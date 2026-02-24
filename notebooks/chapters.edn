@@ -2,7 +2,8 @@
  "Core Concepts" ["tensors_and_ejml"
                   "complex_tensors"
                   "fourier_transform"
-                  "abstract_linear_algebra"]
+                  "abstract_linear_algebra"
+                  "sharing_and_mutation"]
  "Applications" ["linear_systems"
                  "markov_chains"
                  "image_processing"
