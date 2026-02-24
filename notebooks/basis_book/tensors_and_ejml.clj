@@ -7,7 +7,7 @@
 ;; | Type | Backing | Layout |
 ;; |:-----|:--------|:-------|
 ;; | dtype-next tensor `[r c]` | `double[r*c]` | row-major |
-;; | EJML `DMatrixRMaj` [r×c] | `double[r*c]` | row-major |
+;; | EJML `DMatrixRMaj` `[r*c]` | `double[r*c]` | row-major |
 ;;
 ;; This means converting between the two involves no allocation
 ;; and no copying — just wrapping the same `double[]` in a
