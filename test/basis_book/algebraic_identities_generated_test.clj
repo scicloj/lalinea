@@ -458,7 +458,7 @@
     reverse
     vec)
    sv-squared
-   (mapv (fn* [p1__73645#] (* p1__73645# p1__73645#)) (sort > S))]
+   (mapv (fn* [p1__75778#] (* p1__75778# p1__75778#)) (sort > S))]
   (every?
    identity
    (map (fn [a b] (< (Math/abs (- a b)) 1.0E-8)) sv-squared AtA-eigs))))
@@ -474,7 +474,7 @@
    (la/svd A)
    sv-norm
    (Math/sqrt
-    (reduce + (map (fn* [p1__73646#] (* p1__73646# p1__73646#)) S)))]
+    (reduce + (map (fn* [p1__75779#] (* p1__75779# p1__75779#)) S)))]
   (close-scalar? (la/norm A) sv-norm)))
 
 

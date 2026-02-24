@@ -73,7 +73,7 @@
    (submatrix Vt (range k) :all)  ;; first k rows
    ```"
   [m rows cols]
-  (if (instance? scicloj.basis.impl.complex.ComplexTensor m)
+  (if (cx/complex? m)
     (cx/complex-tensor
      (dtype/clone (tensor/select (cx/->tensor m) rows cols :all)))
     (dtype/clone (tensor/select m rows cols))))
@@ -88,7 +88,7 @@
    For real matrices: C = A * B
    For complex matrices: delegates to EJML's ZMatrixRMaj multiply."
   [a b]
-  (if (instance? scicloj.basis.impl.complex.ComplexTensor a)
+  (if (cx/complex? a)
     ;; Complex path
     (let [za (ejml/ct->zmat a)
           zb (ejml/ct->zmat b)
@@ -110,7 +110,7 @@
    For real matrices: B = A^T
    For complex matrices: B = A† (Hermitian adjoint)"
   [a]
-  (if (instance? scicloj.basis.impl.complex.ComplexTensor a)
+  (if (cx/complex? a)
     (let [za (ejml/ct->zmat a)]
       (ejml/zmat->ct (ejml/ztranspose-conj za)))
     (let [da (bt/tensor->dmat a)]
@@ -123,21 +123,21 @@
 (defn add
   "Matrix addition."
   [a b]
-  (if (instance? scicloj.basis.impl.complex.ComplexTensor a)
+  (if (cx/complex? a)
     (cx/add a b)
     (dfn/+ a b)))
 
 (defn sub
   "Matrix subtraction."
   [a b]
-  (if (instance? scicloj.basis.impl.complex.ComplexTensor a)
+  (if (cx/complex? a)
     (cx/sub a b)
     (dfn/- a b)))
 
 (defn scale
   "Scalar multiply: alpha * A."
   [alpha a]
-  (if (instance? scicloj.basis.impl.complex.ComplexTensor a)
+  (if (cx/complex? a)
     (cx/scale a alpha)
     (dfn/* a (double alpha))))
 
@@ -149,7 +149,7 @@
   "Matrix trace. Returns a double for real matrices, a scalar ComplexTensor
    for complex matrices."
   [a]
-  (if (instance? scicloj.basis.impl.complex.ComplexTensor a)
+  (if (cx/complex? a)
     (let [[re im] (ejml/ztrace (ejml/ct->zmat a))]
       (cx/complex re im))
     (let [shape (dtype/shape a)
@@ -161,7 +161,7 @@
   "Matrix determinant. Returns a double for real matrices, a scalar
    ComplexTensor for complex matrices."
   [a]
-  (if (instance? scicloj.basis.impl.complex.ComplexTensor a)
+  (if (cx/complex? a)
     (let [[re im] (ejml/zdet (ejml/ct->zmat a))]
       (cx/complex re im))
     (ejml/ddet (bt/tensor->dmat a))))
@@ -169,7 +169,7 @@
 (defn norm
   "Frobenius norm."
   ^double [a]
-  (if (instance? scicloj.basis.impl.complex.ComplexTensor a)
+  (if (cx/complex? a)
     (ejml/znorm-f (ejml/ct->zmat a))
     (Math/sqrt (double (dfn/sum (dfn/* a a))))))
 
@@ -180,7 +180,7 @@
 (defn invert
   "Matrix inverse. Returns nil if singular."
   [a]
-  (if (instance? scicloj.basis.impl.complex.ComplexTensor a)
+  (if (cx/complex? a)
     (when-let [inv (ejml/zinvert (ejml/ct->zmat a))]
       (ejml/zmat->ct inv))
     (when-let [inv (ejml/dinvert (bt/tensor->dmat a))]
@@ -190,7 +190,7 @@
   "Solve A * X = B for X. Returns nil if singular.
    A is [n n], B is [n m]. Returns X as tensor or ComplexTensor."
   [a b]
-  (if (instance? scicloj.basis.impl.complex.ComplexTensor a)
+  (if (cx/complex? a)
     (let [za (ejml/ct->zmat a)
           zb (ejml/ct->zmat b)]
       (when-let [zx (ejml/zsolve za zb)]

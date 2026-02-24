@@ -332,6 +332,11 @@
   [^ComplexTensor ct]
   (vec (butlast (dtype/shape (.-tensor ct)))))
 
+(defn complex?
+  "True if x is a ComplexTensor."
+  [x]
+  (instance? ComplexTensor x))
+
 (defn scalar?
   "True if this ComplexTensor represents a scalar complex number."
   [^ComplexTensor ct]
