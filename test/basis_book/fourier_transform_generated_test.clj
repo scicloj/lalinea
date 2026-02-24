@@ -11,16 +11,16 @@
   [clojure.test :refer [deftest is]]))
 
 
-(def v3_l23 (bfft/forward [1.0 0.0 -1.0 0.0]))
+(def v3_l30 (bfft/forward [1.0 0.0 -1.0 0.0]))
 
 
 (deftest
- t5_l27
- (is ((fn [ct] (< (Math/abs (double (cx/re (ct 0)))) 1.0E-10)) v3_l23)))
+ t5_l34
+ (is ((fn [ct] (< (Math/abs (double (cx/re (ct 0)))) 1.0E-10)) v3_l30)))
 
 
 (def
- v7_l33
+ v7_l40
  (let
   [signal
    [1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0]
@@ -31,11 +31,11 @@
   (dfn/reduce-max (dfn/abs (dfn/- recovered (double-array signal))))))
 
 
-(deftest t8_l38 (is ((fn [v] (< v 1.0E-10)) v7_l33)))
+(deftest t8_l45 (is ((fn [v] (< v 1.0E-10)) v7_l40)))
 
 
 (def
- v10_l47
+ v10_l54
  (let
   [signal
    [1.0 2.0 3.0 4.0]
@@ -52,11 +52,11 @@
   (< (Math/abs (- time-energy freq-energy)) 1.0E-10)))
 
 
-(deftest t11_l55 (is (true? v10_l47)))
+(deftest t11_l62 (is (true? v10_l54)))
 
 
 (def
- v13_l61
+ v13_l68
  (let
   [x
    [1.0 2.0 3.0 4.0]
@@ -86,11 +86,11 @@
     1.0E-10))))
 
 
-(deftest t14_l72 (is (true? v13_l61)))
+(deftest t14_l79 (is (true? v13_l68)))
 
 
 (def
- v16_l81
+ v16_l88
  (let
   [x
    [1.0 2.0 0.0 0.0]
@@ -132,11 +132,11 @@
    1.0E-10)))
 
 
-(deftest t17_l101 (is (true? v16_l81)))
+(deftest t17_l108 (is (true? v16_l88)))
 
 
 (def
- v19_l108
+ v19_l115
  (let
   [spectrum (bfft/forward [3.0 3.0 3.0 3.0])]
   {:dc (cx/re (spectrum 0)),
@@ -147,18 +147,18 @@
 
 
 (deftest
- t20_l112
+ t20_l119
  (is
   ((fn
     [v]
     (and
      (< (Math/abs (- (double (:dc v)) 12.0)) 1.0E-10)
-     (every? (fn* [p1__74339#] (< p1__74339# 1.0E-10)) (:others v))))
-   v19_l108)))
+     (every? (fn* [p1__76128#] (< p1__76128# 1.0E-10)) (:others v))))
+   v19_l115)))
 
 
 (def
- v22_l117
+ v22_l124
  (let
   [spectrum (bfft/forward [1.0 -1.0 1.0 -1.0])]
   {:dc (double (cx/abs (spectrum 0))),
@@ -166,18 +166,18 @@
 
 
 (deftest
- t23_l121
+ t23_l128
  (is
   ((fn
     [v]
     (and
      (< (:dc v) 1.0E-10)
      (< (Math/abs (- (:nyquist v) 4.0)) 1.0E-10)))
-   v22_l117)))
+   v22_l124)))
 
 
 (def
- v25_l128
+ v25_l135
  (let
   [signal
    (cx/complex-tensor [1.0 0.0] [0.0 1.0])
@@ -194,11 +194,11 @@
     1.0E-10))))
 
 
-(deftest t26_l134 (is (true? v25_l128)))
+(deftest t26_l141 (is (true? v25_l135)))
 
 
 (def
- v28_l140
+ v28_l147
  (let
   [signal
    [1.0 2.0 3.0 4.0]
@@ -211,4 +211,4 @@
    1.0E-10)))
 
 
-(deftest t29_l145 (is (true? v28_l140)))
+(deftest t29_l152 (is (true? v28_l147)))

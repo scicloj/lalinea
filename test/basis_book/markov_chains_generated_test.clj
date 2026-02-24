@@ -13,27 +13,27 @@
 
 
 (def
- v3_l42
+ v3_l50
  (def P (la/matrix [[0.7 0.2 0.1] [0.3 0.4 0.3] [0.2 0.3 0.5]])))
 
 
-(def v5_l49 (la/mmul P (la/column (repeat 3 1.0))))
+(def v5_l57 (la/mmul P (la/column (repeat 3 1.0))))
 
 
 (deftest
- t6_l51
+ t6_l59
  (is
   ((fn
     [sums]
     (< (la/norm (la/sub sums (la/column (repeat 3 1.0)))) 1.0E-10))
-   v5_l49)))
+   v5_l57)))
 
 
-(def v8_l65 (def initial-state (la/row [1.0 0.0 0.0])))
+(def v8_l73 (def initial-state (la/row [1.0 0.0 0.0])))
 
 
 (def
- v9_l67
+ v9_l75
  (def
   walk-history
   (let
@@ -50,7 +50,7 @@
 
 
 (def
- v11_l80
+ v11_l88
  (->
   (tc/dataset
    (mapcat
@@ -66,24 +66,24 @@
 
 
 (def
- v13_l91
+ v13_l99
  (let
   [last-state (last walk-history)]
   [(:sunny last-state) (:cloudy last-state) (:rainy last-state)]))
 
 
 (deftest
- t14_l96
+ t14_l104
  (is
   ((fn [v] (< (Math/abs (- (+ (v 0) (v 1) (v 2)) 1.0)) 1.0E-10))
-   v13_l91)))
+   v13_l99)))
 
 
-(def v16_l107 (def eigen-result (la/eigen (la/transpose P))))
+(def v16_l115 (def eigen-result (la/eigen (la/transpose P))))
 
 
 (def
- v18_l111
+ v18_l119
  (def
   stationary-eigen
   (let
@@ -105,22 +105,22 @@
    (vec (dfn/* col (/ 1.0 total))))))
 
 
-(def v19_l123 stationary-eigen)
+(def v19_l131 stationary-eigen)
 
 
 (deftest
- t20_l125
+ t20_l133
  (is
   ((fn
     [v]
     (and
      (< (Math/abs (- (dfn/sum (double-array v)) 1.0)) 1.0E-10)
      (every? pos? v)))
-   v19_l123)))
+   v19_l131)))
 
 
 (def
- v22_l137
+ v22_l145
  (def
   power-iteration-history
   (let
@@ -144,7 +144,7 @@
 
 
 (def
- v24_l153
+ v24_l161
  (->
   (tc/dataset power-iteration-history)
   (plotly/base {:=x :iteration, :=y :change})
@@ -153,17 +153,17 @@
 
 
 (def
- v26_l160
+ v26_l168
  (let
   [last-change (:change (last power-iteration-history))]
   last-change))
 
 
-(deftest t27_l163 (is ((fn [c] (< c 1.0E-10)) v26_l160)))
+(deftest t27_l171 (is ((fn [c] (< c 1.0E-10)) v26_l168)))
 
 
 (def
- v29_l184
+ v29_l192
  (def
   H
   (la/matrix
@@ -174,14 +174,14 @@
     [1/4 1/4 1/4 1/4 0]])))
 
 
-(def v31_l195 (def damping 0.85))
+(def v31_l203 (def damping 0.85))
 
 
-(def v32_l197 (def n-pages 5))
+(def v32_l205 (def n-pages 5))
 
 
 (def
- v33_l199
+ v33_l207
  (def
   google-matrix
   (la/add
@@ -192,7 +192,7 @@
 
 
 (def
- v35_l206
+ v35_l214
  (def
   pagerank
   (let
@@ -211,7 +211,7 @@
 
 
 (def
- v37_l218
+ v37_l226
  (let
   [labels ["Page 0" "Page 1" "Page 2" "Page 3" "Page 4"]]
   (->
@@ -221,15 +221,15 @@
    plotly/plot)))
 
 
-(def v39_l226 (dfn/sum pagerank))
+(def v39_l234 (dfn/sum pagerank))
 
 
 (deftest
- t40_l228
- (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v39_l226)))
+ t40_l236
+ (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v39_l234)))
 
 
-(def v42_l233 (argops/argmax pagerank))
+(def v42_l241 (argops/argmax pagerank))
 
 
-(deftest t43_l235 (is ((fn [idx] (contains? #{0 2} idx)) v42_l233)))
+(deftest t43_l243 (is ((fn [idx] (contains? #{0 2} idx)) v42_l241)))

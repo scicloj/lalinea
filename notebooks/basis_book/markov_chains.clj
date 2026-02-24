@@ -13,13 +13,21 @@
 
 (ns basis-book.markov-chains
   (:require
+   ;; Basis linear algebra API (https://github.com/scicloj/basis):
    [scicloj.basis.linalg :as la]
+   ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
    [tech.v3.tensor :as tensor]
+   ;; Low-level buffer operations:
    [tech.v3.datatype :as dtype]
+   ;; Element-wise array math:
    [tech.v3.datatype.functional :as dfn]
+   ;; Arg-reduction operations (argmax, argmin, etc.):
    [tech.v3.datatype.argops :as argops]
+   ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
+   ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
    [scicloj.tableplot.v1.plotly :as plotly]
+   ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]))
 
 ;; ## A weather model

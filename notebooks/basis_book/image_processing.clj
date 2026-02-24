@@ -7,11 +7,17 @@
 
 (ns basis-book.image-processing
   (:require
+   ;; Basis linear algebra API (https://github.com/scicloj/basis):
    [scicloj.basis.linalg :as la]
+   ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
    [tech.v3.tensor :as tensor]
+   ;; Low-level buffer operations:
    [tech.v3.datatype :as dtype]
+   ;; Element-wise array math:
    [tech.v3.datatype.functional :as dfn]
+   ;; Tensor ↔ BufferedImage conversion:
    [tech.v3.libs.buffered-image :as bufimg]
+   ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]))
 
 ;; ## Synthetic test images

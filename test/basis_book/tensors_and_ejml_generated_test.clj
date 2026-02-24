@@ -12,7 +12,7 @@
 
 
 (def
- v3_l30
+ v3_l36
  (let
   [t (la/matrix [[1.0 2.0] [3.0 4.0]]) dm (bt/tensor->dmat t)]
   {:identical?
@@ -22,25 +22,25 @@
 
 
 (deftest
- t4_l37
+ t4_l43
  (is
   ((fn [v] (and (:identical? v) (= (:rows v) 2) (= (:cols v) 2)))
-   v3_l30)))
+   v3_l36)))
 
 
 (def
- v6_l43
+ v6_l49
  (let
   [t (la/matrix [[1.0 0.0] [0.0 1.0]]) dm (bt/tensor->dmat t)]
   (.set dm 0 1 99.0)
   (tensor/mget t 0 1)))
 
 
-(deftest t7_l48 (is (= v6_l43 99.0)))
+(deftest t7_l54 (is (= v6_l49 99.0)))
 
 
 (def
- v9_l52
+ v9_l58
  (let
   [t
    (la/matrix [[1.0 0.0] [0.0 1.0]])
@@ -52,27 +52,27 @@
   (.get dm 0 1)))
 
 
-(deftest t10_l58 (is (= v9_l52 42.0)))
+(deftest t10_l64 (is (= v9_l58 42.0)))
 
 
-(def v12_l65 (la/matrix [[1 2 3] [4 5 6] [7 8 9]]))
+(def v12_l71 (la/matrix [[1 2 3] [4 5 6] [7 8 9]]))
 
 
 (deftest
- t13_l69
- (is ((fn [m] (= [3 3] (vec (dtype/shape m)))) v12_l65)))
+ t13_l75
+ (is ((fn [m] (= [3 3] (vec (dtype/shape m)))) v12_l71)))
 
 
 (def
- v15_l81
+ v15_l87
  (let [A (la/matrix [[1 2] [3 4]]) I (la/eye 2)] (la/mmul A I)))
 
 
-(deftest t16_l85 (is ((fn [m] (= 1.0 (tensor/mget m 0 0))) v15_l81)))
+(deftest t16_l91 (is ((fn [m] (= 1.0 (tensor/mget m 0 0))) v15_l87)))
 
 
 (def
- v18_l91
+ v18_l97
  (let
   [A
    (la/matrix [[1 2] [3 4]])
@@ -85,22 +85,22 @@
 
 
 (deftest
- t19_l99
+ t19_l105
  (is
   ((fn
     [v]
     (and
      (every?
-      (fn* [p1__74095#] (< (Math/abs (- p1__74095# 1.0)) 1.0E-10))
+      (fn* [p1__75884#] (< (Math/abs (- p1__75884# 1.0)) 1.0E-10))
       (:diag v))
      (every?
-      (fn* [p1__74096#] (< (Math/abs p1__74096#) 1.0E-10))
+      (fn* [p1__75885#] (< (Math/abs p1__75885#) 1.0E-10))
       (:off v))))
-   v18_l91)))
+   v18_l97)))
 
 
 (def
- v21_l106
+ v21_l112
  (let
   [A
    (la/matrix [[1 2 3] [4 5 6]])
@@ -111,36 +111,36 @@
   (< (Math/abs (- (la/trace AtA) (* nf nf))) 1.0E-10)))
 
 
-(deftest t22_l111 (is (true? v21_l106)))
+(deftest t22_l117 (is (true? v21_l112)))
 
 
 (def
- v24_l118
+ v24_l124
  (let [A (la/matrix [[1 4] [9 16]])] (tensor/mget (dfn/sqrt A) 1 0)))
 
 
-(deftest t26_l123 (is (= v24_l118 3.0)))
+(deftest t26_l129 (is (= v24_l124 3.0)))
 
 
 (def
- v28_l127
+ v28_l133
  (let
   [A (la/matrix [[1 2] [3 4]]) B (la/matrix [[5 6] [7 8]])]
   (tensor/mget (tensor/ensure-tensor (dfn/* A B)) 0 0)))
 
 
-(deftest t29_l131 (is (= v28_l127 5.0)))
+(deftest t29_l137 (is (= v28_l133 5.0)))
 
 
 (def
- v31_l139
+ v31_l145
  (let
   [A (la/matrix [[4 1] [1 3]]) {:keys [eigenvalues]} (la/eigen A)]
   (sort (map first eigenvalues))))
 
 
 (deftest
- t32_l143
+ t32_l149
  (is
   ((fn
     [evs]
@@ -149,11 +149,11 @@
      (every?
       identity
       (map (fn [a b] (< (Math/abs (- a b)) 1.0E-10)) evs expected))))
-   v31_l139)))
+   v31_l145)))
 
 
 (def
- v34_l152
+ v34_l158
  (let
   [A
    (la/matrix [[1 2] [3 4]])
@@ -164,11 +164,11 @@
   (< (la/norm (la/sub A reconstructed)) 1.0E-10)))
 
 
-(deftest t35_l157 (is (true? v34_l152)))
+(deftest t35_l163 (is (true? v34_l158)))
 
 
 (def
- v37_l163
+ v37_l169
  (let
   [A
    (la/matrix [[1 2] [3 4]])
@@ -179,21 +179,21 @@
   (< (la/norm (la/sub QtQ (la/eye 2))) 1.0E-10)))
 
 
-(deftest t38_l168 (is (true? v37_l163)))
+(deftest t38_l174 (is (true? v37_l169)))
 
 
 (def
- v40_l172
+ v40_l178
  (let
   [A (la/matrix [[1 2] [3 4]]) {:keys [Q R]} (la/qr A)]
   (< (la/norm (la/sub A (la/mmul Q R))) 1.0E-10)))
 
 
-(deftest t41_l176 (is (true? v40_l172)))
+(deftest t41_l182 (is (true? v40_l178)))
 
 
 (def
- v43_l182
+ v43_l188
  (let
   [A
    (la/matrix [[4 2] [2 3]])
@@ -204,4 +204,4 @@
   (< (la/norm (la/sub A reconstructed)) 1.0E-10)))
 
 
-(deftest t44_l187 (is (true? v43_l182)))
+(deftest t44_l193 (is (true? v43_l188)))

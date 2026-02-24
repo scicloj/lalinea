@@ -11,7 +11,7 @@
 
 
 (def
- v3_l24
+ v3_l30
  (def
   gradient
   (tensor/compute-tensor
@@ -29,16 +29,16 @@
    :uint8)))
 
 
-(def v4_l33 (bufimg/tensor->image gradient))
+(def v4_l39 (bufimg/tensor->image gradient))
 
 
 (deftest
- t5_l35
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v4_l33)))
+ t5_l41
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v4_l39)))
 
 
 (def
- v7_l40
+ v7_l46
  (def
   checkerboard
   (let
@@ -49,16 +49,16 @@
     :uint8))))
 
 
-(def v8_l47 (bufimg/tensor->image checkerboard))
+(def v8_l53 (bufimg/tensor->image checkerboard))
 
 
 (deftest
- t9_l49
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v8_l47)))
+ t9_l55
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v8_l53)))
 
 
 (def
- v11_l54
+ v11_l60
  (def
   circle-img
   (let
@@ -78,16 +78,16 @@
     :uint8))))
 
 
-(def v12_l68 (bufimg/tensor->image circle-img))
+(def v12_l74 (bufimg/tensor->image circle-img))
 
 
 (deftest
- t13_l70
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v12_l68)))
+ t13_l76
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v12_l74)))
 
 
 (def
- v15_l83
+ v15_l89
  (def
   extract-channel
   (fn
@@ -103,28 +103,28 @@
      :uint8)))))
 
 
-(def v16_l91 (bufimg/tensor->image (extract-channel gradient 0)))
+(def v16_l97 (bufimg/tensor->image (extract-channel gradient 0)))
 
 
 (deftest
- t17_l93
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v16_l91)))
+ t17_l99
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v16_l97)))
 
 
 (def
- v19_l98
+ v19_l104
  (let
   [ch (tensor/select gradient :all :all 0)]
   [(int (tensor/mget ch 0 0)) (int (tensor/mget ch 199 0))]))
 
 
 (deftest
- t20_l102
- (is ((fn [[top bottom]] (and (< top 10) (> bottom 250))) v19_l98)))
+ t20_l108
+ (is ((fn [[top bottom]] (and (< top 10) (> bottom 250))) v19_l104)))
 
 
 (def
- v22_l109
+ v22_l115
  (def
   swapped
   (let
@@ -137,16 +137,16 @@
     :uint8))))
 
 
-(def v23_l117 (bufimg/tensor->image swapped))
+(def v23_l123 (bufimg/tensor->image swapped))
 
 
 (deftest
- t24_l119
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v23_l117)))
+ t24_l125
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v23_l123)))
 
 
 (def
- v26_l132
+ v26_l138
  (def
   brighten
   (fn
@@ -162,16 +162,16 @@
     (tensor/reshape (vec (dtype/shape img)))))))
 
 
-(def v27_l143 (bufimg/tensor->image (brighten circle-img)))
+(def v27_l149 (bufimg/tensor->image (brighten circle-img)))
 
 
 (deftest
- t28_l145
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v27_l143)))
+ t28_l151
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v27_l149)))
 
 
 (def
- v30_l157
+ v30_l163
  (def
   to-grayscale
   (fn
@@ -199,33 +199,33 @@
      :uint8)))))
 
 
-(def v31_l172 (bufimg/tensor->image (to-grayscale gradient)))
+(def v31_l178 (bufimg/tensor->image (to-grayscale gradient)))
 
 
 (deftest
- t32_l174
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v31_l172)))
+ t32_l180
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v31_l178)))
 
 
 (def
- v34_l186
+ v34_l192
  (def
   blur-kernel
   (la/scale (/ 1.0 9.0) (la/matrix [[1 1 1] [1 1 1] [1 1 1]]))))
 
 
 (def
- v35_l190
+ v35_l196
  (def sharpen-kernel (la/matrix [[0 -1 0] [-1 5 -1] [0 -1 0]])))
 
 
 (def
- v36_l195
+ v36_l201
  (def edge-kernel (la/matrix [[-1 -1 -1] [-1 8 -1] [-1 -1 -1]])))
 
 
 (def
- v38_l207
+ v38_l213
  (def
   apply-kernel
   (fn
@@ -276,43 +276,43 @@
 
 
 (def
- v40_l234
+ v40_l240
  (bufimg/tensor->image (apply-kernel checkerboard blur-kernel)))
 
 
 (deftest
- t41_l236
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v40_l234)))
+ t41_l242
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v40_l240)))
 
 
 (def
- v43_l244
+ v43_l250
  (bufimg/tensor->image (apply-kernel checkerboard edge-kernel)))
 
 
 (deftest
- t44_l246
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v43_l244)))
+ t44_l252
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v43_l250)))
 
 
 (def
- v46_l253
+ v46_l259
  (bufimg/tensor->image (apply-kernel circle-img sharpen-kernel)))
 
 
 (deftest
- t47_l255
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v46_l253)))
+ t47_l261
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v46_l259)))
 
 
-(def v49_l266 (def sobel-x (la/matrix [[-1 0 1] [-2 0 2] [-1 0 1]])))
+(def v49_l272 (def sobel-x (la/matrix [[-1 0 1] [-2 0 2] [-1 0 1]])))
 
 
-(def v50_l269 (def sobel-y (la/matrix [[-1 -2 -1] [0 0 0] [1 2 1]])))
+(def v50_l275 (def sobel-y (la/matrix [[-1 -2 -1] [0 0 0] [1 2 1]])))
 
 
 (def
- v51_l272
+ v51_l278
  (def
   sobel-edges
   (fn
@@ -386,9 +386,9 @@
      :uint8)))))
 
 
-(def v52_l307 (bufimg/tensor->image (sobel-edges circle-img)))
+(def v52_l313 (bufimg/tensor->image (sobel-edges circle-img)))
 
 
 (deftest
- t53_l309
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v52_l307)))
+ t53_l315
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v52_l313)))
