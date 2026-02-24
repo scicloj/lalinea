@@ -1,1 +1,13 @@
-{"Getting Started" ["quickstart"]}
+{"Getting Started" ["quickstart"]
+ "Core Concepts" ["tensors_and_ejml"
+                  "complex_tensors"
+                  "fourier_transform"
+                  "abstract_linear_algebra"]
+ "Applications" ["linear_systems"
+                 "markov_chains"
+                 "image_processing"
+                 "fractals"
+                 "decompositions_in_action"
+                 "least_squares"
+                 "spectral_graph_theory"]
+ "Validation" ["algebraic_identities"]}
