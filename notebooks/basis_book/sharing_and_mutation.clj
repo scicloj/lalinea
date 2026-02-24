@@ -1,14 +1,3 @@
-(ns basis-book.sharing-and-mutation
-  (:require
-   [scicloj.basis.linalg :as la]
-   [scicloj.basis.impl.complex :as cx]
-   [scicloj.basis.impl.tensor :as bt]
-   [tech.v3.tensor :as tensor]
-   [tech.v3.datatype :as dtype]
-   [tech.v3.datatype.functional :as dfn]
-   [scicloj.kindly.v4.kind :as kind])
-  (:import [org.ejml.data DMatrixRMaj]))
-
 ;; # Sharing and Mutation
 ;;
 ;; dtype-next and basis follow a **functional, immutable-by-convention**
@@ -23,6 +12,17 @@
 ;;
 ;; The rule of thumb: **if you didn't call `dtype/clone`, you might
 ;; be sharing memory.**
+
+(ns basis-book.sharing-and-mutation
+  (:require
+   [scicloj.basis.linalg :as la]
+   [scicloj.basis.impl.complex :as cx]
+   [scicloj.basis.impl.tensor :as bt]
+   [tech.v3.tensor :as tensor]
+   [tech.v3.datatype :as dtype]
+   [tech.v3.datatype.functional :as dfn]
+   [scicloj.kindly.v4.kind :as kind])
+  (:import [org.ejml.data DMatrixRMaj]))
 
 ;; ## Tensors share memory across reshapes
 
