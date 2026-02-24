@@ -11,8 +11,7 @@
             [scicloj.basis.impl.ejml :as ejml]
             [tech.v3.tensor :as tensor]
             [tech.v3.datatype :as dtype]
-            [tech.v3.datatype.functional :as dfn])
-  (:import [org.ejml.data DMatrixRMaj]))
+            [tech.v3.datatype.functional :as dfn]))
 
 ;; ---------------------------------------------------------------------------
 ;; Matrix construction
@@ -43,12 +42,11 @@
 (defn diag
   "Create a diagonal matrix from a sequence of diagonal values."
   [values]
-  (let [v (double-array values)
-        n (count v)
-        dm (DMatrixRMaj. n n)]
-    (dotimes [i n]
-      (.set dm i i (aget v i)))
-    (bt/dmat->tensor dm)))
+  (let [v (dtype/->reader (dtype/make-container :float64 values))
+        n (count v)]
+    (tensor/compute-tensor [n n]
+      (fn [i j] (if (== i j) (double (v i)) 0.0))
+      :float64)))
 
 (defn column
   "Create a column vector (shape [n 1]) from a sequence."
