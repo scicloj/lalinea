@@ -205,7 +205,7 @@
 
 ;; ### Applying a kernel
 ;;
-;; For each output pixel, extract a 3×3 patch and compute
+;; For each output pixel, extract a 3*3 patch and compute
 ;; the element-wise product with the kernel, then sum.
 ;; This is imperative — we loop over every pixel and write
 ;; the result into an output array.

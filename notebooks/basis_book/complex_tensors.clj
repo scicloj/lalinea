@@ -7,9 +7,9 @@
 ;;
 ;; | Underlying shape | Complex interpretation | `re` / `im` returns |
 ;; |:-----------------|:----------------------|:---------------------|
-;; | `[2]` | scalar complex number | double |
+;; | `[2]` | scalar complex number | `double` |
 ;; | `[n 2]` | complex vector, length n | `[n]` tensor view |
-;; | `[r c 2]` | complex r × c matrix | `[r c]` tensor view |
+;; | `[r c 2]` | complex r * c matrix | `[r c]` tensor view |
 ;;
 ;; The interleaved layout matches EJML's `ZMatrixRMaj`, enabling
 ;; zero-copy bridging to complex linear algebra.

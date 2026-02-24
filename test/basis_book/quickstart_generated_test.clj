@@ -43,120 +43,118 @@
 
 (def
  v14_l56
- (let
-  [A (la/matrix [[1 2] [3 4]]) B (la/matrix [[5 6] [7 8]])]
-  (la/mmul A B)))
+ (la/mmul (la/matrix [[1 2] [3 4]]) (la/matrix [[5 6] [7 8]])))
 
 
-(deftest t16_l62 (is ((fn [m] (= 19.0 (tensor/mget m 0 0))) v14_l56)))
+(deftest t16_l61 (is ((fn [m] (= 19.0 (tensor/mget m 0 0))) v14_l56)))
 
 
-(def v17_l64 (la/transpose (la/matrix [[1 2] [3 4]])))
+(def v17_l63 (la/transpose (la/matrix [[1 2] [3 4]])))
 
 
-(deftest t18_l66 (is ((fn [m] (= 3.0 (tensor/mget m 0 1))) v17_l64)))
+(deftest t18_l65 (is ((fn [m] (= 3.0 (tensor/mget m 0 1))) v17_l63)))
 
 
-(def v20_l70 (la/det (la/matrix [[1 2] [3 4]])))
-
-
-(deftest
- t21_l72
- (is ((fn [v] (< (Math/abs (- v -2.0)) 1.0E-10)) v20_l70)))
-
-
-(def v22_l74 (la/trace (la/matrix [[1 2] [3 4]])))
-
-
-(deftest t23_l76 (is ((fn [v] (= v 5.0)) v22_l74)))
-
-
-(def v24_l78 (la/norm (la/matrix [[1 2] [3 4]])))
+(def v20_l69 (la/det (la/matrix [[1 2] [3 4]])))
 
 
 (deftest
- t25_l80
- (is ((fn [v] (< (Math/abs (- v 5.477225575051661)) 1.0E-10)) v24_l78)))
+ t21_l71
+ (is ((fn [v] (< (Math/abs (- v -2.0)) 1.0E-10)) v20_l69)))
+
+
+(def v22_l73 (la/trace (la/matrix [[1 2] [3 4]])))
+
+
+(deftest t23_l75 (is ((fn [v] (= v 5.0)) v22_l73)))
+
+
+(def v24_l77 (la/norm (la/matrix [[1 2] [3 4]])))
+
+
+(deftest
+ t25_l79
+ (is ((fn [v] (< (Math/abs (- v 5.477225575051661)) 1.0E-10)) v24_l77)))
 
 
 (def
- v27_l88
+ v27_l87
  (la/solve (la/matrix [[2 1] [1 3]]) (la/matrix [[5] [10]])))
 
 
 (deftest
- t29_l93
+ t29_l92
  (is
   ((fn
     [x]
     (and
      (< (Math/abs (- (tensor/mget x 0 0) 1.0)) 1.0E-10)
      (< (Math/abs (- (tensor/mget x 1 0) 3.0)) 1.0E-10)))
-   v27_l88)))
+   v27_l87)))
 
 
 (def
- v31_l100
+ v31_l99
  (let
   [{:keys [eigenvalues]} (la/eigen (la/matrix [[2 1] [1 2]]))]
   (sort (map first eigenvalues))))
 
 
 (deftest
- t33_l105
+ t33_l104
  (is
   ((fn
     [evs]
     (and
      (< (Math/abs (- (first evs) 1.0)) 1.0E-10)
      (< (Math/abs (- (second evs) 3.0)) 1.0E-10)))
-   v31_l100)))
+   v31_l99)))
 
 
-(def v35_l110 (let [{:keys [S]} (la/svd (la/matrix [[1 2] [3 4]]))] S))
-
-
-(deftest
- t36_l113
- (is ((fn [S] (< (Math/abs (- (first S) 5.4649857)) 1.0E-4)) v35_l110)))
-
-
-(def v38_l120 (cx/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0]))
+(def v35_l109 (let [{:keys [S]} (la/svd (la/matrix [[1 2] [3 4]]))] S))
 
 
 (deftest
- t39_l122
- (is ((fn [ct] (= [3] (cx/complex-shape ct))) v38_l120)))
+ t36_l112
+ (is ((fn [S] (< (Math/abs (- (first S) 5.4649857)) 1.0E-4)) v35_l109)))
+
+
+(def v38_l119 (cx/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0]))
+
+
+(deftest
+ t39_l121
+ (is ((fn [ct] (= [3] (cx/complex-shape ct))) v38_l119)))
 
 
 (def
- v41_l126
+ v41_l125
  (let
   [A (cx/complex-tensor [[1.0 0.0] [0.0 1.0]] [[0.0 0.0] [0.0 0.0]])]
   (la/mmul A A)))
 
 
 (deftest
- t42_l130
- (is ((fn [ct] (= [2 2] (cx/complex-shape ct))) v41_l126)))
+ t42_l129
+ (is ((fn [ct] (= [2 2] (cx/complex-shape ct))) v41_l125)))
 
 
-(def v44_l137 (bfft/forward [1.0 0.0 1.0 0.0]))
+(def v44_l136 (bfft/forward [1.0 0.0 1.0 0.0]))
 
 
 (deftest
- t46_l141
+ t46_l140
  (is
   ((fn
     [ct]
     (and
      (= [4] (cx/complex-shape ct))
      (< (Math/abs (- (cx/re (ct 0)) 2.0)) 1.0E-10)))
-   v44_l137)))
+   v44_l136)))
 
 
 (def
- v48_l146
+ v48_l145
  (let
   [signal
    [1.0 2.0 3.0 4.0]
@@ -166,25 +164,25 @@
 
 
 (deftest
- t49_l150
+ t49_l149
  (is
   ((fn
     [v]
     (every?
-     (fn* [p1__75757#] (< (Math/abs p1__75757#) 1.0E-10))
+     (fn* [p1__77881#] (< (Math/abs p1__77881#) 1.0E-10))
      (map - v [1.0 2.0 3.0 4.0])))
-   v48_l146)))
+   v48_l145)))
 
 
-(def v51_l157 (let [A (la/matrix [[1 2] [3 4]])] (dfn/sum A)))
+(def v51_l156 (let [A (la/matrix [[1 2] [3 4]])] (dfn/sum A)))
 
 
-(deftest t52_l160 (is ((fn [v] (= v 10.0)) v51_l157)))
+(deftest t52_l159 (is ((fn [v] (= v 10.0)) v51_l156)))
 
 
 (def
- v54_l164
+ v54_l163
  (let [A (la/matrix [[1 2] [3 4]])] (tensor/mget (la/scale 2.0 A) 1 1)))
 
 
-(deftest t55_l167 (is (= v54_l164 8.0)))
+(deftest t55_l166 (is (= v54_l163 8.0)))
