@@ -20,7 +20,7 @@ no copying, just different views of the same data.
 
 ### Real matrices
 
-- **Construction** — `matrix`, `eye`, `zeros`, `diag`, `column`, `row`
+- **Construction** — `matrix`, `eye`, `zeros`, `diag`, `column`, `row`, `submatrix`
 - **Arithmetic** — `mmul`, `add`, `sub`, `scale`, `transpose`
 - **Properties** — `trace`, `det`, `norm` (Frobenius)
 - **Inverse and solve** — `invert`, `solve` (returns `nil` for singular matrices)
@@ -29,7 +29,7 @@ no copying, just different views of the same data.
 ### Complex matrices
 
 - [ComplexTensor](https://en.wikipedia.org/wiki/Complex_number) — interleaved `[re im]` layout sharing memory with EJML's `ZMatrixRMaj`
-- Complex `mmul`, `add`, `sub`, `scale`, conjugate `transpose`, `invert`
+- Complex `mmul`, `add`, `sub`, `scale`, conjugate `transpose`, `invert`, `solve`
 - Complex `trace`, `det`, `norm`
 
 ### Fourier transforms
@@ -55,8 +55,14 @@ Add to your `deps.edn`:
 
 ## Documentation
 
-The [basis book](https://scicloj.github.io/basis/) covers tensors, EJML interop,
-complex tensors, and Fourier transforms with worked examples and tests.
+The [basis book](https://scicloj.github.io/basis/) is a set of notebook-based chapters covering:
+
+- **Getting started** — quickstart
+- **Core concepts** — tensors & EJML interop, complex tensors, Fourier transforms, abstract linear algebra, sharing & mutation
+- **Applications** — linear systems, Markov chains & PageRank, image processing, fractals, decompositions in action, least squares, spectral graph theory
+- **Validation** — algebraic identities
+
+Each chapter includes inline tests via `kind/test-last`.
 
 ## API
 
@@ -98,7 +104,7 @@ The [book notebooks](https://scicloj.github.io/basis/) also use
 
 ```bash
 clojure -M:dev -m nrepl.cmdline   # start REPL
-./run_tests.sh                     # run tests (64 tests, 64 assertions)
+./run_tests.sh                     # run tests (268 tests, 268 assertions)
 clojure -T:build ci                # test + build JAR
 ```
 
