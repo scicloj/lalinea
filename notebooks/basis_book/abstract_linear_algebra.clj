@@ -294,6 +294,13 @@
 
 ;; $2 \cdot [3,1]^T + (-1) \cdot [1,2]^T = [5,0]^T$.
 ;; We combined $\mathbf{u}$ and $\mathbf{v}$ to reach a new point.
+;; Visually: start with $2\mathbf{u}$, then add $-\mathbf{v}$
+;; (shown dashed) tip-to-tail:
+
+(arrow-plot [{:label "2u" :xy [6 2] :color "#2266cc"}
+             {:label "-v" :xy [-1 -2] :color "#cc4422" :from [6 2] :dashed? true}
+             {:label "2u-v" :xy [5 0] :color "#228833"}]
+            {})
 
 ;; ### Span
 ;;
@@ -356,6 +363,17 @@
 ;; "not parallel." The **determinant** of the matrix with these
 ;; vectors as columns is non-zero precisely when they are independent.
 
+;; The difference is visible geometrically — independent vectors
+;; point in genuinely different directions, while dependent
+;; vectors are parallel:
+
+(arrow-plot [{:label "[3,1]" :xy [3 1] :color "#2266cc"}
+             {:label "[1,2]" :xy [1 2] :color "#cc4422"}]
+            {:width 250})
+
+;; These point in different directions — they are independent
+;; ($\det \neq 0$):
+
 ;; Independent — two non-parallel directions:
 
 (la/det (la/matrix [[3 1]
@@ -363,6 +381,14 @@
 
 (kind/test-last
  [(fn [d] (> (Math/abs d) 1e-10))])
+
+;; Now two parallel vectors — one is $2\times$ the other:
+
+(arrow-plot [{:label "[3,1]" :xy [3 1] :color "#2266cc"}
+             {:label "[6,2]" :xy [6 2] :color "#cc4422"}]
+            {:width 250})
+
+;; They lie on the same line — the second adds no new direction.
 
 ;; Dependent — second column is $2 \times$ the first:
 
@@ -494,6 +520,15 @@
  [(fn [r] (and (< (Math/abs (- (tensor/mget r 0 0) -1.0)) 1e-10)
                (< (Math/abs (tensor/mget r 1 0)) 1e-10)))])
 
+;; Visualising the effect on our vectors — each arrow
+;; rotates 90° counter-clockwise:
+
+(arrow-plot [{:label "u" :xy [3 1] :color "#2266cc"}
+             {:label "Ru" :xy [-1 3] :color "#2266cc" :dashed? true}
+             {:label "v" :xy [1 2] :color "#cc4422"}
+             {:label "Rv" :xy [-2 1] :color "#cc4422" :dashed? true}]
+            {})
+
 ;; Let us verify the linearity properties.
 ;;
 ;; **Additivity**: $R(\mathbf{u} + \mathbf{v}) = R(\mathbf{u}) + R(\mathbf{v})$:
@@ -580,6 +615,15 @@
 (kind/test-last
  [(fn [d] (< (Math/abs (- d 1.0)) 1e-10))])
 
+;; The shear fixes $\mathbf{e}_1$ but slides $\mathbf{e}_2$
+;; sideways — it tilts the vertical axis:
+
+(arrow-plot [{:label "e₁" :xy [1 0] :color "#2266cc"}
+             {:label "e₂" :xy [0 1] :color "#cc4422"}
+             {:label "Se₁" :xy [1 0] :color "#2266cc" :dashed? true}
+             {:label "Se₂" :xy [2 1] :color "#cc4422" :dashed? true}]
+            {})
+
 ;; ### Composition of maps
 ;;
 ;; Applying one linear map and then another is the same as
@@ -595,6 +639,14 @@
 
 (kind/test-last
  [(fn [d] (> d 0.1))])
+
+;; Applying both orderings to $\mathbf{e}_1 = [1,0]^T$ shows
+;; different results:
+
+(arrow-plot [{:label "e₁" :xy [1 0] :color "#999999"}
+             {:label "R then S" :xy [0 1] :color "#2266cc"}
+             {:label "S then R" :xy [0 3] :color "#cc4422"}]
+            {:width 200})
 
 ;; The result depends on the order — just like "put on socks,
 ;; then shoes" is different from "put on shoes, then socks."
@@ -848,6 +900,20 @@ dot-ab
 ;; the projection matrix is:
 ;;
 ;; $$P = W (W^T W)^{-1} W^T$$
+;;
+;; In two dimensions, projecting $\mathbf{b}$ onto a line
+;; spanned by $\mathbf{a}$ is easy to visualise. The projection
+;; sits on the line, and the residual is perpendicular:
+
+(arrow-plot [{:label "a" :xy [2 1] :color "#999999"}
+             {:label "b" :xy [1 3] :color "#2266cc"}
+             {:label "proj" :xy [2 1] :color "#228833"}
+             {:label "resid" :xy [-1 2] :color "#cc4422" :from [2 1] :dashed? true}]
+            {})
+
+;; The green arrow (projection) lies on the direction of
+;; $\mathbf{a}$, and the dashed red residual is perpendicular
+;; to it. The general formula for higher dimensions:
 
 (def W-proj
   (la/matrix [[1 0]
@@ -997,6 +1063,17 @@ q2-gs
 ;;
 ;; for some scalar $\lambda$ (the **eigenvalue**). The map $A$
 ;; acts on $\mathbf{v}$ by merely scaling it by $\lambda$.
+
+;; In two dimensions we can see this directly. The matrix
+;; $\begin{bmatrix} 2 & 1 \\ 0 & 3 \end{bmatrix}$ has
+;; eigenvectors $[1,0]^T$ (eigenvalue 2) and $[1,1]^T$ (eigenvalue 3).
+;; Each eigenvector only gets scaled — it stays on the same line:
+
+(arrow-plot [{:label "v₁" :xy [1 0] :color "#2266cc"}
+             {:label "Av₁=2v₁" :xy [2 0] :color "#2266cc" :dashed? true}
+             {:label "v₂" :xy [1 1] :color "#cc4422"}
+             {:label "Av₂=3v₂" :xy [3 3] :color "#cc4422" :dashed? true}]
+            {})
 
 ;; Consider:
 
