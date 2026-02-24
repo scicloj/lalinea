@@ -458,7 +458,7 @@
     reverse
     vec)
    sv-squared
-   (mapv (fn* [p1__81826#] (* p1__81826# p1__81826#)) (sort > S))]
+   (mapv (fn* [p1__244810#] (* p1__244810# p1__244810#)) (sort > S))]
   (every?
    identity
    (map (fn [a b] (< (Math/abs (- a b)) 1.0E-8)) sv-squared AtA-eigs))))
@@ -474,7 +474,9 @@
    (la/svd A)
    sv-norm
    (Math/sqrt
-    (reduce + (map (fn* [p1__81827#] (* p1__81827# p1__81827#)) S)))]
+    (reduce
+     +
+     (map (fn* [p1__244811#] (* p1__244811# p1__244811#)) S)))]
   (close-scalar? (la/norm A) sv-norm)))
 
 
@@ -523,7 +525,83 @@
 
 
 (def
- v162_l551
+ v162_l548
+ (def ca (cx/complex-tensor [1.0 -2.0 3.0] [4.0 5.0 -6.0])))
+
+
+(def
+ v163_l549
+ (def cb (cx/complex-tensor [-3.0 0.5 2.0] [1.0 -1.5 7.0])))
+
+
+(def
+ v164_l551
+ (def
+  complex-approx=
+  (fn
+   [x y tol]
+   (let
+    [re-diff
+     (dfn/- (cx/re x) (cx/re y))
+     im-diff
+     (dfn/- (cx/im x) (cx/im y))]
+    (and
+     (< (dfn/reduce-max (dfn/abs re-diff)) tol)
+     (< (dfn/reduce-max (dfn/abs im-diff)) tol))))))
+
+
+(def v166_l560 (complex-approx= (cx/mul ca cb) (cx/mul cb ca) 1.0E-10))
+
+
+(deftest t167_l562 (is (true? v166_l560)))
+
+
+(def v169_l566 (complex-approx= (cx/conj (cx/conj ca)) ca 1.0E-10))
+
+
+(deftest t170_l568 (is (true? v169_l566)))
+
+
+(def
+ v172_l572
+ (complex-approx=
+  (cx/conj (cx/mul ca cb))
+  (cx/mul (cx/conj ca) (cx/conj cb))
+  1.0E-10))
+
+
+(deftest t173_l576 (is (true? v172_l572)))
+
+
+(def
+ v175_l580
+ (<
+  (dfn/reduce-max
+   (dfn/abs
+    (dfn/- (cx/abs (cx/mul ca cb)) (dfn/* (cx/abs ca) (cx/abs cb)))))
+  1.0E-10))
+
+
+(deftest t176_l585 (is (true? v175_l580)))
+
+
+(def
+ v178_l589
+ (let
+  [[re-ab im-ab]
+   (cx/dot-conj ca cb)
+   [re-aa _]
+   (cx/dot-conj ca ca)
+   [re-bb _]
+   (cx/dot-conj cb cb)]
+  (<= (- (+ (* re-ab re-ab) (* im-ab im-ab)) 1.0E-10) (* re-aa re-bb))))
+
+
+(deftest t179_l595 (is (true? v178_l589)))
+
+
+(def
+ v181_l606
  (let
   [CA
    (cx/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
@@ -537,11 +615,11 @@
    1.0E-10)))
 
 
-(deftest t163_l558 (is (true? v162_l551)))
+(deftest t182_l613 (is (true? v181_l606)))
 
 
 (def
- v165_l562
+ v184_l617
  (let
   [CA
    (cx/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
@@ -550,11 +628,11 @@
   (< (la/norm (la/sub AAdag (la/transpose AAdag))) 1.0E-10)))
 
 
-(deftest t166_l566 (is (true? v165_l562)))
+(deftest t185_l621 (is (true? v184_l617)))
 
 
 (def
- v168_l570
+ v187_l625
  (let
   [CA
    (cx/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
@@ -571,11 +649,11 @@
   (< (la/norm (la/sub det-AB product)) 1.0E-10)))
 
 
-(deftest t169_l578 (is (true? v168_l570)))
+(deftest t188_l633 (is (true? v187_l625)))
 
 
 (def
- v171_l582
+ v190_l637
  (let
   [CA
    (cx/complex-tensor [[2 1] [1 3]] [[1 0] [0 1]])
@@ -586,11 +664,11 @@
   (< (la/norm (la/sub (la/mmul CA Cx) Cb)) 1.0E-10)))
 
 
-(deftest t172_l587 (is (true? v171_l582)))
+(deftest t191_l642 (is (true? v190_l637)))
 
 
 (def
- v174_l591
+ v193_l646
  (let
   [CA
    (cx/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
@@ -599,4 +677,4 @@
   (< (la/norm (la/sub (la/mmul CA (la/invert CA)) CI)) 1.0E-10)))
 
 
-(deftest t175_l595 (is (true? v174_l591)))
+(deftest t194_l650 (is (true? v193_l646)))

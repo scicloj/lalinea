@@ -29,16 +29,16 @@
 ;; on both nice and awkward inputs.
 
 (def A (la/matrix [[2 1 0]
-                             [1 3 1]
-                             [0 1 2]]))
+                   [1 3 1]
+                   [0 1 2]]))
 
 (def B (la/matrix [[1 -1 2]
-                             [0  2 1]
-                             [3  0 1]]))
+                   [0  2 1]
+                   [3  0 1]]))
 
 (def C (la/matrix [[-1 4 2]
-                             [3 0 1]
-                             [2 1 5]]))
+                   [3 0 1]
+                   [2 1 5]]))
 
 (def I3 (la/eye 3))
 
@@ -540,6 +540,61 @@
 
 ;; ---
 ;;
+;; ## Complex vector arithmetic
+;;
+;; Element-wise complex operations satisfy the same algebraic
+;; rules as scalar complex arithmetic.
+
+(def ca (cx/complex-tensor [1.0 -2.0 3.0] [4.0 5.0 -6.0]))
+(def cb (cx/complex-tensor [-3.0 0.5 2.0] [1.0 -1.5 7.0]))
+
+(def complex-approx=
+  (fn [x y tol]
+    (let [re-diff (dfn/- (cx/re x) (cx/re y))
+          im-diff (dfn/- (cx/im x) (cx/im y))]
+      (and (< (dfn/reduce-max (dfn/abs re-diff)) tol)
+           (< (dfn/reduce-max (dfn/abs im-diff)) tol)))))
+
+;; ### Commutativity: $a \cdot b = b \cdot a$
+
+(complex-approx= (cx/mul ca cb) (cx/mul cb ca) 1e-10)
+
+(kind/test-last [true?])
+
+;; ### Conjugate is an involution: $\overline{\overline{a}} = a$
+
+(complex-approx= (cx/conj (cx/conj ca)) ca 1e-10)
+
+(kind/test-last [true?])
+
+;; ### Conjugate distributes: $\overline{a \cdot b} = \bar{a} \cdot \bar{b}$
+
+(complex-approx= (cx/conj (cx/mul ca cb))
+                 (cx/mul (cx/conj ca) (cx/conj cb))
+                 1e-10)
+
+(kind/test-last [true?])
+
+;; ### Magnitude is multiplicative: $|a \cdot b| = |a| \cdot |b|$
+
+(< (dfn/reduce-max
+    (dfn/abs (dfn/- (cx/abs (cx/mul ca cb))
+                    (dfn/* (cx/abs ca) (cx/abs cb)))))
+   1e-10)
+
+(kind/test-last [true?])
+
+;; ### Cauchy-Schwarz: $|\langle a, b \rangle_H|^2 \leq \langle a, a \rangle_H \cdot \langle b, b \rangle_H$
+
+(let [[re-ab im-ab] (cx/dot-conj ca cb)
+      [re-aa _] (cx/dot-conj ca ca)
+      [re-bb _] (cx/dot-conj cb cb)]
+  (<= (- (+ (* re-ab re-ab) (* im-ab im-ab)) 1e-10)
+      (* re-aa re-bb)))
+
+(kind/test-last [true?])
+
+;;
 ;; ## Complex matrices
 ;;
 ;; All the identities above should hold for complex matrices too.
@@ -618,5 +673,7 @@
 ;;   Frobenius norm
 ;; - **Cholesky**: reconstruction for SPD, nil for non-SPD
 ;; - **Linear solve**: solution satisfies equation, agrees with inverse
+;; - **Complex vector arithmetic**: commutativity, conjugate involution,
+;;   conjugate distribution, magnitude multiplicativity, Cauchy-Schwarz
 ;; - **Complex matrices**: associativity, Hermitian property,
 ;;   multiplicative determinant, solve, inverse
