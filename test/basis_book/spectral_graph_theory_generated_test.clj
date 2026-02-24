@@ -209,62 +209,60 @@
  v49_l229
  (def
   K5-adj
-  (let
-   [result (double-array (* kn kn))]
-   (dotimes
-    [i kn]
-    (dotimes
-     [j kn]
-     (when (not= i j) (aset result (+ (* i kn) j) 1.0))))
-   (tensor/reshape (tensor/ensure-tensor result) [kn kn]))))
+  (tensor/compute-tensor
+   [kn kn]
+   (fn [i j] (if (not= i j) 1.0 0.0))
+   :float64)))
 
 
 (def
- v50_l237
+ v50_l234
  (def
   K5-eigenvalues
   (sorted-real-eigenvalues (la/eigen (laplacian K5-adj)))))
 
 
-(def v51_l240 K5-eigenvalues)
+(def v51_l237 K5-eigenvalues)
 
 
 (deftest
- t52_l242
+ t52_l239
  (is
   ((fn
     [v]
     (and
      (< (Math/abs (first v)) 1.0E-10)
      (every? (fn [x] (< (Math/abs (- x 5.0)) 1.0E-10)) (rest v))))
-   v51_l240)))
+   v51_l237)))
 
 
-(def v54_l259 (def cn 8))
+(def v54_l256 (def cn 8))
 
 
 (def
- v55_l261
+ v55_l258
  (def
   cycle-adj
-  (let
-   [result (double-array (* cn cn))]
-   (dotimes
-    [i cn]
-    (aset result (+ (* i cn) (mod (inc i) cn)) 1.0)
-    (aset result (+ (* i cn) (mod (+ i (dec cn)) cn)) 1.0))
-   (tensor/reshape (tensor/ensure-tensor result) [cn cn]))))
+  (tensor/compute-tensor
+   [cn cn]
+   (fn
+    [i j]
+    (if
+     (or (= j (mod (inc i) cn)) (= j (mod (+ i (dec cn)) cn)))
+     1.0
+     0.0))
+   :float64)))
 
 
 (def
- v56_l268
+ v56_l265
  (def
   cycle-eigenvalues
   (sorted-real-eigenvalues (la/eigen (laplacian cycle-adj)))))
 
 
 (def
- v57_l271
+ v57_l268
  (def
   cycle-theoretical
   (sort
@@ -273,14 +271,14 @@
     (range cn)))))
 
 
-(def v59_l277 cycle-eigenvalues)
+(def v59_l274 cycle-eigenvalues)
 
 
-(def v61_l281 cycle-theoretical)
+(def v61_l278 cycle-theoretical)
 
 
 (def
- v63_l285
+ v63_l282
  (<
   (dfn/reduce-max
    (dfn/abs
@@ -290,34 +288,31 @@
   1.0E-10))
 
 
-(deftest t64_l290 (is (true? v63_l285)))
+(deftest t64_l287 (is (true? v63_l282)))
 
 
-(def v66_l298 (def pn 6))
+(def v66_l295 (def pn 6))
 
 
 (def
- v67_l300
+ v67_l297
  (def
   path-adj
-  (let
-   [result (double-array (* pn pn))]
-   (dotimes
-    [i (dec pn)]
-    (aset result (+ (* i pn) (inc i)) 1.0)
-    (aset result (+ (* (inc i) pn) i) 1.0))
-   (tensor/reshape (tensor/ensure-tensor result) [pn pn]))))
+  (tensor/compute-tensor
+   [pn pn]
+   (fn [i j] (if (= 1 (Math/abs (- i j))) 1.0 0.0))
+   :float64)))
 
 
 (def
- v68_l307
+ v68_l302
  (def
   path-eigenvalues
   (sorted-real-eigenvalues (la/eigen (laplacian path-adj)))))
 
 
 (def
- v69_l310
+ v69_l305
  (def
   path-theoretical
   (sort
@@ -327,7 +322,7 @@
 
 
 (def
- v70_l314
+ v70_l309
  (<
   (dfn/reduce-max
    (dfn/abs
@@ -337,11 +332,11 @@
   1.0E-10))
 
 
-(deftest t71_l319 (is (true? v70_l314)))
+(deftest t71_l314 (is (true? v70_l309)))
 
 
 (def
- v73_l329
+ v73_l324
  (def
   community-adj
   (la/matrix
@@ -356,17 +351,17 @@
     [0 0 0 0 0 0 1 1 0]])))
 
 
-(def v74_l344 (def comm-eig (la/eigen (laplacian community-adj))))
+(def v74_l339 (def comm-eig (la/eigen (laplacian community-adj))))
 
 
-(def v76_l348 (def comm-eigenvalues (sorted-real-eigenvalues comm-eig)))
+(def v76_l343 (def comm-eigenvalues (sorted-real-eigenvalues comm-eig)))
 
 
-(def v77_l350 (take 4 comm-eigenvalues))
+(def v77_l345 (take 4 comm-eigenvalues))
 
 
 (deftest
- t78_l352
+ t78_l347
  (is
   ((fn
     [v]
@@ -375,11 +370,11 @@
      (< (second v) 1.5)
      (< (nth v 2) 1.5)
      (> (nth v 3) 1.5)))
-   v77_l350)))
+   v77_l345)))
 
 
 (def
- v80_l365
+ v80_l360
  (def
   sorted-comm-indices
   (let
@@ -388,7 +383,7 @@
 
 
 (def
- v82_l372
+ v82_l367
  (def
   embed-data
   (let
@@ -403,13 +398,13 @@
      :community
      (mapv
       (fn*
-       [p1__73523#]
-       (cond (<= p1__73523# 2) "A" (<= p1__73523# 5) "B" :else "C"))
+       [p1__240625#]
+       (cond (<= p1__240625# 2) "A" (<= p1__240625# 5) "B" :else "C"))
       (range 9))}))))
 
 
 (def
- v83_l383
+ v83_l378
  (->
   embed-data
   (plotly/base {:=x :x, :=y :y, :=color :community})
@@ -417,14 +412,14 @@
   plotly/plot))
 
 
-(def v85_l405 (def conductance (/ 1.0 3.0)))
+(def v85_l400 (def conductance (/ 1.0 3.0)))
 
 
 (def
- v86_l407
+ v86_l402
  (and
   (<= (/ fiedler-value 2.0) conductance)
   (<= conductance (Math/sqrt (* 2.0 fiedler-value)))))
 
 
-(deftest t87_l410 (is (true? v86_l407)))
+(deftest t87_l405 (is (true? v86_l402)))

@@ -17,6 +17,7 @@
    [tech.v3.tensor :as tensor]
    [tech.v3.datatype :as dtype]
    [tech.v3.datatype.functional :as dfn]
+   [tech.v3.datatype.argops :as argops]
    [tablecloth.api :as tc]
    [scicloj.tableplot.v1.plotly :as plotly]
    [scicloj.kindly.v4.kind :as kind]))
@@ -229,10 +230,6 @@ stationary-eigen
 ;; Page 2 (which page 0 and 1 link to, and also receives links from 3 and 4)
 ;; has the highest rank:
 
-(let [pr-arr (dtype/->double-array pagerank)
-      max-idx (loop [i 1 best 0]
-                (if (>= i (alength pr-arr)) best
-                    (recur (inc i) (if (> (aget pr-arr i) (aget pr-arr best)) i best))))]
-  max-idx)
+(argops/argmax pagerank)
 
 (kind/test-last [(fn [idx] (contains? #{0 2} idx))])

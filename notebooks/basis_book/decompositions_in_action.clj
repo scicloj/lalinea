@@ -172,11 +172,10 @@
         col1 (tensor/select data-tensor :all 1)
         mean0 (/ (dfn/sum col0) n-points)
         mean1 (/ (dfn/sum col1) n-points)
-        arr (double-array (* n-points 2))]
-    (dotimes [i n-points]
-      (aset arr (* i 2) (- (col0 i) mean0))
-      (aset arr (inc (* i 2)) (- (col1 i) mean1)))
-    (tensor/reshape (tensor/ensure-tensor arr) [n-points 2])))
+        means (tensor/compute-tensor [n-points 2]
+                (fn [_i j] (if (zero? j) mean0 mean1))
+                :float64)]
+    (dtype/clone (dfn/- data-tensor means))))
 
 ;; ### Compute covariance matrix and eigendecompose
 

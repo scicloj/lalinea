@@ -5,6 +5,7 @@
   [tech.v3.tensor :as tensor]
   [tech.v3.datatype :as dtype]
   [tech.v3.datatype.functional :as dfn]
+  [tech.v3.datatype.argops :as argops]
   [tablecloth.api :as tc]
   [scicloj.tableplot.v1.plotly :as plotly]
   [scicloj.kindly.v4.kind :as kind]
@@ -12,27 +13,27 @@
 
 
 (def
- v3_l41
+ v3_l42
  (def P (la/matrix [[0.7 0.2 0.1] [0.3 0.4 0.3] [0.2 0.3 0.5]])))
 
 
-(def v5_l48 (la/mmul P (la/column (repeat 3 1.0))))
+(def v5_l49 (la/mmul P (la/column (repeat 3 1.0))))
 
 
 (deftest
- t6_l50
+ t6_l51
  (is
   ((fn
     [sums]
     (< (la/norm (la/sub sums (la/column (repeat 3 1.0)))) 1.0E-10))
-   v5_l48)))
+   v5_l49)))
 
 
-(def v8_l64 (def initial-state (la/row [1.0 0.0 0.0])))
+(def v8_l65 (def initial-state (la/row [1.0 0.0 0.0])))
 
 
 (def
- v9_l66
+ v9_l67
  (def
   walk-history
   (let
@@ -49,7 +50,7 @@
 
 
 (def
- v11_l79
+ v11_l80
  (->
   (tc/dataset
    (mapcat
@@ -65,24 +66,24 @@
 
 
 (def
- v13_l90
+ v13_l91
  (let
   [last-state (last walk-history)]
   [(:sunny last-state) (:cloudy last-state) (:rainy last-state)]))
 
 
 (deftest
- t14_l95
+ t14_l96
  (is
   ((fn [v] (< (Math/abs (- (+ (v 0) (v 1) (v 2)) 1.0)) 1.0E-10))
-   v13_l90)))
+   v13_l91)))
 
 
-(def v16_l106 (def eigen-result (la/eigen (la/transpose P))))
+(def v16_l107 (def eigen-result (la/eigen (la/transpose P))))
 
 
 (def
- v18_l110
+ v18_l111
  (def
   stationary-eigen
   (let
@@ -104,22 +105,22 @@
    (vec (dfn/* col (/ 1.0 total))))))
 
 
-(def v19_l122 stationary-eigen)
+(def v19_l123 stationary-eigen)
 
 
 (deftest
- t20_l124
+ t20_l125
  (is
   ((fn
     [v]
     (and
      (< (Math/abs (- (dfn/sum (double-array v)) 1.0)) 1.0E-10)
      (every? pos? v)))
-   v19_l122)))
+   v19_l123)))
 
 
 (def
- v22_l136
+ v22_l137
  (def
   power-iteration-history
   (let
@@ -143,7 +144,7 @@
 
 
 (def
- v24_l152
+ v24_l153
  (->
   (tc/dataset power-iteration-history)
   (plotly/base {:=x :iteration, :=y :change})
@@ -152,17 +153,17 @@
 
 
 (def
- v26_l159
+ v26_l160
  (let
   [last-change (:change (last power-iteration-history))]
   last-change))
 
 
-(deftest t27_l162 (is ((fn [c] (< c 1.0E-10)) v26_l159)))
+(deftest t27_l163 (is ((fn [c] (< c 1.0E-10)) v26_l160)))
 
 
 (def
- v29_l183
+ v29_l184
  (def
   H
   (la/matrix
@@ -173,14 +174,14 @@
     [1/4 1/4 1/4 1/4 0]])))
 
 
-(def v31_l194 (def damping 0.85))
+(def v31_l195 (def damping 0.85))
 
 
-(def v32_l196 (def n-pages 5))
+(def v32_l197 (def n-pages 5))
 
 
 (def
- v33_l198
+ v33_l199
  (def
   google-matrix
   (la/add
@@ -191,7 +192,7 @@
 
 
 (def
- v35_l205
+ v35_l206
  (def
   pagerank
   (let
@@ -210,7 +211,7 @@
 
 
 (def
- v37_l217
+ v37_l218
  (let
   [labels ["Page 0" "Page 1" "Page 2" "Page 3" "Page 4"]]
   (->
@@ -220,29 +221,15 @@
    plotly/plot)))
 
 
-(def v39_l225 (dfn/sum pagerank))
+(def v39_l226 (dfn/sum pagerank))
 
 
 (deftest
- t40_l227
- (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v39_l225)))
+ t40_l228
+ (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v39_l226)))
 
 
-(def
- v42_l232
- (let
-  [pr-arr
-   (dtype/->double-array pagerank)
-   max-idx
-   (loop
-    [i 1 best 0]
-    (if
-     (>= i (alength pr-arr))
-     best
-     (recur
-      (inc i)
-      (if (> (aget pr-arr i) (aget pr-arr best)) i best))))]
-  max-idx))
+(def v42_l233 (argops/argmax pagerank))
 
 
-(deftest t43_l238 (is ((fn [idx] (contains? #{0 2} idx)) v42_l232)))
+(deftest t43_l235 (is ((fn [idx] (contains? #{0 2} idx)) v42_l233)))

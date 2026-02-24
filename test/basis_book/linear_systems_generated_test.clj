@@ -30,29 +30,27 @@
  v7_l46
  (def
   vandermonde
-  (tensor/ensure-tensor
-   (dtype/clone
-    (tensor/compute-tensor
-     [(count xs) (inc degree)]
-     (fn [r c] (Math/pow (nth xs r) (double c)))
-     :float64)))))
+  (tensor/compute-tensor
+   [(count xs) (inc degree)]
+   (fn [r c] (Math/pow (nth xs r) (double c)))
+   :float64)))
 
 
-(def v8_l53 vandermonde)
+(def v8_l51 vandermonde)
 
 
 (deftest
- t9_l55
+ t9_l53
  (is
   ((fn [m] (= [(count xs) (inc degree)] (vec (dtype/shape m))))
-   v8_l53)))
+   v8_l51)))
 
 
-(def v11_l63 (def y-col (la/column ys)))
+(def v11_l61 (def y-col (la/column ys)))
 
 
 (def
- v12_l65
+ v12_l63
  (def
   beta
   (la/solve
@@ -60,11 +58,11 @@
    (la/mmul (la/transpose vandermonde) y-col))))
 
 
-(def v13_l69 beta)
+(def v13_l67 beta)
 
 
 (deftest
- t15_l74
+ t15_l72
  (is
   ((fn
     [b]
@@ -79,29 +77,19 @@
       (< (Math/abs (- b0 3.0)) 0.5)
       (< (Math/abs (- b1 -1.2)) 0.5)
       (< (Math/abs (- b2 0.5)) 0.3))))
-   v13_l69)))
+   v13_l67)))
 
 
 (def
- v17_l84
+ v17_l82
  (def
   fitted-ys
-  (mapv
-   (fn
-    [x]
-    (let
-     [b0
-      (tensor/mget beta 0 0)
-      b1
-      (tensor/mget beta 1 0)
-      b2
-      (tensor/mget beta 2 0)]
-     (+ b0 (* b1 x) (* b2 x x))))
-   xs)))
+  (vec
+   (dtype/->reader (tensor/select (la/mmul vandermonde beta) :all 0)))))
 
 
 (def
- v18_l92
+ v18_l85
  (->
   (tc/dataset
    {:x (concat xs xs),
@@ -115,15 +103,15 @@
 
 
 (def
- v20_l111
+ v20_l104
  (def weights (mapv (fn [x] (Math/exp (- (* 0.5 x x)))) xs)))
 
 
-(def v21_l114 (def W (la/diag weights)))
+(def v21_l107 (def W (la/diag weights)))
 
 
 (def
- v22_l116
+ v22_l109
  (def
   beta-weighted
   (la/solve
@@ -131,35 +119,35 @@
    (la/mmul (la/transpose vandermonde) (la/mmul W y-col)))))
 
 
-(def v23_l120 beta-weighted)
+(def v23_l113 beta-weighted)
 
 
 (deftest
- t24_l122
+ t24_l115
  (is
   ((fn
     [b]
     (let [b0 (tensor/mget b 0 0)] (< (Math/abs (- b0 3.0)) 0.5)))
-   v23_l120)))
+   v23_l113)))
 
 
-(def v26_l142 (def A-gs (la/matrix [[10 1 2] [1 12 3] [2 3 15]])))
+(def v26_l135 (def A-gs (la/matrix [[10 1 2] [1 12 3] [2 3 15]])))
 
 
-(def v27_l147 (def b-gs (la/column [13 16 20])))
+(def v27_l140 (def b-gs (la/column [13 16 20])))
 
 
-(def v29_l151 (def x-direct (la/solve A-gs b-gs)))
+(def v29_l144 (def x-direct (la/solve A-gs b-gs)))
 
 
-(def v30_l153 x-direct)
+(def v30_l146 x-direct)
 
 
-(deftest t31_l155 (is ((fn [x] (some? x)) v30_l153)))
+(deftest t31_l148 (is ((fn [x] (some? x)) v30_l146)))
 
 
 (def
- v33_l159
+ v33_l152
  (def
   gauss-seidel-history
   (let
@@ -209,7 +197,7 @@
 
 
 (def
- v35_l187
+ v35_l180
  (->
   (tc/dataset gauss-seidel-history)
   (plotly/base {:=x :iteration, :=y :residual})
@@ -217,14 +205,14 @@
   plotly/plot))
 
 
-(def v37_l194 (-> gauss-seidel-history last :residual))
+(def v37_l187 (-> gauss-seidel-history last :residual))
 
 
-(deftest t38_l196 (is ((fn [r] (< r 1.0E-10)) v37_l194)))
+(deftest t38_l189 (is ((fn [r] (< r 1.0E-10)) v37_l187)))
 
 
 (def
- v40_l202
+ v40_l195
  (let
   [x-iter
    (let
@@ -261,4 +249,4 @@
   (la/norm (la/sub x-iter x-direct))))
 
 
-(deftest t41_l219 (is ((fn [d] (< d 1.0E-10)) v40_l202)))
+(deftest t41_l212 (is ((fn [d] (< d 1.0E-10)) v40_l195)))

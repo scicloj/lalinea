@@ -227,12 +227,9 @@ disc-eigenvalues
 (def kn 5)
 
 (def K5-adj
-  (let [result (double-array (* kn kn))]
-    (dotimes [i kn]
-      (dotimes [j kn]
-        (when (not= i j)
-          (aset result (+ (* i kn) j) 1.0))))
-    (tensor/reshape (tensor/ensure-tensor result) [kn kn])))
+  (tensor/compute-tensor [kn kn]
+    (fn [i j] (if (not= i j) 1.0 0.0))
+    :float64))
 
 (def K5-eigenvalues
   (sorted-real-eigenvalues (la/eigen (laplacian K5-adj))))
@@ -259,11 +256,11 @@ K5-eigenvalues
 (def cn 8)
 
 (def cycle-adj
-  (let [result (double-array (* cn cn))]
-    (dotimes [i cn]
-      (aset result (+ (* i cn) (mod (inc i) cn)) 1.0)
-      (aset result (+ (* i cn) (mod (+ i (dec cn)) cn)) 1.0))
-    (tensor/reshape (tensor/ensure-tensor result) [cn cn])))
+  (tensor/compute-tensor [cn cn]
+    (fn [i j] (if (or (= j (mod (inc i) cn))
+                      (= j (mod (+ i (dec cn)) cn)))
+                1.0 0.0))
+    :float64))
 
 (def cycle-eigenvalues
   (sorted-real-eigenvalues (la/eigen (laplacian cycle-adj))))
@@ -298,11 +295,9 @@ cycle-theoretical
 (def pn 6)
 
 (def path-adj
-  (let [result (double-array (* pn pn))]
-    (dotimes [i (dec pn)]
-      (aset result (+ (* i pn) (inc i)) 1.0)
-      (aset result (+ (* (inc i) pn) i) 1.0))
-    (tensor/reshape (tensor/ensure-tensor result) [pn pn])))
+  (tensor/compute-tensor [pn pn]
+    (fn [i j] (if (= 1 (Math/abs (- i j))) 1.0 0.0))
+    :float64))
 
 (def path-eigenvalues
   (sorted-real-eigenvalues (la/eigen (laplacian path-adj))))

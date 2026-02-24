@@ -45,16 +45,6 @@
         arr (.data dm)]
     (tensor/reshape (tensor/ensure-tensor arr) [r c])))
 
-(defn dmat
-  "Create a new DMatrixRMaj of size r x c, initialized to zero."
-  ^DMatrixRMaj [r c]
-  (DMatrixRMaj. (int r) (int c)))
-
-(defn dmat-identity
-  "Create a DMatrixRMaj identity matrix of size d x d."
-  ^DMatrixRMaj [d]
-  (org.ejml.dense.row.CommonOps_DDRM/identity (int d)))
-
 (defn matrix
   "Create an [r c] tensor from nested sequences.
    The tensor is backed by a contiguous double[]."
@@ -64,21 +54,23 @@
 (defn row-vector
   "Create a [1 c] tensor from a flat sequence."
   [xs]
-  (let [arr (double-array xs)]
-    (tensor/reshape (tensor/ensure-tensor arr) [1 (count arr)])))
+  (let [buf (dtype/make-container :float64 xs)]
+    (tensor/reshape (tensor/ensure-tensor buf) [1 (count buf)])))
 
 (defn col-vector
   "Create a [r 1] tensor from a flat sequence."
   [xs]
-  (let [arr (double-array xs)]
-    (tensor/reshape (tensor/ensure-tensor arr) [(count arr) 1])))
+  (let [buf (dtype/make-container :float64 xs)]
+    (tensor/reshape (tensor/ensure-tensor buf) [(count buf) 1])))
 
 (defn eye
   "Create an n x n identity matrix as a tensor."
   [n]
-  (dmat->tensor (dmat-identity n)))
+  (tensor/compute-tensor [n n]
+    (fn [i j] (if (== i j) 1.0 0.0))
+    :float64))
 
 (defn zeros
   "Create an r x c zero matrix as a tensor."
   [r c]
-  (dmat->tensor (dmat r c)))
+  (tensor/compute-tensor [r c] (fn [_ _] 0.0) :float64))

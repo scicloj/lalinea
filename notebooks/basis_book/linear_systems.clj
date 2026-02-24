@@ -44,11 +44,9 @@
 (def degree 2)
 
 (def vandermonde
-  (tensor/ensure-tensor
-   (dtype/clone
-    (tensor/compute-tensor [(count xs) (inc degree)]
-      (fn [r c] (Math/pow (nth xs r) (double c)))
-      :float64))))
+  (tensor/compute-tensor [(count xs) (inc degree)]
+    (fn [r c] (Math/pow (nth xs r) (double c)))
+    :float64))
 
 vandermonde
 
@@ -82,12 +80,7 @@ beta
 ;; ### Plot data and fitted curve
 
 (def fitted-ys
-  (mapv (fn [x]
-          (let [b0 (tensor/mget beta 0 0)
-                b1 (tensor/mget beta 1 0)
-                b2 (tensor/mget beta 2 0)]
-            (+ b0 (* b1 x) (* b2 x x))))
-        xs))
+  (vec (dtype/->reader (tensor/select (la/mmul vandermonde beta) :all 0))))
 
 (-> (tc/dataset {:x (concat xs xs)
                  :y (concat ys fitted-ys)
