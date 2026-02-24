@@ -69,7 +69,7 @@
       (>= k max-iter)
       counts
       (let
-       [z2 (cx/cadd (cx/cmul z z) c) abs-t (cx/cabs z2)]
+       [z2 (dtype/clone (cx/add (cx/mul z z) c)) abs-t (cx/abs z2)]
        (dotimes
         [r h]
         (dotimes
@@ -188,7 +188,10 @@
       (>= k max-iter)
       counts
       (let
-       [z2 (cx/cadd (cx/cmul z z) c-grid) abs-t (cx/cabs z2)]
+       [z2
+        (dtype/clone (cx/add (cx/mul z z) c-grid))
+        abs-t
+        (cx/abs z2)]
        (dotimes
         [r h]
         (dotimes

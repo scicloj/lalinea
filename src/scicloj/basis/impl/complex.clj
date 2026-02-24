@@ -12,6 +12,7 @@
      [... 2]   arbitrary rank
 
    Adapted from scicloj.harmonica.linalg.complex."
+  (:refer-clojure :exclude [abs conj])
   (:require [tech.v3.tensor :as tensor]
             [tech.v3.datatype :as dtype]
             [tech.v3.datatype.functional :as dfn]
@@ -290,8 +291,8 @@
                                           (if (even? idx)
                                             (double (re-flat (quot idx 2)))
                                             (double (im-flat (quot idx 2)))))
-           full-shape (conj re-shape 2)]
-       (->ComplexTensor (tensor/reshape (dtype/clone interleaved) full-shape))))))
+           full-shape (clojure.core/conj re-shape 2)]
+       (->ComplexTensor (tensor/reshape interleaved full-shape))))))
 
 (defn complex-tensor-real
   "Create a ComplexTensor from real data only (imaginary parts = 0)."
@@ -304,8 +305,8 @@
                                        (if (even? idx)
                                          (double (re-flat (quot idx 2)))
                                          0.0))
-        full-shape (conj re-shape 2)]
-    (->ComplexTensor (tensor/reshape (dtype/clone interleaved) full-shape))))
+        full-shape (clojure.core/conj re-shape 2)]
+    (->ComplexTensor (tensor/reshape interleaved full-shape))))
 
 ;; ---------------------------------------------------------------------------
 ;; Accessors
@@ -348,7 +349,7 @@
     (aset arr 1 (double im))
     (->ComplexTensor (tensor/ensure-tensor arr))))
 
-(defn cmul
+(defn mul
   "Pointwise complex multiply: (a+bi)(c+di) = (ac-bd) + (ad+bc)i"
   [^ComplexTensor a ^ComplexTensor b]
   (if (and (scalar? a) (scalar? b))
@@ -361,19 +362,18 @@
           n (dtype/ecount (->tensor a))]
       (->ComplexTensor
        (tensor/reshape
-        (dtype/clone
-         (dtype/make-reader :float64 n
-                            (let [base (-> idx (quot 2) (* 2))
-                                  ar (double (a-flat base))
-                                  ai (double (a-flat (unchecked-inc base)))
-                                  br (double (b-flat base))
-                                  bi (double (b-flat (unchecked-inc base)))]
-                              (if (even? idx)
-                                (- (* ar br) (* ai bi))
-                                (+ (* ar bi) (* ai br))))))
+        (dtype/make-reader :float64 n
+                           (let [base (-> idx (quot 2) (* 2))
+                                 ar (double (a-flat base))
+                                 ai (double (a-flat (unchecked-inc base)))
+                                 br (double (b-flat base))
+                                 bi (double (b-flat (unchecked-inc base)))]
+                             (if (even? idx)
+                               (- (* ar br) (* ai bi))
+                               (+ (* ar bi) (* ai br)))))
         (dtype/shape (->tensor a)))))))
 
-(defn cconj
+(defn conj
   "Complex conjugate: negate imaginary part."
   [^ComplexTensor ct]
   (let [t (->tensor ct)
@@ -381,25 +381,24 @@
         n (dtype/ecount t)]
     (->ComplexTensor
      (tensor/reshape
-      (dtype/clone
-       (dtype/make-reader :float64 n
-                          (let [v (double (flat idx))]
-                            (if (even? idx) v (- v)))))
+      (dtype/make-reader :float64 n
+                         (let [v (double (flat idx))]
+                           (if (even? idx) v (- v))))
       (dtype/shape t)))))
 
-(defn cscale
+(defn scale
   "Scale by a real scalar."
   [^ComplexTensor ct alpha]
   (->ComplexTensor (dfn/* (double alpha) (->tensor ct))))
 
-(defn cabs
+(defn abs
   "Element-wise complex magnitude: sqrt(re² + im²).
    Returns a real tensor (or double for scalar)."
   [^ComplexTensor ct]
   (let [r (re ct) i (im ct)]
     (dfn/sqrt (dfn/+ (dfn/* r r) (dfn/* i i)))))
 
-(defn cdot
+(defn dot
   "Complex dot product: Σ a_i * b_i.
    Returns a [re im] pair."
   [^ComplexTensor a ^ComplexTensor b]
@@ -408,7 +407,7 @@
     [(- (dfn/sum (dfn/* ar br)) (dfn/sum (dfn/* ai bi)))
      (+ (dfn/sum (dfn/* ar bi)) (dfn/sum (dfn/* ai br)))]))
 
-(defn cdot-conj
+(defn dot-conj
   "Hermitian inner product: Σ a_i * conj(b_i).
    Returns a [re im] pair."
   [^ComplexTensor a ^ComplexTensor b]
@@ -417,7 +416,7 @@
     [(+ (dfn/sum (dfn/* ar br)) (dfn/sum (dfn/* ai bi)))
      (- (dfn/sum (dfn/* ai br)) (dfn/sum (dfn/* ar bi)))]))
 
-(defn cadd
+(defn add
   "Pointwise complex addition."
   [^ComplexTensor a ^ComplexTensor b]
   (if (and (scalar? a) (scalar? b))
@@ -425,7 +424,7 @@
              (+ (double (im a)) (double (im b))))
     (->ComplexTensor (dfn/+ (->tensor a) (->tensor b)))))
 
-(defn csub
+(defn sub
   "Pointwise complex subtraction."
   [^ComplexTensor a ^ComplexTensor b]
   (if (and (scalar? a) (scalar? b))
@@ -433,7 +432,7 @@
              (- (double (im a)) (double (im b))))
     (->ComplexTensor (dfn/- (->tensor a) (->tensor b)))))
 
-(defn csum
+(defn sum
   "Complex-aware summation. Returns a scalar ComplexTensor."
   [^ComplexTensor ct]
   (complex (dfn/sum (re ct)) (dfn/sum (im ct))))

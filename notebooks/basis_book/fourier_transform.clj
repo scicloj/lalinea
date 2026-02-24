@@ -48,7 +48,7 @@
       n (count signal)
       spectrum (bfft/forward signal)
       time-energy (dfn/sum (dfn/* (double-array signal) (double-array signal)))
-      magnitudes (cx/cabs spectrum)
+      magnitudes (cx/abs spectrum)
       freq-energy (/ (dfn/sum (dfn/* magnitudes magnitudes)) n)]
   (< (Math/abs (- time-energy freq-energy)) 1e-10))
 
@@ -64,8 +64,8 @@
       beta -1.5
       combined (double-array (dfn/+ (dfn/* alpha (double-array x)) (dfn/* beta (double-array y))))
       lhs (bfft/forward combined)
-      rhs (cx/cadd (cx/cscale (bfft/forward x) alpha)
-                    (cx/cscale (bfft/forward y) beta))]
+      rhs (cx/add (cx/scale (bfft/forward x) alpha)
+                    (cx/scale (bfft/forward y) beta))]
   (and (< (dfn/reduce-max (dfn/abs (dfn/- (cx/re lhs) (cx/re rhs)))) 1e-10)
        (< (dfn/reduce-max (dfn/abs (dfn/- (cx/im lhs) (cx/im rhs)))) 1e-10)))
 
@@ -82,7 +82,7 @@
       y [1.0 0.0 1.0 0.0]
       Fx (bfft/forward x)
       Fy (bfft/forward y)
-      product-spectrum (cx/cmul Fx Fy)
+      product-spectrum (cx/mul Fx Fy)
       conv-result (bfft/inverse-real product-spectrum)
       n (count x)
       xarr (double-array x)
@@ -107,7 +107,7 @@
 
 (let [spectrum (bfft/forward [3.0 3.0 3.0 3.0])]
   {:dc (cx/re (spectrum 0))
-   :others [(cx/cabs (spectrum 1)) (cx/cabs (spectrum 2)) (cx/cabs (spectrum 3))]})
+   :others [(cx/abs (spectrum 1)) (cx/abs (spectrum 2)) (cx/abs (spectrum 3))]})
 
 (kind/test-last [(fn [v] (and (< (Math/abs (- (double (:dc v)) 12.0)) 1e-10)
                               (every? #(< % 1e-10) (:others v))))])
@@ -115,7 +115,7 @@
 ;; The DFT of $x = [1, -1, 1, -1]$ has energy only at Nyquist ($k = N/2$).
 
 (let [spectrum (bfft/forward [1.0 -1.0 1.0 -1.0])]
-  {:dc (double (cx/cabs (spectrum 0)))
+  {:dc (double (cx/abs (spectrum 0)))
    :nyquist (double (cx/re (spectrum 2)))})
 
 (kind/test-last [(fn [v] (and (< (:dc v) 1e-10)

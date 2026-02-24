@@ -566,7 +566,7 @@
       det-AB (la/det (la/mmul CA CB))
       det-A (la/det CA)
       det-B (la/det CB)
-      product (cx/cmul det-A det-B)]
+      product (cx/mul det-A det-B)]
   (< (la/norm (la/sub det-AB product)) 1e-10))
 
 (kind/test-last [true?])

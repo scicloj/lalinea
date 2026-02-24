@@ -103,8 +103,8 @@
 
 (let [a (cx/complex-tensor [1.0 2.0] [3.0 4.0])
       b (cx/complex-tensor [5.0 6.0] [7.0 8.0])]
-  {:re (vec (cx/re (cx/cmul a b)))
-   :im (vec (cx/im (cx/cmul a b)))})
+  {:re (vec (cx/re (cx/mul a b)))
+   :im (vec (cx/im (cx/mul a b)))})
 
 ;; $(1+3i)(5+7i) = -16 + 22i$, $(2+4i)(6+8i) = -20 + 40i$
 
@@ -113,7 +113,7 @@
 
 ;; ### Conjugate
 
-(let [ct (cx/cconj (cx/complex-tensor [1.0 2.0] [3.0 -4.0]))]
+(let [ct (cx/conj (cx/complex-tensor [1.0 2.0] [3.0 -4.0]))]
   {:re (vec (cx/re ct))
    :im (vec (cx/im ct))})
 
@@ -121,7 +121,7 @@
 
 ;; ### Magnitude
 
-(let [m (cx/cabs (cx/complex-tensor [3.0 0.0] [4.0 1.0]))]
+(let [m (cx/abs (cx/complex-tensor [3.0 0.0] [4.0 1.0]))]
   [(double (m 0)) (double (m 1))])
 
 ;; $|3+4i| = 5$, $|0+i| = 1$
@@ -134,7 +134,7 @@
 ;; $\langle a, b \rangle_H = \sum_i a_i \cdot \overline{b_i}$
 
 (let [a (cx/complex-tensor [3.0 1.0] [4.0 2.0])
-      [re-aa im-aa] (cx/cdot-conj a a)]
+      [re-aa im-aa] (cx/dot-conj a a)]
   {:norm-sq re-aa :im-part im-aa})
 
 ;; $|3+4i|^2 + |1+2i|^2 = 25 + 5 = 30$
@@ -205,37 +205,37 @@
 
 ;; Commutativity: $a \cdot b = b \cdot a$
 
-(approx= (cx/cmul a b) (cx/cmul b a) 1e-10)
+(approx= (cx/mul a b) (cx/mul b a) 1e-10)
 
 (kind/test-last [true?])
 
 ;; Conjugate is an involution: $\overline{\overline{a}} = a$
 
-(approx= (cx/cconj (cx/cconj a)) a 1e-10)
+(approx= (cx/conj (cx/conj a)) a 1e-10)
 
 (kind/test-last [true?])
 
 ;; Conjugate distributes: $\overline{a \cdot b} = \bar{a} \cdot \bar{b}$
 
-(approx= (cx/cconj (cx/cmul a b))
-         (cx/cmul (cx/cconj a) (cx/cconj b))
+(approx= (cx/conj (cx/mul a b))
+         (cx/mul (cx/conj a) (cx/conj b))
          1e-10)
 
 (kind/test-last [true?])
 
 ;; Magnitude is multiplicative: $|a \cdot b| = |a| \cdot |b|$
 
-(let [lhs (cx/cabs (cx/cmul a b))
-      rhs (dfn/* (cx/cabs a) (cx/cabs b))]
+(let [lhs (cx/abs (cx/mul a b))
+      rhs (dfn/* (cx/abs a) (cx/abs b))]
   (< (dfn/reduce-max (dfn/abs (dfn/- lhs rhs))) 1e-10))
 
 (kind/test-last [true?])
 
 ;; Cauchy-Schwarz: $|\langle a, b \rangle_H|^2 \leq \langle a, a \rangle_H \cdot \langle b, b \rangle_H$
 
-(let [[re-ab im-ab] (cx/cdot-conj a b)
-      [re-aa _] (cx/cdot-conj a a)
-      [re-bb _] (cx/cdot-conj b b)]
+(let [[re-ab im-ab] (cx/dot-conj a b)
+      [re-aa _] (cx/dot-conj a a)
+      [re-bb _] (cx/dot-conj b b)]
   (<= (- (+ (* re-ab re-ab) (* im-ab im-ab)) 1e-10)
       (* re-aa re-bb)))
 

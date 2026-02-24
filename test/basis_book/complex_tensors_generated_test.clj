@@ -109,7 +109,7 @@
    (cx/complex-tensor [1.0 2.0] [3.0 4.0])
    b
    (cx/complex-tensor [5.0 6.0] [7.0 8.0])]
-  {:re (vec (cx/re (cx/cmul a b))), :im (vec (cx/im (cx/cmul a b)))}))
+  {:re (vec (cx/re (cx/mul a b))), :im (vec (cx/im (cx/mul a b)))}))
 
 
 (deftest
@@ -122,7 +122,7 @@
 (def
  v35_l116
  (let
-  [ct (cx/cconj (cx/complex-tensor [1.0 2.0] [3.0 -4.0]))]
+  [ct (cx/conj (cx/complex-tensor [1.0 2.0] [3.0 -4.0]))]
   {:re (vec (cx/re ct)), :im (vec (cx/im ct))}))
 
 
@@ -132,7 +132,7 @@
 (def
  v38_l124
  (let
-  [m (cx/cabs (cx/complex-tensor [3.0 0.0] [4.0 1.0]))]
+  [m (cx/abs (cx/complex-tensor [3.0 0.0] [4.0 1.0]))]
   [(double (m 0)) (double (m 1))]))
 
 
@@ -153,7 +153,7 @@
   [a
    (cx/complex-tensor [3.0 1.0] [4.0 2.0])
    [re-aa im-aa]
-   (cx/cdot-conj a a)]
+   (cx/dot-conj a a)]
   {:norm-sq re-aa, :im-part im-aa}))
 
 
@@ -263,13 +263,13 @@
     (< (dfn/reduce-max (dfn/abs im-diff)) tol)))))
 
 
-(def v63_l208 (approx= (cx/cmul a b) (cx/cmul b a) 1.0E-10))
+(def v63_l208 (approx= (cx/mul a b) (cx/mul b a) 1.0E-10))
 
 
 (deftest t64_l210 (is (true? v63_l208)))
 
 
-(def v66_l214 (approx= (cx/cconj (cx/cconj a)) a 1.0E-10))
+(def v66_l214 (approx= (cx/conj (cx/conj a)) a 1.0E-10))
 
 
 (deftest t67_l216 (is (true? v66_l214)))
@@ -278,8 +278,8 @@
 (def
  v69_l220
  (approx=
-  (cx/cconj (cx/cmul a b))
-  (cx/cmul (cx/cconj a) (cx/cconj b))
+  (cx/conj (cx/mul a b))
+  (cx/mul (cx/conj a) (cx/conj b))
   1.0E-10))
 
 
@@ -289,7 +289,7 @@
 (def
  v72_l228
  (let
-  [lhs (cx/cabs (cx/cmul a b)) rhs (dfn/* (cx/cabs a) (cx/cabs b))]
+  [lhs (cx/abs (cx/mul a b)) rhs (dfn/* (cx/abs a) (cx/abs b))]
   (< (dfn/reduce-max (dfn/abs (dfn/- lhs rhs))) 1.0E-10)))
 
 
@@ -300,11 +300,11 @@
  v75_l236
  (let
   [[re-ab im-ab]
-   (cx/cdot-conj a b)
+   (cx/dot-conj a b)
    [re-aa _]
-   (cx/cdot-conj a a)
+   (cx/dot-conj a a)
    [re-bb _]
-   (cx/cdot-conj b b)]
+   (cx/dot-conj b b)]
   (<= (- (+ (* re-ab re-ab) (* im-ab im-ab)) 1.0E-10) (* re-aa re-bb))))
 
 

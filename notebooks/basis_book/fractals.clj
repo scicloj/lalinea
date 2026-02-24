@@ -73,8 +73,8 @@
       (loop [z zero-grid k 0]
         (if (>= k max-iter)
           counts
-          (let [z2 (cx/cadd (cx/cmul z z) c)
-                abs-t (cx/cabs z2)]
+          (let [z2 (dtype/clone (cx/add (cx/mul z z) c))
+                abs-t (cx/abs z2)]
             (dotimes [r h]
               (dotimes [col w]
                 (when (< (tensor/mget abs-t r col) 2.0)
@@ -145,8 +145,8 @@
       (loop [z z0 k 0]
         (if (>= k max-iter)
           counts
-          (let [z2 (cx/cadd (cx/cmul z z) c-grid)
-                abs-t (cx/cabs z2)]
+          (let [z2 (dtype/clone (cx/add (cx/mul z z) c-grid))
+                abs-t (cx/abs z2)]
             (dotimes [r h]
               (dotimes [col w]
                 (when (< (tensor/mget abs-t r col) 2.0)

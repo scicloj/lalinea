@@ -126,21 +126,21 @@
   "Matrix addition."
   [a b]
   (if (instance? scicloj.basis.impl.complex.ComplexTensor a)
-    (cx/cadd a b)
+    (cx/add a b)
     (dfn/+ a b)))
 
 (defn sub
   "Matrix subtraction."
   [a b]
   (if (instance? scicloj.basis.impl.complex.ComplexTensor a)
-    (cx/csub a b)
+    (cx/sub a b)
     (dfn/- a b)))
 
 (defn scale
   "Scalar multiply: alpha * A."
   [alpha a]
   (if (instance? scicloj.basis.impl.complex.ComplexTensor a)
-    (cx/cscale a alpha)
+    (cx/scale a alpha)
     (dfn/* a (double alpha))))
 
 ;; ---------------------------------------------------------------------------

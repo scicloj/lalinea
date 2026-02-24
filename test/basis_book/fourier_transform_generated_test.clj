@@ -46,7 +46,7 @@
    time-energy
    (dfn/sum (dfn/* (double-array signal) (double-array signal)))
    magnitudes
-   (cx/cabs spectrum)
+   (cx/abs spectrum)
    freq-energy
    (/ (dfn/sum (dfn/* magnitudes magnitudes)) n)]
   (< (Math/abs (- time-energy freq-energy)) 1.0E-10)))
@@ -74,9 +74,9 @@
    lhs
    (bfft/forward combined)
    rhs
-   (cx/cadd
-    (cx/cscale (bfft/forward x) alpha)
-    (cx/cscale (bfft/forward y) beta))]
+   (cx/add
+    (cx/scale (bfft/forward x) alpha)
+    (cx/scale (bfft/forward y) beta))]
   (and
    (<
     (dfn/reduce-max (dfn/abs (dfn/- (cx/re lhs) (cx/re rhs))))
@@ -101,7 +101,7 @@
    Fy
    (bfft/forward y)
    product-spectrum
-   (cx/cmul Fx Fy)
+   (cx/mul Fx Fy)
    conv-result
    (bfft/inverse-real product-spectrum)
    n
@@ -141,9 +141,9 @@
   [spectrum (bfft/forward [3.0 3.0 3.0 3.0])]
   {:dc (cx/re (spectrum 0)),
    :others
-   [(cx/cabs (spectrum 1))
-    (cx/cabs (spectrum 2))
-    (cx/cabs (spectrum 3))]}))
+   [(cx/abs (spectrum 1))
+    (cx/abs (spectrum 2))
+    (cx/abs (spectrum 3))]}))
 
 
 (deftest
@@ -153,7 +153,7 @@
     [v]
     (and
      (< (Math/abs (- (double (:dc v)) 12.0)) 1.0E-10)
-     (every? (fn* [p1__75655#] (< p1__75655# 1.0E-10)) (:others v))))
+     (every? (fn* [p1__238580#] (< p1__238580# 1.0E-10)) (:others v))))
    v19_l108)))
 
 
@@ -161,7 +161,7 @@
  v22_l117
  (let
   [spectrum (bfft/forward [1.0 -1.0 1.0 -1.0])]
-  {:dc (double (cx/cabs (spectrum 0))),
+  {:dc (double (cx/abs (spectrum 0))),
    :nyquist (double (cx/re (spectrum 2)))}))
 
 
