@@ -96,8 +96,7 @@
 ;;
 ;; Eigendecomposition of a symmetric matrix:
 
-(let [{:keys [eigenvalues]} (la/eigen (la/matrix [[2 1] [1 2]]))]
-  (sort (map first eigenvalues)))
+(sort (map first (:eigenvalues (la/eigen (la/matrix [[2 1] [1 2]])))))
 
 ;; Eigenvalues are $3$ and $1$.
 
@@ -106,8 +105,7 @@
 
 ;; SVD:
 
-(let [{:keys [S]} (la/svd (la/matrix [[1 2] [3 4]]))]
-  S)
+(:S (la/svd (la/matrix [[1 2] [3 4]])))
 
 (kind/test-last [(fn [S] (< (Math/abs (- (first S) 5.4649857)) 1e-4))])
 
@@ -138,7 +136,7 @@
 ;; $\hat{f} = [2, 0, 2, 0]$ — a signal with energy at DC and Nyquist.
 
 (kind/test-last [(fn [ct] (and (= [4] (cx/complex-shape ct))
-                              (< (Math/abs (- (cx/re (ct 0)) 2.0)) 1e-10)))])
+                               (< (Math/abs (- (cx/re (ct 0)) 2.0)) 1e-10)))])
 
 ;; Round-trip:
 
@@ -153,14 +151,12 @@
 ;;
 ;; Since matrices are tensors, all dtype-next operations work.
 
-(let [A (la/matrix [[1 2] [3 4]])]
-  (dfn/sum A))
+(dfn/sum (la/matrix [[1 2] [3 4]]))
 
 (kind/test-last [(fn [v] (= v 10.0))])
 
 ;; Element-wise operations preserve tensor structure:
 
-(let [A (la/matrix [[1 2] [3 4]])]
-  (tensor/mget (la/scale 2.0 A) 1 1))
+(tensor/mget (la/scale 2.0 (la/matrix [[1 2] [3 4]])) 1 1)
 
 (kind/test-last [= 8.0])

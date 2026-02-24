@@ -170,52 +170,48 @@
 
 (def
  v46_l158
- (let
-  [A
-   (cx/complex-tensor [[1.0 0.0] [0.0 1.0]] [[0.0 0.0] [0.0 0.0]])
-   B
-   (cx/complex-tensor [[0.0 1.0] [1.0 0.0]] [[0.0 0.0] [0.0 0.0]])]
-  (la/mmul A B)))
+ (la/mmul
+  (cx/complex-tensor [[1.0 0.0] [0.0 1.0]] [[0.0 0.0] [0.0 0.0]])
+  (cx/complex-tensor [[0.0 1.0] [1.0 0.0]] [[0.0 0.0] [0.0 0.0]])))
 
 
 (deftest
- t47_l164
+ t47_l163
  (is ((fn [ct] (= [2 2] (cx/complex-shape ct))) v46_l158)))
 
 
 (def
- v49_l168
- (let
-  [A (cx/complex-tensor [[1.0 2.0] [3.0 4.0]] [[5.0 6.0] [7.0 8.0]])]
-  (la/transpose A)))
+ v49_l167
+ (la/transpose
+  (cx/complex-tensor [[1.0 2.0] [3.0 4.0]] [[5.0 6.0] [7.0 8.0]])))
 
 
 (deftest
- t50_l172
+ t50_l170
  (is
   ((fn [ct] (let [r (cx/re ct)] (= 3.0 (tensor/mget r 0 1))))
-   v49_l168)))
+   v49_l167)))
 
 
 (def
- v52_l177
+ v52_l175
  (la/det
   (cx/complex-tensor [[1.0 3.0] [5.0 7.0]] [[2.0 4.0] [6.0 8.0]])))
 
 
 (deftest
- t54_l182
+ t54_l180
  (is
   ((fn
     [d]
     (and
      (< (Math/abs (cx/re d)) 1.0E-10)
      (< (Math/abs (- (cx/im d) -16.0)) 1.0E-10)))
-   v52_l177)))
+   v52_l175)))
 
 
 (def
- v56_l187
+ v56_l185
  (let
   [A
    (cx/complex-tensor [[1.0 2.0] [3.0 4.0]] [[0.5 1.0] [1.5 2.5]])
@@ -238,17 +234,17 @@
     1.0E-10))))
 
 
-(deftest t57_l197 (is (true? v56_l187)))
+(deftest t57_l195 (is (true? v56_l185)))
 
 
-(def v59_l201 (def a (cx/complex-tensor [1.0 -2.0 3.0] [4.0 5.0 -6.0])))
+(def v59_l199 (def a (cx/complex-tensor [1.0 -2.0 3.0] [4.0 5.0 -6.0])))
 
 
-(def v60_l202 (def b (cx/complex-tensor [-3.0 0.5 2.0] [1.0 -1.5 7.0])))
+(def v60_l200 (def b (cx/complex-tensor [-3.0 0.5 2.0] [1.0 -1.5 7.0])))
 
 
 (def
- v61_l204
+ v61_l202
  (defn
   approx=
   "Check that two ComplexTensors are approximately equal."
@@ -263,41 +259,43 @@
     (< (dfn/reduce-max (dfn/abs im-diff)) tol)))))
 
 
-(def v63_l214 (approx= (cx/mul a b) (cx/mul b a) 1.0E-10))
+(def v63_l212 (approx= (cx/mul a b) (cx/mul b a) 1.0E-10))
 
 
-(deftest t64_l216 (is (true? v63_l214)))
+(deftest t64_l214 (is (true? v63_l212)))
 
 
-(def v66_l220 (approx= (cx/conj (cx/conj a)) a 1.0E-10))
+(def v66_l218 (approx= (cx/conj (cx/conj a)) a 1.0E-10))
 
 
-(deftest t67_l222 (is (true? v66_l220)))
+(deftest t67_l220 (is (true? v66_l218)))
 
 
 (def
- v69_l226
+ v69_l224
  (approx=
   (cx/conj (cx/mul a b))
   (cx/mul (cx/conj a) (cx/conj b))
   1.0E-10))
 
 
-(deftest t70_l230 (is (true? v69_l226)))
+(deftest t70_l228 (is (true? v69_l224)))
 
 
 (def
- v72_l234
- (let
-  [lhs (cx/abs (cx/mul a b)) rhs (dfn/* (cx/abs a) (cx/abs b))]
-  (< (dfn/reduce-max (dfn/abs (dfn/- lhs rhs))) 1.0E-10)))
+ v72_l232
+ (<
+  (dfn/reduce-max
+   (dfn/abs
+    (dfn/- (cx/abs (cx/mul a b)) (dfn/* (cx/abs a) (cx/abs b)))))
+  1.0E-10))
 
 
-(deftest t73_l238 (is (true? v72_l234)))
+(deftest t73_l237 (is (true? v72_l232)))
 
 
 (def
- v75_l242
+ v75_l241
  (let
   [[re-ab im-ab]
    (cx/dot-conj a b)
@@ -308,4 +306,4 @@
   (<= (- (+ (* re-ab re-ab) (* im-ab im-ab)) 1.0E-10) (* re-aa re-bb))))
 
 
-(deftest t76_l248 (is (true? v75_l242)))
+(deftest t76_l247 (is (true? v75_l241)))

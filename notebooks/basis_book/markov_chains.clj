@@ -165,8 +165,7 @@ stationary-eigen
 
 ;; After convergence, power iteration agrees with the eigendecomposition:
 
-(let [last-change (:change (last power-iteration-history))]
-  last-change)
+(:change (last power-iteration-history))
 
 (kind/test-last [(fn [c] (< c 1e-10))])
 
@@ -190,11 +189,11 @@ stationary-eigen
 ;; Build the hyperlink matrix $H$ (row-stochastic):
 
 (def H
-  (la/matrix [[0    1/2  1/2  0    0  ]
-              [0    0    1    0    0  ]
-              [1    0    0    0    0  ]
-              [1/2  0    1/2  0    0  ]
-              [1/4  1/4  1/4  1/4  0  ]]))
+  (la/matrix [[0    1/2  1/2  0    0]
+              [0    0    1    0    0]
+              [1    0    0    0    0]
+              [1/2  0    1/2  0    0]
+              [1/4  1/4  1/4  1/4  0]]))
 
 ;; The Google matrix with damping factor $d = 0.85$:
 ;;
@@ -223,11 +222,11 @@ stationary-eigen
 
 ;; Page 0 and 2 receive the most links and have the highest rank:
 
-(let [labels ["Page 0" "Page 1" "Page 2" "Page 3" "Page 4"]]
-  (-> (tc/dataset {:page labels :rank (vec (dtype/->reader pagerank))})
-      (plotly/base {:=x :page :=y :rank})
-      (plotly/layer-bar)
-      plotly/plot))
+(-> (tc/dataset {:page ["Page 0" "Page 1" "Page 2" "Page 3" "Page 4"]
+                 :rank (vec (dtype/->reader pagerank))})
+    (plotly/base {:=x :page :=y :rank})
+    (plotly/layer-bar)
+    plotly/plot)
 
 ;; PageRank values sum to 1:
 

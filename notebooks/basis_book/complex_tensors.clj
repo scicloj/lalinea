@@ -155,19 +155,17 @@
 
 ;; Matrix multiply:
 
-(let [A (cx/complex-tensor [[1.0 0.0] [0.0 1.0]]
-                           [[0.0 0.0] [0.0 0.0]])
-      B (cx/complex-tensor [[0.0 1.0] [1.0 0.0]]
-                           [[0.0 0.0] [0.0 0.0]])]
-  (la/mmul A B))
+(la/mmul (cx/complex-tensor [[1.0 0.0] [0.0 1.0]]
+                            [[0.0 0.0] [0.0 0.0]])
+         (cx/complex-tensor [[0.0 1.0] [1.0 0.0]]
+                            [[0.0 0.0] [0.0 0.0]]))
 
 (kind/test-last [(fn [ct] (= [2 2] (cx/complex-shape ct)))])
 
 ;; Conjugate transpose (Hermitian adjoint):
 
-(let [A (cx/complex-tensor [[1.0 2.0] [3.0 4.0]]
-                           [[5.0 6.0] [7.0 8.0]])]
-  (la/transpose A))
+(la/transpose (cx/complex-tensor [[1.0 2.0] [3.0 4.0]]
+                                 [[5.0 6.0] [7.0 8.0]]))
 
 (kind/test-last [(fn [ct] (let [r (cx/re ct)]
                             (= 3.0 (tensor/mget r 0 1))))])
@@ -231,9 +229,10 @@
 
 ;; Magnitude is multiplicative: $|a \cdot b| = |a| \cdot |b|$
 
-(let [lhs (cx/abs (cx/mul a b))
-      rhs (dfn/* (cx/abs a) (cx/abs b))]
-  (< (dfn/reduce-max (dfn/abs (dfn/- lhs rhs))) 1e-10))
+(< (dfn/reduce-max
+    (dfn/abs (dfn/- (cx/abs (cx/mul a b))
+                    (dfn/* (cx/abs a) (cx/abs b)))))
+   1e-10)
 
 (kind/test-last [true?])
 

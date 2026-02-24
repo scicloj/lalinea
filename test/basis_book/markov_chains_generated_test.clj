@@ -152,18 +152,14 @@
   plotly/plot))
 
 
-(def
- v26_l168
- (let
-  [last-change (:change (last power-iteration-history))]
-  last-change))
+(def v26_l168 (:change (last power-iteration-history)))
 
 
-(deftest t27_l171 (is ((fn [c] (< c 1.0E-10)) v26_l168)))
+(deftest t27_l170 (is ((fn [c] (< c 1.0E-10)) v26_l168)))
 
 
 (def
- v29_l192
+ v29_l191
  (def
   H
   (la/matrix
@@ -174,14 +170,14 @@
     [1/4 1/4 1/4 1/4 0]])))
 
 
-(def v31_l203 (def damping 0.85))
+(def v31_l202 (def damping 0.85))
 
 
-(def v32_l205 (def n-pages 5))
+(def v32_l204 (def n-pages 5))
 
 
 (def
- v33_l207
+ v33_l206
  (def
   google-matrix
   (la/add
@@ -192,7 +188,7 @@
 
 
 (def
- v35_l214
+ v35_l213
  (def
   pagerank
   (let
@@ -211,25 +207,25 @@
 
 
 (def
- v37_l226
- (let
-  [labels ["Page 0" "Page 1" "Page 2" "Page 3" "Page 4"]]
-  (->
-   (tc/dataset {:page labels, :rank (vec (dtype/->reader pagerank))})
-   (plotly/base {:=x :page, :=y :rank})
-   (plotly/layer-bar)
-   plotly/plot)))
+ v37_l225
+ (->
+  (tc/dataset
+   {:page ["Page 0" "Page 1" "Page 2" "Page 3" "Page 4"],
+    :rank (vec (dtype/->reader pagerank))})
+  (plotly/base {:=x :page, :=y :rank})
+  (plotly/layer-bar)
+  plotly/plot))
 
 
-(def v39_l234 (dfn/sum pagerank))
+(def v39_l233 (dfn/sum pagerank))
 
 
 (deftest
- t40_l236
- (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v39_l234)))
+ t40_l235
+ (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v39_l233)))
 
 
-(def v42_l241 (argops/argmax pagerank))
+(def v42_l240 (argops/argmax pagerank))
 
 
-(deftest t43_l243 (is ((fn [idx] (contains? #{0 2} idx)) v42_l241)))
+(deftest t43_l242 (is ((fn [idx] (contains? #{0 2} idx)) v42_l240)))

@@ -84,9 +84,8 @@
 ;;
 ;; $A \cdot I = A$
 
-(let [A (la/matrix [[1 2] [3 4]])
-      I (la/eye 2)]
-  (la/mmul A I))
+(la/mmul (la/matrix [[1 2] [3 4]])
+         (la/eye 2))
 
 (kind/test-last [(fn [m] (= 1.0 (tensor/mget m 0 0)))])
 
@@ -121,8 +120,7 @@
 ;; Since matrices are dtype-next tensors, all `dfn` operations work
 ;; element-wise.
 
-(let [A (la/matrix [[1 4] [9 16]])]
-  (tensor/mget (dfn/sqrt A) 1 0))
+(tensor/mget (dfn/sqrt (la/matrix [[1 4] [9 16]])) 1 0)
 
 ;; $\sqrt{9} = 3$
 
@@ -130,9 +128,10 @@
 
 ;; Element-wise multiply (Hadamard product):
 
-(let [A (la/matrix [[1 2] [3 4]])
-      B (la/matrix [[5 6] [7 8]])]
-  (tensor/mget (tensor/ensure-tensor (dfn/* A B)) 0 0))
+(tensor/mget (tensor/ensure-tensor
+              (dfn/* (la/matrix [[1 2] [3 4]])
+                     (la/matrix [[5 6] [7 8]])))
+             0 0)
 
 (kind/test-last [= 5.0])
 
@@ -142,14 +141,13 @@
 ;;
 ;; For a symmetric matrix, eigenvalues are real.
 
-(let [A (la/matrix [[4 1] [1 3]])
-      {:keys [eigenvalues]} (la/eigen A)]
+(let [{:keys [eigenvalues]} (la/eigen (la/matrix [[4 1] [1 3]]))]
   (sort (map first eigenvalues)))
 
 (kind/test-last [(fn [evs] (let [expected [2.381966011250105 4.618033988749895]]
-                              (every? identity
-                                      (map (fn [a b] (< (Math/abs (- a b)) 1e-10))
-                                           evs expected))))])
+                             (every? identity
+                                     (map (fn [a b] (< (Math/abs (- a b)) 1e-10))
+                                          evs expected))))])
 
 ;; ### SVD reconstruction
 ;;

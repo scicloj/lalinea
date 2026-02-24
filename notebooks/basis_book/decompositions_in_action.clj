@@ -48,20 +48,20 @@
   (tensor/ensure-tensor
    (dtype/clone
     (tensor/compute-tensor [img-size img-size]
-      (fn [r c]
-        (let [x (/ (- c 50.0) 50.0)
-              y (/ (- r 50.0) 50.0)
-              circle (if (< (+ (* x x) (* y y)) 0.5) 200.0 50.0)
-              gradient (* 100.0 (+ 0.5 (* 0.5 (Math/sin (* 3.0 x)))))]
-          (+ (* 0.6 circle) (* 0.4 gradient))))
-      :float64))))
+                           (fn [r c]
+                             (let [x (/ (- c 50.0) 50.0)
+                                   y (/ (- r 50.0) 50.0)
+                                   circle (if (< (+ (* x x) (* y y)) 0.5) 200.0 50.0)
+                                   gradient (* 100.0 (+ 0.5 (* 0.5 (Math/sin (* 3.0 x)))))]
+                               (+ (* 0.6 circle) (* 0.4 gradient))))
+                           :float64))))
 
 ;; Display the original:
 
 (let [t (tensor/compute-tensor [img-size img-size 3]
-          (fn [r c _ch]
-            (int (max 0 (min 255 (tensor/mget test-image r c)))))
-          :uint8)]
+                               (fn [r c _ch]
+                                 (int (max 0 (min 255 (tensor/mget test-image r c)))))
+                               :uint8)]
   (bufimg/tensor->image t))
 
 (kind/test-last
@@ -74,12 +74,11 @@
 ;; The singular values drop off rapidly — most of the information
 ;; is in the first few:
 
-(let [S (:S svd-result)]
-  (-> (tc/dataset {:index (range (count S))
-                   :singular-value S})
-      (plotly/base {:=x :index :=y :singular-value})
-      (plotly/layer-line)
-      plotly/plot))
+(-> (tc/dataset {:index (range (count (:S svd-result)))
+                 :singular-value (:S svd-result)})
+    (plotly/base {:=x :index :=y :singular-value})
+    (plotly/layer-line)
+    plotly/plot)
 
 ;; ### Rank-k reconstruction
 ;;
@@ -101,9 +100,9 @@
   (fn [m]
     (let [[h w] (dtype/shape m)]
       (tensor/compute-tensor [h w 3]
-        (fn [r c _ch]
-          (int (max 0 (min 255 (tensor/mget m r c)))))
-        :uint8))))
+                             (fn [r c _ch]
+                               (int (max 0 (min 255 (tensor/mget m r c)))))
+                             :uint8))))
 
 ;; Rank 1 — captures only the dominant direction:
 
@@ -131,20 +130,19 @@
 ;; The original stores $n \times m$ values.
 ;; Rank $k$ stores $k(n + m + 1)$ values.
 
-(let [n img-size m img-size]
-  (-> (tc/dataset {:k [1 5 10 20 50]
-                   :ratio (mapv (fn [k]
-                                  (/ (* 1.0 k (+ n m 1))
-                                     (* n m)))
-                                [1 5 10 20 50])
-                   :error (mapv (fn [k]
-                                  (la/norm (la/sub test-image
-                                                   (reconstruct-rank-k svd-result k))))
-                                [1 5 10 20 50])})
-      (plotly/base {:=x :ratio :=y :error})
-      (plotly/layer-point {:=mark-size 10})
-      (plotly/layer-line)
-      plotly/plot))
+(-> (tc/dataset {:k [1 5 10 20 50]
+                 :ratio (mapv (fn [k]
+                                (/ (* 1.0 k (+ img-size img-size 1))
+                                   (* img-size img-size)))
+                              [1 5 10 20 50])
+                 :error (mapv (fn [k]
+                                (la/norm (la/sub test-image
+                                                 (reconstruct-rank-k svd-result k))))
+                              [1 5 10 20 50])})
+    (plotly/base {:=x :ratio :=y :error})
+    (plotly/layer-point {:=mark-size 10})
+    (plotly/layer-line)
+    plotly/plot)
 
 ;; ## Principal Component Analysis
 ;;
@@ -181,8 +179,8 @@
         mean0 (/ (dfn/sum col0) n-points)
         mean1 (/ (dfn/sum col1) n-points)
         means (tensor/compute-tensor [n-points 2]
-                (fn [_i j] (if (zero? j) mean0 mean1))
-                :float64)]
+                                     (fn [_i j] (if (zero? j) mean0 mean1))
+                                     :float64)]
     (dtype/clone (dfn/- data-tensor means))))
 
 ;; ### Compute covariance matrix and eigendecompose
@@ -213,9 +211,9 @@ cov-matrix
 (let [{:keys [eigenvalues eigenvectors]} pca-eigen
       ;; Sort by eigenvalue descending
       sorted (sort-by first >
-               (map vector
-                    (map first eigenvalues)
-                    eigenvectors))
+                      (map vector
+                           (map first eigenvalues)
+                           eigenvectors))
       [lam1 ev1] (first sorted)
       [lam2 ev2] (second sorted)
       ;; Eigenvector endpoints (scaled by sqrt of eigenvalue)
@@ -245,7 +243,7 @@ cov-matrix
 
 (let [{:keys [eigenvalues eigenvectors]} pca-eigen
       sorted (sort-by first >
-               (map vector (map first eigenvalues) eigenvectors))
+                      (map vector (map first eigenvalues) eigenvectors))
       ev1 (second (first sorted))
       ;; Project: X * v1 * v1^T
       projected (la/mmul (la/mmul X ev1) (la/transpose ev1))
@@ -308,10 +306,10 @@ true-eigenvalues
                          (let [v (tensor/mget A-next 2 1)] (* v v))))]
         (recur A-next (inc k)
                (conj history {:iteration (inc k)
-                               :off-diagonal off-diag
-                               :eig-1 (nth diag 0)
-                               :eig-2 (nth diag 1)
-                               :eig-3 (nth diag 2)}))))))
+                              :off-diagonal off-diag
+                              :eig-1 (nth diag 0)
+                              :eig-2 (nth diag 1)
+                              :eig-3 (nth diag 2)}))))))
 
 ;; The off-diagonal elements converge to zero — the matrix
 ;; becomes diagonal:
