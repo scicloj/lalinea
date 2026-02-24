@@ -25,178 +25,170 @@
 (def v7_l45 (def v (la/column [1 2 3])))
 
 
-(def
- v9_l49
- (def
-  close?
-  (fn [x y] (let [diff (la/sub x y)] (< (la/norm diff) 1.0E-10)))))
+(def v9_l55 (la/close? (la/add A B) (la/add B A)))
+
+
+(deftest t10_l57 (is (true? v9_l55)))
 
 
 (def
- v10_l54
- (def
-  close-scalar?
-  (fn [a b] (< (Math/abs (- (double a) (double b))) 1.0E-10))))
+ v12_l61
+ (la/close? (la/add (la/add A B) C) (la/add A (la/add B C))))
 
 
-(def v12_l66 (close? (la/add A B) (la/add B A)))
+(deftest t13_l64 (is (true? v12_l61)))
 
 
-(deftest t13_l68 (is (true? v12_l66)))
+(def v15_l68 (la/close? (la/add A (la/zeros 3 3)) A))
 
 
-(def v15_l72 (close? (la/add (la/add A B) C) (la/add A (la/add B C))))
+(deftest t16_l70 (is (true? v15_l68)))
 
 
-(deftest t16_l75 (is (true? v15_l72)))
+(def v18_l74 (< (la/norm (la/sub A A)) 1.0E-10))
 
 
-(def v18_l79 (close? (la/add A (la/zeros 3 3)) A))
-
-
-(deftest t19_l81 (is (true? v18_l79)))
-
-
-(def v21_l85 (< (la/norm (la/sub A A)) 1.0E-10))
-
-
-(deftest t22_l87 (is (true? v21_l85)))
+(deftest t19_l76 (is (true? v18_l74)))
 
 
 (def
- v24_l91
+ v21_l80
  (let
   [alpha 3.5]
-  (close?
+  (la/close?
    (la/scale alpha (la/add A B))
    (la/add (la/scale alpha A) (la/scale alpha B)))))
 
 
-(deftest t25_l95 (is (true? v24_l91)))
+(deftest t22_l84 (is (true? v21_l80)))
 
 
 (def
- v27_l99
+ v24_l88
  (let
   [alpha 2.0 beta 3.0]
-  (close?
+  (la/close?
    (la/scale (* alpha beta) A)
    (la/scale alpha (la/scale beta A)))))
 
 
-(deftest t28_l103 (is (true? v27_l99)))
+(deftest t25_l92 (is (true? v24_l88)))
 
 
 (def
- v30_l114
- (close? (la/mmul (la/mmul A B) C) (la/mmul A (la/mmul B C))))
+ v27_l103
+ (la/close? (la/mmul (la/mmul A B) C) (la/mmul A (la/mmul B C))))
 
 
-(deftest t31_l117 (is (true? v30_l114)))
+(deftest t28_l106 (is (true? v27_l103)))
 
 
-(def v33_l121 (close? (la/mmul I3 A) A))
+(def v30_l110 (la/close? (la/mmul I3 A) A))
 
 
-(deftest t34_l123 (is (true? v33_l121)))
+(deftest t31_l112 (is (true? v30_l110)))
 
 
-(def v36_l127 (close? (la/mmul A I3) A))
+(def v33_l116 (la/close? (la/mmul A I3) A))
 
 
-(deftest t37_l129 (is (true? v36_l127)))
-
-
-(def
- v39_l133
- (close? (la/mmul A (la/add B C)) (la/add (la/mmul A B) (la/mmul A C))))
-
-
-(deftest t40_l136 (is (true? v39_l133)))
+(deftest t34_l118 (is (true? v33_l116)))
 
 
 (def
- v42_l140
- (close? (la/mmul (la/add A B) C) (la/add (la/mmul A C) (la/mmul B C))))
+ v36_l122
+ (la/close?
+  (la/mmul A (la/add B C))
+  (la/add (la/mmul A B) (la/mmul A C))))
 
 
-(deftest t43_l143 (is (true? v42_l140)))
+(deftest t37_l125 (is (true? v36_l122)))
 
 
 (def
- v45_l147
+ v39_l129
+ (la/close?
+  (la/mmul (la/add A B) C)
+  (la/add (la/mmul A C) (la/mmul B C))))
+
+
+(deftest t40_l132 (is (true? v39_l129)))
+
+
+(def
+ v42_l136
  (let
   [alpha 2.5]
   (and
-   (close?
+   (la/close?
     (la/scale alpha (la/mmul A B))
     (la/mmul (la/scale alpha A) B))
-   (close?
+   (la/close?
     (la/scale alpha (la/mmul A B))
     (la/mmul A (la/scale alpha B))))))
 
 
-(deftest t46_l153 (is (true? v45_l147)))
+(deftest t43_l142 (is (true? v42_l136)))
 
 
-(def v48_l160 (> (la/norm (la/sub (la/mmul A B) (la/mmul B A))) 0.01))
+(def v45_l149 (> (la/norm (la/sub (la/mmul A B) (la/mmul B A))) 0.01))
 
 
-(deftest t49_l162 (is (true? v48_l160)))
+(deftest t46_l151 (is (true? v45_l149)))
 
 
-(def v51_l175 (close? (la/transpose (la/transpose A)) A))
+(def v48_l164 (la/close? (la/transpose (la/transpose A)) A))
 
 
-(deftest t52_l177 (is (true? v51_l175)))
+(deftest t49_l166 (is (true? v48_l164)))
 
 
 (def
- v54_l181
- (close?
+ v51_l170
+ (la/close?
   (la/transpose (la/add A B))
   (la/add (la/transpose A) (la/transpose B))))
 
 
-(deftest t55_l184 (is (true? v54_l181)))
+(deftest t52_l173 (is (true? v51_l170)))
 
 
 (def
- v57_l191
- (close?
+ v54_l180
+ (la/close?
   (la/transpose (la/mmul A B))
   (la/mmul (la/transpose B) (la/transpose A))))
 
 
-(deftest t58_l194 (is (true? v57_l191)))
+(deftest t55_l183 (is (true? v54_l180)))
 
 
 (def
- v60_l198
+ v57_l187
  (let
   [alpha 4.0]
-  (close?
+  (la/close?
    (la/transpose (la/scale alpha A))
    (la/scale alpha (la/transpose A)))))
 
 
-(deftest t61_l202 (is (true? v60_l198)))
+(deftest t58_l191 (is (true? v57_l187)))
 
 
 (def
- v63_l214
+ v60_l203
  (let
   [alpha 2.0 beta 3.0]
-  (close-scalar?
+  (la/close-scalar?
    (la/trace (la/add (la/scale alpha A) (la/scale beta B)))
    (+ (* alpha (la/trace A)) (* beta (la/trace B))))))
 
 
-(deftest t64_l220 (is (true? v63_l214)))
+(deftest t61_l209 (is (true? v60_l203)))
 
 
 (def
- v66_l227
+ v63_l216
  (let
   [trABC
    (la/trace (la/mmul A (la/mmul B C)))
@@ -204,159 +196,167 @@
    (la/trace (la/mmul B (la/mmul C A)))
    trCAB
    (la/trace (la/mmul C (la/mmul A B)))]
-  (and (close-scalar? trABC trBCA) (close-scalar? trBCA trCAB))))
+  (and (la/close-scalar? trABC trBCA) (la/close-scalar? trBCA trCAB))))
 
 
-(deftest t67_l233 (is (true? v66_l227)))
-
-
-(def v69_l237 (close-scalar? (la/trace (la/transpose A)) (la/trace A)))
-
-
-(deftest t70_l239 (is (true? v69_l237)))
-
-
-(def v72_l243 (close-scalar? (la/trace I3) 3.0))
-
-
-(deftest t73_l245 (is (true? v72_l243)))
+(deftest t64_l222 (is (true? v63_l216)))
 
 
 (def
- v75_l259
- (close-scalar? (la/det (la/mmul A B)) (* (la/det A) (la/det B))))
+ v66_l226
+ (la/close-scalar? (la/trace (la/transpose A)) (la/trace A)))
 
 
-(deftest t76_l262 (is (true? v75_l259)))
+(deftest t67_l228 (is (true? v66_l226)))
 
 
-(def v78_l266 (close-scalar? (la/det (la/transpose A)) (la/det A)))
+(def v69_l232 (la/close-scalar? (la/trace I3) 3.0))
 
 
-(deftest t79_l268 (is (true? v78_l266)))
-
-
-(def v81_l272 (close-scalar? (la/det I3) 1.0))
-
-
-(deftest t82_l274 (is (true? v81_l272)))
-
-
-(def v84_l278 (close-scalar? (la/det (la/invert A)) (/ 1.0 (la/det A))))
-
-
-(deftest t85_l281 (is (true? v84_l278)))
+(deftest t70_l234 (is (true? v69_l232)))
 
 
 (def
- v87_l285
+ v72_l248
+ (la/close-scalar? (la/det (la/mmul A B)) (* (la/det A) (la/det B))))
+
+
+(deftest t73_l251 (is (true? v72_l248)))
+
+
+(def v75_l255 (la/close-scalar? (la/det (la/transpose A)) (la/det A)))
+
+
+(deftest t76_l257 (is (true? v75_l255)))
+
+
+(def v78_l261 (la/close-scalar? (la/det I3) 1.0))
+
+
+(deftest t79_l263 (is (true? v78_l261)))
+
+
+(def
+ v81_l267
+ (la/close-scalar? (la/det (la/invert A)) (/ 1.0 (la/det A))))
+
+
+(deftest t82_l270 (is (true? v81_l267)))
+
+
+(def
+ v84_l274
  (let
   [alpha 2.0 n 3]
-  (close-scalar?
+  (la/close-scalar?
    (la/det (la/scale alpha A))
    (* (Math/pow alpha n) (la/det A)))))
 
 
-(deftest t88_l289 (is (true? v87_l285)))
+(deftest t85_l278 (is (true? v84_l274)))
 
 
-(def v90_l301 (close? (la/mmul A (la/invert A)) I3))
+(def v87_l290 (la/close? (la/mmul A (la/invert A)) I3))
 
 
-(deftest t91_l303 (is (true? v90_l301)))
+(deftest t88_l292 (is (true? v87_l290)))
 
 
-(def v93_l307 (close? (la/mmul (la/invert A) A) I3))
+(def v90_l296 (la/close? (la/mmul (la/invert A) A) I3))
 
 
-(deftest t94_l309 (is (true? v93_l307)))
+(deftest t91_l298 (is (true? v90_l296)))
 
 
-(def v96_l313 (close? (la/invert (la/invert A)) A))
+(def v93_l302 (la/close? (la/invert (la/invert A)) A))
 
 
-(deftest t97_l315 (is (true? v96_l313)))
+(deftest t94_l304 (is (true? v93_l302)))
 
 
 (def
- v99_l322
- (close?
+ v96_l311
+ (la/close?
   (la/invert (la/mmul A B))
   (la/mmul (la/invert B) (la/invert A))))
 
 
-(deftest t100_l325 (is (true? v99_l322)))
+(deftest t97_l314 (is (true? v96_l311)))
 
 
 (def
- v102_l329
- (close? (la/transpose (la/invert A)) (la/invert (la/transpose A))))
+ v99_l318
+ (la/close? (la/transpose (la/invert A)) (la/invert (la/transpose A))))
 
 
-(deftest t103_l332 (is (true? v102_l329)))
+(deftest t100_l321 (is (true? v99_l318)))
 
 
 (def
- v105_l336
+ v102_l325
  (let
   [alpha 2.0]
-  (close?
+  (la/close?
    (la/invert (la/scale alpha A))
    (la/scale (/ 1.0 alpha) (la/invert A)))))
 
 
-(deftest t106_l340 (is (true? v105_l336)))
+(deftest t103_l329 (is (true? v102_l325)))
 
 
 (def
- v108_l351
+ v105_l340
  (and
   (>= (la/norm A) 0)
   (> (la/norm A) 0)
   (< (la/norm (la/zeros 3 3)) 1.0E-10)))
 
 
-(deftest t109_l355 (is (true? v108_l351)))
+(deftest t106_l344 (is (true? v105_l340)))
 
 
 (def
- v111_l359
+ v108_l348
  (let
   [alpha -2.5]
-  (close-scalar?
+  (la/close-scalar?
    (la/norm (la/scale alpha A))
    (* (Math/abs alpha) (la/norm A)))))
 
 
-(deftest t112_l363 (is (true? v111_l359)))
+(deftest t109_l352 (is (true? v108_l348)))
 
 
 (def
- v114_l369
- (close-scalar?
+ v111_l358
+ (la/close-scalar?
   (* (la/norm A) (la/norm A))
   (la/trace (la/mmul (la/transpose A) A))))
 
 
-(deftest t115_l372 (is (true? v114_l369)))
-
-
-(def v117_l383 (let [{:keys [Q R]} (la/qr A)] (close? (la/mmul Q R) A)))
-
-
-(deftest t118_l386 (is (true? v117_l383)))
+(deftest t112_l361 (is (true? v111_l358)))
 
 
 (def
- v120_l390
- (let [{:keys [Q]} (la/qr A)] (close? (la/mmul (la/transpose Q) Q) I3)))
+ v114_l372
+ (let [{:keys [Q R]} (la/qr A)] (la/close? (la/mmul Q R) A)))
 
 
-(deftest t121_l393 (is (true? v120_l390)))
+(deftest t115_l375 (is (true? v114_l372)))
 
 
 (def
- v123_l399
+ v117_l379
+ (let
+  [{:keys [Q]} (la/qr A)]
+  (la/close? (la/mmul (la/transpose Q) Q) I3)))
+
+
+(deftest t118_l382 (is (true? v117_l379)))
+
+
+(def
+ v120_l388
  (let
   [{:keys [R]} (la/qr A)]
   (every?
@@ -368,11 +368,11 @@
    (range 1 3))))
 
 
-(deftest t124_l406 (is (true? v123_l399)))
+(deftest t121_l395 (is (true? v120_l388)))
 
 
 (def
- v126_l417
+ v123_l406
  (let
   [{:keys [eigenvalues eigenvectors]} (la/eigen A)]
   (every?
@@ -382,71 +382,71 @@
      evec
      (let
       [Av (la/mmul A evec) lam-v (la/scale lam-re evec)]
-      (close? Av lam-v))))
+      (la/close? Av lam-v))))
    (map vector eigenvalues eigenvectors))))
 
 
-(deftest t127_l425 (is (true? v126_l417)))
+(deftest t124_l414 (is (true? v123_l406)))
 
 
 (def
- v129_l429
+ v126_l418
  (let
   [{:keys [eigenvalues]}
    (la/eigen A)
    eig-sum
    (reduce + (map first eigenvalues))]
-  (close-scalar? (la/trace A) eig-sum)))
+  (la/close-scalar? (la/trace A) eig-sum)))
 
 
-(deftest t130_l433 (is (true? v129_l429)))
+(deftest t127_l422 (is (true? v126_l418)))
 
 
 (def
- v132_l437
+ v129_l426
  (let
   [{:keys [eigenvalues]}
    (la/eigen A)
    eig-prod
    (reduce * (map first eigenvalues))]
-  (close-scalar? (la/det A) eig-prod)))
+  (la/close-scalar? (la/det A) eig-prod)))
 
 
-(deftest t133_l441 (is (true? v132_l437)))
+(deftest t130_l430 (is (true? v129_l426)))
 
 
 (def
- v135_l453
+ v132_l442
  (let
   [{:keys [U S Vt]} (la/svd A) Sigma (la/diag S)]
-  (close? (la/mmul U (la/mmul Sigma Vt)) A)))
+  (la/close? (la/mmul U (la/mmul Sigma Vt)) A)))
 
 
-(deftest t136_l457 (is (true? v135_l453)))
+(deftest t133_l446 (is (true? v132_l442)))
 
 
 (def
- v138_l461
+ v135_l450
  (let
   [{:keys [U]} (la/svd A)]
-  (close? (la/mmul (la/transpose U) U) I3)))
+  (la/close? (la/mmul (la/transpose U) U) I3)))
 
 
-(deftest t139_l464 (is (true? v138_l461)))
+(deftest t136_l453 (is (true? v135_l450)))
 
 
 (def
- v141_l468
+ v138_l457
  (let
   [{:keys [Vt]} (la/svd A)]
-  (close? (la/mmul Vt (la/transpose Vt)) I3)))
+  (la/close? (la/mmul Vt (la/transpose Vt)) I3)))
 
 
-(deftest t142_l471 (is (true? v141_l468)))
+(deftest t139_l460 (is (true? v138_l457)))
 
 
 (def
- v144_l475
+ v141_l464
  (let
   [{:keys [S]}
    (la/svd A)
@@ -458,17 +458,17 @@
     reverse
     vec)
    sv-squared
-   (mapv (fn* [p1__244810#] (* p1__244810# p1__244810#)) (sort > S))]
+   (mapv (fn* [p1__247618#] (* p1__247618# p1__247618#)) (sort > S))]
   (every?
    identity
    (map (fn [a b] (< (Math/abs (- a b)) 1.0E-8)) sv-squared AtA-eigs))))
 
 
-(deftest t145_l486 (is (true? v144_l475)))
+(deftest t142_l475 (is (true? v141_l464)))
 
 
 (def
- v147_l490
+ v144_l479
  (let
   [{:keys [S]}
    (la/svd A)
@@ -476,41 +476,41 @@
    (Math/sqrt
     (reduce
      +
-     (map (fn* [p1__244811#] (* p1__244811# p1__244811#)) S)))]
-  (close-scalar? (la/norm A) sv-norm)))
+     (map (fn* [p1__247619#] (* p1__247619# p1__247619#)) S)))]
+  (la/close-scalar? (la/norm A) sv-norm)))
 
 
-(deftest t148_l494 (is (true? v147_l490)))
+(deftest t145_l483 (is (true? v144_l479)))
 
 
 (def
- v150_l506
+ v147_l495
  (let
   [M (la/add (la/mmul (la/transpose A) A) I3) L (la/cholesky M)]
-  (close? (la/mmul L (la/transpose L)) M)))
+  (la/close? (la/mmul L (la/transpose L)) M)))
 
 
-(deftest t151_l510 (is (true? v150_l506)))
+(deftest t148_l499 (is (true? v147_l495)))
 
 
-(def v153_l514 (nil? (la/cholesky (la/matrix [[1 2] [2 1]]))))
+(def v150_l503 (nil? (la/cholesky (la/matrix [[1 2] [2 1]]))))
 
 
-(deftest t154_l516 (is (true? v153_l514)))
+(deftest t151_l505 (is (true? v150_l503)))
 
 
 (def
- v156_l526
+ v153_l515
  (let
   [b (la/column [1 2 3]) x (la/solve A b)]
-  (close? (la/mmul A x) b)))
+  (la/close? (la/mmul A x) b)))
 
 
-(deftest t157_l530 (is (true? v156_l526)))
+(deftest t154_l519 (is (true? v153_l515)))
 
 
 (def
- v159_l534
+ v156_l523
  (let
   [b
    (la/column [1 2 3])
@@ -518,63 +518,46 @@
    (la/solve A b)
    x-inv
    (la/mmul (la/invert A) b)]
-  (close? x-solve x-inv)))
+  (la/close? x-solve x-inv)))
 
 
-(deftest t160_l539 (is (true? v159_l534)))
+(deftest t157_l528 (is (true? v156_l523)))
 
 
 (def
- v162_l548
+ v159_l537
  (def ca (cx/complex-tensor [1.0 -2.0 3.0] [4.0 5.0 -6.0])))
 
 
 (def
- v163_l549
+ v160_l538
  (def cb (cx/complex-tensor [-3.0 0.5 2.0] [1.0 -1.5 7.0])))
 
 
-(def
- v164_l551
- (def
-  complex-approx=
-  (fn
-   [x y tol]
-   (let
-    [re-diff
-     (dfn/- (cx/re x) (cx/re y))
-     im-diff
-     (dfn/- (cx/im x) (cx/im y))]
-    (and
-     (< (dfn/reduce-max (dfn/abs re-diff)) tol)
-     (< (dfn/reduce-max (dfn/abs im-diff)) tol))))))
+(def v162_l542 (la/close? (cx/mul ca cb) (cx/mul cb ca)))
 
 
-(def v166_l560 (complex-approx= (cx/mul ca cb) (cx/mul cb ca) 1.0E-10))
+(deftest t163_l544 (is (true? v162_l542)))
 
 
-(deftest t167_l562 (is (true? v166_l560)))
+(def v165_l548 (la/close? (cx/conj (cx/conj ca)) ca))
 
 
-(def v169_l566 (complex-approx= (cx/conj (cx/conj ca)) ca 1.0E-10))
-
-
-(deftest t170_l568 (is (true? v169_l566)))
+(deftest t166_l550 (is (true? v165_l548)))
 
 
 (def
- v172_l572
- (complex-approx=
+ v168_l554
+ (la/close?
   (cx/conj (cx/mul ca cb))
-  (cx/mul (cx/conj ca) (cx/conj cb))
-  1.0E-10))
+  (cx/mul (cx/conj ca) (cx/conj cb))))
 
 
-(deftest t173_l576 (is (true? v172_l572)))
+(deftest t169_l557 (is (true? v168_l554)))
 
 
 (def
- v175_l580
+ v171_l561
  (<
   (dfn/reduce-max
    (dfn/abs
@@ -582,11 +565,11 @@
   1.0E-10))
 
 
-(deftest t176_l585 (is (true? v175_l580)))
+(deftest t172_l566 (is (true? v171_l561)))
 
 
 (def
- v178_l589
+ v174_l570
  (let
   [[re-ab im-ab]
    (cx/dot-conj ca cb)
@@ -597,11 +580,11 @@
   (<= (- (+ (* re-ab re-ab) (* im-ab im-ab)) 1.0E-10) (* re-aa re-bb))))
 
 
-(deftest t179_l595 (is (true? v178_l589)))
+(deftest t175_l576 (is (true? v174_l570)))
 
 
 (def
- v181_l606
+ v177_l587
  (let
   [CA
    (cx/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
@@ -615,11 +598,11 @@
    1.0E-10)))
 
 
-(deftest t182_l613 (is (true? v181_l606)))
+(deftest t178_l594 (is (true? v177_l587)))
 
 
 (def
- v184_l617
+ v180_l598
  (let
   [CA
    (cx/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
@@ -628,11 +611,11 @@
   (< (la/norm (la/sub AAdag (la/transpose AAdag))) 1.0E-10)))
 
 
-(deftest t185_l621 (is (true? v184_l617)))
+(deftest t181_l602 (is (true? v180_l598)))
 
 
 (def
- v187_l625
+ v183_l606
  (let
   [CA
    (cx/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
@@ -649,11 +632,11 @@
   (< (la/norm (la/sub det-AB product)) 1.0E-10)))
 
 
-(deftest t188_l633 (is (true? v187_l625)))
+(deftest t184_l614 (is (true? v183_l606)))
 
 
 (def
- v190_l637
+ v186_l618
  (let
   [CA
    (cx/complex-tensor [[2 1] [1 3]] [[1 0] [0 1]])
@@ -664,11 +647,11 @@
   (< (la/norm (la/sub (la/mmul CA Cx) Cb)) 1.0E-10)))
 
 
-(deftest t191_l642 (is (true? v190_l637)))
+(deftest t187_l623 (is (true? v186_l618)))
 
 
 (def
- v193_l646
+ v189_l627
  (let
   [CA
    (cx/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
@@ -677,4 +660,4 @@
   (< (la/norm (la/sub (la/mmul CA (la/invert CA)) CI)) 1.0E-10)))
 
 
-(deftest t194_l650 (is (true? v193_l646)))
+(deftest t190_l631 (is (true? v189_l627)))

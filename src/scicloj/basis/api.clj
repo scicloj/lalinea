@@ -43,6 +43,8 @@
 (def trace "Matrix trace." la/trace)
 (def det "Matrix determinant." la/det)
 (def norm "Frobenius norm." la/norm)
+(def close? "Approximate matrix equality." la/close?)
+(def close-scalar? "Approximate scalar equality." la/close-scalar?)
 (def invert "Matrix inverse." la/invert)
 (def solve "Solve A*X=B for X." la/solve)
 (def eigen "Eigendecomposition." la/eigen)

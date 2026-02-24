@@ -211,60 +211,55 @@
 (def w-ax (la/column [-1 4]))
 (def zero2 (la/column [0 0]))
 
-;; A helper to check that two vectors are approximately equal:
-
-(def close?
-  (fn [a b] (< (la/norm (la/sub a b)) 1e-10)))
-
 ;; **Axiom 1 — Commutativity:**
 
-(close? (la/add u v) (la/add v u))
+(la/close? (la/add u v) (la/add v u))
 
 (kind/test-last [true?])
 
 ;; **Axiom 2 — Associativity:**
 
-(close? (la/add (la/add u v) w-ax)
-        (la/add u (la/add v w-ax)))
+(la/close? (la/add (la/add u v) w-ax)
+           (la/add u (la/add v w-ax)))
 
 (kind/test-last [true?])
 
 ;; **Axiom 3 — Zero vector:**
 
-(close? (la/add u zero2) u)
+(la/close? (la/add u zero2) u)
 
 (kind/test-last [true?])
 
 ;; **Axiom 4 — Additive inverse:**
 
-(close? (la/add u (la/scale -1.0 u)) zero2)
+(la/close? (la/add u (la/scale -1.0 u)) zero2)
 
 (kind/test-last [true?])
 
 ;; **Axiom 5 — Scalar compatibility:**
 
-(close? (la/scale 2.0 (la/scale 3.0 u))
-        (la/scale 6.0 u))
+(la/close? (la/scale 2.0 (la/scale 3.0 u))
+           (la/scale 6.0 u))
 
 (kind/test-last [true?])
 
 ;; **Axiom 6 — Scalar identity:**
 
-(close? (la/scale 1.0 u) u)
+(la/close? (la/scale 1.0 u) u)
 
 (kind/test-last [true?])
 
 ;; **Axiom 7 — Distributivity over vectors:**
 
-(close? (la/scale 5.0 (la/add u v))
-        (la/add (la/scale 5.0 u) (la/scale 5.0 v)))
+(la/close? (la/scale 5.0 (la/add u v))
+           (la/add (la/scale 5.0 u) (la/scale 5.0 v)))
 
 (kind/test-last [true?])
 
 ;; **Axiom 8 — Distributivity over scalars:**
 
-(close? (la/scale (+ 2.0 3.0) u)
-        (la/add (la/scale 2.0 u) (la/scale 3.0 u)))
+(la/close? (la/scale (+ 2.0 3.0) u)
+           (la/add (la/scale 2.0 u) (la/scale 3.0 u)))
 
 (kind/test-last [true?])
 
@@ -430,10 +425,10 @@
 
 ;; $\mathbf{w} = 5\mathbf{e}_1 + (-3)\mathbf{e}_2 + 7\mathbf{e}_3$:
 
-(close? w
-        (la/add (la/scale 5.0 e1)
-                (la/add (la/scale -3.0 e2)
-                        (la/scale 7.0 e3))))
+(la/close? w
+           (la/add (la/scale 5.0 e1)
+                   (la/add (la/scale -3.0 e2)
+                           (la/scale 7.0 e3))))
 
 (kind/test-last [true?])
 
@@ -503,15 +498,15 @@
 ;;
 ;; **Additivity**: $R(\mathbf{u} + \mathbf{v}) = R(\mathbf{u}) + R(\mathbf{v})$:
 
-(close? (la/mmul R90 (la/add u v))
-        (la/add (la/mmul R90 u) (la/mmul R90 v)))
+(la/close? (la/mmul R90 (la/add u v))
+           (la/add (la/mmul R90 u) (la/mmul R90 v)))
 
 (kind/test-last [true?])
 
 ;; **Homogeneity**: $R(3\mathbf{u}) = 3 R(\mathbf{u})$:
 
-(close? (la/mmul R90 (la/scale 3.0 u))
-        (la/scale 3.0 (la/mmul R90 u)))
+(la/close? (la/mmul R90 (la/scale 3.0 u))
+           (la/scale 3.0 (la/mmul R90 u)))
 
 (kind/test-last [true?])
 
@@ -870,7 +865,7 @@ dot-ab
 ;; is the same as applying it once ($P^2 = P$). Once you
 ;; are on the subspace, projecting again does nothing.
 
-(close? (la/mmul P-proj P-proj) P-proj)
+(la/close? (la/mmul P-proj P-proj) P-proj)
 
 (kind/test-last [true?])
 
@@ -1140,7 +1135,7 @@ D-result
                                          (* lam lam))))]
     (la/mmul P-cols (la/mmul D2 Pinv))))
 
-(close? A-diag-sq A-diag-sq-via-eigen)
+(la/close? A-diag-sq A-diag-sq-via-eigen)
 
 (kind/test-last [true?])
 
@@ -1170,7 +1165,7 @@ D-result
 
 ;; Verify symmetry:
 
-(close? S-sym (la/transpose S-sym))
+(la/close? S-sym (la/transpose S-sym))
 
 (kind/test-last [true?])
 
@@ -1371,7 +1366,7 @@ sigmas
 ;; - **Symmetric**: $A = A^T$
 ;; - **Positive definite**: all eigenvalues > 0
 
-(close? A-final (la/transpose A-final))
+(la/close? A-final (la/transpose A-final))
 
 (kind/test-last [true?])
 
@@ -1426,7 +1421,7 @@ final-eigenvalues
 
 (def A-inv (la/invert A-final))
 
-(close? (la/mmul A-final A-inv) (la/eye 3))
+(la/close? (la/mmul A-final A-inv) (la/eye 3))
 
 (kind/test-last [true?])
 
@@ -1434,7 +1429,7 @@ final-eigenvalues
 
 (def chol-final (la/cholesky A-final))
 
-(close? (la/mmul chol-final (la/transpose chol-final)) A-final)
+(la/close? (la/mmul chol-final (la/transpose chol-final)) A-final)
 
 (kind/test-last [true?])
 

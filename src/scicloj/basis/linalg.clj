@@ -174,6 +174,22 @@
     (Math/sqrt (double (dfn/sum (dfn/* a a))))))
 
 ;; ---------------------------------------------------------------------------
+;; Approximate equality
+;; ---------------------------------------------------------------------------
+
+(defn close?
+  "True when two matrices (or ComplexTensors) are approximately equal:
+   ‖a − b‖_F < tol. Default tolerance is 1e-10."
+  ([a b] (close? a b 1e-10))
+  ([a b tol] (< (norm (sub a b)) (double tol))))
+
+(defn close-scalar?
+  "True when two scalars are approximately equal:
+   |a − b| < tol. Default tolerance is 1e-10."
+  ([a b] (close-scalar? a b 1e-10))
+  ([a b tol] (< (Math/abs (- (double a) (double b))) (double tol))))
+
+;; ---------------------------------------------------------------------------
 ;; Inverse and solve
 ;; ---------------------------------------------------------------------------
 

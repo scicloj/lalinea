@@ -44,17 +44,6 @@
 
 (def v (la/column [1 2 3]))
 
-;; A helper to check that two matrices are approximately equal:
-
-(def close?
-  (fn [x y]
-    (let [diff (la/sub x y)]
-      (< (la/norm diff) 1e-10))))
-
-(def close-scalar?
-  (fn [a b]
-    (< (Math/abs (- (double a) (double b))) 1e-10)))
-
 ;; ---
 ;;
 ;; ## Matrix arithmetic
@@ -63,20 +52,20 @@
 ;;
 ;; Matrix addition is commutative because it operates element-wise.
 
-(close? (la/add A B) (la/add B A))
+(la/close? (la/add A B) (la/add B A))
 
 (kind/test-last [true?])
 
 ;; ### Associativity of addition: $(A + B) + C = A + (B + C)$
 
-(close? (la/add (la/add A B) C)
-        (la/add A (la/add B C)))
+(la/close? (la/add (la/add A B) C)
+           (la/add A (la/add B C)))
 
 (kind/test-last [true?])
 
 ;; ### Additive identity: $A + 0 = A$
 
-(close? (la/add A (la/zeros 3 3)) A)
+(la/close? (la/add A (la/zeros 3 3)) A)
 
 (kind/test-last [true?])
 
@@ -89,16 +78,16 @@
 ;; ### Scalar distribution: $\alpha(A + B) = \alpha A + \alpha B$
 
 (let [alpha 3.5]
-  (close? (la/scale alpha (la/add A B))
-          (la/add (la/scale alpha A) (la/scale alpha B))))
+  (la/close? (la/scale alpha (la/add A B))
+             (la/add (la/scale alpha A) (la/scale alpha B))))
 
 (kind/test-last [true?])
 
 ;; ### Scalar associativity: $(\alpha \beta) A = \alpha (\beta A)$
 
 (let [alpha 2.0 beta 3.0]
-  (close? (la/scale (* alpha beta) A)
-          (la/scale alpha (la/scale beta A))))
+  (la/close? (la/scale (* alpha beta) A)
+             (la/scale alpha (la/scale beta A))))
 
 (kind/test-last [true?])
 
@@ -111,44 +100,44 @@
 ;; Matrix multiplication is associative — the order of evaluation
 ;; doesn't matter, only the order of the factors.
 
-(close? (la/mmul (la/mmul A B) C)
-        (la/mmul A (la/mmul B C)))
+(la/close? (la/mmul (la/mmul A B) C)
+           (la/mmul A (la/mmul B C)))
 
 (kind/test-last [true?])
 
 ;; ### Left identity: $IA = A$
 
-(close? (la/mmul I3 A) A)
+(la/close? (la/mmul I3 A) A)
 
 (kind/test-last [true?])
 
 ;; ### Right identity: $AI = A$
 
-(close? (la/mmul A I3) A)
+(la/close? (la/mmul A I3) A)
 
 (kind/test-last [true?])
 
 ;; ### Distributivity: $A(B + C) = AB + AC$
 
-(close? (la/mmul A (la/add B C))
-        (la/add (la/mmul A B) (la/mmul A C)))
+(la/close? (la/mmul A (la/add B C))
+           (la/add (la/mmul A B) (la/mmul A C)))
 
 (kind/test-last [true?])
 
 ;; ### Right distributivity: $(A + B)C = AC + BC$
 
-(close? (la/mmul (la/add A B) C)
-        (la/add (la/mmul A C) (la/mmul B C)))
+(la/close? (la/mmul (la/add A B) C)
+           (la/add (la/mmul A C) (la/mmul B C)))
 
 (kind/test-last [true?])
 
 ;; ### Scalar compatibility: $\alpha(AB) = (\alpha A)B = A(\alpha B)$
 
 (let [alpha 2.5]
-  (and (close? (la/scale alpha (la/mmul A B))
-               (la/mmul (la/scale alpha A) B))
-       (close? (la/scale alpha (la/mmul A B))
-               (la/mmul A (la/scale alpha B)))))
+  (and (la/close? (la/scale alpha (la/mmul A B))
+                  (la/mmul (la/scale alpha A) B))
+       (la/close? (la/scale alpha (la/mmul A B))
+                  (la/mmul A (la/scale alpha B)))))
 
 (kind/test-last [true?])
 
@@ -172,14 +161,14 @@
 ;;
 ;; Transposing twice returns to the original.
 
-(close? (la/transpose (la/transpose A)) A)
+(la/close? (la/transpose (la/transpose A)) A)
 
 (kind/test-last [true?])
 
 ;; ### Sum: $(A + B)^T = A^T + B^T$
 
-(close? (la/transpose (la/add A B))
-        (la/add (la/transpose A) (la/transpose B)))
+(la/close? (la/transpose (la/add A B))
+           (la/add (la/transpose A) (la/transpose B)))
 
 (kind/test-last [true?])
 
@@ -188,16 +177,16 @@
 ;; The transpose of a product reverses the order. This is because
 ;; the transpose "reads" the matrix backwards.
 
-(close? (la/transpose (la/mmul A B))
-        (la/mmul (la/transpose B) (la/transpose A)))
+(la/close? (la/transpose (la/mmul A B))
+           (la/mmul (la/transpose B) (la/transpose A)))
 
 (kind/test-last [true?])
 
 ;; ### Scalar: $(\alpha A)^T = \alpha A^T$
 
 (let [alpha 4.0]
-  (close? (la/transpose (la/scale alpha A))
-          (la/scale alpha (la/transpose A))))
+  (la/close? (la/transpose (la/scale alpha A))
+             (la/scale alpha (la/transpose A))))
 
 (kind/test-last [true?])
 
@@ -212,10 +201,10 @@
 ;; ### Linearity: $\operatorname{tr}(\alpha A + \beta B) = \alpha\operatorname{tr}(A) + \beta\operatorname{tr}(B)$
 
 (let [alpha 2.0 beta 3.0]
-  (close-scalar? (la/trace (la/add (la/scale alpha A)
-                                   (la/scale beta B)))
-                 (+ (* alpha (la/trace A))
-                    (* beta (la/trace B)))))
+  (la/close-scalar? (la/trace (la/add (la/scale alpha A)
+                                      (la/scale beta B)))
+                    (+ (* alpha (la/trace A))
+                       (* beta (la/trace B)))))
 
 (kind/test-last [true?])
 
@@ -227,20 +216,20 @@
 (let [trABC (la/trace (la/mmul A (la/mmul B C)))
       trBCA (la/trace (la/mmul B (la/mmul C A)))
       trCAB (la/trace (la/mmul C (la/mmul A B)))]
-  (and (close-scalar? trABC trBCA)
-       (close-scalar? trBCA trCAB)))
+  (and (la/close-scalar? trABC trBCA)
+       (la/close-scalar? trBCA trCAB)))
 
 (kind/test-last [true?])
 
 ;; ### Transpose: $\operatorname{tr}(A^T) = \operatorname{tr}(A)$
 
-(close-scalar? (la/trace (la/transpose A)) (la/trace A))
+(la/close-scalar? (la/trace (la/transpose A)) (la/trace A))
 
 (kind/test-last [true?])
 
 ;; ### Trace of identity: $\operatorname{tr}(I_n) = n$
 
-(close-scalar? (la/trace I3) 3.0)
+(la/close-scalar? (la/trace I3) 3.0)
 
 (kind/test-last [true?])
 
@@ -256,35 +245,35 @@
 ;; This is the most fundamental property: the determinant is a
 ;; **group homomorphism** from invertible matrices to nonzero reals.
 
-(close-scalar? (la/det (la/mmul A B))
-               (* (la/det A) (la/det B)))
+(la/close-scalar? (la/det (la/mmul A B))
+                  (* (la/det A) (la/det B)))
 
 (kind/test-last [true?])
 
 ;; ### Transpose: $\det(A^T) = \det(A)$
 
-(close-scalar? (la/det (la/transpose A)) (la/det A))
+(la/close-scalar? (la/det (la/transpose A)) (la/det A))
 
 (kind/test-last [true?])
 
 ;; ### Identity: $\det(I) = 1$
 
-(close-scalar? (la/det I3) 1.0)
+(la/close-scalar? (la/det I3) 1.0)
 
 (kind/test-last [true?])
 
 ;; ### Inverse: $\det(A^{-1}) = 1 / \det(A)$
 
-(close-scalar? (la/det (la/invert A))
-               (/ 1.0 (la/det A)))
+(la/close-scalar? (la/det (la/invert A))
+                  (/ 1.0 (la/det A)))
 
 (kind/test-last [true?])
 
 ;; ### Scalar: $\det(\alpha A) = \alpha^n \det(A)$ for $n \times n$ matrix
 
 (let [alpha 2.0 n 3]
-  (close-scalar? (la/det (la/scale alpha A))
-                 (* (Math/pow alpha n) (la/det A))))
+  (la/close-scalar? (la/det (la/scale alpha A))
+                    (* (Math/pow alpha n) (la/det A))))
 
 (kind/test-last [true?])
 
@@ -298,19 +287,19 @@
 ;;
 ;; ### Definition: $A A^{-1} = I$
 
-(close? (la/mmul A (la/invert A)) I3)
+(la/close? (la/mmul A (la/invert A)) I3)
 
 (kind/test-last [true?])
 
 ;; ### Right inverse: $A^{-1} A = I$
 
-(close? (la/mmul (la/invert A) A) I3)
+(la/close? (la/mmul (la/invert A) A) I3)
 
 (kind/test-last [true?])
 
 ;; ### Involution: $(A^{-1})^{-1} = A$
 
-(close? (la/invert (la/invert A)) A)
+(la/close? (la/invert (la/invert A)) A)
 
 (kind/test-last [true?])
 
@@ -319,23 +308,23 @@
 ;; Like transpose, the inverse reverses the order of products.
 ;; To undo $A$ then $B$, you must undo $B$ first.
 
-(close? (la/invert (la/mmul A B))
-        (la/mmul (la/invert B) (la/invert A)))
+(la/close? (la/invert (la/mmul A B))
+           (la/mmul (la/invert B) (la/invert A)))
 
 (kind/test-last [true?])
 
 ;; ### Transpose commutation: $(A^{-1})^T = (A^T)^{-1}$
 
-(close? (la/transpose (la/invert A))
-        (la/invert (la/transpose A)))
+(la/close? (la/transpose (la/invert A))
+           (la/invert (la/transpose A)))
 
 (kind/test-last [true?])
 
 ;; ### Scalar: $(\alpha A)^{-1} = \frac{1}{\alpha} A^{-1}$
 
 (let [alpha 2.0]
-  (close? (la/invert (la/scale alpha A))
-          (la/scale (/ 1.0 alpha) (la/invert A))))
+  (la/close? (la/invert (la/scale alpha A))
+             (la/scale (/ 1.0 alpha) (la/invert A))))
 
 (kind/test-last [true?])
 
@@ -357,8 +346,8 @@
 ;; ### Scale: $\|\alpha A\|_F = |\alpha| \|A\|_F$
 
 (let [alpha -2.5]
-  (close-scalar? (la/norm (la/scale alpha A))
-                 (* (Math/abs alpha) (la/norm A))))
+  (la/close-scalar? (la/norm (la/scale alpha A))
+                    (* (Math/abs alpha) (la/norm A))))
 
 (kind/test-last [true?])
 
@@ -366,8 +355,8 @@
 ;;
 ;; The Frobenius norm squared equals the trace of $A^T A$.
 
-(close-scalar? (* (la/norm A) (la/norm A))
-               (la/trace (la/mmul (la/transpose A) A)))
+(la/close-scalar? (* (la/norm A) (la/norm A))
+                  (la/trace (la/mmul (la/transpose A) A)))
 
 (kind/test-last [true?])
 
@@ -381,14 +370,14 @@
 ;; ### Reconstruction: $QR = A$
 
 (let [{:keys [Q R]} (la/qr A)]
-  (close? (la/mmul Q R) A))
+  (la/close? (la/mmul Q R) A))
 
 (kind/test-last [true?])
 
 ;; ### Orthogonality: $Q^T Q = I$
 
 (let [{:keys [Q]} (la/qr A)]
-  (close? (la/mmul (la/transpose Q) Q) I3))
+  (la/close? (la/mmul (la/transpose Q) Q) I3))
 
 (kind/test-last [true?])
 
@@ -419,7 +408,7 @@
             (when evec
               (let [Av (la/mmul A evec)
                     lam-v (la/scale lam-re evec)]
-                (close? Av lam-v))))
+                (la/close? Av lam-v))))
           (map vector eigenvalues eigenvectors)))
 
 (kind/test-last [true?])
@@ -428,7 +417,7 @@
 
 (let [{:keys [eigenvalues]} (la/eigen A)
       eig-sum (reduce + (map first eigenvalues))]
-  (close-scalar? (la/trace A) eig-sum))
+  (la/close-scalar? (la/trace A) eig-sum))
 
 (kind/test-last [true?])
 
@@ -436,7 +425,7 @@
 
 (let [{:keys [eigenvalues]} (la/eigen A)
       eig-prod (reduce * (map first eigenvalues))]
-  (close-scalar? (la/det A) eig-prod))
+  (la/close-scalar? (la/det A) eig-prod))
 
 (kind/test-last [true?])
 
@@ -452,21 +441,21 @@
 
 (let [{:keys [U S Vt]} (la/svd A)
       Sigma (la/diag S)]
-  (close? (la/mmul U (la/mmul Sigma Vt)) A))
+  (la/close? (la/mmul U (la/mmul Sigma Vt)) A))
 
 (kind/test-last [true?])
 
 ;; ### U is orthogonal: $U^T U = I$
 
 (let [{:keys [U]} (la/svd A)]
-  (close? (la/mmul (la/transpose U) U) I3))
+  (la/close? (la/mmul (la/transpose U) U) I3))
 
 (kind/test-last [true?])
 
 ;; ### V is orthogonal: $V^T V = I$
 
 (let [{:keys [Vt]} (la/svd A)]
-  (close? (la/mmul Vt (la/transpose Vt)) I3))
+  (la/close? (la/mmul Vt (la/transpose Vt)) I3))
 
 (kind/test-last [true?])
 
@@ -489,7 +478,7 @@
 
 (let [{:keys [S]} (la/svd A)
       sv-norm (Math/sqrt (reduce + (map #(* % %) S)))]
-  (close-scalar? (la/norm A) sv-norm))
+  (la/close-scalar? (la/norm A) sv-norm))
 
 (kind/test-last [true?])
 
@@ -505,7 +494,7 @@
 
 (let [M (la/add (la/mmul (la/transpose A) A) I3)
       L (la/cholesky M)]
-  (close? (la/mmul L (la/transpose L)) M))
+  (la/close? (la/mmul L (la/transpose L)) M))
 
 (kind/test-last [true?])
 
@@ -525,7 +514,7 @@
 
 (let [b (la/column [1 2 3])
       x (la/solve A b)]
-  (close? (la/mmul A x) b))
+  (la/close? (la/mmul A x) b))
 
 (kind/test-last [true?])
 
@@ -534,7 +523,7 @@
 (let [b (la/column [1 2 3])
       x-solve (la/solve A b)
       x-inv (la/mmul (la/invert A) b)]
-  (close? x-solve x-inv))
+  (la/close? x-solve x-inv))
 
 (kind/test-last [true?])
 
@@ -548,30 +537,22 @@
 (def ca (cx/complex-tensor [1.0 -2.0 3.0] [4.0 5.0 -6.0]))
 (def cb (cx/complex-tensor [-3.0 0.5 2.0] [1.0 -1.5 7.0]))
 
-(def complex-approx=
-  (fn [x y tol]
-    (let [re-diff (dfn/- (cx/re x) (cx/re y))
-          im-diff (dfn/- (cx/im x) (cx/im y))]
-      (and (< (dfn/reduce-max (dfn/abs re-diff)) tol)
-           (< (dfn/reduce-max (dfn/abs im-diff)) tol)))))
-
 ;; ### Commutativity: $a \cdot b = b \cdot a$
 
-(complex-approx= (cx/mul ca cb) (cx/mul cb ca) 1e-10)
+(la/close? (cx/mul ca cb) (cx/mul cb ca))
 
 (kind/test-last [true?])
 
 ;; ### Conjugate is an involution: $\overline{\overline{a}} = a$
 
-(complex-approx= (cx/conj (cx/conj ca)) ca 1e-10)
+(la/close? (cx/conj (cx/conj ca)) ca)
 
 (kind/test-last [true?])
 
 ;; ### Conjugate distributes: $\overline{a \cdot b} = \bar{a} \cdot \bar{b}$
 
-(complex-approx= (cx/conj (cx/mul ca cb))
-                 (cx/mul (cx/conj ca) (cx/conj cb))
-                 1e-10)
+(la/close? (cx/conj (cx/mul ca cb))
+           (cx/mul (cx/conj ca) (cx/conj cb)))
 
 (kind/test-last [true?])
 
