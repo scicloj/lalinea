@@ -39,7 +39,7 @@
     (let [width (or (:width opts) 300)
           all-pts (mapcat (fn [{:keys [xy from]}]
                             (let [[fx fy] (or from [0 0])
-                                  [tx ty] xy]
+                                  [tx ty] [(+ fx (xy 0)) (+ fy (xy 1))]]
                               [[fx fy] [tx ty]]))
                           arrows)
           all-xs (map first all-pts)
@@ -87,7 +87,7 @@
           arrow-elts (mapcat
                       (fn [{:keys [label xy color from dashed?]}]
                         (let [[fx fy] (or from [0 0])
-                              [tx ty] xy
+                              [tx ty] [(+ fx (xy 0)) (+ fy (xy 1))]
                               adx (- tx fx) ady (- ty fy)
                               len (Math/sqrt (+ (* adx adx) (* ady ady)))
                               nx (if (pos? len) (/ (- ady) len) 0)
