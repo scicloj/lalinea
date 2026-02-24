@@ -53,9 +53,8 @@
 ;;
 ;; All operations accept tensors and return tensors.
 
-(let [A (la/matrix [[1 2] [3 4]])
-      B (la/matrix [[5 6] [7 8]])]
-  (la/mmul A B))
+(la/mmul (la/matrix [[1 2] [3 4]])
+         (la/matrix [[5 6] [7 8]]))
 
 ;; $AB = \begin{pmatrix} 19 & 22 \\ 43 & 50 \end{pmatrix}$
 
