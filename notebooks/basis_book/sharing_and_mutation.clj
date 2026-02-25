@@ -327,43 +327,67 @@
     (and (== -1.0 E-00)
          (== 1.0 Et-00)))])
 
-;; ## Mutable state and compute-tensor
+;; ## Noncaching tensors from compute-tensor
 ;;
-;; `tensor/compute-tensor` may evaluate its function **out of element
-;; order** (it can parallelise across chunks). This means a mutable
-;; object like a random number generator consumed inside the function
-;; produces non-deterministic results — the order of `.nextGaussian`
-;; calls depends on thread scheduling.
+;; `tensor/compute-tensor` returns a **lazy, noncaching** tensor.
+;; Each time you read an element, it calls the function again.
+;; With a pure function this is fine — but with a mutable RNG,
+;; reading the *same* tensor twice produces different values.
+;; The tensor is not even close to itself:
 
-;; Here we use `compute-tensor` with a seeded RNG. Even though the
-;; seed is fixed, two calls produce *different* tensors — the parallel
-;; chunking scrambles the order of `.nextGaussian` calls:
+(let [rng (java.util.Random. 42)
+      t (tensor/compute-tensor [4 4] (fn [_ _] (.nextGaussian rng)) :float64)]
+  (la/close? t t))
+
+(kind/test-last [false?])
+
+;; `dtype/clone` materializes the lazy tensor into a contiguous
+;; array, fixing this problem:
+
+(let [rng (java.util.Random. 42)
+      t (dtype/clone
+         (tensor/compute-tensor [4 4] (fn [_ _] (.nextGaussian rng)) :float64))]
+  (la/close? t t))
+
+(kind/test-last [true?])
+
+;; ## Non-deterministic evaluation order
+;;
+;; There is a second, separate problem. `compute-tensor` may
+;; evaluate its function **out of element order** — it can
+;; parallelise across chunks. With a mutable RNG, the order
+;; of `.nextGaussian` calls depends on thread scheduling, so
+;; two calls with the same seed produce different tensors:
 
 (let [make-random-tensor
       (fn []
         (let [rng (java.util.Random. 42)]
-          (tensor/compute-tensor [100 100] (fn [_ _] (.nextGaussian rng)) :float64)))]
+          (dtype/clone
+           (tensor/compute-tensor [100 100] (fn [_ _] (.nextGaussian rng)) :float64))))]
   (la/close? (make-random-tensor) (make-random-tensor)))
 
 (kind/test-last [false?])
+
+;; `dtype/clone` fixed the noncaching issue but cannot fix this —
+;; the scrambling happens *during* evaluation, before `clone`
+;; sees the result.
 ;;
-;; The safe alternative is `dotimes` with `aset`, which guarantees
-;; sequential evaluation:
+;; The safe alternative: generate values sequentially with
+;; `repeatedly`, then materialize into a tensor:
 
 (let [make-random-tensor
       (fn []
-        (let [rng (java.util.Random. 42)
-              arr (double-array 16)]
-          (dotimes [i 16]
-            (aset arr i (.nextGaussian rng)))
-          (tensor/reshape (tensor/ensure-tensor arr) [4 4])))]
+        (let [rng (java.util.Random. 42)]
+          (->> (repeatedly (* 4 4) #(.nextGaussian rng))
+               (dtype/make-container :float64)
+               (tensor/reshape [4 4]))))]
   (la/close? (make-random-tensor) (make-random-tensor)))
 
 (kind/test-last [true?])
 
 ;; **Rule of thumb**: never pass mutable state into `compute-tensor`.
-;; Use `dotimes`/`aset` for sequential side-effecting construction,
-;; or pre-generate the random data and reshape it.
+;; Generate values sequentially (e.g., with `repeatedly`), materialize
+;; with `dtype/make-container`, then reshape.
 
 ;; ## Summary
 ;;

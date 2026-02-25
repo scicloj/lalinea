@@ -388,34 +388,70 @@
 
 
 (def
- v63_l342
+ v63_l338
+ (let
+  [rng
+   (java.util.Random. 42)
+   t
+   (tensor/compute-tensor
+    [4 4]
+    (fn [_ _] (.nextGaussian rng))
+    :float64)]
+  (la/close? t t)))
+
+
+(deftest t64_l342 (is (false? v63_l338)))
+
+
+(def
+ v66_l347
+ (let
+  [rng
+   (java.util.Random. 42)
+   t
+   (dtype/clone
+    (tensor/compute-tensor
+     [4 4]
+     (fn [_ _] (.nextGaussian rng))
+     :float64))]
+  (la/close? t t)))
+
+
+(deftest t67_l352 (is (true? v66_l347)))
+
+
+(def
+ v69_l362
  (let
   [make-random-tensor
    (fn
     []
     (let
      [rng (java.util.Random. 42)]
-     (tensor/compute-tensor
-      [100 100]
-      (fn [_ _] (.nextGaussian rng))
-      :float64)))]
+     (dtype/clone
+      (tensor/compute-tensor
+       [100 100]
+       (fn [_ _] (.nextGaussian rng))
+       :float64))))]
   (la/close? (make-random-tensor) (make-random-tensor))))
 
 
-(deftest t64_l348 (is (false? v63_l342)))
+(deftest t70_l369 (is (false? v69_l362)))
 
 
 (def
- v66_l353
+ v72_l378
  (let
   [make-random-tensor
    (fn
     []
     (let
-     [rng (java.util.Random. 42) arr (double-array 16)]
-     (dotimes [i 16] (aset arr i (.nextGaussian rng)))
-     (tensor/reshape (tensor/ensure-tensor arr) [4 4])))]
+     [rng (java.util.Random. 42)]
+     (->>
+      (repeatedly (* 4 4) (fn* [] (.nextGaussian rng)))
+      (dtype/make-container :float64)
+      (tensor/reshape [4 4]))))]
   (la/close? (make-random-tensor) (make-random-tensor))))
 
 
-(deftest t67_l362 (is (true? v66_l353)))
+(deftest t73_l386 (is (true? v72_l378)))
