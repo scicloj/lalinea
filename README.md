@@ -83,12 +83,6 @@ For complex tensor operations:
 (require '[scicloj.basis.complex :as cx])
 ```
 
-A convenience namespace re-exports the most common functions:
-
-```clojure
-(require '[scicloj.basis.api :as basis])
-```
-
 ## Built on
 
 - [dtype-next](https://github.com/cnuernber/dtype-next) — array/tensor numerics
