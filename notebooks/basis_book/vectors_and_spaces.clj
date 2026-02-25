@@ -11,6 +11,8 @@
    [scicloj.basis.linalg :as la]
    ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
    [tech.v3.tensor :as tensor]
+   ;; Low-level buffer operations:
+   [tech.v3.datatype :as dtype]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
@@ -296,15 +298,24 @@
 ;; their linear combinations — every point you can reach by
 ;; adding and scaling them.
 ;;
-;; If two vectors in $\mathbb{R}^2$ point in different directions,
-;; their span is the entire plane. Let us visualise this by
-;; plotting many combinations:
+;; Our vectors $\mathbf{u} = [3,1]^T$ and $\mathbf{v} = [1,2]^T$
+;; point in different directions. Their span should be the entire
+;; plane — let us check by plotting many combinations
+;; $\alpha \mathbf{u} + \beta \mathbf{v}$:
 
-(let [params (for [a (range -2.0 2.1 0.5)
-                   b (range -2.0 2.1 0.5)]
-               {:a a :b b})
-      xs (mapv (fn [{:keys [a b]}] (+ (* a 3.0) (* b 1.0))) params)
-      ys (mapv (fn [{:keys [a b]}] (+ (* a 1.0) (* b 2.0))) params)]
+(let [coeffs (vec (for [a (range -2.0 2.1 0.5)
+                        b (range -2.0 2.1 0.5)]
+                    [a b]))
+      n (count coeffs)
+      points (dtype/clone
+              (tensor/compute-tensor [n 2]
+                                     (fn [i j]
+                                       (let [[a b] (nth coeffs i)]
+                                         (+ (* a (tensor/mget u j 0))
+                                            (* b (tensor/mget v j 0)))))
+                                     :float64))
+      xs (tensor/select points :all 0)
+      ys (tensor/select points :all 1)]
   (-> (tc/dataset {:x xs :y ys})
       (plotly/base {:=x :x :=y :y})
       (plotly/layer-point {:=mark-size 6})
@@ -312,15 +323,26 @@
 
 ;; The points fill a grid that covers the whole plane.
 ;; Every point in $\mathbb{R}^2$ can be expressed as
-;; $\alpha [3,1]^T + \beta [1,2]^T$ for some $\alpha, \beta$.
-
+;; $\alpha \mathbf{u} + \beta \mathbf{v}$ for some $\alpha, \beta$.
+;;
 ;; What if the vectors point in the **same** direction?
+;; Take $[1,2]^T$ and $[2,4]^T$ — one is just $2\times$ the other:
 
-(let [params (for [a (range -2.0 2.1 0.5)
-                   b (range -2.0 2.1 0.5)]
-               {:a a :b b})
-      xs (mapv (fn [{:keys [a b]}] (+ (* a 1.0) (* b 2.0))) params)
-      ys (mapv (fn [{:keys [a b]}] (+ (* a 2.0) (* b 4.0))) params)]
+(let [s1 (la/column [1 2])
+      s2 (la/column [2 4])
+      coeffs (vec (for [a (range -2.0 2.1 0.5)
+                        b (range -2.0 2.1 0.5)]
+                    [a b]))
+      n (count coeffs)
+      points (dtype/clone
+              (tensor/compute-tensor [n 2]
+                                     (fn [i j]
+                                       (let [[a b] (nth coeffs i)]
+                                         (+ (* a (tensor/mget s1 j 0))
+                                            (* b (tensor/mget s2 j 0)))))
+                                     :float64))
+      xs (tensor/select points :all 0)
+      ys (tensor/select points :all 1)]
   (-> (tc/dataset {:x xs :y ys})
       (plotly/base {:=x :x :=y :y})
       (plotly/layer-point {:=mark-size 6})
