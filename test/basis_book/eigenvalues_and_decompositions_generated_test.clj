@@ -189,34 +189,34 @@
 (deftest t48_l245 (is ((fn [d] (< d 1.0E-10)) v47_l243)))
 
 
-(def v50_l284 (def A-svd (la/matrix [[1 0 1] [0 1 1]])))
+(def v50_l298 (def A-svd (la/matrix [[1 0 1] [0 1 1]])))
 
 
-(def v51_l288 (def svd-A (la/svd A-svd)))
+(def v51_l302 (def svd-A (la/svd A-svd)))
 
 
-(def v52_l290 (vec (:S svd-A)))
+(def v52_l304 (vec (:S svd-A)))
 
 
 (deftest
- t53_l292
- (is ((fn [s] (and (= 2 (count s)) (every? pos? s))) v52_l290)))
+ t53_l306
+ (is ((fn [s] (and (= 2 (count s)) (every? pos? s))) v52_l304)))
 
 
-(def v55_l318 (def A-lr (la/matrix [[3 2 2] [2 3 -2]])))
+(def v55_l332 (def A-lr (la/matrix [[3 2 2] [2 3 -2]])))
 
 
-(def v56_l322 (def svd-lr (la/svd A-lr)))
+(def v56_l336 (def svd-lr (la/svd A-lr)))
 
 
-(def v57_l324 (def sigmas (vec (:S svd-lr))))
+(def v57_l338 (def sigmas (vec (:S svd-lr))))
 
 
-(def v58_l326 sigmas)
+(def v58_l340 sigmas)
 
 
 (def
- v60_l330
+ v60_l344
  (def
   A-rank1
   (la/scale
@@ -226,98 +226,98 @@
     (la/submatrix (:Vt svd-lr) [0] :all)))))
 
 
-(def v62_l337 (def approx-err (la/norm (la/sub A-lr A-rank1))))
+(def v62_l351 (def approx-err (la/norm (la/sub A-lr A-rank1))))
 
 
-(def v63_l339 (< (Math/abs (- approx-err (second sigmas))) 1.0E-10))
+(def v63_l353 (< (Math/abs (- approx-err (second sigmas))) 1.0E-10))
 
 
-(deftest t64_l341 (is (true? v63_l339)))
+(deftest t64_l355 (is (true? v63_l353)))
 
 
-(def v66_l367 (def ATA (la/mmul (la/transpose A-svd) A-svd)))
+(def v66_l381 (def ATA (la/mmul (la/transpose A-svd) A-svd)))
 
 
 (def
- v67_l369
+ v67_l383
  (every?
-  (fn* [p1__119008#] (>= p1__119008# -1.0E-10))
+  (fn* [p1__134870#] (>= p1__134870# -1.0E-10))
   (cx/re (:eigenvalues (la/eigen ATA)))))
 
 
-(deftest t68_l371 (is (true? v67_l369)))
+(deftest t68_l385 (is (true? v67_l383)))
 
 
 (def
- v70_l382
+ v70_l396
  (def spd-mat (la/add (la/mmul (la/transpose A-eig) A-eig) (la/eye 3))))
 
 
-(def v71_l385 (def chol-L (la/cholesky spd-mat)))
+(def v71_l399 (def chol-L (la/cholesky spd-mat)))
 
 
 (def
- v73_l389
+ v73_l403
  (la/norm (la/sub (la/mmul chol-L (la/transpose chol-L)) spd-mat)))
 
 
-(deftest t74_l391 (is ((fn [d] (< d 1.0E-10)) v73_l389)))
+(deftest t74_l405 (is ((fn [d] (< d 1.0E-10)) v73_l403)))
 
 
-(def v76_l396 (la/cholesky (la/matrix [[1 2] [2 1]])))
+(def v76_l410 (la/cholesky (la/matrix [[1 2] [2 1]])))
 
 
-(deftest t77_l398 (is (nil? v76_l396)))
+(deftest t77_l412 (is (nil? v76_l410)))
 
 
-(def v79_l410 (def A-final (la/matrix [[2 1 0] [1 3 1] [0 1 2]])))
+(def v79_l424 (def A-final (la/matrix [[2 1 0] [1 3 1] [0 1 2]])))
 
 
-(def v81_l420 (la/close? A-final (la/transpose A-final)))
+(def v81_l434 (la/close? A-final (la/transpose A-final)))
 
 
-(deftest t82_l422 (is (true? v81_l420)))
+(deftest t82_l436 (is (true? v81_l434)))
 
 
-(def v84_l426 (def eig-final (la/eigen A-final)))
+(def v84_l440 (def eig-final (la/eigen A-final)))
 
 
-(def v85_l428 (def final-eigenvalues (la/real-eigenvalues A-final)))
+(def v85_l442 (def final-eigenvalues (la/real-eigenvalues A-final)))
 
 
-(def v86_l431 final-eigenvalues)
+(def v86_l445 final-eigenvalues)
 
 
 (deftest
- t87_l433
- (is ((fn [v] (and (= 3 (count v)) (every? pos? v))) v86_l431)))
+ t87_l447
+ (is ((fn [v] (and (= 3 (count v)) (every? pos? v))) v86_l445)))
 
 
 (def
- v89_l441
+ v89_l455
  (<
   (Math/abs (- (la/trace A-final) (reduce + final-eigenvalues)))
   1.0E-10))
 
 
-(deftest t90_l445 (is (true? v89_l441)))
+(deftest t90_l459 (is (true? v89_l455)))
 
 
 (def
- v92_l449
+ v92_l463
  (<
   (Math/abs (- (la/det A-final) (reduce * final-eigenvalues)))
   1.0E-10))
 
 
-(deftest t93_l453 (is (true? v92_l449)))
+(deftest t93_l467 (is (true? v92_l463)))
 
 
-(def v95_l457 (def final-svd (la/svd A-final)))
+(def v95_l471 (def final-svd (la/svd A-final)))
 
 
 (def
- v96_l459
+ v96_l473
  (<
   (dfn/reduce-max
    (dfn/abs
@@ -327,35 +327,35 @@
   1.0E-10))
 
 
-(deftest t97_l464 (is (true? v96_l459)))
+(deftest t97_l478 (is (true? v96_l473)))
 
 
 (def
- v99_l468
+ v99_l482
  (count
   (filter
-   (fn* [p1__119009#] (> p1__119009# 1.0E-10))
+   (fn* [p1__134871#] (> p1__134871# 1.0E-10))
    (vec (:S final-svd)))))
 
 
-(deftest t100_l470 (is ((fn [r] (= r 3)) v99_l468)))
+(deftest t100_l484 (is ((fn [r] (= r 3)) v99_l482)))
 
 
-(def v101_l473 (def A-inv (la/invert A-final)))
+(def v101_l487 (def A-inv (la/invert A-final)))
 
 
-(def v102_l475 (la/close? (la/mmul A-final A-inv) (la/eye 3)))
+(def v102_l489 (la/close? (la/mmul A-final A-inv) (la/eye 3)))
 
 
-(deftest t103_l477 (is (true? v102_l475)))
+(deftest t103_l491 (is (true? v102_l489)))
 
 
-(def v105_l481 (def chol-final (la/cholesky A-final)))
+(def v105_l495 (def chol-final (la/cholesky A-final)))
 
 
 (def
- v106_l483
+ v106_l497
  (la/close? (la/mmul chol-final (la/transpose chol-final)) A-final))
 
 
-(deftest t107_l485 (is (true? v106_l483)))
+(deftest t107_l499 (is (true? v106_l497)))

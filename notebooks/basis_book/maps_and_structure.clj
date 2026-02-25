@@ -42,13 +42,24 @@
 ;; - $T(\alpha \mathbf{v}) = \alpha\, T(\mathbf{v})$
 ;;
 ;; Informally: the map commutes with addition and scaling.
-;; These two rules have a profound consequence:
+;; This definition applies to any vector spaces, not just
+;; $\mathbb{R}^n$. Familiar examples from calculus are linear maps:
+;;
+;; - **Differentiation**: $D(\alpha f + \beta g) = \alpha f' + \beta g'$
+;; - **Integration**: $\int_0^x (\alpha f + \beta g) = \alpha \int_0^x f + \beta \int_0^x g$
+;;
+;; These operate on infinite-dimensional function spaces and cannot
+;; be represented as finite matrices.
+;;
+;; For *finite-dimensional* spaces, however, a remarkable theorem
+;; gives us a concrete handle:
 ;;
 ;; **Every linear map from $\mathbb{R}^n$ to $\mathbb{R}^m$ can
 ;; be written as multiplication by an $m \times n$ matrix.**
 ;;
-;; This is why matrices are so important — they are the
-;; universal representation of linear maps.
+;; This is why matrices are central to computational linear
+;; algebra — they are the universal representation of linear
+;; maps between finite-dimensional spaces.
 
 ;; ### Example: rotation
 ;;
@@ -297,6 +308,18 @@ rank-M
 ;; Although $M$ is $3 \times 3$, it has rank 2 — only two
 ;; of its three columns carry independent information.
 
+;; ### Nullity
+;;
+;; The **nullity** is the dimension of the null space —
+;; the number of independent directions collapsed to zero.
+
+(def nullity-M (count (filter #(<= % 1e-10) sv-M)))
+
+nullity-M
+
+(kind/test-last
+ [(fn [n] (= n 1))])
+
 ;; ### The rank-nullity theorem
 ;;
 ;; One of the most important theorems in linear algebra:
@@ -307,8 +330,11 @@ rank-M
 ;; the dimensions "used" by the map, and the nullity counts
 ;; the dimensions "collapsed" to zero. Together they account
 ;; for all $n$ input dimensions.
-;;
-;; For $M$: rank $2$ + nullity $1$ = $3$ columns.
+
+(= (+ rank-M nullity-M)
+   (second (dtype/shape M)))
+
+(kind/test-last [true?])
 
 ;; We can extract the null space from the SVD. The columns
 ;; of $V$ corresponding to zero singular values span it:
@@ -374,8 +400,9 @@ rank-M
 ;; | Null space $\text{Null}(A)$ | $n - r$ | $\mathbb{R}^n$ |
 ;;
 ;; The key insight: in each ambient space, the two subspaces
-;; are **orthogonal complements** — they are perpendicular
-;; and together they fill the whole space.
+;; are **complementary** — every vector can be written uniquely
+;; as a sum of one vector from each subspace, so their
+;; dimensions add up to the dimension of the ambient space.
 ;;
 ;; Let us compute all four for our rank-2 matrix $M$:
 
@@ -425,24 +452,13 @@ rank-M
 ;; - In $\mathbb{R}^3$ (output): col space (2) + left null (1) = 3
 ;; - In $\mathbb{R}^3$ (input): row space (2) + null space (1) = 3
 
-;; The **orthogonality** is what makes this structure beautiful.
-;; In the input space, the row space and null space are perpendicular:
-
-(la/mmul (la/transpose row-space-basis) null-basis)
-
-(kind/test-last
- [(fn [r] (< (la/norm r) 1e-10))])
-
-;; And in the output space, the column space and left null space
-;; are perpendicular:
-
-(la/mmul (la/transpose col-space-basis) left-null-basis)
-
-(kind/test-last
- [(fn [r] (< (la/norm r) 1e-10))])
-
-;; This means every vector in $\mathbb{R}^3$ splits uniquely
+;; Every vector in $\mathbb{R}^3$ splits uniquely
 ;; into a row-space part and a null-space part (input side),
 ;; or a column-space part and a left-null-space part (output side).
 ;; The matrix $M$ maps the row space onto the column space
 ;; and annihilates the null space.
+;;
+;; When we have a notion of angles (as we do in $\mathbb{R}^n$
+;; spaces), these complementary pairs turn out to be perpendicular.
+;; The next chapter introduces inner products, which make this
+;; precise.

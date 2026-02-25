@@ -260,6 +260,20 @@ D-result
 ;;
 ;; The word "spectrum" for the eigenvalues comes from this
 ;; theorem — the eigenvalues are the "spectral lines" of the matrix.
+;;
+;; Symmetry ($A = A^T$) is the matrix expression of a deeper
+;; abstract property: the operator is **self-adjoint** with
+;; respect to the inner product:
+;;
+;; $$\langle A\mathbf{u}, \mathbf{v} \rangle = \langle \mathbf{u}, A\mathbf{v} \rangle$$
+;;
+;; The spectral theorem is really about self-adjoint operators
+;; on inner product spaces. In different settings it takes
+;; different forms: for the integral inner product
+;; $\langle f, g \rangle = \int f\,g\,dx$ on function spaces,
+;; the self-adjoint condition leads to **Sturm-Liouville theory**
+;; — the same spectral structure (real eigenvalues, orthogonal
+;; eigenfunctions) appears in differential equations.
 
 ;; ---
 ;;

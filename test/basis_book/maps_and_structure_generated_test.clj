@@ -17,39 +17,39 @@
 (def v4_l30 (def v (la/column [1 2])))
 
 
-(def v6_l57 (def R90 (la/matrix [[0 -1] [1 0]])))
+(def v6_l68 (def R90 (la/matrix [[0 -1] [1 0]])))
 
 
-(def v8_l63 (la/mmul R90 (la/column [1 0])))
+(def v8_l74 (la/mmul R90 (la/column [1 0])))
 
 
 (deftest
- t9_l65
+ t9_l76
  (is
   ((fn
     [r]
     (and
      (< (Math/abs (tensor/mget r 0 0)) 1.0E-10)
      (< (Math/abs (- (tensor/mget r 1 0) 1.0)) 1.0E-10)))
-   v8_l63)))
+   v8_l74)))
 
 
-(def v11_l71 (la/mmul R90 (la/column [0 1])))
+(def v11_l82 (la/mmul R90 (la/column [0 1])))
 
 
 (deftest
- t12_l73
+ t12_l84
  (is
   ((fn
     [r]
     (and
      (< (Math/abs (- (tensor/mget r 0 0) -1.0)) 1.0E-10)
      (< (Math/abs (tensor/mget r 1 0)) 1.0E-10)))
-   v11_l71)))
+   v11_l82)))
 
 
 (def
- v14_l80
+ v14_l91
  (vis/arrow-plot
   [{:label "u", :xy [3 1], :color "#2266cc"}
    {:label "Ru", :xy [-1 3], :color "#2266cc", :dashed? true}
@@ -59,39 +59,39 @@
 
 
 (def
- v16_l90
+ v16_l101
  (la/close?
   (la/mmul R90 (la/add u v))
   (la/add (la/mmul R90 u) (la/mmul R90 v))))
 
 
-(deftest t17_l93 (is (true? v16_l90)))
+(deftest t17_l104 (is (true? v16_l101)))
 
 
 (def
- v19_l97
+ v19_l108
  (la/close?
   (la/mmul R90 (la/scale 3.0 u))
   (la/scale 3.0 (la/mmul R90 u))))
 
 
-(deftest t20_l100 (is (true? v19_l97)))
+(deftest t20_l111 (is (true? v19_l108)))
 
 
-(def v22_l104 (def stretch-mat (la/matrix [[3 0] [0 1]])))
+(def v22_l115 (def stretch-mat (la/matrix [[3 0] [0 1]])))
 
 
 (def
- v24_l111
+ v24_l122
  (let
   [angles
    (mapv
-    (fn* [p1__118774#] (* 2.0 Math/PI (/ p1__118774# 40.0)))
+    (fn* [p1__134607#] (* 2.0 Math/PI (/ p1__134607# 40.0)))
     (range 41))
    circle-x
-   (mapv (fn* [p1__118775#] (Math/cos p1__118775#)) angles)
+   (mapv (fn* [p1__134608#] (Math/cos p1__134608#)) angles)
    circle-y
-   (mapv (fn* [p1__118776#] (Math/sin p1__118776#)) angles)
+   (mapv (fn* [p1__134609#] (Math/sin p1__134609#)) angles)
    stretched
    (mapv
     (fn
@@ -114,14 +114,14 @@
    plotly/plot)))
 
 
-(def v26_l136 (def proj-xy (la/matrix [[1 0 0] [0 1 0] [0 0 0]])))
+(def v26_l147 (def proj-xy (la/matrix [[1 0 0] [0 1 0] [0 0 0]])))
 
 
-(def v28_l143 (la/mmul proj-xy (la/column [5 3 7])))
+(def v28_l154 (la/mmul proj-xy (la/column [5 3 7])))
 
 
 (deftest
- t29_l145
+ t29_l156
  (is
   ((fn
     [r]
@@ -129,28 +129,28 @@
      (= 5.0 (tensor/mget r 0 0))
      (= 3.0 (tensor/mget r 1 0))
      (= 0.0 (tensor/mget r 2 0))))
-   v28_l143)))
+   v28_l154)))
 
 
-(def v31_l153 (la/det proj-xy))
+(def v31_l164 (la/det proj-xy))
 
 
-(deftest t32_l155 (is ((fn [d] (< (Math/abs d) 1.0E-10)) v31_l153)))
+(deftest t32_l166 (is ((fn [d] (< (Math/abs d) 1.0E-10)) v31_l164)))
 
 
-(def v34_l163 (def shear-mat (la/matrix [[1 2] [0 1]])))
+(def v34_l174 (def shear-mat (la/matrix [[1 2] [0 1]])))
 
 
-(def v35_l167 (la/det shear-mat))
+(def v35_l178 (la/det shear-mat))
 
 
 (deftest
- t36_l169
- (is ((fn [d] (< (Math/abs (- d 1.0)) 1.0E-10)) v35_l167)))
+ t36_l180
+ (is ((fn [d] (< (Math/abs (- d 1.0)) 1.0E-10)) v35_l178)))
 
 
 (def
- v38_l175
+ v38_l186
  (vis/arrow-plot
   [{:label "e₁", :xy [1 0], :color "#2266cc"}
    {:label "e₂", :xy [0 1], :color "#cc4422"}
@@ -159,20 +159,20 @@
   {}))
 
 
-(def v40_l189 (def AB (la/mmul stretch-mat R90)))
+(def v40_l200 (def AB (la/mmul stretch-mat R90)))
 
 
-(def v41_l190 (def BA (la/mmul R90 stretch-mat)))
+(def v41_l201 (def BA (la/mmul R90 stretch-mat)))
 
 
-(def v42_l192 (la/norm (la/sub AB BA)))
+(def v42_l203 (la/norm (la/sub AB BA)))
 
 
-(deftest t43_l194 (is ((fn [d] (> d 0.1)) v42_l192)))
+(deftest t43_l205 (is ((fn [d] (> d 0.1)) v42_l203)))
 
 
 (def
- v45_l200
+ v45_l211
  (vis/arrow-plot
   [{:label "e₁", :xy [1 0], :color "#999999"}
    {:label "R then S", :xy [0 1], :color "#2266cc"}
@@ -180,48 +180,67 @@
   {:width 200}))
 
 
-(def v47_l245 (def M (la/matrix [[1 2 3] [4 5 9] [7 8 15]])))
+(def v47_l256 (def M (la/matrix [[1 2 3] [4 5 9] [7 8 15]])))
 
 
-(def v49_l253 (la/mmul M (la/column [1 1 -1])))
+(def v49_l264 (la/mmul M (la/column [1 1 -1])))
 
 
-(deftest t50_l255 (is ((fn [r] (< (la/norm r) 1.0E-10)) v49_l253)))
+(deftest t50_l266 (is ((fn [r] (< (la/norm r) 1.0E-10)) v49_l264)))
 
 
-(def v52_l266 (la/mmul M (la/scale 7.0 (la/column [1 1 -1]))))
+(def v52_l277 (la/mmul M (la/scale 7.0 (la/column [1 1 -1]))))
 
 
-(deftest t53_l268 (is ((fn [r] (< (la/norm r) 1.0E-10)) v52_l266)))
+(deftest t53_l279 (is ((fn [r] (< (la/norm r) 1.0E-10)) v52_l277)))
 
 
-(def v55_l283 (def sv-M (vec (:S (la/svd M)))))
+(def v55_l294 (def sv-M (vec (:S (la/svd M)))))
 
 
-(def v56_l285 sv-M)
+(def v56_l296 sv-M)
 
 
-(deftest t57_l287 (is ((fn [v] (= 3 (count v))) v56_l285)))
+(deftest t57_l298 (is ((fn [v] (= 3 (count v))) v56_l296)))
 
 
 (def
- v58_l290
+ v58_l301
  (def
   rank-M
-  (count (filter (fn* [p1__118777#] (> p1__118777# 1.0E-10)) sv-M))))
+  (count (filter (fn* [p1__134610#] (> p1__134610# 1.0E-10)) sv-M))))
 
 
-(def v59_l292 rank-M)
+(def v59_l303 rank-M)
 
 
-(deftest t60_l294 (is ((fn [r] (= r 2)) v59_l292)))
-
-
-(def v62_l316 (def svd-M (la/svd M)))
+(deftest t60_l305 (is ((fn [r] (= r 2)) v59_l303)))
 
 
 (def
- v63_l318
+ v62_l316
+ (def
+  nullity-M
+  (count (filter (fn* [p1__134611#] (<= p1__134611# 1.0E-10)) sv-M))))
+
+
+(def v63_l318 nullity-M)
+
+
+(deftest t64_l320 (is ((fn [n] (= n 1)) v63_l318)))
+
+
+(def v66_l334 (= (+ rank-M nullity-M) (second (dtype/shape M))))
+
+
+(deftest t67_l337 (is (true? v66_l334)))
+
+
+(def v69_l342 (def svd-M (la/svd M)))
+
+
+(def
+ v70_l344
  (def
   null-basis
   (let
@@ -234,40 +253,40 @@
    (la/submatrix (la/transpose Vt) :all null-idx))))
 
 
-(def v65_l326 (la/norm (la/mmul M null-basis)))
+(def v72_l352 (la/norm (la/mmul M null-basis)))
 
 
-(deftest t66_l328 (is ((fn [d] (< d 1.0E-10)) v65_l326)))
+(deftest t73_l354 (is ((fn [d] (< d 1.0E-10)) v72_l352)))
 
 
-(def v68_l342 (def A-full (la/matrix [[2 1] [1 3]])))
+(def v75_l368 (def A-full (la/matrix [[2 1] [1 3]])))
 
 
 (def
- v69_l344
+ v76_l370
  (count
   (filter
-   (fn* [p1__118778#] (> p1__118778# 1.0E-10))
+   (fn* [p1__134612#] (> p1__134612# 1.0E-10))
    (vec (:S (la/svd A-full))))))
 
 
-(deftest t70_l346 (is ((fn [r] (= r 2)) v69_l344)))
+(deftest t77_l372 (is ((fn [r] (= r 2)) v76_l370)))
 
 
-(def v72_l351 (la/solve A-full (la/column [5 7])))
+(def v79_l377 (la/solve A-full (la/column [5 7])))
 
 
-(deftest t73_l353 (is ((fn [x] (some? x)) v72_l351)))
+(deftest t80_l379 (is ((fn [x] (some? x)) v79_l377)))
 
 
-(def v75_l358 (la/solve M (la/column [1 2 3])))
+(def v82_l384 (la/solve M (la/column [1 2 3])))
 
 
-(deftest t76_l360 (is (nil? v75_l358)))
+(deftest t83_l386 (is (nil? v82_l384)))
 
 
 (def
- v78_l385
+ v85_l412
  (def
   col-space-basis
   (let
@@ -281,7 +300,7 @@
 
 
 (def
- v80_l393
+ v87_l420
  (def
   left-null-basis
   (let
@@ -295,7 +314,7 @@
 
 
 (def
- v82_l402
+ v89_l429
  (def
   row-space-basis
   (let
@@ -309,7 +328,7 @@
 
 
 (def
- v84_l412
+ v91_l439
  {:col-space (second (dtype/shape col-space-basis)),
   :left-null (second (dtype/shape left-null-basis)),
   :row-space (second (dtype/shape row-space-basis)),
@@ -317,7 +336,7 @@
 
 
 (deftest
- t85_l417
+ t92_l444
  (is
   ((fn
     [m]
@@ -326,16 +345,4 @@
      (= 1 (:left-null m))
      (= 2 (:row-space m))
      (= 1 (:null-space m))))
-   v84_l412)))
-
-
-(def v87_l431 (la/mmul (la/transpose row-space-basis) null-basis))
-
-
-(deftest t88_l433 (is ((fn [r] (< (la/norm r) 1.0E-10)) v87_l431)))
-
-
-(def v90_l439 (la/mmul (la/transpose col-space-basis) left-null-basis))
-
-
-(deftest t91_l441 (is ((fn [r] (< (la/norm r) 1.0E-10)) v90_l439)))
+   v91_l439)))

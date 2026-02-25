@@ -1,9 +1,16 @@
 ;; # Vectors and Spaces
 ;;
-;; This chapter develops the foundations of linear algebra from
-;; first principles. We start with vectors as ordered lists of
-;; numbers, define addition and scaling, and then build up to
-;; the key concepts of linear independence, basis, and dimension.
+;; A **vector space** is an abstract concept: any collection of
+;; objects that can be added together and scaled by numbers, following
+;; a short list of axioms. The power of linear algebra is that
+;; theorems proved from these axioms apply to *every* vector space
+;; simultaneously — columns of numbers, polynomials, functions,
+;; matrices, and more.
+;;
+;; This chapter develops the foundations using $\mathbb{R}^n$ — columns
+;; of real numbers — as our main concrete example. We define addition
+;; and scaling, state the axioms, and build up to the key concepts
+;; of linear independence, basis, and dimension.
 
 (ns basis-book.vectors-and-spaces
   (:require
@@ -24,11 +31,11 @@
 
 ;; ## Vectors
 ;;
-;; ### What is a vector?
+;; ### Vectors in $\mathbb{R}^n$
 ;;
-;; In the most concrete sense, a vector is an ordered list of
-;; numbers. A vector in $\mathbb{R}^2$ (the plane) has two entries;
-;; a vector in $\mathbb{R}^3$ (space) has three.
+;; Our concrete setting is $\mathbb{R}^n$ — the space of ordered
+;; lists of $n$ real numbers. A vector in $\mathbb{R}^2$ (the plane)
+;; has two entries; a vector in $\mathbb{R}^3$ (space) has three.
 
 (def u (la/column [3 1]))
 (def v (la/column [1 2]))
@@ -169,17 +176,23 @@
 
 (kind/test-last [true?])
 
-;; These eight rules are all we need. Every theorem in linear
-;; algebra follows from them. The rules feel unsurprising for
-;; number columns, but the same structure appears in:
+;; These eight rules are all we need. Any collection of objects
+;; satisfying them is a vector space, and every theorem in linear
+;; algebra follows from them alone. The axioms *are* the concept.
 ;;
-;; - Polynomials (add coefficients, scale by constants)
-;; - Functions $f: \mathbb{R} \to \mathbb{R}$ (pointwise addition and scaling)
-;; - Matrices (entry-by-entry addition and scaling)
-;; - Solutions to linear differential equations
+;; The rules feel unsurprising for number columns, but the same
+;; structure appears in surprising places:
 ;;
-;; Working abstractly means proving something once and having it
-;; apply to all of these simultaneously.
+;; - **Polynomials** of degree $\leq n$: add coefficients, scale by constants. Dimension $n+1$.
+;; - **Continuous functions** $f: [a,b] \to \mathbb{R}$: pointwise addition $(f+g)(x) = f(x)+g(x)$ and scaling $(\alpha f)(x) = \alpha f(x)$. Infinite-dimensional.
+;; - **Matrices** of size $m \times n$: entry-by-entry addition and scaling. Dimension $mn$.
+;; - **Solutions to a linear ODE** like $y'' + y = 0$: any linear combination of solutions is again a solution.
+;;
+;; Working abstractly means proving something once — say, that every
+;; basis has the same number of elements — and having it apply to
+;; all of these simultaneously. The rest of this chapter works in
+;; $\mathbb{R}^n$, but the concepts (span, independence, basis,
+;; dimension) are defined by the axioms and hold in every vector space.
 
 ;; ---
 ;;

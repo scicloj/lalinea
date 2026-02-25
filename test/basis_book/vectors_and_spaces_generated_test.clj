@@ -11,34 +11,34 @@
   [clojure.test :refer [deftest is]]))
 
 
-(def v3_l33 (def u (la/column [3 1])))
+(def v3_l40 (def u (la/column [3 1])))
 
 
-(def v4_l34 (def v (la/column [1 2])))
+(def v4_l41 (def v (la/column [1 2])))
 
 
 (def
- v6_l39
+ v6_l46
  (vis/arrow-plot
   [{:label "u", :xy [3 1], :color "#2266cc"}
    {:label "v", :xy [1 2], :color "#cc4422"}]
   {:width 300}))
 
 
-(def v8_l49 (la/add u v))
+(def v8_l56 (la/add u v))
 
 
 (deftest
- t9_l51
+ t9_l58
  (is
   ((fn
     [r]
     (and (= 4.0 (tensor/mget r 0 0)) (= 3.0 (tensor/mget r 1 0))))
-   v8_l49)))
+   v8_l56)))
 
 
 (def
- v10_l55
+ v10_l62
  (vis/arrow-plot
   [{:label "u", :xy [3 1], :color "#2266cc"}
    {:label "v", :xy [1 2], :color "#cc4422", :from [3 1]}
@@ -46,126 +46,126 @@
   {:width 300}))
 
 
-(def v12_l65 (la/scale 2.0 u))
+(def v12_l72 (la/scale 2.0 u))
 
 
 (deftest
- t13_l67
+ t13_l74
  (is
   ((fn
     [r]
     (and (= 6.0 (tensor/mget r 0 0)) (= 2.0 (tensor/mget r 1 0))))
-   v12_l65)))
+   v12_l72)))
 
 
 (def
- v14_l71
+ v14_l78
  (vis/arrow-plot
   [{:label "u", :xy [3 1], :color "#2266cc"}
    {:label "2u", :xy [6 2], :color "#8844cc"}]
   {:width 300}))
 
 
-(def v16_l77 (la/scale -1.0 u))
+(def v16_l84 (la/scale -1.0 u))
 
 
 (deftest
- t17_l79
+ t17_l86
  (is
   ((fn
     [r]
     (and (= -3.0 (tensor/mget r 0 0)) (= -1.0 (tensor/mget r 1 0))))
-   v16_l77)))
+   v16_l84)))
 
 
 (def
- v18_l83
+ v18_l90
  (vis/arrow-plot
   [{:label "u", :xy [3 1], :color "#2266cc"}
    {:label "−u", :xy [-3 -1], :color "#cc4422"}]
   {:width 300}))
 
 
-(def v20_l117 (def w-ax (la/column [-1 4])))
+(def v20_l124 (def w-ax (la/column [-1 4])))
 
 
-(def v21_l118 (def zero2 (la/column [0 0])))
+(def v21_l125 (def zero2 (la/column [0 0])))
 
 
-(def v23_l122 (la/close? (la/add u v) (la/add v u)))
+(def v23_l129 (la/close? (la/add u v) (la/add v u)))
 
 
-(deftest t24_l124 (is (true? v23_l122)))
+(deftest t24_l131 (is (true? v23_l129)))
 
 
 (def
- v26_l128
+ v26_l135
  (la/close? (la/add (la/add u v) w-ax) (la/add u (la/add v w-ax))))
 
 
-(deftest t27_l131 (is (true? v26_l128)))
+(deftest t27_l138 (is (true? v26_l135)))
 
 
-(def v29_l135 (la/close? (la/add u zero2) u))
+(def v29_l142 (la/close? (la/add u zero2) u))
 
 
-(deftest t30_l137 (is (true? v29_l135)))
+(deftest t30_l144 (is (true? v29_l142)))
 
 
-(def v32_l141 (la/close? (la/add u (la/scale -1.0 u)) zero2))
+(def v32_l148 (la/close? (la/add u (la/scale -1.0 u)) zero2))
 
 
-(deftest t33_l143 (is (true? v32_l141)))
+(deftest t33_l150 (is (true? v32_l148)))
 
 
 (def
- v35_l147
+ v35_l154
  (la/close? (la/scale 2.0 (la/scale 3.0 u)) (la/scale 6.0 u)))
 
 
-(deftest t36_l150 (is (true? v35_l147)))
+(deftest t36_l157 (is (true? v35_l154)))
 
 
-(def v38_l154 (la/close? (la/scale 1.0 u) u))
+(def v38_l161 (la/close? (la/scale 1.0 u) u))
 
 
-(deftest t39_l156 (is (true? v38_l154)))
+(deftest t39_l163 (is (true? v38_l161)))
 
 
 (def
- v41_l160
+ v41_l167
  (la/close?
   (la/scale 5.0 (la/add u v))
   (la/add (la/scale 5.0 u) (la/scale 5.0 v))))
 
 
-(deftest t42_l163 (is (true? v41_l160)))
+(deftest t42_l170 (is (true? v41_l167)))
 
 
 (def
- v44_l167
+ v44_l174
  (la/close?
   (la/scale (+ 2.0 3.0) u)
   (la/add (la/scale 2.0 u) (la/scale 3.0 u))))
 
 
-(deftest t45_l170 (is (true? v44_l167)))
+(deftest t45_l177 (is (true? v44_l174)))
 
 
-(def v47_l195 (la/add (la/scale 2.0 u) (la/scale -1.0 v)))
+(def v47_l208 (la/add (la/scale 2.0 u) (la/scale -1.0 v)))
 
 
 (deftest
- t48_l197
+ t48_l210
  (is
   ((fn
     [r]
     (and (= 5.0 (tensor/mget r 0 0)) (= 0.0 (tensor/mget r 1 0))))
-   v47_l195)))
+   v47_l208)))
 
 
 (def
- v50_l206
+ v50_l219
  (vis/arrow-plot
   [{:label "2u", :xy [6 2], :color "#2266cc"}
    {:label "-v",
@@ -178,7 +178,7 @@
 
 
 (def
- v52_l222
+ v52_l235
  (let
   [coeffs
    (vec (for [a (range -2.0 2.1 0.5) b (range -2.0 2.1 0.5)] [a b]))
@@ -206,7 +206,7 @@
 
 
 (def
- v54_l247
+ v54_l260
  (let
   [s1
    (la/column [1 2])
@@ -238,61 +238,61 @@
 
 
 (def
- v56_l296
+ v56_l309
  (vis/arrow-plot
   [{:label "[3,1]", :xy [3 1], :color "#2266cc"}
    {:label "[1,2]", :xy [1 2], :color "#cc4422"}]
   {:width 250}))
 
 
-(def v58_l305 (la/det (la/matrix [[3 1] [1 2]])))
+(def v58_l318 (la/det (la/matrix [[3 1] [1 2]])))
 
 
-(deftest t59_l308 (is ((fn [d] (> (Math/abs d) 1.0E-10)) v58_l305)))
+(deftest t59_l321 (is ((fn [d] (> (Math/abs d) 1.0E-10)) v58_l318)))
 
 
 (def
- v61_l313
+ v61_l326
  (vis/arrow-plot
   [{:label "[3,1]", :xy [3 1], :color "#2266cc"}
    {:label "[6,2]", :xy [6 2], :color "#cc4422"}]
   {:width 250}))
 
 
-(def v63_l321 (la/det (la/matrix [[3 6] [1 2]])))
+(def v63_l334 (la/det (la/matrix [[3 6] [1 2]])))
 
 
-(deftest t64_l324 (is ((fn [d] (< (Math/abs d) 1.0E-10)) v63_l321)))
+(deftest t64_l337 (is ((fn [d] (< (Math/abs d) 1.0E-10)) v63_l334)))
 
 
-(def v66_l330 (la/det (la/matrix [[1 0 0] [0 1 0] [0 0 1]])))
+(def v66_l343 (la/det (la/matrix [[1 0 0] [0 1 0] [0 0 1]])))
 
 
 (deftest
- t67_l334
- (is ((fn [d] (< (Math/abs (- d 1.0)) 1.0E-10)) v66_l330)))
+ t67_l347
+ (is ((fn [d] (< (Math/abs (- d 1.0)) 1.0E-10)) v66_l343)))
 
 
-(def v69_l340 (la/det (la/matrix [[1 0 1] [0 1 1] [0 0 0]])))
+(def v69_l353 (la/det (la/matrix [[1 0 1] [0 1 1] [0 0 0]])))
 
 
-(deftest t70_l344 (is ((fn [d] (< (Math/abs d) 1.0E-10)) v69_l340)))
+(deftest t70_l357 (is ((fn [d] (< (Math/abs d) 1.0E-10)) v69_l353)))
 
 
-(def v72_l364 (def e1 (la/column [1 0 0])))
+(def v72_l377 (def e1 (la/column [1 0 0])))
 
 
-(def v73_l365 (def e2 (la/column [0 1 0])))
+(def v73_l378 (def e2 (la/column [0 1 0])))
 
 
-(def v74_l366 (def e3 (la/column [0 0 1])))
+(def v74_l379 (def e3 (la/column [0 0 1])))
 
 
-(def v76_l376 (def w (la/column [5 -3 7])))
+(def v76_l389 (def w (la/column [5 -3 7])))
 
 
 (def
- v78_l380
+ v78_l393
  (la/close?
   w
   (la/add
@@ -300,31 +300,31 @@
    (la/add (la/scale -3.0 e2) (la/scale 7.0 e3)))))
 
 
-(deftest t79_l385 (is (true? v78_l380)))
+(deftest t79_l398 (is (true? v78_l393)))
 
 
-(def v81_l407 (def v1 (la/column [1 0 0])))
+(def v81_l420 (def v1 (la/column [1 0 0])))
 
 
-(def v82_l408 (def v2 (la/column [0 1 0])))
+(def v82_l421 (def v2 (la/column [0 1 0])))
 
 
-(def v83_l409 (def v3 (la/column [0 0 1])))
+(def v83_l422 (def v3 (la/column [0 0 1])))
 
 
-(def v84_l411 (la/det (la/matrix [[1 0 0] [0 1 0] [0 0 1]])))
+(def v84_l424 (la/det (la/matrix [[1 0 0] [0 1 0] [0 0 1]])))
 
 
 (deftest
- t85_l415
- (is ((fn [d] (< (Math/abs (- d 1.0)) 1.0E-10)) v84_l411)))
+ t85_l428
+ (is ((fn [d] (< (Math/abs (- d 1.0)) 1.0E-10)) v84_l424)))
 
 
-(def v87_l422 (def v4 (la/column [2 3 1])))
+(def v87_l435 (def v4 (la/column [2 3 1])))
 
 
 (def
- v88_l424
+ v88_l437
  (la/close?
   v4
   (la/add
@@ -332,4 +332,4 @@
    (la/add (la/scale 3.0 v2) (la/scale 1.0 v3)))))
 
 
-(deftest t89_l429 (is (true? v88_l424)))
+(deftest t89_l442 (is (true? v88_l437)))

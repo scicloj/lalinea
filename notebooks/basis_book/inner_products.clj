@@ -1,14 +1,18 @@
 ;; # Inner Products and Orthogonality
 ;;
-;; So far, vectors can be added and scaled — but we have no notion
-;; of **length** or **angle**. The dot product fills this gap,
-;; unlocking orthogonality, projections, and the Gram-Schmidt
-;; process that leads to the QR decomposition.
+;; A vector space gives us addition and scaling, but nothing more.
+;; There is no built-in notion of **length**, **angle**, or
+;; **perpendicularity** — these require extra structure. An
+;; **inner product** provides exactly that, and this chapter
+;; develops the consequences: orthogonality, projections, and
+;; the Gram-Schmidt process that leads to the QR decomposition.
 
 (ns basis-book.inner-products
   (:require
    ;; Basis linear algebra API (https://github.com/scicloj/basis):
    [scicloj.basis.linalg :as la]
+   ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
+   [tech.v3.tensor :as tensor]
    ;; Element-wise array math:
    [tech.v3.datatype.functional :as dfn]
    ;; Low-level buffer operations:
@@ -18,42 +22,146 @@
    ;; Arrow diagrams for 2D vectors:
    [scicloj.basis.vis :as vis]))
 
-;; ## Dot product and orthogonality
+;; ## Inner products
 ;;
-;; ### The dot product
+;; ### The abstract definition
 ;;
-;; The **dot product** (or **inner product**) of two vectors is:
+;; An **inner product** on a vector space $V$ is a function
+;; $\langle \cdot, \cdot \rangle : V \times V \to \mathbb{R}$
+;; satisfying three axioms:
 ;;
-;; $$\mathbf{u} \cdot \mathbf{v} = \mathbf{u}^T \mathbf{v} = \sum_i u_i v_i$$
+;; 1. **Linearity**: $\langle \alpha\mathbf{u} + \beta\mathbf{v},\, \mathbf{w} \rangle = \alpha\langle \mathbf{u}, \mathbf{w}\rangle + \beta\langle \mathbf{v}, \mathbf{w}\rangle$
+;; 2. **Symmetry**: $\langle \mathbf{u}, \mathbf{v} \rangle = \langle \mathbf{v}, \mathbf{u} \rangle$
+;; 3. **Positive definiteness**: $\langle \mathbf{v}, \mathbf{v} \rangle > 0$ when $\mathbf{v} \neq \mathbf{0}$, and $= 0$ only when $\mathbf{v} = \mathbf{0}$
 ;;
-;; It measures how much two vectors point in the same direction.
+;; Linearity plus symmetry together give **bilinearity** — the
+;; function is linear in both arguments. A vector space equipped
+;; with an inner product is called an **inner product space**.
+;;
+;; The inner product is what gives a vector space geometry.
+;; Length, angle, and orthogonality are all defined in terms of
+;; it — they do not exist in a bare vector space.
+;;
+;; The concept applies far beyond columns of numbers:
+;;
+;; - For **continuous functions** on $[a,b]$: $\langle f, g \rangle = \int_a^b f(x)\,g(x)\,dx$
+;; - For **matrices**: the Frobenius inner product $\langle A, B \rangle = \text{tr}(A^T B)$
+;;
+;; Different inner products on the same vector space give different
+;; notions of length and angle. The choice of inner product matters.
+
+;; ### The standard inner product on $\mathbb{R}^n$
+;;
+;; The most familiar inner product on $\mathbb{R}^n$ is the
+;; **dot product**:
+;;
+;; $$\langle \mathbf{u}, \mathbf{v} \rangle = \sum_i u_i v_i$$
+;;
+;; This is computed by `la/dot`:
 
 (def a3 (la/column [1 2 3]))
 (def b3 (la/column [4 5 6]))
 
-(def dot-ab
-  (dfn/sum (dfn/* a3 b3)))
+(la/dot a3 b3)
 
-dot-ab
+;; $1 \cdot 4 + 2 \cdot 5 + 3 \cdot 6 = 32$.
 
 (kind/test-last
  [(fn [d] (< (Math/abs (- d 32.0)) 1e-10))])
 
-;; $1 \cdot 4 + 2 \cdot 5 + 3 \cdot 6 = 32$.
-
-;; ### Length and angle
+;; ### Verifying the axioms
 ;;
-;; The **length** (or **norm**) of a vector is $\|\mathbf{v}\| = \sqrt{\mathbf{v} \cdot \mathbf{v}}$:
+;; Just as we verified the vector space axioms in the previous
+;; chapter, let us check that the dot product satisfies the
+;; three inner product axioms.
+
+(def c3 (la/column [7 8 9]))
+
+;; **Axiom 1 — Linearity:**
+
+(la/close-scalar?
+ (la/dot (la/add (la/scale 2.0 a3) (la/scale 3.0 b3)) c3)
+ (+ (* 2.0 (la/dot a3 c3))
+    (* 3.0 (la/dot b3 c3))))
+
+(kind/test-last [true?])
+
+;; **Axiom 2 — Symmetry:**
+
+(la/close-scalar? (la/dot a3 b3) (la/dot b3 a3))
+
+(kind/test-last [true?])
+
+;; **Axiom 3 — Positive definiteness:**
+
+(> (la/dot a3 a3) 0.0)
+
+(kind/test-last [true?])
+
+(la/close-scalar? (la/dot (la/column [0 0 0]) (la/column [0 0 0])) 0.0)
+
+(kind/test-last [true?])
+
+;; ### A different inner product: weighted dot product
+;;
+;; The standard dot product is not the only inner product on
+;; $\mathbb{R}^n$. Given a positive definite matrix $W$, the
+;; **weighted inner product** is:
+;;
+;; $$\langle \mathbf{u}, \mathbf{v} \rangle_W = \mathbf{u}^T W \mathbf{v}$$
+;;
+;; This also satisfies the three axioms (because $W$ is symmetric
+;; and positive definite), but it gives a different geometry.
+
+(def W-ip (la/matrix [[2 0] [0 1]]))
+
+(def u-ip (la/column [1 1]))
+
+;; Standard length:
+
+(la/norm u-ip)
+
+(kind/test-last
+ [(fn [d] (la/close-scalar? d (Math/sqrt 2.0)))])
+
+;; Weighted length ($\sqrt{\mathbf{u}^T W \mathbf{u}}$):
+
+(Math/sqrt (tensor/mget (la/mmul (la/transpose u-ip) (la/mmul W-ip u-ip)) 0 0))
+
+(kind/test-last
+ [(fn [d] (la/close-scalar? d (Math/sqrt 3.0)))])
+
+;; The same vector has length $\sqrt{2}$ under the standard
+;; inner product but $\sqrt{3}$ under the weighted one. The
+;; weight matrix stretches the $x$-direction, making $[1,1]^T$
+;; longer in that geometry.
+
+;; ---
+;;
+;; ## Length, angle, and orthogonality
+;;
+;; With an inner product in hand, we can define geometric concepts.
+;; Everything below follows from the axioms — the specific choice
+;; of inner product determines the geometry.
+;;
+;; ### Length
+;;
+;; The **length** (or **norm**) of a vector is:
+;;
+;; $$\|\mathbf{v}\| = \sqrt{\langle \mathbf{v}, \mathbf{v} \rangle}$$
 
 (la/norm a3)
 
 (kind/test-last
  [(fn [d] (< (Math/abs (- d (Math/sqrt 14.0))) 1e-10))])
 
-;; Two vectors are **orthogonal** (perpendicular) when their dot
-;; product is zero:
+;; ### Orthogonality
+;;
+;; Two vectors are **orthogonal** when their inner product is zero:
+;;
+;; $$\langle \mathbf{u}, \mathbf{v} \rangle = 0$$
 
-(dfn/sum (dfn/* (la/column [1 0]) (la/column [0 1])))
+(la/dot (la/column [1 0]) (la/column [0 1]))
 
 (kind/test-last
  [(fn [d] (< (Math/abs d) 1e-10))])
@@ -61,22 +169,27 @@ dot-ab
 ;; A set of vectors is **orthonormal** if they are all unit
 ;; length and mutually orthogonal. The standard basis is the
 ;; canonical example.
+;;
+;; Recall from the previous chapter that the four fundamental
+;; subspaces of a matrix are complementary. With the standard
+;; inner product, they are in fact **orthogonal complements** —
+;; every vector in one subspace is orthogonal to every vector
+;; in the other.
 
 ;; ### Angle between vectors
 ;;
-;; The dot product is related to the angle $\theta$ between
-;; two vectors by:
+;; The inner product determines the angle $\theta$ between
+;; two vectors:
 ;;
-;; $$\cos \theta = \frac{\mathbf{u} \cdot \mathbf{v}}{\|\mathbf{u}\| \, \|\mathbf{v}\|}$$
+;; $$\cos \theta = \frac{\langle \mathbf{u}, \mathbf{v} \rangle}{\|\mathbf{u}\| \, \|\mathbf{v}\|}$$
 ;;
-;; This gives a precise measure of alignment: $\cos \theta = 1$
-;; for parallel vectors, $0$ for orthogonal, $-1$ for opposite.
+;; $\cos \theta = 1$ for parallel, $0$ for orthogonal, $-1$ for opposite.
 
 (def p (la/column [1 0]))
 (def q (la/column [1 1]))
 
 (def cos-theta
-  (/ (dfn/sum (dfn/* p q))
+  (/ (la/dot p q)
      (* (la/norm p) (la/norm q))))
 
 cos-theta
