@@ -180,6 +180,13 @@ L
 ;;
 ;; The eigenvalues $0 = \lambda_1 \leq \lambda_2 \leq \cdots \leq \lambda_n$
 ;; are called the **spectrum** of the graph.
+;;
+;; Note the ascending order: in spectral graph theory the convention
+;; is to number eigenvalues from smallest to largest, because the
+;; interesting structure lives at the **bottom** of the spectrum —
+;; zero eigenvalues count connected components, and $\lambda_2$
+;; measures how tightly the graph is connected. (This is the
+;; opposite of PCA and SVD, where the largest values come first.)
 
 (def eig (la/eigen L))
 
@@ -243,9 +250,9 @@ cluster-assignment
 
 (kind/test-last
  [(fn [v]
-    (let [freqs (frequencies v)]
-      (and (= 3 (freqs :A))
-           (= 3 (freqs :B)))))])
+    (and (apply = (subvec v 0 3))
+         (apply = (subvec v 3 6))
+         (not= (v 0) (v 3))))])
 
 ;; The spectral bisection perfectly recovers the two clusters
 ;; {0, 1, 2} and {3, 4, 5}. Here is the graph with vertices
@@ -449,17 +456,23 @@ cycle-theoretical
 
 (def comm-eigenvalues (sorted-real-eigenvalues comm-eig))
 
-(take 4 comm-eigenvalues)
+comm-eigenvalues
 
 (kind/test-last
  [(fn [v]
-    (and (< (Math/abs (first v)) 1e-10)
-         (< (second v) 1.5)
-         (< (nth v 2) 1.5)
-         (> (nth v 3) 1.5)))])
+    (and (= 9 (count v))
+         (< (Math/abs (first v)) 1e-10)
+         (< (nth v 2) 1.0)
+         (> (nth v 3) (* 2.0 (nth v 2)))))])
 
-;; There are two near-zero eigenvalues beyond the first, with a
-;; gap before the fourth. This "spectral gap" signals three communities.
+(-> (tc/dataset {:index (range (count comm-eigenvalues))
+                 :eigenvalue comm-eigenvalues})
+    (plotly/base {:=x :index :=y :eigenvalue})
+    (plotly/layer-bar)
+    plotly/plot)
+
+;; The three smallest eigenvalues are small, then a jump to the fourth.
+;; This **spectral gap** signals three communities.
 
 ;; To cluster, we use the eigenvectors corresponding to the three
 ;; smallest eigenvalues:
