@@ -19,8 +19,6 @@
    [scicloj.basis.linalg :as la]
    ;; Complex tensors — interleaved [re im] layout:
    [scicloj.basis.complex :as cx]
-   ;; Tensor ↔ EJML zero-copy bridge:
-   [scicloj.basis.impl.tensor :as bt]
    ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
    [tech.v3.tensor :as tensor]
    ;; Low-level buffer operations:
@@ -78,7 +76,7 @@
 ;; This is how basis achieves zero-overhead interop with EJML.
 
 (let [M (la/matrix [[1 2] [3 4]])
-      dm (bt/tensor->dmat M)]
+      dm (la/tensor->dmat M)]
   (identical? (.ary-data (dtype/as-array-buffer M))
               (.data dm)))
 
@@ -87,7 +85,7 @@
 ;; Mutating the DMatrixRMaj is visible in the tensor:
 
 (let [M (la/matrix [[1 2] [3 4]])
-      dm (bt/tensor->dmat M)
+      dm (la/tensor->dmat M)
       _ (.set dm 0 0 -1.0)]
   {:M-00 (tensor/mget M 0 0)
    :dm-00 (.get dm 0 0)})
@@ -100,7 +98,7 @@
 ;; And the other direction — mutating the tensor's array:
 
 (let [M (la/matrix [[1 2] [3 4]])
-      dm (bt/tensor->dmat M)
+      dm (la/tensor->dmat M)
       _ (aset (.data dm) 3 99.0)]
   (tensor/mget M 1 1))
 

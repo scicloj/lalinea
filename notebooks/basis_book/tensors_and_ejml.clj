@@ -17,8 +17,6 @@
   (:require
    ;; Basis linear algebra API (https://github.com/scicloj/basis):
    [scicloj.basis.linalg :as la]
-   ;; Tensor ↔ EJML zero-copy bridge:
-   [scicloj.basis.impl.tensor :as bt]
    ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
    [tech.v3.tensor :as tensor]
    ;; Low-level buffer operations:
@@ -34,7 +32,7 @@
 ;; `tensor->dmat` and `dmat->tensor` share the identical Java array.
 
 (let [t (la/matrix [[1.0 2.0] [3.0 4.0]])
-      dm (bt/tensor->dmat t)]
+      dm (la/tensor->dmat t)]
   {:identical? (identical? (dtype/->double-array (.buffer t))
                            (.data ^DMatrixRMaj dm))
    :rows (.numRows ^DMatrixRMaj dm)
@@ -47,7 +45,7 @@
 ;; Mutations through the EJML view are visible in the tensor:
 
 (let [t (la/matrix [[1.0 0.0] [0.0 1.0]])
-      dm (bt/tensor->dmat t)]
+      dm (la/tensor->dmat t)]
   (.set ^DMatrixRMaj dm 0 1 99.0)
   (tensor/mget t 0 1))
 
@@ -56,7 +54,7 @@
 ;; And mutations through the tensor are visible in EJML:
 
 (let [t (la/matrix [[1.0 0.0] [0.0 1.0]])
-      dm (bt/tensor->dmat t)
+      dm (la/tensor->dmat t)
       arr (dtype/->double-array (.buffer t))]
   (aset arr 1 42.0)
   (.get ^DMatrixRMaj dm 0 1))

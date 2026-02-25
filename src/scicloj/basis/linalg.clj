@@ -13,7 +13,8 @@
             [tech.v3.tensor :as tensor]
             [tech.v3.datatype :as dtype]
             [tech.v3.datatype.functional :as dfn])
-  (:import [java.util Arrays]))
+  (:import [java.util Arrays]
+           [org.ejml.data DMatrixRMaj]))
 
 ;; ---------------------------------------------------------------------------
 ;; Matrix construction
@@ -59,6 +60,27 @@
   "Create a row vector (shape [1 n]) from a sequence."
   [xs]
   (bt/row-vector xs))
+
+;; ---------------------------------------------------------------------------
+;; EJML interop
+;; ---------------------------------------------------------------------------
+
+(defn tensor->dmat
+  "Zero-copy: convert a [r c] tensor to an EJML DMatrixRMaj sharing
+   the same double[]. Mutations through either view are visible in
+   the other.
+
+   Falls back to a copy if the tensor is not backed by a contiguous
+   double[] (e.g. a lazy reader or a strided view)."
+  ^DMatrixRMaj [tensor]
+  (bt/tensor->dmat tensor))
+
+(defn dmat->tensor
+  "Zero-copy: convert an EJML DMatrixRMaj to a [r c] tensor sharing
+   the same double[]. Mutations through either view are visible in
+   the other."
+  [^DMatrixRMaj dm]
+  (bt/dmat->tensor dm))
 
 ;; ---------------------------------------------------------------------------
 (defn submatrix

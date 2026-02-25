@@ -2,8 +2,11 @@
  "Core Concepts" ["tensors_and_ejml"
                   "complex_tensors"
                   "fourier_transform"
-                  "abstract_linear_algebra"
                   "sharing_and_mutation"]
+ "Abstract Linear Algebra" ["vectors_and_spaces"
+                            "maps_and_structure"
+                            "inner_products"
+                            "eigenvalues_and_decompositions"]
  "Applications" ["linear_systems"
                  "markov_chains"
                  "image_processing"
