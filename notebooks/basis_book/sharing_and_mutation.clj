@@ -143,12 +143,13 @@
 
 ;; Mutating the backing array was immediately visible in the `re` view.
 
-;; ## Lazy operations do NOT share memory
+;; ## Lazy operations: no new memory, no new mutation handle
 
 ;; `dfn/+`, `dfn/*`, etc. return **lazy noncaching readers**.
-;; They don't allocate new memory — they recompute on every access.
-;; This means they reference the *source* data, but don't share
-;; a mutable buffer with it.
+;; They allocate no new memory — they recompute on every access,
+;; reading through to the original source buffers. This means
+;; they don't create a new mutable handle, but they still
+;; depend on the source data.
 
 (let [x (tensor/->tensor [1 2 3] {:datatype :float64})
       y (tensor/->tensor [10 20 30] {:datatype :float64})
@@ -334,18 +335,17 @@
 ;; produces non-deterministic results — the order of `.nextGaussian`
 ;; calls depends on thread scheduling.
 
-;; Here we use `compute-tensor` with a seeded RNG and check whether
-;; two calls produce the same tensor:
+;; Here we use `compute-tensor` with a seeded RNG. Even though the
+;; seed is fixed, two calls produce *different* tensors — the parallel
+;; chunking scrambles the order of `.nextGaussian` calls:
 
 (let [make-random-tensor
       (fn []
         (let [rng (java.util.Random. 42)]
-          (tensor/compute-tensor [4 4] (fn [_ _] (.nextGaussian rng)) :float64)))]
+          (tensor/compute-tensor [100 100] (fn [_ _] (.nextGaussian rng)) :float64)))]
   (la/close? (make-random-tensor) (make-random-tensor)))
 
-;; This may return `true` or `false` depending on the runtime's
-;; thread scheduling. The RNG is deterministic, but the *order*
-;; in which elements are requested is not.
+(kind/test-last [false?])
 ;;
 ;; The safe alternative is `dotimes` with `aset`, which guarantees
 ;; sequential evaluation:
@@ -367,22 +367,22 @@
 
 ;; ## Summary
 ;;
-;; | Operation | Shares memory? | Notes |
-;; |:----------|:---------------|:------|
-;; | `tensor/reshape` | Yes | Same `double[]`, different shape |
-;; | `tensor/select` | Yes | Strided view into same `double[]` |
-;; | `tensor->dmat` / `dmat->tensor` | Yes | Zero-copy EJML interop |
-;; | `cx/complex-tensor` (1-arity wrap) | Yes | Wraps the tensor directly |
-;; | `cx/re` / `cx/im` | Yes | Strided views into interleaved layout |
-;; | `dfn/+`, `dfn/*`, etc. | No | Lazy — recompute from sources on access |
-;; | `cx/add`, `cx/sub`, `cx/scale` | No | Lazy ComplexTensors |
-;; | `dtype/clone` | No | Independent contiguous copy |
-;; | `la/submatrix` | No | Always clones |
-;; | `la/mmul`, `la/transpose`, etc. | No | EJML allocates new result |
+;; | Operation | New allocation? | Mutable handle? | Notes |
+;; |:----------|:----------------|:----------------|:------|
+;; | `tensor/reshape` | No | Yes — same `double[]` | Different shape, same backing |
+;; | `tensor/select` | No | Yes — strided view | View into same `double[]` |
+;; | `tensor->dmat` / `dmat->tensor` | No | Yes — same `double[]` | Zero-copy EJML interop |
+;; | `cx/complex-tensor` (1-arity wrap) | No | Yes — wraps tensor | Shares the interleaved array |
+;; | `cx/re` / `cx/im` | No | Yes — strided view | Views into interleaved layout |
+;; | `dfn/+`, `dfn/*`, etc. | No | No — lazy reader | Reads through to sources |
+;; | `cx/add`, `cx/sub`, `cx/scale` | No | No — lazy reader | Lazy ComplexTensors |
+;; | `dtype/clone` | Yes | Yes — independent | Breaks all links to source |
+;; | `la/submatrix` | Yes | Yes — independent | Always clones |
+;; | `la/mmul`, `la/transpose`, etc. | Yes | Yes — independent | EJML allocates new result |
 ;;
-;; Lazy readers don't have their own array, but they **read through**
-;; to the source arrays. Mutating a source changes what the lazy reader
-;; computes. Use `dtype/clone` to materialize and break the link.
+;; Lazy readers have no array of their own, but they **read through**
+;; to the source arrays — mutating a source changes what the lazy
+;; reader computes. Use `dtype/clone` to materialize and break the link.
 ;;
 ;; **The guideline**: treat all data as immutable. When you need to
 ;; mutate (e.g., in a performance-critical inner loop), use

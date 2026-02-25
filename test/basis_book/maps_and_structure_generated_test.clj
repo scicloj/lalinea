@@ -247,12 +247,12 @@
  (let
   [angles
    (mapv
-    (fn* [p1__85715#] (* 2.0 Math/PI (/ p1__85715# 40.0)))
+    (fn* [p1__91029#] (* 2.0 Math/PI (/ p1__91029# 40.0)))
     (range 41))
    circle-x
-   (mapv (fn* [p1__85716#] (Math/cos p1__85716#)) angles)
+   (mapv (fn* [p1__91030#] (Math/cos p1__91030#)) angles)
    circle-y
-   (mapv (fn* [p1__85717#] (Math/sin p1__85717#)) angles)
+   (mapv (fn* [p1__91031#] (Math/sin p1__91031#)) angles)
    stretched
    (mapv
     (fn
@@ -369,7 +369,7 @@
  v60_l374
  (def
   rank-M
-  (count (filter (fn* [p1__85718#] (> p1__85718# 1.0E-10)) sv-M))))
+  (count (filter (fn* [p1__91032#] (> p1__91032# 1.0E-10)) sv-M))))
 
 
 (def v61_l376 rank-M)
@@ -408,7 +408,7 @@
  v71_l428
  (count
   (filter
-   (fn* [p1__85719#] (> p1__85719# 1.0E-10))
+   (fn* [p1__91033#] (> p1__91033# 1.0E-10))
    (vec (:S (la/svd A-full))))))
 
 
