@@ -29,7 +29,9 @@
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
    [scicloj.tableplot.v1.plotly :as plotly]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
-   [scicloj.kindly.v4.kind :as kind]))
+   [scicloj.kindly.v4.kind :as kind]
+   ;; Graph and arrow diagrams:
+   [scicloj.basis.vis :as vis]))
 
 ;; A helper for computing row sums of a matrix:
 
@@ -44,60 +46,6 @@
 (def laplacian
   (fn [adj]
     (la/sub (la/diag (row-sums adj)) adj)))
-
-;; ### Plotting helper
-;;
-;; We will draw small graphs as SVG diagrams throughout this notebook.
-;; This helper renders vertices as circles and edges as lines.
-
-(def graph-plot
-  (fn [positions edges opts]
-    (let [width (or (:width opts) 300)
-          n (count positions)
-          labels (or (:labels opts) (mapv str (range n)))
-          node-colors (or (:node-colors opts) (vec (repeat n "#2266cc")))
-          edge-hl (or (:edge-highlight opts) #{})
-          xs (mapv first positions)
-          ys (mapv second positions)
-          x-min (apply min xs) x-max (apply max xs)
-          y-min (apply min ys) y-max (apply max ys)
-          dx (- x-max x-min) dy (- y-max y-min)
-          span (max dx dy 1.0)
-          pad (* 0.4 span)
-          vb-x (- x-min pad) vb-w (+ dx (* 2 pad))
-          vb-h (+ dy (* 2 pad))
-          vb-y-top (+ y-max pad)
-          height (* width (/ vb-h vb-w))
-          px-per-unit (/ width vb-w)
-          r (* 0.22 span (min 1.0 (/ 3.0 (max n 1))))
-          stroke-w (/ 1.5 px-per-unit)
-          font-size (* 0.7 r)
-          edge-elts (mapv (fn [[i j]]
-                            (let [[x1 y1] (positions i)
-                                  [x2 y2] (positions j)
-                                  hl? (or (edge-hl [i j]) (edge-hl [j i]))]
-                              [:line {:x1 x1 :y1 (- y1) :x2 x2 :y2 (- y2)
-                                      :stroke (if hl? "#cc4422" "#999")
-                                      :stroke-width (if hl? (* 3 stroke-w) (* 1.5 stroke-w))}]))
-                          edges)
-          node-elts (mapcat (fn [i]
-                              (let [[cx cy] (positions i)]
-                                [[:circle {:cx cx :cy (- cy) :r r
-                                           :fill (node-colors i)
-                                           :stroke "#333" :stroke-width stroke-w}]
-                                 [:text {:x cx :y (- cy)
-                                         :fill "white"
-                                         :font-size font-size
-                                         :font-family "sans-serif"
-                                         :font-weight "bold"
-                                         :text-anchor "middle"
-                                         :dominant-baseline "central"}
-                                  (labels i)]]))
-                            (range n))]
-      (kind/hiccup
-       (into [:svg {:width width :height height
-                    :viewBox (str vb-x " " (- vb-y-top) " " vb-w " " vb-h)}]
-             (concat edge-elts node-elts))))))
 
 ;; ## From graphs to matrices
 ;;
@@ -125,8 +73,8 @@
 (def six-edges
   [[0 1] [0 2] [1 2] [2 3] [3 4] [3 5] [4 5]])
 
-(graph-plot six-pos six-edges
-            {:edge-highlight #{[2 3]}})
+(vis/graph-plot six-pos six-edges
+                {:edge-highlight #{[2 3]}})
 
 ;; The **degree** of each vertex — how many neighbours it has:
 
@@ -254,10 +202,10 @@ cluster-assignment
 ;; {0, 1, 2} and {3, 4, 5}. Here is the graph with vertices
 ;; coloured by cluster:
 
-(graph-plot six-pos six-edges
-            {:node-colors (mapv {:A "#2266cc" :B "#dd8800"}
-                                cluster-assignment)
-             :edge-highlight #{[2 3]}})
+(vis/graph-plot six-pos six-edges
+                {:node-colors (mapv {:A "#2266cc" :B "#dd8800"}
+                                    cluster-assignment)
+                 :edge-highlight #{[2 3]}})
 
 ;; Let us visualize the Fiedler vector. Each vertex's value
 ;; shows which side of the partition it falls on.
@@ -284,10 +232,10 @@ cluster-assignment
               [0 0 0 1 0 1]
               [0 0 0 1 1 0]]))
 
-(graph-plot six-pos
-            [[0 1] [0 2] [1 2] [3 4] [3 5] [4 5]]
-            {:node-colors ["#2266cc" "#2266cc" "#2266cc"
-                           "#dd8800" "#dd8800" "#dd8800"]})
+(vis/graph-plot six-pos
+                [[0 1] [0 2] [1 2] [3 4] [3 5] [4 5]]
+                {:node-colors ["#2266cc" "#2266cc" "#2266cc"
+                               "#dd8800" "#dd8800" "#dd8800"]})
 
 (def disc-eigenvalues
   (la/real-eigenvalues (laplacian adj-disconnected)))
@@ -315,9 +263,9 @@ disc-eigenvalues
                          (fn [i j] (if (not= i j) 1.0 0.0))
                          :float64))
 
-(graph-plot [[0.0 1.0] [-0.951 0.309] [-0.588 -0.809] [0.588 -0.809] [0.951 0.309]]
-            [[0 1] [0 2] [0 3] [0 4] [1 2] [1 3] [1 4] [2 3] [2 4] [3 4]]
-            {})
+(vis/graph-plot [[0.0 1.0] [-0.951 0.309] [-0.588 -0.809] [0.588 -0.809] [0.951 0.309]]
+                [[0 1] [0 2] [0 3] [0 4] [1 2] [1 3] [1 4] [2 3] [2 4] [3 4]]
+                {})
 
 (def K5-eigenvalues
   (la/real-eigenvalues (laplacian K5-adj)))
@@ -350,9 +298,9 @@ K5-eigenvalues
                                      1.0 0.0))
                          :float64))
 
-(graph-plot [[0.0 1.0] [-0.707 0.707] [-1.0 0.0] [-0.707 -0.707] [-0.0 -1.0] [0.707 -0.707] [1.0 -0.0] [0.707 0.707]]
-            [[0 1] [1 2] [2 3] [3 4] [4 5] [5 6] [6 7] [7 0]]
-            {})
+(vis/graph-plot [[0.0 1.0] [-0.707 0.707] [-1.0 0.0] [-0.707 -0.707] [-0.0 -1.0] [0.707 -0.707] [1.0 -0.0] [0.707 0.707]]
+                [[0 1] [1 2] [2 3] [3 4] [4 5] [5 6] [6 7] [7 0]]
+                {})
 
 (def cycle-eigenvalues
   (la/real-eigenvalues (laplacian cycle-adj)))
@@ -391,9 +339,9 @@ cycle-theoretical
                          (fn [i j] (if (= 1 (Math/abs (- i j))) 1.0 0.0))
                          :float64))
 
-(graph-plot [[0 0] [1 0] [2 0] [3 0] [4 0] [5 0]]
-            [[0 1] [1 2] [2 3] [3 4] [4 5]]
-            {:width 350})
+(vis/graph-plot [[0 0] [1 0] [2 0] [3 0] [4 0] [5 0]]
+                [[0 1] [1 2] [2 3] [3 4] [4 5]]
+                {:width 350})
 
 (def path-eigenvalues
   (la/real-eigenvalues (laplacian path-adj)))
@@ -432,19 +380,19 @@ cycle-theoretical
     [0 0 0 0 0 0 1 0 1]
     [0 0 0 0 0 0 1 1 0]]))
 
-(graph-plot [[0 0.8] [0 -0.8] [1.5 0]
-             [3.5 0] [5 0.8] [5 -0.8]
-             [6.5 0] [8 0.8] [8 -0.8]]
-            [[0 1] [0 2] [1 2]
-             [2 3]
-             [3 4] [3 5] [4 5]
-             [5 6]
-             [6 7] [6 8] [7 8]]
-            {:node-colors ["#2266cc" "#2266cc" "#2266cc"
-                           "#228833" "#228833" "#228833"
-                           "#dd8800" "#dd8800" "#dd8800"]
-             :edge-highlight #{[2 3] [5 6]}
-             :width 400})
+(vis/graph-plot [[0 0.8] [0 -0.8] [1.5 0]
+                 [3.5 0] [5 0.8] [5 -0.8]
+                 [6.5 0] [8 0.8] [8 -0.8]]
+                [[0 1] [0 2] [1 2]
+                 [2 3]
+                 [3 4] [3 5] [4 5]
+                 [5 6]
+                 [6 7] [6 8] [7 8]]
+                {:node-colors ["#2266cc" "#2266cc" "#2266cc"
+                               "#228833" "#228833" "#228833"
+                               "#dd8800" "#dd8800" "#dd8800"]
+                 :edge-highlight #{[2 3] [5 6]}
+                 :width 400})
 
 (def comm-eig (la/eigen (laplacian community-adj)))
 

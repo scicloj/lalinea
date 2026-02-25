@@ -11,14 +11,15 @@
   [scicloj.tableplot.v1.plotly :as plotly]
   [fastmath.random :as frand]
   [scicloj.kindly.v4.kind :as kind]
+  [scicloj.basis.vis :as vis]
   [clojure.test :refer [deftest is]]))
 
 
-(def v3_l48 (def img-size 100))
+(def v3_l50 (def img-size 100))
 
 
 (def
- v4_l50
+ v4_l52
  (def
   test-image
   (tensor/ensure-tensor
@@ -41,7 +42,7 @@
 
 
 (def
- v6_l64
+ v6_l66
  (let
   [t
    (tensor/compute-tensor
@@ -52,15 +53,15 @@
 
 
 (deftest
- t7_l70
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v6_l64)))
+ t7_l72
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v6_l66)))
 
 
-(def v9_l75 (def svd-result (la/svd test-image)))
+(def v9_l77 (def svd-result (la/svd test-image)))
 
 
 (def
- v11_l80
+ v11_l82
  (->
   (tc/dataset
    {:index (range (count (:S svd-result))),
@@ -71,7 +72,7 @@
 
 
 (def
- v13_l92
+ v13_l94
  (def
   reconstruct-rank-k
   (fn
@@ -89,54 +90,40 @@
 
 
 (def
- v15_l102
- (def
-  matrix->gray-image
-  (fn
-   [m]
-   (let
-    [[h w] (dtype/shape m)]
-    (tensor/compute-tensor
-     [h w 3]
-     (fn [r c _ch] (int (max 0 (min 255 (tensor/mget m r c)))))
-     :uint8)))))
-
-
-(def
- v17_l112
+ v15_l106
  (bufimg/tensor->image
-  (matrix->gray-image (reconstruct-rank-k svd-result 1))))
+  (vis/matrix->gray-image (reconstruct-rank-k svd-result 1))))
 
 
 (deftest
- t18_l114
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v17_l112)))
+ t16_l108
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v15_l106)))
 
 
 (def
- v20_l119
+ v18_l113
  (bufimg/tensor->image
-  (matrix->gray-image (reconstruct-rank-k svd-result 5))))
+  (vis/matrix->gray-image (reconstruct-rank-k svd-result 5))))
 
 
 (deftest
- t21_l121
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v20_l119)))
+ t19_l115
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v18_l113)))
 
 
 (def
- v23_l126
+ v21_l120
  (bufimg/tensor->image
-  (matrix->gray-image (reconstruct-rank-k svd-result 20))))
+  (vis/matrix->gray-image (reconstruct-rank-k svd-result 20))))
 
 
 (deftest
- t24_l128
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v23_l126)))
+ t22_l122
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v21_l120)))
 
 
 (def
- v26_l136
+ v24_l130
  (->
   (tc/dataset
    {:k [1 5 10 20 50],
@@ -158,11 +145,11 @@
   plotly/plot))
 
 
-(def v28_l161 (def n-points 200))
+(def v26_l155 (def n-points 200))
 
 
 (def
- v29_l163
+ v27_l157
  (def
   data-tensor
   (let
@@ -193,7 +180,7 @@
 
 
 (def
- v31_l179
+ v29_l173
  (def
   X
   (let
@@ -214,25 +201,25 @@
 
 
 (def
- v33_l191
+ v31_l185
  (def
   cov-matrix
   (la/scale (/ 1.0 (dec n-points)) (la/mmul (la/transpose X) X))))
 
 
-(def v34_l195 cov-matrix)
+(def v32_l189 cov-matrix)
 
 
 (deftest
- t35_l197
- (is ((fn [m] (= [2 2] (vec (dtype/shape m)))) v34_l195)))
+ t33_l191
+ (is ((fn [m] (= [2 2] (vec (dtype/shape m)))) v32_l189)))
 
 
-(def v36_l200 (def pca-eigen (la/eigen cov-matrix)))
+(def v34_l194 (def pca-eigen (la/eigen cov-matrix)))
 
 
 (def
- v38_l204
+ v36_l198
  (let
   [eigenvalues
    (:eigenvalues pca-eigen)
@@ -245,12 +232,12 @@
 
 
 (deftest
- t39_l210
- (is ((fn [evs] (> (first evs) (second evs))) v38_l204)))
+ t37_l204
+ (is ((fn [evs] (> (first evs) (second evs))) v36_l198)))
 
 
 (def
- v41_l217
+ v39_l211
  (let
   [{:keys [eigenvalues eigenvectors]}
    pca-eigen
@@ -294,11 +281,11 @@
    plotly/plot)))
 
 
-(deftest t42_l243 (is ((fn [_] true) v41_l217)))
+(deftest t40_l237 (is ((fn [_] true) v39_l211)))
 
 
 (def
- v44_l250
+ v42_l244
  (let
   [{:keys [eigenvalues eigenvectors]}
    pca-eigen
@@ -319,23 +306,23 @@
   explained))
 
 
-(deftest t46_l263 (is ((fn [v] (> v 0.8)) v44_l250)))
+(deftest t44_l257 (is ((fn [v] (> v 0.8)) v42_l244)))
 
 
-(def v48_l276 (def test-matrix (la/matrix [[4 1 0] [1 3 1] [0 1 2]])))
+(def v46_l270 (def test-matrix (la/matrix [[4 1 0] [1 3 1] [0 1 2]])))
 
 
-(def v50_l283 (def true-eigenvalues (la/real-eigenvalues test-matrix)))
+(def v48_l277 (def true-eigenvalues (la/real-eigenvalues test-matrix)))
 
 
-(def v51_l286 true-eigenvalues)
+(def v49_l280 true-eigenvalues)
 
 
-(deftest t52_l288 (is ((fn [evs] (= 3 (count evs))) v51_l286)))
+(deftest t50_l282 (is ((fn [evs] (= 3 (count evs))) v49_l280)))
 
 
 (def
- v54_l293
+ v52_l287
  (def
   qr-history
   (loop
@@ -372,7 +359,7 @@
 
 
 (def
- v56_l323
+ v54_l317
  (->
   (tc/dataset qr-history)
   (plotly/base {:=x :iteration, :=y :off-diagonal})
@@ -380,14 +367,14 @@
   plotly/plot))
 
 
-(def v57_l328 (:off-diagonal (last qr-history)))
+(def v55_l322 (:off-diagonal (last qr-history)))
 
 
-(deftest t58_l330 (is ((fn [v] (< v 1.0E-6)) v57_l328)))
+(deftest t56_l324 (is ((fn [v] (< v 1.0E-6)) v55_l322)))
 
 
 (def
- v60_l335
+ v58_l329
  (let
   [final
    (last qr-history)
@@ -401,11 +388,11 @@
     true-eigenvalues))))
 
 
-(deftest t61_l341 (is (true? v60_l335)))
+(deftest t59_l335 (is (true? v58_l329)))
 
 
 (def
- v63_l345
+ v61_l339
  (->
   (tc/dataset
    (mapcat
@@ -420,4 +407,4 @@
   plotly/plot))
 
 
-(deftest t64_l354 (is ((fn [_] true) v63_l345)))
+(deftest t62_l348 (is ((fn [_] true) v61_l339)))

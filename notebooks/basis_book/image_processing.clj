@@ -18,7 +18,9 @@
    ;; Tensor ↔ BufferedImage conversion:
    [tech.v3.libs.buffered-image :as bufimg]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
-   [scicloj.kindly.v4.kind :as kind]))
+   [scicloj.kindly.v4.kind :as kind]
+   ;; Visualization helpers:
+   [scicloj.basis.vis :as vis]))
 
 ;; ## Synthetic test images
 ;;
@@ -29,12 +31,12 @@
 
 (def gradient
   (tensor/compute-tensor [200 200 3]
-    (fn [r c ch]
-      (case (int ch)
-        0 (int (* 255 (/ r 200.0)))   ;; red: top→bottom
-        1 (int (* 255 (/ c 200.0)))   ;; green: left→right
-        2 128))                        ;; blue: constant
-    :uint8))
+                         (fn [r c ch]
+                           (case (int ch)
+                             0 (int (* 255 (/ r 200.0)))   ;; red: top→bottom
+                             1 (int (* 255 (/ c 200.0)))   ;; green: left→right
+                             2 128))                        ;; blue: constant
+                         :uint8))
 
 (bufimg/tensor->image gradient)
 
@@ -46,9 +48,9 @@
 (def checkerboard
   (let [size 200 sq 25]
     (tensor/compute-tensor [size size 3]
-      (fn [r c _ch]
-        (if (even? (+ (quot r sq) (quot c sq))) 240 30))
-      :uint8)))
+                           (fn [r c _ch]
+                             (if (even? (+ (quot r sq) (quot c sq))) 240 30))
+                           :uint8)))
 
 (bufimg/tensor->image checkerboard)
 
@@ -60,16 +62,16 @@
 (def circle-img
   (let [size 200 cx 100 cy 100 radius 60]
     (tensor/compute-tensor [size size 3]
-      (fn [r c ch]
-        (let [dr (- r cy) dc (- c cx)
-              dist (Math/sqrt (+ (* dr dr) (* dc dc)))]
-          (if (<= dist radius)
-            (case (int ch)
-              0 50             ;; dark red
-              1 180            ;; bright green
-              2 220)           ;; bright blue
-            20)))              ;; dark background
-      :uint8)))
+                           (fn [r c ch]
+                             (let [dr (- r cy) dc (- c cx)
+                                   dist (Math/sqrt (+ (* dr dr) (* dc dc)))]
+                               (if (<= dist radius)
+                                 (case (int ch)
+                                   0 50             ;; dark red
+                                   1 180            ;; bright green
+                                   2 220)           ;; bright blue
+                                 20)))              ;; dark background
+                           :uint8)))
 
 (bufimg/tensor->image circle-img)
 
@@ -91,10 +93,10 @@
     (let [[h w _c] (dtype/shape img)
           channel (tensor/select img :all :all ch)]
       (tensor/compute-tensor [h w 3]
-        (fn [r c _] (int (tensor/mget channel r c)))
-        :uint8))))
+                             (fn [r c _] (int (tensor/mget channel r c)))
+                             :uint8))))
 
-(bufimg/tensor->image (extract-channel gradient 0))
+(bufimg/tensor->image (vis/extract-channel gradient 0))
 
 (kind/test-last
  [(fn [img] (= java.awt.image.BufferedImage (type img)))])
@@ -115,10 +117,10 @@
 (def swapped
   (let [[h w _c] (dtype/shape gradient)]
     (tensor/compute-tensor [h w 3]
-      (fn [r c ch]
+                           (fn [r c ch]
         ;; Swap R↔B
-        (int (tensor/mget gradient r c (case (int ch) 0 2 2 0 ch))))
-      :uint8)))
+                             (int (tensor/mget gradient r c (case (int ch) 0 2 2 0 ch))))
+                           :uint8)))
 
 (bufimg/tensor->image swapped)
 
@@ -170,10 +172,10 @@
           weights (la/column [0.299 0.587 0.114])
           gray-flat (la/mmul pixels weights)]
       (tensor/compute-tensor [h w 3]
-        (fn [r c _ch]
-          (let [idx (+ (* r w) c)]
-            (int (max 0 (min 255 (tensor/mget gray-flat idx 0))))))
-        :uint8))))
+                             (fn [r c _ch]
+                               (let [idx (+ (* r w) c)]
+                                 (int (max 0 (min 255 (tensor/mget gray-flat idx 0))))))
+                             :uint8))))
 
 (bufimg/tensor->image (to-grayscale gradient))
 
@@ -194,9 +196,9 @@
             (la/matrix [[1 1 1] [1 1 1] [1 1 1]])))
 
 (def sharpen-kernel
-  (la/matrix [[ 0 -1  0]
+  (la/matrix [[0 -1  0]
               [-1  5 -1]
-              [ 0 -1  0]]))
+              [0 -1  0]]))
 
 (def edge-kernel
   (la/matrix [[-1 -1 -1]
@@ -231,9 +233,9 @@
                                                                    (+ c kc)))))))))))]
             (aset out (+ (* ri w) ci) val))))
       (tensor/compute-tensor [h w 3]
-        (fn [r c _ch]
-          (int (max 0 (min 255 (aget out (+ (* r w) c))))))
-        :uint8))))
+                             (fn [r c _ch]
+                               (int (max 0 (min 255 (aget out (+ (* r w) c))))))
+                             :uint8))))
 
 ;; ### Box blur
 
@@ -306,9 +308,9 @@
                 mag (Math/sqrt (+ (* gx gx) (* gy gy)))]
             (aset out (+ (* ri w) ci) mag))))
       (tensor/compute-tensor [h w 3]
-        (fn [r c _ch]
-          (int (min 255 (aget out (+ (* r w) c)))))
-        :uint8))))
+                             (fn [r c _ch]
+                               (int (min 255 (aget out (+ (* r w) c)))))
+                             :uint8))))
 
 (bufimg/tensor->image (sobel-edges circle-img))
 

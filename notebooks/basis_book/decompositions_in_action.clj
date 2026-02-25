@@ -27,7 +27,9 @@
    ;; Seeded random number generation (https://generateme.github.io/fastmath/):
    [fastmath.random :as frand]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
-   [scicloj.kindly.v4.kind :as kind]))
+   [scicloj.kindly.v4.kind :as kind]
+   ;; Visualization helpers:
+   [scicloj.basis.vis :as vis]))
 
 ;; ## Image compression with SVD
 ;;
@@ -99,31 +101,23 @@
 
 ;; Compare rank 1, 5, 10, and 50 approximations:
 
-(def matrix->gray-image
-  (fn [m]
-    (let [[h w] (dtype/shape m)]
-      (tensor/compute-tensor [h w 3]
-                             (fn [r c _ch]
-                               (int (max 0 (min 255 (tensor/mget m r c)))))
-                             :uint8))))
-
 ;; Rank 1 — captures only the dominant direction:
 
-(bufimg/tensor->image (matrix->gray-image (reconstruct-rank-k svd-result 1)))
+(bufimg/tensor->image (vis/matrix->gray-image (reconstruct-rank-k svd-result 1)))
 
 (kind/test-last
  [(fn [img] (= java.awt.image.BufferedImage (type img)))])
 
 ;; Rank 5 — the circular structure starts to appear:
 
-(bufimg/tensor->image (matrix->gray-image (reconstruct-rank-k svd-result 5)))
+(bufimg/tensor->image (vis/matrix->gray-image (reconstruct-rank-k svd-result 5)))
 
 (kind/test-last
  [(fn [img] (= java.awt.image.BufferedImage (type img)))])
 
 ;; Rank 20 — nearly indistinguishable from the original:
 
-(bufimg/tensor->image (matrix->gray-image (reconstruct-rank-k svd-result 20)))
+(bufimg/tensor->image (vis/matrix->gray-image (reconstruct-rank-k svd-result 20)))
 
 (kind/test-last
  [(fn [img] (= java.awt.image.BufferedImage (type img)))])
