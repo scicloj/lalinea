@@ -24,6 +24,8 @@
    [tablecloth.api :as tc]
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
    [scicloj.tableplot.v1.plotly :as plotly]
+   ;; Seeded random number generation (https://generateme.github.io/fastmath/):
+   [fastmath.random :as frand]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]))
 
@@ -161,11 +163,11 @@
 (def data-tensor
   (let [theta (/ Math/PI 6)
         cos-t (Math/cos theta) sin-t (Math/sin theta)
-        rng (java.util.Random. 42)
+        rng (frand/rng :mersenne 42)
         arr (double-array (* n-points 2))]
     (dotimes [i n-points]
-      (let [p1 (* 3.0 (.nextGaussian rng))
-            p2 (* 0.8 (.nextGaussian rng))
+      (let [p1 (frand/grandom rng 0.0 3.0)
+            p2 (frand/grandom rng 0.0 0.8)
             x (+ (* cos-t p1) (* (- sin-t) p2))
             y (+ (* sin-t p1) (* cos-t p2))]
         (aset arr (* i 2) x)

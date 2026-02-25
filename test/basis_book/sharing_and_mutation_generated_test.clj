@@ -390,3 +390,34 @@
  (is
   ((fn [{:keys [E-00 Et-00]}] (and (== -1.0 E-00) (== 1.0 Et-00)))
    v60_l319)))
+
+
+(def
+ v63_l342
+ (let
+  [make-random-tensor
+   (fn
+    []
+    (let
+     [rng (java.util.Random. 42)]
+     (tensor/compute-tensor
+      [4 4]
+      (fn [_ _] (.nextGaussian rng))
+      :float64)))]
+  (la/close? (make-random-tensor) (make-random-tensor))))
+
+
+(def
+ v65_l355
+ (let
+  [make-random-tensor
+   (fn
+    []
+    (let
+     [rng (java.util.Random. 42) arr (double-array 16)]
+     (dotimes [i 16] (aset arr i (.nextGaussian rng)))
+     (tensor/reshape (tensor/ensure-tensor arr) [4 4])))]
+  (la/close? (make-random-tensor) (make-random-tensor))))
+
+
+(deftest t66_l364 (is (true? v65_l355)))

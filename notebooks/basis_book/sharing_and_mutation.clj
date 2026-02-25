@@ -328,6 +328,45 @@
     (and (== -1.0 E-00)
          (== 1.0 Et-00)))])
 
+;; ## Mutable state and compute-tensor
+;;
+;; `tensor/compute-tensor` may evaluate its function **out of element
+;; order** (it can parallelise across chunks). This means a mutable
+;; object like a random number generator consumed inside the function
+;; produces non-deterministic results — the order of `.nextGaussian`
+;; calls depends on thread scheduling.
+
+;; Here we use `compute-tensor` with a seeded RNG and check whether
+;; two calls produce the same tensor:
+
+(let [make-random-tensor
+      (fn []
+        (let [rng (java.util.Random. 42)]
+          (tensor/compute-tensor [4 4] (fn [_ _] (.nextGaussian rng)) :float64)))]
+  (la/close? (make-random-tensor) (make-random-tensor)))
+
+;; This may return `true` or `false` depending on the runtime's
+;; thread scheduling. The RNG is deterministic, but the *order*
+;; in which elements are requested is not.
+;;
+;; The safe alternative is `dotimes` with `aset`, which guarantees
+;; sequential evaluation:
+
+(let [make-random-tensor
+      (fn []
+        (let [rng (java.util.Random. 42)
+              arr (double-array 16)]
+          (dotimes [i 16]
+            (aset arr i (.nextGaussian rng)))
+          (tensor/reshape (tensor/ensure-tensor arr) [4 4])))]
+  (la/close? (make-random-tensor) (make-random-tensor)))
+
+(kind/test-last [true?])
+
+;; **Rule of thumb**: never pass mutable state into `compute-tensor`.
+;; Use `dotimes`/`aset` for sequential side-effecting construction,
+;; or pre-generate the random data and reshape it.
+
 ;; ## Summary
 ;;
 ;; | Operation | Shares memory? | Notes |

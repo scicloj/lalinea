@@ -55,7 +55,7 @@
       n (count signal)
       spectrum (bfft/forward signal)
       time-energy (dfn/sum (dfn/* (double-array signal) (double-array signal)))
-      magnitudes (cx/abs spectrum)
+      magnitudes (la/abs spectrum)
       freq-energy (/ (dfn/sum (dfn/* magnitudes magnitudes)) n)]
   (< (Math/abs (- time-energy freq-energy)) 1e-10))
 
@@ -114,7 +114,7 @@
 
 (let [spectrum (bfft/forward [3.0 3.0 3.0 3.0])]
   {:dc (cx/re (spectrum 0))
-   :others [(cx/abs (spectrum 1)) (cx/abs (spectrum 2)) (cx/abs (spectrum 3))]})
+   :others [(la/abs (spectrum 1)) (la/abs (spectrum 2)) (la/abs (spectrum 3))]})
 
 (kind/test-last [(fn [v] (and (< (Math/abs (- (double (:dc v)) 12.0)) 1e-10)
                               (every? #(< % 1e-10) (:others v))))])
@@ -122,7 +122,7 @@
 ;; The DFT of $x = [1, -1, 1, -1]$ has energy only at Nyquist ($k = N/2$).
 
 (let [spectrum (bfft/forward [1.0 -1.0 1.0 -1.0])]
-  {:dc (double (cx/abs (spectrum 0)))
+  {:dc (double (la/abs (spectrum 0)))
    :nyquist (double (cx/re (spectrum 2)))})
 
 (kind/test-last [(fn [v] (and (< (:dc v) 1e-10)

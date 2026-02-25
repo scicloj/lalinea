@@ -19,6 +19,8 @@
    [tablecloth.api :as tc]
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
    [scicloj.tableplot.v1.plotly :as plotly]
+   ;; Seeded random number generation (https://generateme.github.io/fastmath/):
+   [fastmath.random :as frand]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]))
 
@@ -39,10 +41,11 @@
 (def xs (vec (range -3.0 3.1 0.3)))
 
 (def ys
-  (mapv (fn [x]
-          (+ (* 0.5 x x) (* -1.2 x) 3.0
-             (* 0.5 (- (rand) 0.5))))
-        xs))
+  (let [rng (frand/rng :mersenne 42)]
+    (mapv (fn [x]
+            (+ (* 0.5 x x) (* -1.2 x) 3.0
+               (* 0.5 (frand/drandom rng -0.5 0.5))))
+          xs)))
 
 ;; ### Build the Vandermonde matrix
 ;;
@@ -52,8 +55,8 @@
 
 (def vandermonde
   (tensor/compute-tensor [(count xs) (inc degree)]
-    (fn [r c] (Math/pow (nth xs r) (double c)))
-    :float64))
+                         (fn [r c] (Math/pow (nth xs r) (double c)))
+                         :float64))
 
 vandermonde
 
@@ -141,8 +144,8 @@ beta-weighted
 
 (def A-gs
   (la/matrix [[10  1  2]
-              [ 1 12  3]
-              [ 2  3 15]]))
+              [1 12  3]
+              [2  3 15]]))
 
 (def b-gs (la/column [13 16 20]))
 
@@ -175,7 +178,7 @@ x-direct
                                          (+ s (* (aget A-arr (+ (* i n) j))
                                                  (aget x j)))))))]
               (aset x i (/ (- (aget b-arr i) sigma)
-                          (aget A-arr (+ (* i n) i))))))
+                           (aget A-arr (+ (* i n) i))))))
           (let [x-tensor (tensor/reshape (tensor/ensure-tensor (dtype/clone x)) [n 1])
                 residual (la/norm (la/sub (la/mmul A-gs x-tensor) b-gs))]
             (recur (inc k)

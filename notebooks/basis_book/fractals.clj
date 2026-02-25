@@ -14,8 +14,9 @@
 
 (ns basis-book.fractals
   (:require
-   ;; Complex tensors — interleaved [re im] layout:
+   ;; Basis linear algebra API (https://github.com/scicloj/basis):
    [scicloj.basis.linalg :as la]
+   ;; Complex tensors — interleaved [re im] layout:
    [scicloj.basis.complex :as cx]
    ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
    [tech.v3.tensor :as tensor]

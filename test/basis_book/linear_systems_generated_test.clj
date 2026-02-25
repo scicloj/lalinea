@@ -7,27 +7,36 @@
   [tech.v3.datatype.functional :as dfn]
   [tablecloth.api :as tc]
   [scicloj.tableplot.v1.plotly :as plotly]
+  [fastmath.random :as frand]
   [scicloj.kindly.v4.kind :as kind]
   [clojure.test :refer [deftest is]]))
 
 
-(def v3_l39 (def xs (vec (range -3.0 3.1 0.3))))
+(def v3_l41 (def xs (vec (range -3.0 3.1 0.3))))
 
 
 (def
- v4_l41
+ v4_l43
  (def
   ys
-  (mapv
-   (fn [x] (+ (* 0.5 x x) (* -1.2 x) 3.0 (* 0.5 (- (rand) 0.5))))
-   xs)))
+  (let
+   [rng (frand/rng :mersenne 42)]
+   (mapv
+    (fn
+     [x]
+     (+
+      (* 0.5 x x)
+      (* -1.2 x)
+      3.0
+      (* 0.5 (frand/drandom rng -0.5 0.5))))
+    xs))))
 
 
-(def v6_l51 (def degree 2))
+(def v6_l54 (def degree 2))
 
 
 (def
- v7_l53
+ v7_l56
  (def
   vandermonde
   (tensor/compute-tensor
@@ -36,21 +45,21 @@
    :float64)))
 
 
-(def v8_l58 vandermonde)
+(def v8_l61 vandermonde)
 
 
 (deftest
- t9_l60
+ t9_l63
  (is
   ((fn [m] (= [(count xs) (inc degree)] (vec (dtype/shape m))))
-   v8_l58)))
+   v8_l61)))
 
 
-(def v11_l68 (def y-col (la/column ys)))
+(def v11_l71 (def y-col (la/column ys)))
 
 
 (def
- v12_l70
+ v12_l73
  (def
   beta
   (la/solve
@@ -58,11 +67,11 @@
    (la/mmul (la/transpose vandermonde) y-col))))
 
 
-(def v13_l74 beta)
+(def v13_l77 beta)
 
 
 (deftest
- t15_l79
+ t15_l82
  (is
   ((fn
     [b]
@@ -77,11 +86,11 @@
       (< (Math/abs (- b0 3.0)) 0.5)
       (< (Math/abs (- b1 -1.2)) 0.5)
       (< (Math/abs (- b2 0.5)) 0.3))))
-   v13_l74)))
+   v13_l77)))
 
 
 (def
- v17_l89
+ v17_l92
  (def
   fitted-ys
   (vec
@@ -89,7 +98,7 @@
 
 
 (def
- v18_l92
+ v18_l95
  (->
   (tc/dataset
    {:x (concat xs xs),
@@ -103,15 +112,15 @@
 
 
 (def
- v20_l111
+ v20_l114
  (def weights (mapv (fn [x] (Math/exp (- (* 0.5 x x)))) xs)))
 
 
-(def v21_l114 (def W (la/diag weights)))
+(def v21_l117 (def W (la/diag weights)))
 
 
 (def
- v22_l116
+ v22_l119
  (def
   beta-weighted
   (la/solve
@@ -119,35 +128,35 @@
    (la/mmul (la/transpose vandermonde) (la/mmul W y-col)))))
 
 
-(def v23_l120 beta-weighted)
+(def v23_l123 beta-weighted)
 
 
 (deftest
- t24_l122
+ t24_l125
  (is
   ((fn
     [b]
     (let [b0 (tensor/mget b 0 0)] (< (Math/abs (- b0 3.0)) 0.5)))
-   v23_l120)))
+   v23_l123)))
 
 
-(def v26_l142 (def A-gs (la/matrix [[10 1 2] [1 12 3] [2 3 15]])))
+(def v26_l145 (def A-gs (la/matrix [[10 1 2] [1 12 3] [2 3 15]])))
 
 
-(def v27_l147 (def b-gs (la/column [13 16 20])))
+(def v27_l150 (def b-gs (la/column [13 16 20])))
 
 
-(def v29_l151 (def x-direct (la/solve A-gs b-gs)))
+(def v29_l154 (def x-direct (la/solve A-gs b-gs)))
 
 
-(def v30_l153 x-direct)
+(def v30_l156 x-direct)
 
 
-(deftest t31_l155 (is ((fn [x] (some? x)) v30_l153)))
+(deftest t31_l158 (is ((fn [x] (some? x)) v30_l156)))
 
 
 (def
- v33_l159
+ v33_l162
  (def
   gauss-seidel-history
   (let
@@ -197,7 +206,7 @@
 
 
 (def
- v35_l187
+ v35_l190
  (->
   (tc/dataset gauss-seidel-history)
   (plotly/base {:=x :iteration, :=y :residual})
@@ -205,14 +214,14 @@
   plotly/plot))
 
 
-(def v37_l194 (-> gauss-seidel-history last :residual))
+(def v37_l197 (-> gauss-seidel-history last :residual))
 
 
-(deftest t38_l196 (is ((fn [r] (< r 1.0E-10)) v37_l194)))
+(deftest t38_l199 (is ((fn [r] (< r 1.0E-10)) v37_l197)))
 
 
 (def
- v40_l202
+ v40_l205
  (let
   [x-iter
    (let
@@ -249,4 +258,4 @@
   (la/norm (la/sub x-iter x-direct))))
 
 
-(deftest t41_l219 (is ((fn [d] (< d 1.0E-10)) v40_l202)))
+(deftest t41_l222 (is ((fn [d] (< d 1.0E-10)) v40_l205)))

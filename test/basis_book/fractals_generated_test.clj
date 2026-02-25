@@ -12,7 +12,7 @@
 
 
 (def
- v3_l38
+ v3_l39
  (def
   complex-grid
   (fn
@@ -30,7 +30,7 @@
 
 
 (def
- v5_l50
+ v5_l51
  (let
   [g (complex-grid -2.0 1.0 -1.5 1.5 3 3) raw (.tensor g)]
   {:shape (cx/complex-shape g),
@@ -39,7 +39,7 @@
 
 
 (deftest
- t6_l56
+ t6_l57
  (is
   ((fn
     [v]
@@ -47,11 +47,11 @@
      (= (:shape v) [3 3])
      (= (:top-left-re v) -2.0)
      (= (:bottom-right-im v) 1.5)))
-   v5_l50)))
+   v5_l51)))
 
 
 (def
- v8_l73
+ v8_l74
  (def
   mandelbrot-counts
   (fn
@@ -84,7 +84,7 @@
 
 
 (def
- v10_l98
+ v10_l99
  (def
   counts->image
   (fn
@@ -119,7 +119,7 @@
 
 
 (def
- v12_l113
+ v12_l114
  (def
   mandelbrot-img
   (let
@@ -134,16 +134,16 @@
    (counts->image counts h w max-iter))))
 
 
-(def v13_l118 (bufimg/tensor->image mandelbrot-img))
+(def v13_l119 (bufimg/tensor->image mandelbrot-img))
 
 
 (deftest
- t14_l120
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v13_l118)))
+ t14_l121
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v13_l119)))
 
 
 (def
- v16_l128
+ v16_l129
  (def
   mandelbrot-zoom
   (let
@@ -158,16 +158,16 @@
    (counts->image counts h w max-iter))))
 
 
-(def v17_l133 (bufimg/tensor->image mandelbrot-zoom))
+(def v17_l134 (bufimg/tensor->image mandelbrot-zoom))
 
 
 (deftest
- t18_l135
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v17_l133)))
+ t18_l136
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v17_l134)))
 
 
 (def
- v20_l144
+ v20_l145
  (def
   julia-counts
   (fn
@@ -206,7 +206,7 @@
 
 
 (def
- v22_l170
+ v22_l171
  (def
   julia-dendrite
   (let
@@ -221,16 +221,16 @@
    (counts->image counts h w max-iter))))
 
 
-(def v23_l175 (bufimg/tensor->image julia-dendrite))
+(def v23_l176 (bufimg/tensor->image julia-dendrite))
 
 
 (deftest
- t24_l177
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v23_l175)))
+ t24_l178
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v23_l176)))
 
 
 (def
- v26_l182
+ v26_l183
  (def
   julia-connected
   (let
@@ -245,16 +245,16 @@
    (counts->image counts h w max-iter))))
 
 
-(def v27_l187 (bufimg/tensor->image julia-connected))
+(def v27_l188 (bufimg/tensor->image julia-connected))
 
 
 (deftest
- t28_l189
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v27_l187)))
+ t28_l190
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v27_l188)))
 
 
 (def
- v30_l194
+ v30_l195
  (def
   julia-rabbit
   (let
@@ -269,24 +269,24 @@
    (counts->image counts h w max-iter))))
 
 
-(def v31_l199 (bufimg/tensor->image julia-rabbit))
+(def v31_l200 (bufimg/tensor->image julia-rabbit))
 
 
 (deftest
- t32_l201
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v31_l199)))
+ t32_l202
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v31_l200)))
 
 
-(def v34_l217 (def dragon-n 512))
+(def v34_l218 (def dragon-n 512))
 
 
 (def
- v35_l219
+ v35_l220
  (def bit-at (fn [n pos] (bit-and (int (/ n (Math/pow 2 pos))) 1))))
 
 
 (def
- v36_l223
+ v36_l224
  (def
   dragon-points
   (let
@@ -329,7 +329,7 @@
 
 
 (def
- v38_l257
+ v38_l258
  (let
   [pts
    dragon-points
@@ -371,4 +371,4 @@
       :stroke-linejoin "round"}]])))
 
 
-(deftest t39_l280 (is ((fn [_] (vector? dragon-points)) v38_l257)))
+(deftest t39_l281 (is ((fn [_] (vector? dragon-points)) v38_l258)))
