@@ -89,13 +89,9 @@
 (def
  v15_l100
  (let
-  [M
-   (la/matrix [[1 2] [3 4]])
-   dm
-   (la/tensor->dmat M)
-   _
-   (aset (.data dm) 3 99.0)]
-  (tensor/mget M 1 1)))
+  [M (la/matrix [[1 2] [3 4]]) dm (la/tensor->dmat M)]
+  (tensor/mset! M 1 1 99.0)
+  (.get dm 1 1)))
 
 
 (deftest t16_l105 (is ((fn [v] (== 99.0 v)) v15_l100)))

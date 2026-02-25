@@ -95,12 +95,12 @@
     (and (== -1.0 M-00)
          (== -1.0 dm-00)))])
 
-;; And the other direction — mutating the tensor's array:
+;; And the other direction — mutating the tensor is visible in EJML:
 
 (let [M (la/matrix [[1 2] [3 4]])
-      dm (la/tensor->dmat M)
-      _ (aset (.data dm) 3 99.0)]
-  (tensor/mget M 1 1))
+      dm (la/tensor->dmat M)]
+  (tensor/mset! M 1 1 99.0)
+  (.get dm 1 1))
 
 (kind/test-last [(fn [v] (== 99.0 v))])
 
