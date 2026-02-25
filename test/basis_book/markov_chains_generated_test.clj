@@ -75,15 +75,26 @@
 (deftest
  t14_l104
  (is
-  ((fn [v] (< (Math/abs (- (+ (v 0) (v 1) (v 2)) 1.0)) 1.0E-10))
+  ((fn
+    [v]
+    (and
+     (< (Math/abs (- (+ (v 0) (v 1) (v 2)) 1.0)) 1.0E-10)
+     (let
+      [prev (nth walk-history 18)]
+      (<
+       (+
+        (Math/abs (- (v 0) (:sunny prev)))
+        (Math/abs (- (v 1) (:cloudy prev)))
+        (Math/abs (- (v 2) (:rainy prev))))
+       1.0E-6))))
    v13_l99)))
 
 
-(def v16_l115 (def eigen-result (la/eigen (la/transpose P))))
+(def v16_l122 (def eigen-result (la/eigen (la/transpose P))))
 
 
 (def
- v18_l119
+ v18_l126
  (def
   stationary-eigen
   (let
@@ -105,22 +116,22 @@
    (vec (dfn/* col (/ 1.0 total))))))
 
 
-(def v19_l131 stationary-eigen)
+(def v19_l138 stationary-eigen)
 
 
 (deftest
- t20_l133
+ t20_l140
  (is
   ((fn
     [v]
     (and
      (< (Math/abs (- (dfn/sum (double-array v)) 1.0)) 1.0E-10)
      (every? pos? v)))
-   v19_l131)))
+   v19_l138)))
 
 
 (def
- v22_l145
+ v22_l152
  (def
   power-iteration-history
   (let
@@ -144,7 +155,7 @@
 
 
 (def
- v24_l161
+ v24_l168
  (->
   (tc/dataset power-iteration-history)
   (plotly/base {:=x :iteration, :=y :change})
@@ -152,14 +163,14 @@
   plotly/plot))
 
 
-(def v26_l168 (:change (last power-iteration-history)))
+(def v26_l175 (:change (last power-iteration-history)))
 
 
-(deftest t27_l170 (is ((fn [c] (< c 1.0E-10)) v26_l168)))
+(deftest t27_l177 (is ((fn [c] (< c 1.0E-10)) v26_l175)))
 
 
 (def
- v29_l191
+ v29_l198
  (def
   H
   (la/matrix
@@ -170,14 +181,14 @@
     [1/4 1/4 1/4 1/4 0]])))
 
 
-(def v31_l202 (def damping 0.85))
+(def v31_l209 (def damping 0.85))
 
 
-(def v32_l204 (def n-pages 5))
+(def v32_l211 (def n-pages 5))
 
 
 (def
- v33_l206
+ v33_l213
  (def
   google-matrix
   (la/add
@@ -188,7 +199,7 @@
 
 
 (def
- v35_l213
+ v35_l220
  (def
   pagerank
   (let
@@ -207,7 +218,7 @@
 
 
 (def
- v37_l225
+ v37_l232
  (->
   (tc/dataset
    {:page ["Page 0" "Page 1" "Page 2" "Page 3" "Page 4"],
@@ -217,15 +228,15 @@
   plotly/plot))
 
 
-(def v39_l233 (dfn/sum pagerank))
+(def v39_l240 (dfn/sum pagerank))
 
 
 (deftest
- t40_l235
- (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v39_l233)))
+ t40_l242
+ (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v39_l240)))
 
 
-(def v42_l240 (argops/argmax pagerank))
+(def v42_l247 (argops/argmax pagerank))
 
 
-(deftest t43_l242 (is ((fn [idx] (contains? #{0 2} idx)) v42_l240)))
+(deftest t43_l249 (is ((fn [idx] (contains? #{0 2} idx)) v42_l247)))

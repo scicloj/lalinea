@@ -102,7 +102,14 @@
    (:rainy last-state)])
 
 (kind/test-last
- [(fn [v] (< (Math/abs (- (+ (v 0) (v 1) (v 2)) 1.0)) 1e-10))])
+ [(fn [v]
+    (and (< (Math/abs (- (+ (v 0) (v 1) (v 2)) 1.0)) 1e-10)
+         ;; Verify convergence: last two steps are nearly identical
+         (let [prev (nth walk-history 18)]
+           (< (+ (Math/abs (- (v 0) (:sunny prev)))
+                 (Math/abs (- (v 1) (:cloudy prev)))
+                 (Math/abs (- (v 2) (:rainy prev))))
+              1e-6))))])
 
 ;; ## Stationary distribution via eigendecomposition
 ;;

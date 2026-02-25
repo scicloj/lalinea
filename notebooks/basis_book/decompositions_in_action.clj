@@ -319,6 +319,11 @@ true-eigenvalues
     (plotly/layer-line)
     plotly/plot)
 
+(:off-diagonal (last qr-history))
+
+(kind/test-last
+ [(fn [v] (< v 1e-6))])
+
 ;; The diagonal converges to the true eigenvalues:
 
 (let [final (last qr-history)

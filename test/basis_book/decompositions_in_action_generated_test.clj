@@ -362,8 +362,14 @@
   plotly/plot))
 
 
+(def v57_l322 (:off-diagonal (last qr-history)))
+
+
+(deftest t58_l324 (is ((fn [v] (< v 1.0E-6)) v57_l322)))
+
+
 (def
- v58_l324
+ v60_l329
  (let
   [final
    (last qr-history)
@@ -377,11 +383,11 @@
     true-eigenvalues))))
 
 
-(deftest t59_l330 (is (true? v58_l324)))
+(deftest t61_l335 (is (true? v60_l329)))
 
 
 (def
- v61_l334
+ v63_l339
  (->
   (tc/dataset
    (mapcat
@@ -396,4 +402,4 @@
   plotly/plot))
 
 
-(deftest t62_l343 (is ((fn [_] true) v61_l334)))
+(deftest t64_l348 (is ((fn [_] true) v63_l339)))
