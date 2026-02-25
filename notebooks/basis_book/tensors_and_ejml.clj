@@ -1,17 +1,10 @@
 ;; # Tensors and EJML
 ;;
-;; **basis** uses dtype-next tensors as the matrix type and EJML
-;; as the computational backend. The two share the same memory
-;; layout — row-major `double[]` — enabling **zero-copy** interop.
-;;
-;; | Type | Backing | Layout |
-;; |:-----|:--------|:-------|
-;; | dtype-next tensor `[r c]` | `double[r*c]` | row-major |
-;; | EJML `DMatrixRMaj` `[r*c]` | `double[r*c]` | row-major |
-;;
-;; This means converting between the two involves no allocation
-;; and no copying — just wrapping the same `double[]` in a
-;; different view.
+;; **basis** represents matrices as
+;; [dtype-next](https://github.com/cnuernber/dtype-next) tensors
+;; and uses [EJML](https://ejml.org/) for the heavy numerical work.
+;; This chapter introduces both libraries and shows how they
+;; fit together through zero-copy interop.
 
 (ns basis-book.tensors-and-ejml
   (:require
@@ -26,6 +19,104 @@
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind])
   (:import [org.ejml.data DMatrixRMaj]))
+
+;; ## dtype-next: typed numerical arrays
+;;
+;; [dtype-next](https://github.com/cnuernber/dtype-next) is a Clojure
+;; library for working with typed numerical data. Its core abstraction
+;; is the **buffer** — a typed, indexed container that can be backed
+;; by a Java array, an off-heap memory region, or a functional reader
+;; that computes values on the fly. All three look the same to consumer
+;; code: they share a common interface for element access, type queries,
+;; and functional transformations.
+;;
+;; A [tensor](https://cnuernber.github.io/dtype-next/tech.v3.tensor.html)
+;; is a **multi-dimensional view** over a buffer. Reshaping or slicing
+;; a tensor creates a new view without copying data — the same backing
+;; storage is simply indexed differently.
+
+;; ### Creating tensors
+
+;; `tensor/->tensor` creates a tensor from nested sequences:
+
+(tensor/->tensor [[1 2 3]
+                  [4 5 6]] {:datatype :float64})
+
+(kind/test-last [(fn [t] (= [2 3] (vec (dtype/shape t))))])
+
+;; `tensor/compute-tensor` builds a tensor by calling a function at
+;; each index — useful for procedural construction:
+
+(tensor/compute-tensor [3 3]
+                       (fn [i j] (if (== i j) 1.0 0.0))
+                       :float64)
+
+(kind/test-last [(fn [t] (= 1.0 (tensor/mget t 1 1)))])
+
+;; ### Indexing and mutation
+
+;; Tensors are callable — `(t i j)` reads element `[i,j]`:
+
+(let [t (tensor/->tensor [[10 20] [30 40]] {:datatype :float64})]
+  [(t 0 1) (t 1 0)])
+
+(kind/test-last [(fn [v] (= [20.0 30.0] v))])
+
+;; `tensor/mget` does the same, and `tensor/mset!` mutates in place:
+
+(let [t (tensor/->tensor [[1 2] [3 4]] {:datatype :float64})]
+  (tensor/mset! t 0 1 99.0)
+  (t 0 1))
+
+(kind/test-last [= 99.0])
+
+;; ### Element-wise operations with dfn
+;;
+;; The `tech.v3.datatype.functional` namespace (aliased `dfn`) provides
+;; element-wise arithmetic on tensors. These operations return **lazy
+;; readers** — they compute on access without allocating intermediate
+;; arrays.
+
+(let [a (tensor/->tensor [[1 2] [3 4]] {:datatype :float64})
+      b (tensor/->tensor [[10 20] [30 40]] {:datatype :float64})]
+  (dfn/+ a b))
+
+(kind/test-last [(fn [t] (= 44.0 (tensor/mget t 1 1)))])
+
+;; Chaining is free — no intermediate copies:
+
+(let [x (tensor/->tensor [[1 4] [9 16]] {:datatype :float64})]
+  (tensor/mget (dfn/sqrt x) 1 0))
+
+;; $\sqrt{9} = 3$
+
+(kind/test-last [= 3.0])
+
+;; ## EJML: efficient Java matrix library
+;;
+;; [EJML](https://ejml.org/) is a pure-Java linear algebra library.
+;; Its workhorse type for real matrices is
+;; [`DMatrixRMaj`](http://ejml.org/javadoc/org/ejml/data/DMatrixRMaj.html)
+;; — a dense matrix stored as a flat `double[]` in **row-major** order.
+;;
+;; EJML provides the algorithms that basis wraps: matrix multiply,
+;; decompositions (eigen, SVD, QR, Cholesky), inverse, solve, and
+;; determinant.
+
+;; ### The key insight: same memory layout
+;;
+;; A dtype-next `[r c]` tensor of `:float64` values is backed by a
+;; `double[]` in row-major order. An EJML `DMatrixRMaj` is also
+;; backed by a `double[]` in row-major order. They are the same thing.
+;;
+;; | Type | Backing | Layout |
+;; |:-----|:--------|:-------|
+;; | dtype-next tensor `[r c]` | `double[r*c]` | row-major |
+;; | EJML `DMatrixRMaj` | `double[r*c]` | row-major |
+;;
+;; This means converting between the two involves no allocation
+;; and no copying — just wrapping the same `double[]` in a
+;; different view.
 
 ;; ## Zero-copy round-trip
 ;;
@@ -97,26 +188,6 @@
 (la/norm (la/matrix [[1 2 3] [4 5 6]]))
 
 (kind/test-last [(fn [v] (< (Math/abs (- v (Math/sqrt 91.0))) 1e-10))])
-
-;; ## Composing tensors with dfn
-;;
-;; Since matrices are dtype-next tensors, all `dfn` operations work
-;; element-wise.
-
-(tensor/mget (dfn/sqrt (la/matrix [[1 4] [9 16]])) 1 0)
-
-;; $\sqrt{9} = 3$
-
-(kind/test-last [= 3.0])
-
-;; Element-wise multiply (Hadamard product):
-
-(tensor/mget (tensor/ensure-tensor
-              (dfn/* (la/matrix [[1 2] [3 4]])
-                     (la/matrix [[5 6] [7 8]])))
-             0 0)
-
-(kind/test-last [= 5.0])
 
 ;; ## Decompositions
 
