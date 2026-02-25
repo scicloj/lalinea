@@ -44,8 +44,10 @@
 
 (kind/test-last [(fn [t] (= [2 3] (vec (dtype/shape t))))])
 
-;; `tensor/compute-tensor` builds a tensor by calling a function at
-;; each index — useful for procedural construction:
+;; `tensor/compute-tensor` creates a lazy tensor that calls a function
+;; at each index on every read — useful for procedural construction.
+;; With a pure function this is transparent; use `dtype/clone` to
+;; materialize when you need a concrete array:
 
 (tensor/compute-tensor [3 3]
                        (fn [i j] (if (== i j) 1.0 0.0))

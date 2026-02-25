@@ -400,6 +400,7 @@
 ;; | `cx/re` / `cx/im` | No | Yes — strided view | Views into interleaved layout |
 ;; | `dfn/+`, `dfn/*`, etc. | No | No — lazy reader | Reads through to sources |
 ;; | `cx/add`, `cx/sub`, `cx/scale` | No | No — lazy reader | Lazy ComplexTensors |
+;; | `tensor/compute-tensor` | No | No — lazy, noncaching | May evaluate out of element order |
 ;; | `dtype/clone` | Yes | Yes — independent | Breaks all links to source |
 ;; | `la/submatrix` | Yes | Yes — independent | Always clones |
 ;; | `la/mmul`, `la/transpose`, etc. | Yes | Yes — independent | EJML allocates new result |
