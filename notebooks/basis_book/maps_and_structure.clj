@@ -13,6 +13,8 @@
    [scicloj.basis.linalg :as la]
    ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
    [tech.v3.tensor :as tensor]
+   ;; Low-level buffer operations:
+   [tech.v3.datatype :as dtype]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
@@ -459,9 +461,27 @@ rank-M
 ;; are **orthogonal complements** — they are perpendicular
 ;; and together they fill the whole space.
 ;;
-;; For our matrix $M$ ($3 \times 3$, rank 2):
+;; Let us compute all four for our rank-2 matrix $M$:
 
-;; Row space vectors (from the SVD):
+;; **Column space** — the columns of $U$ corresponding to
+;; non-zero singular values:
+
+(def col-space-basis
+  (let [sv (vec (:S svd-M))
+        U (:U svd-M)
+        col-idx (vec (keep-indexed (fn [i s] (when (> s 1e-10) i)) sv))]
+    (la/submatrix U :all col-idx)))
+
+;; **Left null space** — the remaining columns of $U$:
+
+(def left-null-basis
+  (let [sv (vec (:S svd-M))
+        U (:U svd-M)
+        null-idx (vec (keep-indexed (fn [i s] (when (< s 1e-10) i)) sv))]
+    (la/submatrix U :all null-idx)))
+
+;; **Row space** — the columns of $V$ corresponding to
+;; non-zero singular values:
 
 (def row-space-basis
   (let [sv (vec (:S svd-M))
@@ -469,12 +489,44 @@ rank-M
         row-idx (vec (keep-indexed (fn [i s] (when (> s 1e-10) i)) sv))]
     (la/submatrix (la/transpose Vt) :all row-idx)))
 
-;; The null space and row space are orthogonal:
+;; **Null space** — already computed above as `null-basis`.
+
+;; Let us verify the dimensions match the table:
+
+{:col-space (second (dtype/shape col-space-basis))
+ :left-null (second (dtype/shape left-null-basis))
+ :row-space (second (dtype/shape row-space-basis))
+ :null-space (second (dtype/shape null-basis))}
+
+(kind/test-last
+ [(fn [m] (and (= 2 (:col-space m))
+               (= 1 (:left-null m))
+               (= 2 (:row-space m))
+               (= 1 (:null-space m))))])
+
+;; rank = 2, nullity = 1, and the dimensions add up:
+;;
+;; - In $\mathbb{R}^3$ (output): col space (2) + left null (1) = 3
+;; - In $\mathbb{R}^3$ (input): row space (2) + null space (1) = 3
+
+;; The **orthogonality** is what makes this structure beautiful.
+;; In the input space, the row space and null space are perpendicular:
 
 (la/mmul (la/transpose row-space-basis) null-basis)
 
 (kind/test-last
  [(fn [r] (< (la/norm r) 1e-10))])
 
+;; And in the output space, the column space and left null space
+;; are perpendicular:
+
+(la/mmul (la/transpose col-space-basis) left-null-basis)
+
+(kind/test-last
+ [(fn [r] (< (la/norm r) 1e-10))])
+
 ;; This means every vector in $\mathbb{R}^3$ splits uniquely
-;; into a row-space part and a null-space part.
+;; into a row-space part and a null-space part (input side),
+;; or a column-space part and a left-null-space part (output side).
+;; The matrix $M$ maps the row space onto the column space
+;; and annihilates the null space.

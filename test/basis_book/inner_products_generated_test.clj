@@ -201,8 +201,37 @@
 (deftest t15_l142 (is ((fn [d] (< (Math/abs d) 1.0E-10)) v14_l140)))
 
 
+(def v17_l159 (def p (la/column [1 0])))
+
+
+(def v18_l160 (def q (la/column [1 1])))
+
+
 (def
- v17_l165
+ v19_l162
+ (def cos-theta (/ (dfn/sum (dfn/* p q)) (* (la/norm p) (la/norm q)))))
+
+
+(def v20_l166 cos-theta)
+
+
+(deftest
+ t21_l168
+ (is
+  ((fn [c] (< (Math/abs (- c (/ 1.0 (Math/sqrt 2.0)))) 1.0E-10))
+   v20_l166)))
+
+
+(def v23_l173 (Math/toDegrees (Math/acos cos-theta)))
+
+
+(deftest
+ t24_l175
+ (is ((fn [d] (< (Math/abs (- d 45.0)) 1.0E-10)) v23_l173)))
+
+
+(def
+ v26_l194
  (arrow-plot
   [{:label "a", :xy [2 1], :color "#999999"}
    {:label "b", :xy [1 3], :color "#2266cc"}
@@ -215,11 +244,11 @@
   {}))
 
 
-(def v19_l175 (def W-proj (la/matrix [[1 0] [0 1] [1 1]])))
+(def v28_l204 (def W-proj (la/matrix [[1 0] [0 1] [1 1]])))
 
 
 (def
- v21_l183
+ v30_l212
  (def
   P-proj
   (la/mmul
@@ -229,69 +258,69 @@
     (la/transpose W-proj)))))
 
 
-(def v23_l191 (la/close? (la/mmul P-proj P-proj) P-proj))
+(def v32_l220 (la/close? (la/mmul P-proj P-proj) P-proj))
 
 
-(deftest t24_l193 (is (true? v23_l191)))
+(deftest t33_l222 (is (true? v32_l220)))
 
 
-(def v26_l197 (def point3d (la/column [1 2 3])))
+(def v35_l226 (def point3d (la/column [1 2 3])))
 
 
-(def v27_l199 (def projected-pt (la/mmul P-proj point3d)))
+(def v36_l228 (def projected-pt (la/mmul P-proj point3d)))
 
 
-(def v28_l201 projected-pt)
+(def v37_l230 projected-pt)
 
 
-(def v30_l207 (def resid (la/sub point3d projected-pt)))
+(def v39_l236 (def resid (la/sub point3d projected-pt)))
 
 
-(def v31_l209 (la/mmul (la/transpose W-proj) resid))
+(def v40_l238 (la/mmul (la/transpose W-proj) resid))
 
 
-(deftest t32_l211 (is ((fn [r] (< (la/norm r) 1.0E-10)) v31_l209)))
+(deftest t41_l240 (is ((fn [r] (< (la/norm r) 1.0E-10)) v40_l238)))
 
 
-(def v34_l234 (def a-gs (la/column [1 1 0])))
+(def v43_l263 (def a-gs (la/column [1 1 0])))
 
 
-(def v35_l235 (def b-gs (la/column [1 0 1])))
+(def v44_l264 (def b-gs (la/column [1 0 1])))
 
 
-(def v37_l239 (def q1-gs (la/scale (/ 1.0 (la/norm a-gs)) a-gs)))
+(def v46_l268 (def q1-gs (la/scale (/ 1.0 (la/norm a-gs)) a-gs)))
 
 
-(def v38_l241 q1-gs)
+(def v47_l270 q1-gs)
 
 
-(def v40_l245 (def proj-b-on-q1 (dfn/sum (dfn/* q1-gs b-gs))))
+(def v49_l274 (def proj-b-on-q1 (dfn/sum (dfn/* q1-gs b-gs))))
 
 
 (def
- v41_l248
+ v50_l277
  (def orthogonal-part (la/sub b-gs (la/scale proj-b-on-q1 q1-gs))))
 
 
 (def
- v43_l253
+ v52_l282
  (def
   q2-gs
   (la/scale (/ 1.0 (la/norm orthogonal-part)) orthogonal-part)))
 
 
-(def v44_l256 q2-gs)
+(def v53_l285 q2-gs)
 
 
 (def
- v46_l260
+ v55_l289
  {:q1-norm (la/norm q1-gs),
   :q2-norm (la/norm q2-gs),
   :dot (dfn/sum (dfn/* q1-gs q2-gs))})
 
 
 (deftest
- t47_l264
+ t56_l293
  (is
   ((fn
     [m]
@@ -299,37 +328,37 @@
      (< (Math/abs (- (:q1-norm m) 1.0)) 1.0E-10)
      (< (Math/abs (- (:q2-norm m) 1.0)) 1.0E-10)
      (< (Math/abs (:dot m)) 1.0E-10)))
-   v46_l260)))
+   v55_l289)))
 
 
-(def v49_l280 (def A-qr (la/matrix [[1 1] [1 0] [0 1]])))
+(def v58_l309 (def A-qr (la/matrix [[1 1] [1 0] [0 1]])))
 
 
-(def v50_l284 (def qr-result (la/qr A-qr)))
+(def v59_l313 (def qr-result (la/qr A-qr)))
 
 
-(def v52_l288 (def ncols-qr (second (dtype/shape A-qr))))
+(def v61_l317 (def ncols-qr (second (dtype/shape A-qr))))
 
 
 (def
- v53_l289
+ v62_l318
  (def Q-thin (la/submatrix (:Q qr-result) :all (range ncols-qr))))
 
 
 (def
- v54_l290
+ v63_l319
  (def R-thin (la/submatrix (:R qr-result) (range ncols-qr) :all)))
 
 
 (def
- v56_l294
+ v65_l323
  (la/norm (la/sub (la/mmul (la/transpose Q-thin) Q-thin) (la/eye 2))))
 
 
-(deftest t57_l296 (is ((fn [d] (< d 1.0E-10)) v56_l294)))
+(deftest t66_l325 (is ((fn [d] (< d 1.0E-10)) v65_l323)))
 
 
-(def v59_l301 (la/norm (la/sub (la/mmul Q-thin R-thin) A-qr)))
+(def v68_l330 (la/norm (la/sub (la/mmul Q-thin R-thin) A-qr)))
 
 
-(deftest t60_l303 (is ((fn [d] (< d 1.0E-10)) v59_l301)))
+(deftest t69_l332 (is ((fn [d] (< d 1.0E-10)) v68_l330)))

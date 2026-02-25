@@ -146,6 +146,35 @@ dot-ab
 ;; length and mutually orthogonal. The standard basis is the
 ;; canonical example.
 
+;; ### Angle between vectors
+;;
+;; The dot product is related to the angle $\theta$ between
+;; two vectors by:
+;;
+;; $$\cos \theta = \frac{\mathbf{u} \cdot \mathbf{v}}{\|\mathbf{u}\| \, \|\mathbf{v}\|}$$
+;;
+;; This gives a precise measure of alignment: $\cos \theta = 1$
+;; for parallel vectors, $0$ for orthogonal, $-1$ for opposite.
+
+(def p (la/column [1 0]))
+(def q (la/column [1 1]))
+
+(def cos-theta
+  (/ (dfn/sum (dfn/* p q))
+     (* (la/norm p) (la/norm q))))
+
+cos-theta
+
+(kind/test-last
+ [(fn [c] (< (Math/abs (- c (/ 1.0 (Math/sqrt 2.0)))) 1e-10))])
+
+;; $\cos \theta = 1/\sqrt{2}$, so $\theta = 45°$:
+
+(Math/toDegrees (Math/acos cos-theta))
+
+(kind/test-last
+ [(fn [d] (< (Math/abs (- d 45.0)) 1e-10))])
+
 ;; ### Orthogonal projection
 ;;
 ;; **Projection** is one of the most useful operations in
@@ -302,3 +331,10 @@ q2-gs
 
 (kind/test-last
  [(fn [d] (< d 1e-10))])
+
+;; In practice, the manual Gram-Schmidt process we showed above
+;; can lose orthogonality due to floating-point rounding —
+;; especially for nearly dependent vectors. EJML's QR (via
+;; Householder reflections) is numerically stable and should
+;; always be preferred over hand-coded Gram-Schmidt.
+;; The manual version here is for building intuition.
