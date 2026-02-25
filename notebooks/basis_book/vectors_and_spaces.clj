@@ -462,3 +462,45 @@
 ;; If you try to fit 4 vectors into $\mathbb{R}^3$, at least
 ;; one must be a linear combination of the others — you cannot
 ;; have more independent vectors than the dimension.
+;;
+;; Here are three independent vectors in $\mathbb{R}^3$ (they
+;; form a basis because the determinant is non-zero):
+
+(def v1 (la/column [1 0 0]))
+(def v2 (la/column [0 1 0]))
+(def v3 (la/column [0 0 1]))
+
+(la/det (la/matrix [[1 0 0]
+                    [0 1 0]
+                    [0 0 1]]))
+
+(kind/test-last
+ [(fn [d] (< (Math/abs (- d 1.0)) 1e-10))])
+
+;; Now introduce a fourth vector. It must be expressible as
+;; a linear combination of the first three — because three
+;; independent vectors already fill all of $\mathbb{R}^3$:
+
+(def v4 (la/column [2 3 1]))
+
+(la/close? v4
+           (la/add (la/scale 2.0 v1)
+                   (la/add (la/scale 3.0 v2)
+                           (la/scale 1.0 v3))))
+
+(kind/test-last [true?])
+
+;; No matter what fourth vector you choose, it will always be
+;; a combination of any basis for the space. This is the essence
+;; of dimension — it is an intrinsic property of the space, not
+;; of any particular set of vectors.
+
+;; ---
+;;
+;; These foundational ideas — vectors, linear combinations,
+;; independence, basis, dimension — are the vocabulary for
+;; everything that follows. In the next chapters we build on
+;; them to study linear maps and their matrix representations,
+;; inner products and projections, and the eigenvalue
+;; decompositions that reveal the structure of linear
+;; transformations.

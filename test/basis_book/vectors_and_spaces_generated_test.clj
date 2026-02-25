@@ -433,3 +433,35 @@
 
 
 (deftest t81_l447 (is (true? v80_l442)))
+
+
+(def v83_l469 (def v1 (la/column [1 0 0])))
+
+
+(def v84_l470 (def v2 (la/column [0 1 0])))
+
+
+(def v85_l471 (def v3 (la/column [0 0 1])))
+
+
+(def v86_l473 (la/det (la/matrix [[1 0 0] [0 1 0] [0 0 1]])))
+
+
+(deftest
+ t87_l477
+ (is ((fn [d] (< (Math/abs (- d 1.0)) 1.0E-10)) v86_l473)))
+
+
+(def v89_l484 (def v4 (la/column [2 3 1])))
+
+
+(def
+ v90_l486
+ (la/close?
+  v4
+  (la/add
+   (la/scale 2.0 v1)
+   (la/add (la/scale 3.0 v2) (la/scale 1.0 v3)))))
+
+
+(deftest t91_l491 (is (true? v90_l486)))

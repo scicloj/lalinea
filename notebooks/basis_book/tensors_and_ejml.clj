@@ -103,20 +103,22 @@
 ;; decompositions (eigen, SVD, QR, Cholesky), inverse, solve, and
 ;; determinant.
 
-;; ### The key insight: same memory layout
+;; ### Convenient coincidence: same memory layout
 ;;
 ;; A dtype-next `[r c]` tensor of `:float64` values is backed by a
 ;; `double[]` in row-major order. An EJML `DMatrixRMaj` is also
-;; backed by a `double[]` in row-major order. They are the same thing.
+;; backed by a `double[]` in row-major order.
 ;;
 ;; | Type | Backing | Layout |
 ;; |:-----|:--------|:-------|
 ;; | dtype-next tensor `[r c]` | `double[r*c]` | row-major |
 ;; | EJML `DMatrixRMaj` | `double[r*c]` | row-major |
 ;;
-;; This means converting between the two involves no allocation
-;; and no copying — just wrapping the same `double[]` in a
-;; different view.
+;; This matching layout is convenient — it lets us convert between
+;; the two with no allocation and no copying, just wrapping the
+;; same `double[]` in a different view. With a different layout
+;; we could still bridge the two libraries using `compute-tensor`,
+;; but the shared row-major convention makes it free.
 
 ;; ## Zero-copy round-trip
 ;;
