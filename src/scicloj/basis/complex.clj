@@ -1,4 +1,4 @@
-(ns scicloj.basis.impl.complex
+(ns scicloj.basis.complex
   "Complex tensors backed by dtype-next.
 
    A ComplexTensor wraps a real tensor whose last dimension is 2
@@ -405,21 +405,21 @@
 
 (defn dot
   "Complex dot product: Σ a_i * b_i.
-   Returns a [re im] pair."
+   Returns a scalar ComplexTensor."
   [^ComplexTensor a ^ComplexTensor b]
   (let [ar (re a) ai (im a)
         br (re b) bi (im b)]
-    [(- (dfn/sum (dfn/* ar br)) (dfn/sum (dfn/* ai bi)))
-     (+ (dfn/sum (dfn/* ar bi)) (dfn/sum (dfn/* ai br)))]))
+    (complex (- (dfn/sum (dfn/* ar br)) (dfn/sum (dfn/* ai bi)))
+             (+ (dfn/sum (dfn/* ar bi)) (dfn/sum (dfn/* ai br))))))
 
 (defn dot-conj
   "Hermitian inner product: Σ a_i * conj(b_i).
-   Returns a [re im] pair."
+   Returns a scalar ComplexTensor."
   [^ComplexTensor a ^ComplexTensor b]
   (let [ar (re a) ai (im a)
         br (re b) bi (im b)]
-    [(+ (dfn/sum (dfn/* ar br)) (dfn/sum (dfn/* ai bi)))
-     (- (dfn/sum (dfn/* ai br)) (dfn/sum (dfn/* ar bi)))]))
+    (complex (+ (dfn/sum (dfn/* ar br)) (dfn/sum (dfn/* ai bi)))
+             (- (dfn/sum (dfn/* ai br)) (dfn/sum (dfn/* ar bi))))))
 
 (defn add
   "Pointwise complex addition."

@@ -15,6 +15,7 @@
   (:require
    ;; Basis linear algebra API (https://github.com/scicloj/basis):
    [scicloj.basis.linalg :as la]
+   [scicloj.basis.complex :as cx]
    ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
    [tech.v3.tensor :as tensor]
    ;; Low-level buffer operations:
@@ -125,11 +126,9 @@
 
 (def stationary-eigen
   (let [{:keys [eigenvalues eigenvectors]} eigen-result
-        idx (->> eigenvalues
-                 (map-indexed (fn [i [re _im]] [i re]))
-                 (sort-by (fn [[_i re]] (Math/abs (- re 1.0))))
-                 first
-                 first)
+        reals (cx/re eigenvalues)
+        idx (first (sort-by (fn [i] (Math/abs (- (double (reals i)) 1.0)))
+                            (range (count eigenvectors))))
         ev (nth eigenvectors idx)
         col (tensor/select ev :all 0)
         total (dfn/sum col)]

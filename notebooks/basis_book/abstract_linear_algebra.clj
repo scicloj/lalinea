@@ -15,6 +15,7 @@
   (:require
    ;; Basis linear algebra API (https://github.com/scicloj/basis):
    [scicloj.basis.linalg :as la]
+   [scicloj.basis.complex :as cx]
    ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
    [tech.v3.tensor :as tensor]
    ;; Low-level buffer operations:
@@ -1087,7 +1088,7 @@ q2-gs
 
 (def eig-result (la/eigen A-eig))
 
-(sort (mapv first (:eigenvalues eig-result)))
+(la/real-eigenvalues A-eig)
 
 (kind/test-last
  [(fn [v]
@@ -1101,7 +1102,7 @@ q2-gs
 ;; $A\mathbf{v} - \lambda\mathbf{v}$ should be zero:
 
 (every? (fn [i]
-          (let [lam (first (nth (:eigenvalues eig-result) i))
+          (let [lam (cx/re ((:eigenvalues eig-result) i))
                 ev (nth (:eigenvectors eig-result) i)]
             (< (la/norm (la/sub (la/mmul A-eig ev)
                                 (la/scale lam ev)))
@@ -1121,13 +1122,13 @@ q2-gs
 ;;
 ;; Let us verify the trace and determinant connections:
 
-(def eig-reals (mapv first (:eigenvalues eig-result)))
+(def eig-reals (cx/re (:eigenvalues eig-result)))
 
-(< (Math/abs (- (la/trace A-eig) (reduce + eig-reals))) 1e-10)
+(< (Math/abs (- (la/trace A-eig) (dfn/sum eig-reals))) 1e-10)
 
 (kind/test-last [true?])
 
-(< (Math/abs (- (la/det A-eig) (reduce * eig-reals))) 1e-10)
+(< (Math/abs (- (la/det A-eig) (reduce * (seq eig-reals)))) 1e-10)
 
 (kind/test-last [true?])
 
@@ -1168,7 +1169,7 @@ q2-gs
 
 (def P-diag
   (let [evecs (:eigenvectors eig-diag)
-        sorted-idx (sort-by (fn [i] (first (nth (:eigenvalues eig-diag) i)))
+        sorted-idx (sort-by (fn [i] (cx/re ((:eigenvalues eig-diag) i)))
                             (range 2))]
     (la/matrix (mapv (fn [j]
                        (vec (dtype/->reader (nth evecs (nth sorted-idx j)))))
@@ -1250,8 +1251,7 @@ D-result
 
 ;; All eigenvalues are real (imaginary parts zero):
 
-(every? (fn [[_ im]] (< (Math/abs im) 1e-10))
-        (:eigenvalues eig-S))
+(< (dfn/reduce-max (dfn/abs (cx/im (:eigenvalues eig-S)))) 1e-10)
 
 (kind/test-last [true?])
 
@@ -1391,8 +1391,7 @@ sigmas
 
 (def ATA (la/mmul (la/transpose A-svd) A-svd))
 
-(every? (fn [[re _]] (>= re -1e-10))
-        (:eigenvalues (la/eigen ATA)))
+(every? #(>= % -1e-10) (cx/re (:eigenvalues (la/eigen ATA))))
 
 (kind/test-last [true?])
 
@@ -1452,7 +1451,7 @@ sigmas
 (def eig-final (la/eigen A-final))
 
 (def final-eigenvalues
-  (sort (mapv first (:eigenvalues eig-final))))
+  (la/real-eigenvalues A-final))
 
 final-eigenvalues
 

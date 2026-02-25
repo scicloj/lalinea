@@ -5,7 +5,7 @@
    returns an interleaved double[] with [re₀ im₀ re₁ im₁ ...] —
    exactly the memory layout of ComplexTensor. This namespace
    provides zero-copy wrappers around Fastmath's transform API."
-  (:require [scicloj.basis.impl.complex :as cx]
+  (:require [scicloj.basis.complex :as cx]
             [fastmath.transform :as ft]
             [tech.v3.tensor :as tensor]
             [tech.v3.datatype :as dtype]))
@@ -36,7 +36,7 @@
 
 (defn inverse
   "Inverse FFT from a ComplexTensor spectrum back to a ComplexTensor signal."
-  [^scicloj.basis.impl.complex.ComplexTensor spectrum]
+  [^scicloj.basis.complex.ComplexTensor spectrum]
   (let [arr (cx/->double-array spectrum)
         result (ft/reverse-1d @fft-complex-io* arr)]
     (cx/complex-tensor (tensor/reshape (tensor/ensure-tensor result)
@@ -55,7 +55,7 @@
 
 (defn forward-complex
   "Forward FFT of a ComplexTensor signal. Returns a ComplexTensor spectrum."
-  [^scicloj.basis.impl.complex.ComplexTensor signal]
+  [^scicloj.basis.complex.ComplexTensor signal]
   (let [arr (cx/->double-array signal)
         result (ft/forward-1d @fft-complex-io* arr)]
     (cx/complex-tensor (tensor/reshape (tensor/ensure-tensor result)

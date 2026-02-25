@@ -10,7 +10,7 @@
    ;; Basis linear algebra API (https://github.com/scicloj/basis):
    [scicloj.basis.linalg :as la]
    ;; Complex tensors — interleaved [re im] layout:
-   [scicloj.basis.impl.complex :as cx]
+   [scicloj.basis.complex :as cx]
    ;; FFT bridge — Fastmath transforms ↔ ComplexTensor:
    [scicloj.basis.transform :as bfft]
    ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
@@ -96,7 +96,7 @@
 ;;
 ;; Eigendecomposition of a symmetric matrix:
 
-(sort (map first (:eigenvalues (la/eigen (la/matrix [[2 1] [1 2]])))))
+(la/real-eigenvalues (la/matrix [[2 1] [1 2]]))
 
 ;; Eigenvalues are $3$ and $1$.
 

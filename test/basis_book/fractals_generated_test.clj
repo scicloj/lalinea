@@ -1,7 +1,8 @@
 (ns
  basis-book.fractals-generated-test
  (:require
-  [scicloj.basis.impl.complex :as cx]
+  [scicloj.basis.linalg :as la]
+  [scicloj.basis.complex :as cx]
   [tech.v3.tensor :as tensor]
   [tech.v3.datatype :as dtype]
   [tech.v3.datatype.functional :as dfn]
@@ -11,7 +12,7 @@
 
 
 (def
- v3_l37
+ v3_l38
  (def
   complex-grid
   (fn
@@ -29,7 +30,7 @@
 
 
 (def
- v5_l49
+ v5_l50
  (let
   [g (complex-grid -2.0 1.0 -1.5 1.5 3 3) raw (.tensor g)]
   {:shape (cx/complex-shape g),
@@ -38,7 +39,7 @@
 
 
 (deftest
- t6_l55
+ t6_l56
  (is
   ((fn
     [v]
@@ -46,11 +47,11 @@
      (= (:shape v) [3 3])
      (= (:top-left-re v) -2.0)
      (= (:bottom-right-im v) 1.5)))
-   v5_l49)))
+   v5_l50)))
 
 
 (def
- v8_l72
+ v8_l73
  (def
   mandelbrot-counts
   (fn
@@ -69,7 +70,7 @@
       (>= k max-iter)
       counts
       (let
-       [z2 (dtype/clone (cx/add (cx/mul z z) c)) abs-t (cx/abs z2)]
+       [z2 (dtype/clone (la/add (la/mul z z) c)) abs-t (la/abs z2)]
        (dotimes
         [r h]
         (dotimes
@@ -83,7 +84,7 @@
 
 
 (def
- v10_l97
+ v10_l98
  (def
   counts->image
   (fn
@@ -118,7 +119,7 @@
 
 
 (def
- v12_l112
+ v12_l113
  (def
   mandelbrot-img
   (let
@@ -133,16 +134,16 @@
    (counts->image counts h w max-iter))))
 
 
-(def v13_l117 (bufimg/tensor->image mandelbrot-img))
+(def v13_l118 (bufimg/tensor->image mandelbrot-img))
 
 
 (deftest
- t14_l119
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v13_l117)))
+ t14_l120
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v13_l118)))
 
 
 (def
- v16_l127
+ v16_l128
  (def
   mandelbrot-zoom
   (let
@@ -157,16 +158,16 @@
    (counts->image counts h w max-iter))))
 
 
-(def v17_l132 (bufimg/tensor->image mandelbrot-zoom))
+(def v17_l133 (bufimg/tensor->image mandelbrot-zoom))
 
 
 (deftest
- t18_l134
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v17_l132)))
+ t18_l135
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v17_l133)))
 
 
 (def
- v20_l143
+ v20_l144
  (def
   julia-counts
   (fn
@@ -189,9 +190,9 @@
       counts
       (let
        [z2
-        (dtype/clone (cx/add (cx/mul z z) c-grid))
+        (dtype/clone (la/add (la/mul z z) c-grid))
         abs-t
-        (cx/abs z2)]
+        (la/abs z2)]
        (dotimes
         [r h]
         (dotimes
@@ -205,7 +206,7 @@
 
 
 (def
- v22_l169
+ v22_l170
  (def
   julia-dendrite
   (let
@@ -220,16 +221,16 @@
    (counts->image counts h w max-iter))))
 
 
-(def v23_l174 (bufimg/tensor->image julia-dendrite))
+(def v23_l175 (bufimg/tensor->image julia-dendrite))
 
 
 (deftest
- t24_l176
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v23_l174)))
+ t24_l177
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v23_l175)))
 
 
 (def
- v26_l181
+ v26_l182
  (def
   julia-connected
   (let
@@ -244,16 +245,16 @@
    (counts->image counts h w max-iter))))
 
 
-(def v27_l186 (bufimg/tensor->image julia-connected))
+(def v27_l187 (bufimg/tensor->image julia-connected))
 
 
 (deftest
- t28_l188
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v27_l186)))
+ t28_l189
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v27_l187)))
 
 
 (def
- v30_l193
+ v30_l194
  (def
   julia-rabbit
   (let
@@ -268,24 +269,24 @@
    (counts->image counts h w max-iter))))
 
 
-(def v31_l198 (bufimg/tensor->image julia-rabbit))
+(def v31_l199 (bufimg/tensor->image julia-rabbit))
 
 
 (deftest
- t32_l200
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v31_l198)))
+ t32_l201
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v31_l199)))
 
 
-(def v34_l216 (def dragon-n 512))
+(def v34_l217 (def dragon-n 512))
 
 
 (def
- v35_l218
+ v35_l219
  (def bit-at (fn [n pos] (bit-and (int (/ n (Math/pow 2 pos))) 1))))
 
 
 (def
- v36_l222
+ v36_l223
  (def
   dragon-points
   (let
@@ -328,7 +329,7 @@
 
 
 (def
- v38_l256
+ v38_l257
  (let
   [pts
    dragon-points
@@ -370,4 +371,4 @@
       :stroke-linejoin "round"}]])))
 
 
-(deftest t39_l279 (is ((fn [_] (vector? dragon-points)) v38_l256)))
+(deftest t39_l280 (is ((fn [_] (vector? dragon-points)) v38_l257)))

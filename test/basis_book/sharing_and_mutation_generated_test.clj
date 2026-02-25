@@ -2,7 +2,7 @@
  basis-book.sharing-and-mutation-generated-test
  (:require
   [scicloj.basis.linalg :as la]
-  [scicloj.basis.impl.complex :as cx]
+  [scicloj.basis.complex :as cx]
   [scicloj.basis.impl.tensor :as bt]
   [tech.v3.tensor :as tensor]
   [tech.v3.datatype :as dtype]

@@ -2,7 +2,7 @@
  basis-book.fourier-transform-generated-test
  (:require
   [scicloj.basis.linalg :as la]
-  [scicloj.basis.impl.complex :as cx]
+  [scicloj.basis.complex :as cx]
   [scicloj.basis.transform :as bfft]
   [tech.v3.tensor :as tensor]
   [tech.v3.datatype :as dtype]
@@ -74,9 +74,9 @@
    lhs
    (bfft/forward combined)
    rhs
-   (cx/add
-    (cx/scale (bfft/forward x) alpha)
-    (cx/scale (bfft/forward y) beta))]
+   (la/add
+    (la/scale alpha (bfft/forward x))
+    (la/scale beta (bfft/forward y)))]
   (and
    (<
     (dfn/reduce-max (dfn/abs (dfn/- (cx/re lhs) (cx/re rhs))))
@@ -101,7 +101,7 @@
    Fy
    (bfft/forward y)
    product-spectrum
-   (cx/mul Fx Fy)
+   (la/mul Fx Fy)
    conv-result
    (bfft/inverse-real product-spectrum)
    n
@@ -153,7 +153,7 @@
     [v]
     (and
      (< (Math/abs (- (double (:dc v)) 12.0)) 1.0E-10)
-     (every? (fn* [p1__46790#] (< p1__46790# 1.0E-10)) (:others v))))
+     (every? (fn* [p1__65906#] (< p1__65906# 1.0E-10)) (:others v))))
    v19_l115)))
 
 

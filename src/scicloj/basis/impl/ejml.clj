@@ -6,13 +6,13 @@
 
    This namespace wraps EJML's CommonOps into Clojure functions."
   (:require [scicloj.basis.impl.tensor :as bt]
-            [scicloj.basis.impl.complex :as cx]
+            [scicloj.basis.complex :as cx]
             [tech.v3.tensor :as tensor]
             [tech.v3.datatype :as dtype])
   (:import [org.ejml.data DMatrixRMaj ZMatrixRMaj Complex_F64]
            [org.ejml.dense.row CommonOps_DDRM NormOps_DDRM MatrixFeatures_DDRM]
            [org.ejml.dense.row CommonOps_ZDRM NormOps_ZDRM MatrixFeatures_ZDRM]
-           [org.ejml.dense.row.factory DecompositionFactory_DDRM]))
+           [org.ejml.dense.row.factory DecompositionFactory_DDRM DecompositionFactory_ZDRM]))
 
 ;; ===========================================================================
 ;; Real matrix operations (DMatrixRMaj)
@@ -247,3 +247,24 @@
     (when (and (CommonOps_ZDRM/solve a b x)
                (not (MatrixFeatures_ZDRM/hasUncountable x)))
       x)))
+
+;; ---------------------------------------------------------------------------
+;; Complex decompositions
+;; ---------------------------------------------------------------------------
+
+(defn zqr
+  "Complex QR decomposition: A = Q * R.
+   Returns a map with :Q and :R as ZMatrixRMaj."
+  [^ZMatrixRMaj a]
+  (let [qr (DecompositionFactory_ZDRM/qr (.numRows a) (.numCols a))]
+    (when (.decompose qr (.copy a))
+      {:Q (.getQ qr nil false)
+       :R (.getR qr nil false)})))
+
+(defn zcholesky
+  "Complex Cholesky decomposition: A = L * L† (for Hermitian positive definite A).
+   Returns the lower-triangular L as ZMatrixRMaj, or nil if not HPD."
+  [^ZMatrixRMaj a]
+  (let [chol (DecompositionFactory_ZDRM/chol (.numRows a) true)]
+    (when (.decompose chol (.copy a))
+      (.getT chol nil))))

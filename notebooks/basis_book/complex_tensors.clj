@@ -19,7 +19,7 @@
    ;; Basis linear algebra API (https://github.com/scicloj/basis):
    [scicloj.basis.linalg :as la]
    ;; Complex tensors — interleaved [re im] layout:
-   [scicloj.basis.impl.complex :as cx]
+   [scicloj.basis.complex :as cx]
    ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
    [tech.v3.tensor :as tensor]
    ;; Low-level buffer operations:
@@ -109,8 +109,8 @@
 
 (let [a (cx/complex-tensor [1.0 2.0] [3.0 4.0])
       b (cx/complex-tensor [5.0 6.0] [7.0 8.0])]
-  {:re (vec (cx/re (cx/mul a b)))
-   :im (vec (cx/im (cx/mul a b)))})
+  {:re (vec (cx/re (la/mul a b)))
+   :im (vec (cx/im (la/mul a b)))})
 
 ;; $(1+3i)(5+7i) = -16 + 22i$, $(2+4i)(6+8i) = -20 + 40i$
 
@@ -127,7 +127,7 @@
 
 ;; ### Magnitude
 
-(let [m (cx/abs (cx/complex-tensor [3.0 0.0] [4.0 1.0]))]
+(let [m (la/abs (cx/complex-tensor [3.0 0.0] [4.0 1.0]))]
   [(double (m 0)) (double (m 1))])
 
 ;; $|3+4i| = 5$, $|0+i| = 1$
@@ -140,8 +140,8 @@
 ;; $\langle a, b \rangle_H = \sum_i a_i \cdot \overline{b_i}$
 
 (let [a (cx/complex-tensor [3.0 1.0] [4.0 2.0])
-      [re-aa im-aa] (cx/dot-conj a a)]
-  {:norm-sq re-aa :im-part im-aa})
+      d (la/dot a a)]
+  {:norm-sq (double (cx/re d)) :im-part (double (cx/im d))})
 
 ;; $|3+4i|^2 + |1+2i|^2 = 25 + 5 = 30$
 

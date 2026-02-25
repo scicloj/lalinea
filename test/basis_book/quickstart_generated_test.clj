@@ -2,7 +2,7 @@
  basis-book.quickstart-generated-test
  (:require
   [scicloj.basis.linalg :as la]
-  [scicloj.basis.impl.complex :as cx]
+  [scicloj.basis.complex :as cx]
   [scicloj.basis.transform :as bfft]
   [tech.v3.tensor :as tensor]
   [tech.v3.datatype :as dtype]
@@ -93,9 +93,7 @@
    v27_l87)))
 
 
-(def
- v31_l99
- (sort (map first (:eigenvalues (la/eigen (la/matrix [[2 1] [1 2]]))))))
+(def v31_l99 (la/real-eigenvalues (la/matrix [[2 1] [1 2]])))
 
 
 (deftest
@@ -167,7 +165,7 @@
   ((fn
     [v]
     (every?
-     (fn* [p1__22107#] (< (Math/abs p1__22107#) 1.0E-10))
+     (fn* [p1__25559#] (< (Math/abs p1__25559#) 1.0E-10))
      (map - v [1.0 2.0 3.0 4.0])))
    v48_l143)))
 

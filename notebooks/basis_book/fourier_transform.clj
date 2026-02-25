@@ -11,7 +11,7 @@
    ;; Basis linear algebra API (https://github.com/scicloj/basis):
    [scicloj.basis.linalg :as la]
    ;; Complex tensors — interleaved [re im] layout:
-   [scicloj.basis.impl.complex :as cx]
+   [scicloj.basis.complex :as cx]
    ;; FFT bridge — Fastmath transforms ↔ ComplexTensor:
    [scicloj.basis.transform :as bfft]
    ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
@@ -71,8 +71,8 @@
       beta -1.5
       combined (double-array (dfn/+ (dfn/* alpha (double-array x)) (dfn/* beta (double-array y))))
       lhs (bfft/forward combined)
-      rhs (cx/add (cx/scale (bfft/forward x) alpha)
-                    (cx/scale (bfft/forward y) beta))]
+      rhs (la/add (la/scale alpha (bfft/forward x))
+                  (la/scale beta (bfft/forward y)))]
   (and (< (dfn/reduce-max (dfn/abs (dfn/- (cx/re lhs) (cx/re rhs)))) 1e-10)
        (< (dfn/reduce-max (dfn/abs (dfn/- (cx/im lhs) (cx/im rhs)))) 1e-10)))
 
@@ -89,7 +89,7 @@
       y [1.0 0.0 1.0 0.0]
       Fx (bfft/forward x)
       Fy (bfft/forward y)
-      product-spectrum (cx/mul Fx Fy)
+      product-spectrum (la/mul Fx Fy)
       conv-result (bfft/inverse-real product-spectrum)
       n (count x)
       xarr (double-array x)

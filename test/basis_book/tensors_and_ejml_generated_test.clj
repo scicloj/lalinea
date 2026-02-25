@@ -103,9 +103,7 @@
 (deftest t29_l122 (is (= v28_l117 5.0)))
 
 
-(def
- v31_l130
- (sort (map first (:eigenvalues (la/eigen (la/matrix [[4 1] [1 3]]))))))
+(def v31_l130 (la/real-eigenvalues (la/matrix [[4 1] [1 3]])))
 
 
 (deftest t32_l132 (is ((fn [evs] (= 2 (count evs))) v31_l130)))

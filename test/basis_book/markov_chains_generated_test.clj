@@ -2,6 +2,7 @@
  basis-book.markov-chains-generated-test
  (:require
   [scicloj.basis.linalg :as la]
+  [scicloj.basis.complex :as cx]
   [tech.v3.tensor :as tensor]
   [tech.v3.datatype :as dtype]
   [tech.v3.datatype.functional :as dfn]
@@ -13,27 +14,27 @@
 
 
 (def
- v3_l50
+ v3_l51
  (def P (la/matrix [[0.7 0.2 0.1] [0.3 0.4 0.3] [0.2 0.3 0.5]])))
 
 
-(def v5_l57 (la/mmul P (la/column (repeat 3 1.0))))
+(def v5_l58 (la/mmul P (la/column (repeat 3 1.0))))
 
 
 (deftest
- t6_l59
+ t6_l60
  (is
   ((fn
     [sums]
     (< (la/norm (la/sub sums (la/column (repeat 3 1.0)))) 1.0E-10))
-   v5_l57)))
+   v5_l58)))
 
 
-(def v8_l73 (def initial-state (la/row [1.0 0.0 0.0])))
+(def v8_l74 (def initial-state (la/row [1.0 0.0 0.0])))
 
 
 (def
- v9_l75
+ v9_l76
  (def
   walk-history
   (let
@@ -50,7 +51,7 @@
 
 
 (def
- v11_l88
+ v11_l89
  (->
   (tc/dataset
    (mapcat
@@ -66,14 +67,14 @@
 
 
 (def
- v13_l99
+ v13_l100
  (let
   [last-state (last walk-history)]
   [(:sunny last-state) (:cloudy last-state) (:rainy last-state)]))
 
 
 (deftest
- t14_l104
+ t14_l105
  (is
   ((fn
     [v]
@@ -87,26 +88,26 @@
         (Math/abs (- (v 1) (:cloudy prev)))
         (Math/abs (- (v 2) (:rainy prev))))
        1.0E-6))))
-   v13_l99)))
+   v13_l100)))
 
 
-(def v16_l122 (def eigen-result (la/eigen (la/transpose P))))
+(def v16_l123 (def eigen-result (la/eigen (la/transpose P))))
 
 
 (def
- v18_l126
+ v18_l127
  (def
   stationary-eigen
   (let
    [{:keys [eigenvalues eigenvectors]}
     eigen-result
+    reals
+    (cx/re eigenvalues)
     idx
-    (->>
-     eigenvalues
-     (map-indexed (fn [i [re _im]] [i re]))
-     (sort-by (fn [[_i re]] (Math/abs (- re 1.0))))
-     first
-     first)
+    (first
+     (sort-by
+      (fn [i] (Math/abs (- (double (reals i)) 1.0)))
+      (range (count eigenvectors))))
     ev
     (nth eigenvectors idx)
     col
@@ -116,22 +117,22 @@
    (vec (dfn/* col (/ 1.0 total))))))
 
 
-(def v19_l138 stationary-eigen)
+(def v19_l137 stationary-eigen)
 
 
 (deftest
- t20_l140
+ t20_l139
  (is
   ((fn
     [v]
     (and
      (< (Math/abs (- (dfn/sum (double-array v)) 1.0)) 1.0E-10)
      (every? pos? v)))
-   v19_l138)))
+   v19_l137)))
 
 
 (def
- v22_l152
+ v22_l151
  (def
   power-iteration-history
   (let
@@ -155,7 +156,7 @@
 
 
 (def
- v24_l168
+ v24_l167
  (->
   (tc/dataset power-iteration-history)
   (plotly/base {:=x :iteration, :=y :change})
@@ -163,14 +164,14 @@
   plotly/plot))
 
 
-(def v26_l175 (:change (last power-iteration-history)))
+(def v26_l174 (:change (last power-iteration-history)))
 
 
-(deftest t27_l177 (is ((fn [c] (< c 1.0E-10)) v26_l175)))
+(deftest t27_l176 (is ((fn [c] (< c 1.0E-10)) v26_l174)))
 
 
 (def
- v29_l198
+ v29_l197
  (def
   H
   (la/matrix
@@ -181,14 +182,14 @@
     [1/4 1/4 1/4 1/4 0]])))
 
 
-(def v31_l209 (def damping 0.85))
+(def v31_l208 (def damping 0.85))
 
 
-(def v32_l211 (def n-pages 5))
+(def v32_l210 (def n-pages 5))
 
 
 (def
- v33_l213
+ v33_l212
  (def
   google-matrix
   (la/add
@@ -199,7 +200,7 @@
 
 
 (def
- v35_l220
+ v35_l219
  (def
   pagerank
   (let
@@ -218,7 +219,7 @@
 
 
 (def
- v37_l232
+ v37_l231
  (->
   (tc/dataset
    {:page ["Page 0" "Page 1" "Page 2" "Page 3" "Page 4"],
@@ -228,15 +229,15 @@
   plotly/plot))
 
 
-(def v39_l240 (dfn/sum pagerank))
+(def v39_l239 (dfn/sum pagerank))
 
 
 (deftest
- t40_l242
- (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v39_l240)))
+ t40_l241
+ (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v39_l239)))
 
 
-(def v42_l247 (argops/argmax pagerank))
+(def v42_l246 (argops/argmax pagerank))
 
 
-(deftest t43_l249 (is ((fn [idx] (contains? #{0 2} idx)) v42_l247)))
+(deftest t43_l248 (is ((fn [idx] (contains? #{0 2} idx)) v42_l246)))

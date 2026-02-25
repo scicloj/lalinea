@@ -13,7 +13,7 @@
    ;; Basis linear algebra API (https://github.com/scicloj/basis):
    [scicloj.basis.linalg :as la]
    ;; Complex tensors — interleaved [re im] layout:
-   [scicloj.basis.impl.complex :as cx]
+   [scicloj.basis.complex :as cx]
    ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
    [tech.v3.tensor :as tensor]
    ;; Low-level buffer operations:
@@ -403,20 +403,21 @@
 ;;
 ;; ### Eigenvalue equation: $Av = \lambda v$
 
-(let [{:keys [eigenvalues eigenvectors]} (la/eigen A)]
-  (every? (fn [[[lam-re _lam-im] evec]]
+(let [{:keys [eigenvalues eigenvectors]} (la/eigen A)
+      reals (cx/re eigenvalues)]
+  (every? (fn [[i evec]]
             (when evec
               (let [Av (la/mmul A evec)
-                    lam-v (la/scale lam-re evec)]
+                    lam-v (la/scale (double (reals i)) evec)]
                 (la/close? Av lam-v))))
-          (map vector eigenvalues eigenvectors)))
+          (map-indexed vector eigenvectors)))
 
 (kind/test-last [true?])
 
 ;; ### Trace equals sum of eigenvalues: $\operatorname{tr}(A) = \sum \lambda_i$
 
 (let [{:keys [eigenvalues]} (la/eigen A)
-      eig-sum (reduce + (map first eigenvalues))]
+      eig-sum (dfn/sum (cx/re eigenvalues))]
   (la/close-scalar? (la/trace A) eig-sum))
 
 (kind/test-last [true?])
@@ -424,7 +425,7 @@
 ;; ### Determinant equals product of eigenvalues: $\det(A) = \prod \lambda_i$
 
 (let [{:keys [eigenvalues]} (la/eigen A)
-      eig-prod (reduce * (map first eigenvalues))]
+      eig-prod (reduce * (seq (cx/re eigenvalues)))]
   (la/close-scalar? (la/det A) eig-prod))
 
 (kind/test-last [true?])
@@ -462,15 +463,11 @@
 ;; ### Singular values equal square roots of eigenvalues of $A^T A$
 
 (let [{:keys [S]} (la/svd A)
-      AtA-eigs (->> (:eigenvalues (la/eigen (la/mmul (la/transpose A) A)))
-                    (map first)
-                    sort
-                    reverse
-                    vec)
-      sv-squared (mapv #(* % %) (sort > S))]
+      AtA-eigs (la/real-eigenvalues (la/mmul (la/transpose A) A))
+      sv-squared (sort > (map #(* % %) S))]
   (every? identity
           (map (fn [a b] (< (Math/abs (- a b)) 1e-8))
-               sv-squared AtA-eigs)))
+               sv-squared (reverse (seq AtA-eigs)))))
 
 (kind/test-last [true?])
 
@@ -539,7 +536,7 @@
 
 ;; ### Commutativity: $a \cdot b = b \cdot a$
 
-(la/close? (cx/mul ca cb) (cx/mul cb ca))
+(la/close? (la/mul ca cb) (la/mul cb ca))
 
 (kind/test-last [true?])
 
@@ -551,25 +548,27 @@
 
 ;; ### Conjugate distributes: $\overline{a \cdot b} = \bar{a} \cdot \bar{b}$
 
-(la/close? (cx/conj (cx/mul ca cb))
-           (cx/mul (cx/conj ca) (cx/conj cb)))
+(la/close? (cx/conj (la/mul ca cb))
+           (la/mul (cx/conj ca) (cx/conj cb)))
 
 (kind/test-last [true?])
 
 ;; ### Magnitude is multiplicative: $|a \cdot b| = |a| \cdot |b|$
 
 (< (dfn/reduce-max
-    (dfn/abs (dfn/- (cx/abs (cx/mul ca cb))
-                    (dfn/* (cx/abs ca) (cx/abs cb)))))
+    (dfn/abs (dfn/- (la/abs (la/mul ca cb))
+                    (dfn/* (la/abs ca) (la/abs cb)))))
    1e-10)
 
 (kind/test-last [true?])
 
 ;; ### Cauchy-Schwarz: $|\langle a, b \rangle_H|^2 \leq \langle a, a \rangle_H \cdot \langle b, b \rangle_H$
 
-(let [[re-ab im-ab] (cx/dot-conj ca cb)
-      [re-aa _] (cx/dot-conj ca ca)
-      [re-bb _] (cx/dot-conj cb cb)]
+(let [d-ab (la/dot ca cb)
+      re-ab (double (cx/re d-ab))
+      im-ab (double (cx/im d-ab))
+      re-aa (double (cx/re (la/dot ca ca)))
+      re-bb (double (cx/re (la/dot cb cb)))]
   (<= (- (+ (* re-ab re-ab) (* im-ab im-ab)) 1e-10)
       (* re-aa re-bb)))
 
@@ -608,7 +607,7 @@
       det-AB (la/det (la/mmul CA CB))
       det-A (la/det CA)
       det-B (la/det CB)
-      product (cx/mul det-A det-B)]
+      product (la/mul det-A det-B)]
   (< (la/norm (la/sub det-AB product)) 1e-10))
 
 (kind/test-last [true?])

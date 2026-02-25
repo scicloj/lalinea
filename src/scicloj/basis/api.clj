@@ -7,7 +7,7 @@
 
    ```clojure
    (require '[scicloj.basis.linalg :as la])       ;; matrix ops
-   (require '[scicloj.basis.impl.complex :as cx])  ;; complex tensors
+   (require '[scicloj.basis.complex :as cx])  ;; complex tensors
    (require '[scicloj.basis.transform :as bfft])   ;; DFT bridge
    ```
 
@@ -16,7 +16,7 @@
    (require '[scicloj.basis.api :as basis])
    ```"
   (:require [scicloj.basis.linalg :as la]
-            [scicloj.basis.impl.complex :as cx]
+            [scicloj.basis.complex :as cx]
             [scicloj.basis.impl.tensor :as bt]
             [scicloj.basis.transform :as bfft]))
 
@@ -40,14 +40,18 @@
 (def add "Matrix addition." la/add)
 (def sub "Matrix subtraction." la/sub)
 (def scale "Scalar multiply." la/scale)
+(def mul "Element-wise multiply." la/mul)
+(def abs "Element-wise absolute value." la/abs)
 (def trace "Matrix trace." la/trace)
 (def det "Matrix determinant." la/det)
 (def norm "Frobenius norm." la/norm)
+(def dot "Inner product." la/dot)
 (def close? "Approximate matrix equality." la/close?)
 (def close-scalar? "Approximate scalar equality." la/close-scalar?)
 (def invert "Matrix inverse." la/invert)
 (def solve "Solve A*X=B for X." la/solve)
 (def eigen "Eigendecomposition." la/eigen)
+(def real-eigenvalues "Sorted real eigenvalues." la/real-eigenvalues)
 (def svd "Singular value decomposition." la/svd)
 (def qr "QR decomposition." la/qr)
 (def cholesky "Cholesky decomposition." la/cholesky)

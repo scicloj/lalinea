@@ -16,6 +16,8 @@
   (:require
    ;; Basis linear algebra API (https://github.com/scicloj/basis):
    [scicloj.basis.linalg :as la]
+   ;; Complex tensors — interleaved [re im] layout:
+   [scicloj.basis.complex :as cx]
    ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
    [tech.v3.tensor :as tensor]
    ;; Low-level buffer operations:
@@ -42,12 +44,6 @@
 (def laplacian
   (fn [adj]
     (la/sub (la/diag (row-sums adj)) adj)))
-
-;; Extract real eigenvalues sorted ascending:
-
-(def sorted-real-eigenvalues
-  (fn [eig]
-    (sort (mapv first (:eigenvalues eig)))))
 
 ;; ### Plotting helper
 ;;
@@ -190,7 +186,7 @@ L
 
 (def eig (la/eigen L))
 
-(def eigenvalues (sorted-real-eigenvalues eig))
+(def eigenvalues (la/real-eigenvalues (laplacian adj)))
 
 eigenvalues
 
@@ -224,8 +220,8 @@ fiedler-value
 ;; a spectral bisection of the graph.
 
 (def sorted-eig-indices
-  (let [vals (mapv first (:eigenvalues eig))]
-    (sort-by (fn [i] (vals i)) (range (count vals)))))
+  (let [vals (cx/re (:eigenvalues eig))]
+    (sort-by (fn [i] (double (vals i))) (range (count (:eigenvalues eig))))))
 
 (def fiedler-eigvec
   (nth (:eigenvectors eig) (second sorted-eig-indices)))
@@ -294,7 +290,7 @@ cluster-assignment
                            "#dd8800" "#dd8800" "#dd8800"]})
 
 (def disc-eigenvalues
-  (sorted-real-eigenvalues (la/eigen (laplacian adj-disconnected))))
+  (la/real-eigenvalues (laplacian adj-disconnected)))
 
 disc-eigenvalues
 
@@ -324,7 +320,7 @@ disc-eigenvalues
             {})
 
 (def K5-eigenvalues
-  (sorted-real-eigenvalues (la/eigen (laplacian K5-adj))))
+  (la/real-eigenvalues (laplacian K5-adj)))
 
 K5-eigenvalues
 
@@ -359,7 +355,7 @@ K5-eigenvalues
             {})
 
 (def cycle-eigenvalues
-  (sorted-real-eigenvalues (la/eigen (laplacian cycle-adj))))
+  (la/real-eigenvalues (laplacian cycle-adj)))
 
 (def cycle-theoretical
   (sort (mapv (fn [k] (- 2.0 (* 2.0 (Math/cos (/ (* 2.0 Math/PI k) cn)))))
@@ -400,7 +396,7 @@ cycle-theoretical
             {:width 350})
 
 (def path-eigenvalues
-  (sorted-real-eigenvalues (la/eigen (laplacian path-adj))))
+  (la/real-eigenvalues (laplacian path-adj)))
 
 (def path-theoretical
   (sort (mapv (fn [k] (- 2.0 (* 2.0 (Math/cos (/ (* Math/PI k) pn)))))
@@ -454,7 +450,7 @@ cycle-theoretical
 
 ;; The eigenvalues sorted ascending:
 
-(def comm-eigenvalues (sorted-real-eigenvalues comm-eig))
+(def comm-eigenvalues (la/real-eigenvalues (laplacian community-adj)))
 
 comm-eigenvalues
 
@@ -478,8 +474,8 @@ comm-eigenvalues
 ;; smallest eigenvalues:
 
 (def sorted-comm-indices
-  (let [vals (mapv first (:eigenvalues comm-eig))]
-    (sort-by (fn [i] (vals i)) (range (count vals)))))
+  (let [vals (cx/re (:eigenvalues comm-eig))]
+    (sort-by (fn [i] (double (vals i))) (range (count (:eigenvalues comm-eig))))))
 
 ;; The spectral embedding — each vertex gets coordinates from
 ;; the second and third smallest eigenvectors:

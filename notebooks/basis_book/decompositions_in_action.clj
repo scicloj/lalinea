@@ -11,6 +11,7 @@
   (:require
    ;; Basis linear algebra API (https://github.com/scicloj/basis):
    [scicloj.basis.linalg :as la]
+   [scicloj.basis.complex :as cx]
    ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
    [tech.v3.tensor :as tensor]
    ;; Low-level buffer operations:
@@ -198,24 +199,27 @@ cov-matrix
 
 ;; Eigenvalues = variances along each principal axis:
 
-(let [{:keys [eigenvalues]} pca-eigen]
-  (sort-by first > eigenvalues))
+(let [eigenvalues (:eigenvalues pca-eigen)
+      reals (cx/re eigenvalues)
+      arr (dtype/->double-array reals)]
+  (java.util.Arrays/sort arr)
+  (vec (reverse (vec arr))))
 
 (kind/test-last
- [(fn [evs] (> (ffirst evs) (first (second evs))))])
+ [(fn [evs] (> (first evs) (second evs)))])
 
 ;; ### Visualize principal axes
 ;;
 ;; The eigenvectors point along the directions of maximum variance.
 
 (let [{:keys [eigenvalues eigenvectors]} pca-eigen
-      ;; Sort by eigenvalue descending
-      sorted (sort-by first >
-                      (map vector
-                           (map first eigenvalues)
-                           eigenvectors))
-      [lam1 ev1] (first sorted)
-      [lam2 ev2] (second sorted)
+      ;; Sort by eigenvalue (real part) descending
+      reals (cx/re eigenvalues)
+      sorted-idx (sort-by (fn [i] (- (double (reals i)))) (range (count eigenvectors)))
+      lam1 (double (reals (first sorted-idx)))
+      ev1 (nth eigenvectors (first sorted-idx))
+      lam2 (double (reals (second sorted-idx)))
+      ev2 (nth eigenvectors (second sorted-idx))
       ;; Eigenvector endpoints (scaled by sqrt of eigenvalue)
       pc1-x (* (Math/sqrt lam1) (tensor/mget ev1 0 0))
       pc1-y (* (Math/sqrt lam1) (tensor/mget ev1 1 0))
@@ -242,13 +246,13 @@ cov-matrix
 ;; Projection is a matrix multiply: $X_{\text{proj}} = X \cdot v_1 \cdot v_1^T$
 
 (let [{:keys [eigenvalues eigenvectors]} pca-eigen
-      sorted (sort-by first >
-                      (map vector (map first eigenvalues) eigenvectors))
-      ev1 (second (first sorted))
+      reals (cx/re eigenvalues)
+      sorted-idx (sort-by (fn [i] (- (double (reals i)))) (range (count eigenvectors)))
+      ev1 (nth eigenvectors (first sorted-idx))
       ;; Project: X * v1 * v1^T
       projected (la/mmul (la/mmul X ev1) (la/transpose ev1))
       ;; Fraction of variance explained
-      variances (sort > (map first eigenvalues))
+      variances (sort > (seq reals))
       explained (/ (first variances) (reduce + variances))]
   explained)
 
@@ -275,7 +279,7 @@ cov-matrix
 ;; True eigenvalues for comparison:
 
 (def true-eigenvalues
-  (sort (map first (:eigenvalues (la/eigen test-matrix)))))
+  (la/real-eigenvalues test-matrix))
 
 true-eigenvalues
 

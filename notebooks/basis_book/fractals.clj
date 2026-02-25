@@ -9,13 +9,14 @@
 ;; This chapter computes fractals using **ComplexTensor** arithmetic.
 ;; The iteration loop is imperative (each step depends on the
 ;; previous), but within each step the computation is **vectorized**
-;; across the entire complex plane — `cmul` and `cadd` operate on
+;; across the entire complex plane — `la/mul` and `la/add` operate on
 ;; every grid point simultaneously.
 
 (ns basis-book.fractals
   (:require
    ;; Complex tensors — interleaved [re im] layout:
-   [scicloj.basis.impl.complex :as cx]
+   [scicloj.basis.linalg :as la]
+   [scicloj.basis.complex :as cx]
    ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
    [tech.v3.tensor :as tensor]
    ;; Low-level buffer operations:
@@ -38,11 +39,11 @@
   (fn [re-min re-max im-min im-max h w]
     (cx/complex-tensor
      (tensor/compute-tensor [h w 2]
-       (fn [r c part]
-         (if (zero? part)
-           (+ re-min (* (- re-max re-min) (/ c (double (dec w)))))
-           (+ im-min (* (- im-max im-min) (/ r (double (dec h)))))))
-       :float64))))
+                            (fn [r c part]
+                              (if (zero? part)
+                                (+ re-min (* (- re-max re-min) (/ c (double (dec w)))))
+                                (+ im-min (* (- im-max im-min) (/ r (double (dec h)))))))
+                            :float64))))
 
 ;; A small test grid — the four corners should span the range:
 
@@ -75,12 +76,12 @@
           counts (int-array (* h w) 0)
           zero-grid (cx/complex-tensor
                      (tensor/compute-tensor [h w 2]
-                       (fn [_ _ _] 0.0) :float64))]
+                                            (fn [_ _ _] 0.0) :float64))]
       (loop [z zero-grid k 0]
         (if (>= k max-iter)
           counts
-          (let [z2 (dtype/clone (cx/add (cx/mul z z) c))
-                abs-t (cx/abs z2)]
+          (let [z2 (dtype/clone (la/add (la/mul z z) c))
+                abs-t (la/abs z2)]
             (dotimes [r h]
               (dotimes [col w]
                 (when (< (tensor/mget abs-t r col) 2.0)
@@ -97,15 +98,15 @@
 (def counts->image
   (fn [counts h w max-iter]
     (tensor/compute-tensor [h w 3]
-      (fn [r c ch]
-        (let [cnt (aget counts (+ (* r w) c))]
-          (if (= cnt max-iter) 0
-              (let [t (/ (double cnt) max-iter)]
-                (case (int ch)
-                  0 (int (* 255 (* 0.5 (+ 1.0 (Math/cos (* 2.0 Math/PI (+ t 0.0)))))))
-                  1 (int (* 255 (* 0.5 (+ 1.0 (Math/cos (* 2.0 Math/PI (+ t 0.33)))))))
-                  2 (int (* 255 (* 0.5 (+ 1.0 (Math/cos (* 2.0 Math/PI (+ t 0.67))))))))))))
-      :uint8)))
+                           (fn [r c ch]
+                             (let [cnt (aget counts (+ (* r w) c))]
+                               (if (= cnt max-iter) 0
+                                   (let [t (/ (double cnt) max-iter)]
+                                     (case (int ch)
+                                       0 (int (* 255 (* 0.5 (+ 1.0 (Math/cos (* 2.0 Math/PI (+ t 0.0)))))))
+                                       1 (int (* 255 (* 0.5 (+ 1.0 (Math/cos (* 2.0 Math/PI (+ t 0.33)))))))
+                                       2 (int (* 255 (* 0.5 (+ 1.0 (Math/cos (* 2.0 Math/PI (+ t 0.67))))))))))))
+                           :uint8)))
 
 ;; ### The classic view
 
@@ -145,14 +146,14 @@
     (let [z0 (complex-grid re-min re-max im-min im-max h w)
           c-grid (cx/complex-tensor
                   (tensor/compute-tensor [h w 2]
-                    (fn [_ _ part] (if (zero? part) c-re c-im))
-                    :float64))
+                                         (fn [_ _ part] (if (zero? part) c-re c-im))
+                                         :float64))
           counts (int-array (* h w) 0)]
       (loop [z z0 k 0]
         (if (>= k max-iter)
           counts
-          (let [z2 (dtype/clone (cx/add (cx/mul z z) c-grid))
-                abs-t (cx/abs z2)]
+          (let [z2 (dtype/clone (la/add (la/mul z z) c-grid))
+                abs-t (la/abs z2)]
             (dotimes [r h]
               (dotimes [col w]
                 (when (< (tensor/mget abs-t r col) 2.0)

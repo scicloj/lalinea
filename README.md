@@ -80,7 +80,7 @@ Fastmath's transform API to ComplexTensors.
 For complex tensor operations:
 
 ```clojure
-(require '[scicloj.basis.impl.complex :as cx])
+(require '[scicloj.basis.complex :as cx])
 ```
 
 A convenience namespace re-exports the most common functions:

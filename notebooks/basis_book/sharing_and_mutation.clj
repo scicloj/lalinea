@@ -18,7 +18,7 @@
    ;; Basis linear algebra API (https://github.com/scicloj/basis):
    [scicloj.basis.linalg :as la]
    ;; Complex tensors — interleaved [re im] layout:
-   [scicloj.basis.impl.complex :as cx]
+   [scicloj.basis.complex :as cx]
    ;; Tensor ↔ EJML zero-copy bridge:
    [scicloj.basis.impl.tensor :as bt]
    ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):

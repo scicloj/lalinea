@@ -6,12 +6,14 @@
    computation, with zero-copy conversion.
 
    For complex matrices, functions accept and return ComplexTensors."
+  (:refer-clojure :exclude [abs])
   (:require [scicloj.basis.impl.tensor :as bt]
-            [scicloj.basis.impl.complex :as cx]
+            [scicloj.basis.complex :as cx]
             [scicloj.basis.impl.ejml :as ejml]
             [tech.v3.tensor :as tensor]
             [tech.v3.datatype :as dtype]
-            [tech.v3.datatype.functional :as dfn]))
+            [tech.v3.datatype.functional :as dfn])
+  (:import [java.util Arrays]))
 
 ;; ---------------------------------------------------------------------------
 ;; Matrix construction
@@ -45,8 +47,8 @@
   (let [v (dtype/->reader (dtype/make-container :float64 values))
         n (count v)]
     (tensor/compute-tensor [n n]
-      (fn [i j] (if (== i j) (double (v i)) 0.0))
-      :float64)))
+                           (fn [i j] (if (== i j) (double (v i)) 0.0))
+                           :float64)))
 
 (defn column
   "Create a column vector (shape [n 1]) from a sequence."
@@ -141,6 +143,19 @@
     (cx/scale a alpha)
     (dfn/* a (double alpha))))
 
+(defn mul
+  "Element-wise multiply (Hadamard product for real, pointwise complex multiply for complex)."
+  [a b]
+  (if (cx/complex? a)
+    (cx/mul a b)
+    (dfn/* a b)))
+
+(defn abs
+  "Element-wise absolute value (magnitude for complex). Returns a real tensor."
+  [a]
+  (if (cx/complex? a)
+    (cx/abs a)
+    (dfn/abs a)))
 ;; ---------------------------------------------------------------------------
 ;; Scalar properties
 ;; ---------------------------------------------------------------------------
@@ -173,6 +188,13 @@
     (ejml/znorm-f (ejml/ct->zmat a))
     (Math/sqrt (double (dfn/sum (dfn/* a a))))))
 
+(defn dot
+  "Inner product. For real vectors: Σ u_i v_i (returns double).
+   For complex vectors: Hermitian ⟨u,v⟩ = Σ u_i conj(v_i) (returns scalar ComplexTensor)."
+  [u v]
+  (if (cx/complex? u)
+    (cx/dot-conj u v)
+    (double (dfn/sum (dfn/* u v)))))
 ;; ---------------------------------------------------------------------------
 ;; Approximate equality
 ;; ---------------------------------------------------------------------------
@@ -221,25 +243,53 @@
 ;; ---------------------------------------------------------------------------
 
 (defn eigen
-  "Eigendecomposition. Returns a map:
-   :eigenvalues  — vector of [re im] pairs
-   :eigenvectors — vector of column eigenvectors as tensors (or nil)"
+  "Eigendecomposition of a real matrix. Returns a map:
+   :eigenvalues  — ComplexTensor of shape [n] (complex vector of eigenvalues)
+   :eigenvectors — vector of column eigenvectors as real tensors (or nil)
+
+   Eigenvalues are returned as a ComplexTensor even for real-eigenvalue
+   matrices. Use `(cx/re (:eigenvalues result))` for the real parts, or
+   `real-eigenvalues` for a sorted real tensor.
+
+   Currently accepts real matrices only (EJML limitation)."
   [a]
   (let [result (ejml/deig (bt/tensor->dmat a))]
     (when result
-      (cond-> {:eigenvalues (:eigenvalues result)}
-        (:eigenvectors result)
-        (assoc :eigenvectors
-               (mapv (fn [ev]
-                       (when ev (bt/dmat->tensor ev)))
-                     (:eigenvectors result)))))))
+      (let [pairs (:eigenvalues result)
+            n (count pairs)
+            arr (double-array (* 2 n))]
+        (dotimes [i n]
+          (let [[re im] (nth pairs i)]
+            (aset arr (* 2 i) (double re))
+            (aset arr (inc (* 2 i)) (double im))))
+        (cond-> {:eigenvalues (cx/complex-tensor
+                               (tensor/reshape (tensor/ensure-tensor arr) [n 2]))}
+          (:eigenvectors result)
+          (assoc :eigenvectors
+                 (mapv (fn [ev]
+                         (when ev (bt/dmat->tensor ev)))
+                       (:eigenvectors result))))))))
+
+(defn real-eigenvalues
+  "Sorted real eigenvalues of a symmetric/Hermitian matrix.
+   Returns a real [n] tensor, sorted ascending.
+
+   Equivalent to extracting real parts from `eigen` and sorting,
+   but more concise and avoids intermediate allocations."
+  [a]
+  (let [evals (:eigenvalues (eigen a))
+        arr (dtype/->double-array (cx/re evals))]
+    (Arrays/sort arr)
+    (tensor/ensure-tensor arr)))
 
 (defn svd
   "Singular value decomposition: A = U * diag(S) * V^T.
    Returns a map:
    :U  — left singular vectors as tensor
    :S  — singular values as vector of doubles
-   :Vt — right singular vectors (transposed) as tensor"
+   :Vt — right singular vectors (transposed) as tensor
+
+   Currently accepts real matrices only (EJML limitation)."
   [a]
   (let [result (ejml/dsvd (bt/tensor->dmat a))]
     (when result
@@ -249,16 +299,24 @@
 
 (defn qr
   "QR decomposition: A = Q * R.
-   Returns a map with :Q and :R as tensors."
+   Returns a map with :Q and :R as tensors (or ComplexTensors)."
   [a]
-  (let [result (ejml/dqr (bt/tensor->dmat a))]
-    (when result
-      {:Q (bt/dmat->tensor (:Q result))
-       :R (bt/dmat->tensor (:R result))})))
+  (if (cx/complex? a)
+    (let [result (ejml/zqr (ejml/ct->zmat a))]
+      (when result
+        {:Q (ejml/zmat->ct (:Q result))
+         :R (ejml/zmat->ct (:R result))}))
+    (let [result (ejml/dqr (bt/tensor->dmat a))]
+      (when result
+        {:Q (bt/dmat->tensor (:Q result))
+         :R (bt/dmat->tensor (:R result))}))))
 
 (defn cholesky
-  "Cholesky decomposition: A = L * L^T (for symmetric positive definite A).
-   Returns the lower-triangular L as a tensor, or nil if A is not SPD."
+  "Cholesky decomposition: A = L * L^T (real) or A = L * L† (complex).
+   Returns the lower-triangular L, or nil if not SPD/HPD."
   [a]
-  (when-let [L (ejml/dcholesky (bt/tensor->dmat a))]
-    (bt/dmat->tensor L)))
+  (if (cx/complex? a)
+    (when-let [L (ejml/zcholesky (ejml/ct->zmat a))]
+      (ejml/zmat->ct L))
+    (when-let [L (ejml/dcholesky (bt/tensor->dmat a))]
+      (bt/dmat->tensor L))))

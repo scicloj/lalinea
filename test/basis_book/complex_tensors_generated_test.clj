@@ -2,7 +2,7 @@
  basis-book.complex-tensors-generated-test
  (:require
   [scicloj.basis.linalg :as la]
-  [scicloj.basis.impl.complex :as cx]
+  [scicloj.basis.complex :as cx]
   [tech.v3.tensor :as tensor]
   [tech.v3.datatype :as dtype]
   [tech.v3.datatype.functional :as dfn]
@@ -109,7 +109,7 @@
    (cx/complex-tensor [1.0 2.0] [3.0 4.0])
    b
    (cx/complex-tensor [5.0 6.0] [7.0 8.0])]
-  {:re (vec (cx/re (cx/mul a b))), :im (vec (cx/im (cx/mul a b)))}))
+  {:re (vec (cx/re (la/mul a b))), :im (vec (cx/im (la/mul a b)))}))
 
 
 (deftest
@@ -132,7 +132,7 @@
 (def
  v38_l130
  (let
-  [m (cx/abs (cx/complex-tensor [3.0 0.0] [4.0 1.0]))]
+  [m (la/abs (cx/complex-tensor [3.0 0.0] [4.0 1.0]))]
   [(double (m 0)) (double (m 1))]))
 
 
@@ -150,11 +150,8 @@
 (def
  v42_l142
  (let
-  [a
-   (cx/complex-tensor [3.0 1.0] [4.0 2.0])
-   [re-aa im-aa]
-   (cx/dot-conj a a)]
-  {:norm-sq re-aa, :im-part im-aa}))
+  [a (cx/complex-tensor [3.0 1.0] [4.0 2.0]) d (la/dot a a)]
+  {:norm-sq (double (cx/re d)), :im-part (double (cx/im d))}))
 
 
 (deftest

@@ -2,7 +2,7 @@
  basis-book.algebraic-identities-generated-test
  (:require
   [scicloj.basis.linalg :as la]
-  [scicloj.basis.impl.complex :as cx]
+  [scicloj.basis.complex :as cx]
   [tech.v3.tensor :as tensor]
   [tech.v3.datatype :as dtype]
   [tech.v3.datatype.functional :as dfn]
@@ -374,141 +374,142 @@
 (def
  v123_l406
  (let
-  [{:keys [eigenvalues eigenvectors]} (la/eigen A)]
+  [{:keys [eigenvalues eigenvectors]}
+   (la/eigen A)
+   reals
+   (cx/re eigenvalues)]
   (every?
    (fn
-    [[[lam-re _lam-im] evec]]
+    [[i evec]]
     (when
      evec
      (let
-      [Av (la/mmul A evec) lam-v (la/scale lam-re evec)]
+      [Av (la/mmul A evec) lam-v (la/scale (double (reals i)) evec)]
       (la/close? Av lam-v))))
-   (map vector eigenvalues eigenvectors))))
+   (map-indexed vector eigenvectors))))
 
 
-(deftest t124_l414 (is (true? v123_l406)))
+(deftest t124_l415 (is (true? v123_l406)))
 
 
 (def
- v126_l418
+ v126_l419
  (let
   [{:keys [eigenvalues]}
    (la/eigen A)
    eig-sum
-   (reduce + (map first eigenvalues))]
+   (dfn/sum (cx/re eigenvalues))]
   (la/close-scalar? (la/trace A) eig-sum)))
 
 
-(deftest t127_l422 (is (true? v126_l418)))
+(deftest t127_l423 (is (true? v126_l419)))
 
 
 (def
- v129_l426
+ v129_l427
  (let
   [{:keys [eigenvalues]}
    (la/eigen A)
    eig-prod
-   (reduce * (map first eigenvalues))]
+   (reduce * (seq (cx/re eigenvalues)))]
   (la/close-scalar? (la/det A) eig-prod)))
 
 
-(deftest t130_l430 (is (true? v129_l426)))
+(deftest t130_l431 (is (true? v129_l427)))
 
 
 (def
- v132_l442
+ v132_l443
  (let
   [{:keys [U S Vt]} (la/svd A) Sigma (la/diag S)]
   (la/close? (la/mmul U (la/mmul Sigma Vt)) A)))
 
 
-(deftest t133_l446 (is (true? v132_l442)))
+(deftest t133_l447 (is (true? v132_l443)))
 
 
 (def
- v135_l450
+ v135_l451
  (let
   [{:keys [U]} (la/svd A)]
   (la/close? (la/mmul (la/transpose U) U) I3)))
 
 
-(deftest t136_l453 (is (true? v135_l450)))
+(deftest t136_l454 (is (true? v135_l451)))
 
 
 (def
- v138_l457
+ v138_l458
  (let
   [{:keys [Vt]} (la/svd A)]
   (la/close? (la/mmul Vt (la/transpose Vt)) I3)))
 
 
-(deftest t139_l460 (is (true? v138_l457)))
+(deftest t139_l461 (is (true? v138_l458)))
 
 
 (def
- v141_l464
+ v141_l465
  (let
   [{:keys [S]}
    (la/svd A)
    AtA-eigs
-   (->>
-    (:eigenvalues (la/eigen (la/mmul (la/transpose A) A)))
-    (map first)
-    sort
-    reverse
-    vec)
+   (la/real-eigenvalues (la/mmul (la/transpose A) A))
    sv-squared
-   (mapv (fn* [p1__73382#] (* p1__73382# p1__73382#)) (sort > S))]
+   (sort > (map (fn* [p1__65619#] (* p1__65619# p1__65619#)) S))]
   (every?
    identity
-   (map (fn [a b] (< (Math/abs (- a b)) 1.0E-8)) sv-squared AtA-eigs))))
+   (map
+    (fn [a b] (< (Math/abs (- a b)) 1.0E-8))
+    sv-squared
+    (reverse (seq AtA-eigs))))))
 
 
-(deftest t142_l475 (is (true? v141_l464)))
+(deftest t142_l472 (is (true? v141_l465)))
 
 
 (def
- v144_l479
+ v144_l476
  (let
   [{:keys [S]}
    (la/svd A)
    sv-norm
    (Math/sqrt
-    (reduce + (map (fn* [p1__73383#] (* p1__73383# p1__73383#)) S)))]
+    (reduce + (map (fn* [p1__65620#] (* p1__65620# p1__65620#)) S)))]
   (la/close-scalar? (la/norm A) sv-norm)))
 
 
-(deftest t145_l483 (is (true? v144_l479)))
+(deftest t145_l480 (is (true? v144_l476)))
 
 
 (def
- v147_l495
+ v147_l492
  (let
   [M (la/add (la/mmul (la/transpose A) A) I3) L (la/cholesky M)]
   (la/close? (la/mmul L (la/transpose L)) M)))
 
 
-(deftest t148_l499 (is (true? v147_l495)))
+(deftest t148_l496 (is (true? v147_l492)))
 
 
-(def v150_l503 (nil? (la/cholesky (la/matrix [[1 2] [2 1]]))))
+(def v150_l500 (nil? (la/cholesky (la/matrix [[1 2] [2 1]]))))
 
 
-(deftest t151_l505 (is (true? v150_l503)))
+(deftest t151_l502 (is (true? v150_l500)))
 
 
 (def
- v153_l515
+ v153_l512
  (let
   [b (la/column [1 2 3]) x (la/solve A b)]
   (la/close? (la/mmul A x) b)))
 
 
-(deftest t154_l519 (is (true? v153_l515)))
+(deftest t154_l516 (is (true? v153_l512)))
 
 
 (def
- v156_l523
+ v156_l520
  (let
   [b
    (la/column [1 2 3])
@@ -519,70 +520,74 @@
   (la/close? x-solve x-inv)))
 
 
-(deftest t157_l528 (is (true? v156_l523)))
+(deftest t157_l525 (is (true? v156_l520)))
 
 
 (def
- v159_l537
+ v159_l534
  (def ca (cx/complex-tensor [1.0 -2.0 3.0] [4.0 5.0 -6.0])))
 
 
 (def
- v160_l538
+ v160_l535
  (def cb (cx/complex-tensor [-3.0 0.5 2.0] [1.0 -1.5 7.0])))
 
 
-(def v162_l542 (la/close? (cx/mul ca cb) (cx/mul cb ca)))
+(def v162_l539 (la/close? (la/mul ca cb) (la/mul cb ca)))
 
 
-(deftest t163_l544 (is (true? v162_l542)))
+(deftest t163_l541 (is (true? v162_l539)))
 
 
-(def v165_l548 (la/close? (cx/conj (cx/conj ca)) ca))
+(def v165_l545 (la/close? (cx/conj (cx/conj ca)) ca))
 
 
-(deftest t166_l550 (is (true? v165_l548)))
+(deftest t166_l547 (is (true? v165_l545)))
 
 
 (def
- v168_l554
+ v168_l551
  (la/close?
-  (cx/conj (cx/mul ca cb))
-  (cx/mul (cx/conj ca) (cx/conj cb))))
+  (cx/conj (la/mul ca cb))
+  (la/mul (cx/conj ca) (cx/conj cb))))
 
 
-(deftest t169_l557 (is (true? v168_l554)))
+(deftest t169_l554 (is (true? v168_l551)))
 
 
 (def
- v171_l561
+ v171_l558
  (<
   (dfn/reduce-max
    (dfn/abs
-    (dfn/- (cx/abs (cx/mul ca cb)) (dfn/* (cx/abs ca) (cx/abs cb)))))
+    (dfn/- (la/abs (la/mul ca cb)) (dfn/* (la/abs ca) (la/abs cb)))))
   1.0E-10))
 
 
-(deftest t172_l566 (is (true? v171_l561)))
+(deftest t172_l563 (is (true? v171_l558)))
 
 
 (def
- v174_l570
+ v174_l567
  (let
-  [[re-ab im-ab]
-   (cx/dot-conj ca cb)
-   [re-aa _]
-   (cx/dot-conj ca ca)
-   [re-bb _]
-   (cx/dot-conj cb cb)]
+  [d-ab
+   (la/dot ca cb)
+   re-ab
+   (double (cx/re d-ab))
+   im-ab
+   (double (cx/im d-ab))
+   re-aa
+   (double (cx/re (la/dot ca ca)))
+   re-bb
+   (double (cx/re (la/dot cb cb)))]
   (<= (- (+ (* re-ab re-ab) (* im-ab im-ab)) 1.0E-10) (* re-aa re-bb))))
 
 
-(deftest t175_l576 (is (true? v174_l570)))
+(deftest t175_l575 (is (true? v174_l567)))
 
 
 (def
- v177_l587
+ v177_l586
  (let
   [CA
    (cx/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
@@ -596,11 +601,11 @@
    1.0E-10)))
 
 
-(deftest t178_l594 (is (true? v177_l587)))
+(deftest t178_l593 (is (true? v177_l586)))
 
 
 (def
- v180_l598
+ v180_l597
  (let
   [CA
    (cx/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
@@ -609,11 +614,11 @@
   (< (la/norm (la/sub AAdag (la/transpose AAdag))) 1.0E-10)))
 
 
-(deftest t181_l602 (is (true? v180_l598)))
+(deftest t181_l601 (is (true? v180_l597)))
 
 
 (def
- v183_l606
+ v183_l605
  (let
   [CA
    (cx/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
@@ -626,15 +631,15 @@
    det-B
    (la/det CB)
    product
-   (cx/mul det-A det-B)]
+   (la/mul det-A det-B)]
   (< (la/norm (la/sub det-AB product)) 1.0E-10)))
 
 
-(deftest t184_l614 (is (true? v183_l606)))
+(deftest t184_l613 (is (true? v183_l605)))
 
 
 (def
- v186_l618
+ v186_l617
  (let
   [CA
    (cx/complex-tensor [[2 1] [1 3]] [[1 0] [0 1]])
@@ -645,11 +650,11 @@
   (< (la/norm (la/sub (la/mmul CA Cx) Cb)) 1.0E-10)))
 
 
-(deftest t187_l623 (is (true? v186_l618)))
+(deftest t187_l622 (is (true? v186_l617)))
 
 
 (def
- v189_l627
+ v189_l626
  (let
   [CA
    (cx/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
@@ -658,4 +663,4 @@
   (< (la/norm (la/sub (la/mmul CA (la/invert CA)) CI)) 1.0E-10)))
 
 
-(deftest t190_l631 (is (true? v189_l627)))
+(deftest t190_l630 (is (true? v189_l626)))

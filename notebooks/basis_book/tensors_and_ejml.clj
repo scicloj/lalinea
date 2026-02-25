@@ -127,7 +127,7 @@
 ;;
 ;; For a symmetric matrix, eigenvalues are real.
 
-(sort (map first (:eigenvalues (la/eigen (la/matrix [[4 1] [1 3]])))))
+(la/real-eigenvalues (la/matrix [[4 1] [1 3]]))
 
 (kind/test-last [(fn [evs] (= 2 (count evs)))])
 
