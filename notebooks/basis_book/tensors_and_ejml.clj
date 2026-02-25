@@ -26,7 +26,7 @@
 ;; library for working with typed numerical data. Its core abstraction
 ;; is the **buffer** — a typed, indexed container that can be backed
 ;; by a Java array, an off-heap memory region, or a functional reader
-;; that computes values on the fly. All three look the same to consumer
+;; that computes values on the fly. All three look the same to user
 ;; code: they share a common interface for element access, type queries,
 ;; and functional transformations.
 ;;
