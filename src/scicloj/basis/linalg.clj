@@ -14,7 +14,7 @@
             [tech.v3.datatype :as dtype]
             [tech.v3.datatype.functional :as dfn])
   (:import [java.util Arrays]
-           [org.ejml.data DMatrixRMaj]))
+           [org.ejml.data DMatrixRMaj ZMatrixRMaj]))
 
 ;; ---------------------------------------------------------------------------
 ;; Matrix construction
@@ -81,6 +81,27 @@
    the other."
   [^DMatrixRMaj dm]
   (bt/dmat->tensor dm))
+
+(defn complex-tensor->zmat
+  "Zero-copy: convert a ComplexTensor to an EJML ZMatrixRMaj sharing
+   the same double[]. Mutations through either view are visible in
+   the other.
+
+   For a matrix ComplexTensor [r c], creates an r*c ZMatrixRMaj.
+   For a vector ComplexTensor [n], creates an n*1 column vector.
+   For a scalar ComplexTensor [], creates a 1*1 matrix.
+
+   Falls back to a copy if the tensor is not backed by a contiguous
+   double[] (e.g. a lazy ComplexTensor from arithmetic operations)."
+  ^ZMatrixRMaj [ct]
+  (ejml/ct->zmat ct))
+
+(defn zmat->complex-tensor
+  "Zero-copy: convert an EJML ZMatrixRMaj to a ComplexTensor [r c]
+   sharing the same double[]. Mutations through either view are
+   visible in the other."
+  [^ZMatrixRMaj zm]
+  (ejml/zmat->ct zm))
 
 ;; ---------------------------------------------------------------------------
 (defn submatrix
