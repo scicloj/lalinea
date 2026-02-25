@@ -21,9 +21,8 @@
    [tech.v3.libs.buffered-image :as bufimg]
    [scicloj.kindly.v4.kind :as kind]))
 
-;; ## Linear Algebra (`scicloj.basis.linalg`)
+;; ## `scicloj.basis.linalg`
 
-;; ### Matrix construction
 
 (kind/doc #'la/matrix)
 
@@ -65,7 +64,6 @@
 
 (kind/test-last [(fn [v] (= [1 3] (vec (dtype/shape v))))])
 
-;; ### Matrix arithmetic
 
 (kind/doc #'la/add)
 
@@ -101,7 +99,6 @@
 
 (kind/test-last [(fn [m] (== 3.0 (tensor/mget m 0 0)))])
 
-;; ### Matrix multiply
 
 (kind/doc #'la/mmul)
 
@@ -111,7 +108,6 @@
 (kind/test-last [(fn [m] (and (= [2 1] (vec (dtype/shape m)))
                               (== 17.0 (tensor/mget m 0 0))))])
 
-;; ### Transpose
 
 (kind/doc #'la/transpose)
 
@@ -119,7 +115,6 @@
 
 (kind/test-last [(fn [m] (= [3 2] (vec (dtype/shape m))))])
 
-;; ### Submatrix
 
 (kind/doc #'la/submatrix)
 
@@ -127,7 +122,6 @@
 
 (kind/test-last [(fn [m] (= [4 2] (vec (dtype/shape m))))])
 
-;; ### Scalar properties
 
 (kind/doc #'la/trace)
 
@@ -153,7 +147,6 @@
 
 (kind/test-last [(fn [v] (== 32.0 v))])
 
-;; ### Approximate equality
 
 (kind/doc #'la/close?)
 
@@ -171,7 +164,6 @@
 
 (kind/test-last [true?])
 
-;; ### Inverse and solve
 
 (kind/doc #'la/invert)
 
@@ -190,7 +182,6 @@
 (kind/test-last [(fn [x] (and (la/close-scalar? (tensor/mget x 0 0) 1.6)
                               (la/close-scalar? (tensor/mget x 1 0) 1.8)))])
 
-;; ### Decompositions
 
 (kind/doc #'la/eigen)
 
@@ -236,7 +227,6 @@
 
 (kind/test-last [true?])
 
-;; ### EJML interop
 
 (kind/doc #'la/tensor->dmat)
 
@@ -270,12 +260,11 @@
 
 (kind/test-last [true?])
 
-;; ## Complex Tensors (`scicloj.basis.complex`)
+;; ## `scicloj.basis.complex`
 ;;
 ;; A ComplexTensor wraps a dtype-next tensor whose last dimension
 ;; is 2 (interleaved real/imaginary pairs).
 
-;; ### Constructors
 
 (kind/doc #'cx/complex-tensor)
 
@@ -297,7 +286,6 @@
                                (== 3.0 (cx/re ct))
                                (== 4.0 (cx/im ct))))])
 
-;; ### Accessors
 
 (kind/doc #'cx/re)
 
@@ -347,7 +335,6 @@
 
 (kind/test-last [= [1.0 3.0 2.0 4.0]])
 
-;; ### Arithmetic
 
 (kind/doc #'cx/add)
 
@@ -423,12 +410,11 @@
 
 (kind/test-last [= [6.0 15.0]])
 
-;; ## Transforms (`scicloj.basis.transform`)
+;; ## `scicloj.basis.transform`
 ;;
 ;; Bridge between Fastmath transforms and basis tensors.
 ;; The FFT takes a real signal and returns a ComplexTensor spectrum.
 
-;; ### FFT
 
 (kind/doc #'bfft/forward)
 
@@ -462,7 +448,6 @@
 
 (kind/test-last [= [4]])
 
-;; ### DCT, DST, DHT
 
 (kind/doc #'bfft/dct-forward)
 
@@ -506,7 +491,7 @@
 
 (kind/test-last [true?])
 
-;; ## Visualization (`scicloj.basis.vis`)
+;; ## `scicloj.basis.vis`
 ;;
 ;; SVG and image helpers for visual linear algebra.
 
