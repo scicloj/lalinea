@@ -164,19 +164,6 @@
     (CommonOps_ZDRM/mult a b c)
     c))
 
-(defn zadd
-  "Complex matrix addition: C = A + B."
-  ^ZMatrixRMaj [^ZMatrixRMaj a ^ZMatrixRMaj b]
-  (let [c (ZMatrixRMaj. (.numRows a) (.numCols a))]
-    (CommonOps_ZDRM/add a b c)
-    c))
-
-(defn zsub
-  "Complex matrix subtraction: C = A - B."
-  ^ZMatrixRMaj [^ZMatrixRMaj a ^ZMatrixRMaj b]
-  (let [c (ZMatrixRMaj. (.numRows a) (.numCols a))]
-    (CommonOps_ZDRM/subtract a b c)
-    c))
 
 (defn ztranspose-conj
   "Conjugate transpose (Hermitian adjoint): B = A†."
