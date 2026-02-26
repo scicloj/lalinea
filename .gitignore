@@ -8,4 +8,5 @@ gfm
 .venv
 docs/*.qmd
 CLAUDE.md
-dev-notes.claude/
+dev-notes
+.claude/
