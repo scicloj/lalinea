@@ -472,7 +472,11 @@ final-eigenvalues
 
 (kind/test-last [true?])
 
-;; ### SVD — singular values = eigenvalues (since SPD)
+;; ### SVD
+;;
+;; For a symmetric positive definite matrix, the singular values
+;; equal the eigenvalues — the spectral theorem and the SVD
+;; coincide.
 
 (def final-svd (la/svd A-final))
 
@@ -496,7 +500,10 @@ final-eigenvalues
 
 (kind/test-last [true?])
 
-;; ### Cholesky — since positive definite
+;; ### Cholesky factorisation
+;;
+;; Since the matrix is symmetric and positive definite, it has
+;; a Cholesky factorisation $A = LL^T$ where $L$ is lower triangular.
 
 (def chol-final (la/cholesky A-final))
 
