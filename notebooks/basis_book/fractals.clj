@@ -202,81 +202,134 @@
 (kind/test-last
  [(fn [img] (= java.awt.image.BufferedImage (type img)))])
 
-;; ## Dragon curve
+;; ## Newton's fractal
 ;;
-;; The [dragon curve](https://en.wikipedia.org/wiki/Dragon_curve)
-;; can be constructed from complex arithmetic. The key idea
-;; (inspired by [this approach](https://rosettacode.org/wiki/Dragon_curve#Version_#1.)):
-;; powers of $(1+i)$ give a sequence of points that spiral
-;; outward, and the binary representation of each integer
-;; determines how to combine these points into the dragon.
+;; [Newton's method](https://en.wikipedia.org/wiki/Newton%27s_method)
+;; finds roots of equations by iterating
+;; $z_{n+1} = z_n - f(z_n) / f'(z_n)$.
+;; In the complex plane, each starting point converges to one of
+;; the roots — and the **boundaries between convergence regions**
+;; form a fractal.
 ;;
-;; We compute all dragon points at once by iterating over
-;; the bit positions. This is a functional accumulation
-;; with no mutable state.
+;; We apply Newton's method to $f(z) = z^3 - 1$, whose roots
+;; are the three cube roots of unity:
+;; $\omega_0 = 1$,
+;; $\omega_1 = e^{2\pi i/3}$,
+;; $\omega_2 = e^{4\pi i/3}$.
+;; Since $f'(z) = 3z^2$, the iteration is:
+;;
+;; $$z_{n+1} = z - \frac{z^3 - 1}{3z^2}$$
+;;
+;; Like Mandelbrot and Julia sets, the iteration is vectorized
+;; across the entire grid — `la/mul`, `la/sub`, and `la/scale`
+;; operate on every grid point simultaneously.
 
-(def dragon-n 512)
+;; ### Complex division
+;;
+;; Newton's method requires dividing one complex grid by another.
+;; We build element-wise complex division from real/imaginary parts:
+;; $\frac{a}{b} = \frac{a\bar{b}}{|b|^2}$.
 
-(def bit-at
-  (fn [n pos]
-    (bit-and (int (/ n (Math/pow 2 pos))) 1)))
+(def complex-div
+  (fn [a b]
+    (let [ar (cx/re a) ai (cx/im a)
+          br (cx/re b) bi (cx/im b)
+          denom (dfn/+ (dfn/* br br) (dfn/* bi bi))]
+      (cx/complex-tensor
+       (dfn// (dfn/+ (dfn/* ar br) (dfn/* ai bi)) denom)
+       (dfn// (dfn/- (dfn/* ai br) (dfn/* ar bi)) denom)))))
 
-(def dragon-points
-  (let [;; Precompute powers of (1+i)
-        pts (mapv (fn [k]
-                    (let [r (Math/pow (Math/sqrt 2.0) k)
-                          theta (* k (/ Math/PI 4))]
-                      [(* r (Math/cos theta))
-                       (* r (Math/sin theta))]))
-                  (range 20))
-        ;; For each n, compute the dragon point by combining
-        ;; bits and powers
-        compute-point
-        (fn [n]
-          (let [nbits (count (Integer/toBinaryString (max 1 n)))]
-            (loop [pos nbits re 0.0 im 0.0]
-              (if (neg? pos)
-                [re im]
-                (let [b (bit-at n pos)
-                      bn (bit-at n (inc pos))]
-                  (if (zero? b)
-                    (recur (dec pos) re im)
-                    (let [[pr pi] (nth pts pos [0 0])
-                          ;; Turn based on bit flip
-                          [tr ti] (if (= b bn) [1.0 0.0] [0.0 1.0])
-                          ;; Complex multiply: turn * pt
-                          new-re (- (* tr pr) (* ti pi))
-                          new-im (+ (* tr pi) (* ti pr))]
-                      (recur (dec pos)
-                             (+ re new-re)
-                             (+ im new-im)))))))))
-        points (mapv compute-point (range dragon-n))]
-    points))
+;; ### Newton iteration
 
-;; Render the dragon curve as an SVG path:
+(def newton-roots
+  (fn [re-min re-max im-min im-max h w max-iter]
+    (let [z0 (complex-grid re-min re-max im-min im-max h w)
+          ;; Constant grid of 1 + 0i
+          one (cx/complex-tensor
+               (tensor/compute-tensor [h w 2]
+                                      (fn [_ _ part] (if (zero? part) 1.0 0.0))
+                                      :float64))
+          ;; The three cube roots of unity
+          roots [(cx/complex 1.0 0.0)
+                 (cx/complex (Math/cos (/ (* 2.0 Math/PI) 3.0))
+                             (Math/sin (/ (* 2.0 Math/PI) 3.0)))
+                 (cx/complex (Math/cos (/ (* 4.0 Math/PI) 3.0))
+                             (Math/sin (/ (* 4.0 Math/PI) 3.0)))]
+          root-idx (int-array (* h w) -1)]
+      ;; Iterate Newton's method
+      (loop [z (dtype/clone z0) k 0]
+        (if (>= k max-iter)
+          ;; Classify each point by nearest root
+          (let [z-final z]
+            (dotimes [r h]
+              (dotimes [c w]
+                (let [idx (+ (* r w) c)
+                      zr (tensor/mget (.tensor ^scicloj.basis.complex.ComplexTensor z-final) r c 0)
+                      zi (tensor/mget (.tensor ^scicloj.basis.complex.ComplexTensor z-final) r c 1)
+                      best (reduce (fn [best-i i]
+                                     (let [root (nth roots i)
+                                           dr (- zr (double (cx/re root)))
+                                           di (- zi (double (cx/im root)))
+                                           d (+ (* dr dr) (* di di))
+                                           root-best (nth roots best-i)
+                                           dbr (- zr (double (cx/re root-best)))
+                                           dbi (- zi (double (cx/im root-best)))
+                                           db (+ (* dbr dbr) (* dbi dbi))]
+                                       (if (< d db) i best-i)))
+                                   0 [1 2])]
+                  (aset root-idx idx best))))
+            root-idx)
+          ;; z_{n+1} = z - (z³ - 1) / (3z²)
+          (let [z2 (la/mul z z)
+                z3 (la/mul z z2)
+                fz (la/sub z3 one)
+                fpz (la/scale z2 3.0)
+                z-next (dtype/clone (la/sub z (complex-div fz fpz)))]
+            (recur z-next (inc k))))))))
 
-(let [pts dragon-points
-      xs (map first pts)
-      ys (map second pts)
-      pad 1.0
-      x-min (- (apply min xs) pad)
-      y-min (- (apply min ys) pad)
-      vb-w (+ (- (apply max xs) (apply min xs)) (* 2 pad))
-      vb-h (+ (- (apply max ys) (apply min ys)) (* 2 pad))
-      sw (* 0.04 (max vb-w vb-h))]
-  (kind/hiccup
-   [:svg {:width 500 :height 500
-          :viewBox (str x-min " " y-min " " vb-w " " vb-h)
-          :preserveAspectRatio "xMidYMid meet"}
-    [:rect {:x x-min :y y-min :width vb-w :height vb-h
-            :fill "#f8f8f8"}]
-    [:path {:d (str "M" (ffirst pts) " " (second (first pts))
-                    (apply str (map (fn [[x y]] (str " L" x " " y))
-                                    (rest pts))))
-            :stroke "#2244aa"
-            :stroke-width sw
-            :fill "none"
-            :stroke-linejoin "round"}]]))
+;; ### Rendering
+;;
+;; Each pixel is colored by which root it converged to.
+;; The three basins get distinct hues; the fractal structure
+;; emerges at the boundaries.
+
+(def root-colors
+  [[230 50 50]    ;; root 0 (1+0i) — red
+   [50 180 50]    ;; root 1 — green
+   [50 80 220]])  ;; root 2 — blue
+
+(def roots->image
+  (fn [root-idx h w]
+    (tensor/compute-tensor [h w 3]
+                           (fn [r c ch]
+                             (let [idx (aget root-idx (+ (* r w) c))]
+                               (if (neg? idx) 0
+                                   (nth (nth root-colors idx) ch))))
+                           :uint8)))
+
+;; ### The full view
+
+(def newton-img
+  (let [h 300 w 300 max-iter 30
+        root-idx (newton-roots -2.0 2.0 -2.0 2.0 h w max-iter)]
+    (roots->image root-idx h w)))
+
+(bufimg/tensor->image newton-img)
 
 (kind/test-last
- [(fn [_] (vector? dragon-points))])
+ [(fn [img] (= java.awt.image.BufferedImage (type img)))])
+
+;; ### Zooming in
+;;
+;; The boundary between basins has fractal detail at every scale.
+;; Here is a zoom into the region near $z = 0$:
+
+(def newton-zoom
+  (let [h 300 w 300 max-iter 50
+        root-idx (newton-roots -0.5 0.5 -0.5 0.5 h w max-iter)]
+    (roots->image root-idx h w)))
+
+(bufimg/tensor->image newton-zoom)
+
+(kind/test-last
+ [(fn [img] (= java.awt.image.BufferedImage (type img)))])

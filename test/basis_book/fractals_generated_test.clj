@@ -277,98 +277,172 @@
  (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v31_l200)))
 
 
-(def v34_l218 (def dragon-n 512))
-
-
 (def
- v35_l220
- (def bit-at (fn [n pos] (bit-and (int (/ n (Math/pow 2 pos))) 1))))
-
-
-(def
- v36_l224
+ v34_l233
  (def
-  dragon-points
-  (let
-   [pts
-    (mapv
-     (fn
-      [k]
-      (let
-       [r (Math/pow (Math/sqrt 2.0) k) theta (* k (/ Math/PI 4))]
-       [(* r (Math/cos theta)) (* r (Math/sin theta))]))
-     (range 20))
-    compute-point
-    (fn
-     [n]
-     (let
-      [nbits (count (Integer/toBinaryString (max 1 n)))]
-      (loop
-       [pos nbits re 0.0 im 0.0]
-       (if
-        (neg? pos)
-        [re im]
-        (let
-         [b (bit-at n pos) bn (bit-at n (inc pos))]
-         (if
-          (zero? b)
-          (recur (dec pos) re im)
-          (let
-           [[pr pi]
-            (nth pts pos [0 0])
-            [tr ti]
-            (if (= b bn) [1.0 0.0] [0.0 1.0])
-            new-re
-            (- (* tr pr) (* ti pi))
-            new-im
-            (+ (* tr pi) (* ti pr))]
-           (recur (dec pos) (+ re new-re) (+ im new-im)))))))))
-    points
-    (mapv compute-point (range dragon-n))]
-   points)))
+  complex-div
+  (fn
+   [a b]
+   (let
+    [ar
+     (cx/re a)
+     ai
+     (cx/im a)
+     br
+     (cx/re b)
+     bi
+     (cx/im b)
+     denom
+     (dfn/+ (dfn/* br br) (dfn/* bi bi))]
+    (cx/complex-tensor
+     (dfn// (dfn/+ (dfn/* ar br) (dfn/* ai bi)) denom)
+     (dfn// (dfn/- (dfn/* ai br) (dfn/* ar bi)) denom))))))
 
 
 (def
- v38_l258
- (let
-  [pts
-   dragon-points
-   xs
-   (map first pts)
-   ys
-   (map second pts)
-   pad
-   1.0
-   x-min
-   (- (apply min xs) pad)
-   y-min
-   (- (apply min ys) pad)
-   vb-w
-   (+ (- (apply max xs) (apply min xs)) (* 2 pad))
-   vb-h
-   (+ (- (apply max ys) (apply min ys)) (* 2 pad))
-   sw
-   (* 0.04 (max vb-w vb-h))]
-  (kind/hiccup
-   [:svg
-    {:width 500,
-     :height 500,
-     :viewBox (str x-min " " y-min " " vb-w " " vb-h),
-     :preserveAspectRatio "xMidYMid meet"}
-    [:rect
-     {:x x-min, :y y-min, :width vb-w, :height vb-h, :fill "#f8f8f8"}]
-    [:path
-     {:d
-      (str
-       "M"
-       (ffirst pts)
-       " "
-       (second (first pts))
-       (apply str (map (fn [[x y]] (str " L" x " " y)) (rest pts)))),
-      :stroke "#2244aa",
-      :stroke-width sw,
-      :fill "none",
-      :stroke-linejoin "round"}]])))
+ v36_l244
+ (def
+  newton-roots
+  (fn
+   [re-min re-max im-min im-max h w max-iter]
+   (let
+    [z0
+     (complex-grid re-min re-max im-min im-max h w)
+     one
+     (cx/complex-tensor
+      (tensor/compute-tensor
+       [h w 2]
+       (fn [_ _ part] (if (zero? part) 1.0 0.0))
+       :float64))
+     roots
+     [(cx/complex 1.0 0.0)
+      (cx/complex
+       (Math/cos (/ (* 2.0 Math/PI) 3.0))
+       (Math/sin (/ (* 2.0 Math/PI) 3.0)))
+      (cx/complex
+       (Math/cos (/ (* 4.0 Math/PI) 3.0))
+       (Math/sin (/ (* 4.0 Math/PI) 3.0)))]
+     root-idx
+     (int-array (* h w) -1)]
+    (loop
+     [z (dtype/clone z0) k 0]
+     (if
+      (>= k max-iter)
+      (let
+       [z-final z]
+       (dotimes
+        [r h]
+        (dotimes
+         [c w]
+         (let
+          [idx
+           (+ (* r w) c)
+           zr
+           (tensor/mget (.tensor z-final) r c 0)
+           zi
+           (tensor/mget (.tensor z-final) r c 1)
+           best
+           (reduce
+            (fn
+             [best-i i]
+             (let
+              [root
+               (nth roots i)
+               dr
+               (- zr (double (cx/re root)))
+               di
+               (- zi (double (cx/im root)))
+               d
+               (+ (* dr dr) (* di di))
+               root-best
+               (nth roots best-i)
+               dbr
+               (- zr (double (cx/re root-best)))
+               dbi
+               (- zi (double (cx/im root-best)))
+               db
+               (+ (* dbr dbr) (* dbi dbi))]
+              (if (< d db) i best-i)))
+            0
+            [1 2])]
+          (aset root-idx idx best))))
+       root-idx)
+      (let
+       [z2
+        (la/mul z z)
+        z3
+        (la/mul z z2)
+        fz
+        (la/sub z3 one)
+        fpz
+        (la/scale z2 3.0)
+        z-next
+        (dtype/clone (la/sub z (complex-div fz fpz)))]
+       (recur z-next (inc k)))))))))
 
 
-(deftest t39_l281 (is ((fn [_] (vector? dragon-points)) v38_l258)))
+(def v38_l296 (def root-colors [[230 50 50] [50 180 50] [50 80 220]]))
+
+
+(def
+ v40_l301
+ (def
+  roots->image
+  (fn
+   [root-idx h w]
+   (tensor/compute-tensor
+    [h w 3]
+    (fn
+     [r c ch]
+     (let
+      [idx (aget root-idx (+ (* r w) c))]
+      (if (neg? idx) 0 (nth (nth root-colors idx) ch))))
+    :uint8))))
+
+
+(def
+ v42_l312
+ (def
+  newton-img
+  (let
+   [h
+    300
+    w
+    300
+    max-iter
+    30
+    root-idx
+    (newton-roots -2.0 2.0 -2.0 2.0 h w max-iter)]
+   (roots->image root-idx h w))))
+
+
+(def v43_l317 (bufimg/tensor->image newton-img))
+
+
+(deftest
+ t44_l319
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v43_l317)))
+
+
+(def
+ v46_l327
+ (def
+  newton-zoom
+  (let
+   [h
+    300
+    w
+    300
+    max-iter
+    50
+    root-idx
+    (newton-roots -0.5 0.5 -0.5 0.5 h w max-iter)]
+   (roots->image root-idx h w))))
+
+
+(def v47_l332 (bufimg/tensor->image newton-zoom))
+
+
+(deftest
+ t48_l334
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v47_l332)))
