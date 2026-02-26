@@ -38,8 +38,8 @@
 ;; A **linear map** (or **linear transformation**) is a function
 ;; between vector spaces that respects the structure:
 ;;
-;; - $T(\mathbf{u} + \mathbf{v}) = T(\mathbf{u}) + T(\mathbf{v})$
-;; - $T(\alpha \mathbf{v}) = \alpha\, T(\mathbf{v})$
+;; - For all vectors $\mathbf{u}, \mathbf{v}$: $T(\mathbf{u} + \mathbf{v}) = T(\mathbf{u}) + T(\mathbf{v})$
+;; - For every scalar $\alpha$ and vector $\mathbf{v}$: $T(\alpha \mathbf{v}) = \alpha\, T(\mathbf{v})$
 ;;
 ;; Informally: the map commutes with addition and scaling.
 ;; This definition applies to any vector spaces, not just
@@ -60,6 +60,20 @@
 ;; This is why matrices are central to computational linear
 ;; algebra — they are the universal representation of linear
 ;; maps between finite-dimensional spaces.
+;;
+;; ### Matrix–vector multiplication
+;;
+;; Concretely, applying a linear map means **matrix–vector
+;; multiplication**: each entry of the output is the dot product
+;; of a row of $A$ with the input vector $\mathbf{x}$:
+;;
+;; $$(A\mathbf{x})_i = \sum_j A_{ij}\, x_j$$
+;;
+;; Equivalently, $A\mathbf{x}$ is a linear combination of
+;; the **columns** of $A$, weighted by the entries of $\mathbf{x}$.
+;; This column view is often the more illuminating one — it
+;; says "the output lives in the span of $A$'s columns."
+;; In basis, matrix–vector multiplication is `la/mmul`.
 
 ;; ### Example: rotation
 ;;

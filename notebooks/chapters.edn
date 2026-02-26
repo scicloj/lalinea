@@ -5,7 +5,7 @@
                   "sharing_and_mutation"]
  "Abstract Linear Algebra" ["vectors_and_spaces"
                             "maps_and_structure"
-                            "inner_products"
+                            "inner_products_and_orthogonality"
                             "eigenvalues_and_decompositions"]
  "Applications" ["linear_systems"
                  "markov_chains"

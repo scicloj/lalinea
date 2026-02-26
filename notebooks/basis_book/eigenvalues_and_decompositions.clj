@@ -265,7 +265,7 @@ D-result
 ;; abstract property: the operator is **self-adjoint** with
 ;; respect to the inner product:
 ;;
-;; $$\langle A\mathbf{u}, \mathbf{v} \rangle = \langle \mathbf{u}, A\mathbf{v} \rangle$$
+;; $$\langle A\mathbf{u}, \mathbf{v} \rangle = \langle \mathbf{u}, A\mathbf{v} \rangle \quad \text{for all vectors } \mathbf{u}, \mathbf{v}$$
 ;;
 ;; The spectral theorem is really about self-adjoint operators
 ;; on inner product spaces. In different settings it takes
@@ -359,8 +359,8 @@ sigmas
 ;;
 ;; ### Definition
 ;;
-;; A symmetric matrix $M$ is **positive definite** (PD) if
-;; $\mathbf{x}^T M \mathbf{x} > 0$ for every non-zero $\mathbf{x}$.
+;; A symmetric matrix $M$ is **positive definite** (PD) if,
+;; for every non-zero vector $\mathbf{x}$: $\mathbf{x}^T M \mathbf{x} > 0$.
 ;;
 ;; Think of it as a bowl shape — the quadratic form always
 ;; curves upward. Equivalent conditions:

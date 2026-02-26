@@ -103,17 +103,17 @@
 ;;
 ;; **Addition axioms:**
 ;;
-;; 1. **Commutativity**: $\mathbf{u} + \mathbf{v} = \mathbf{v} + \mathbf{u}$
-;; 2. **Associativity**: $(\mathbf{u} + \mathbf{v}) + \mathbf{w} = \mathbf{u} + (\mathbf{v} + \mathbf{w})$
-;; 3. **Zero vector**: there exists $\mathbf{0}$ such that $\mathbf{u} + \mathbf{0} = \mathbf{u}$
+;; 1. **Commutativity**: for all vectors $\mathbf{u}, \mathbf{v}$: $\mathbf{u} + \mathbf{v} = \mathbf{v} + \mathbf{u}$
+;; 2. **Associativity**: for all vectors $\mathbf{u}, \mathbf{v}, \mathbf{w}$: $(\mathbf{u} + \mathbf{v}) + \mathbf{w} = \mathbf{u} + (\mathbf{v} + \mathbf{w})$
+;; 3. **Zero vector**: there exists $\mathbf{0}$ such that for every vector $\mathbf{u}$: $\mathbf{u} + \mathbf{0} = \mathbf{u}$
 ;; 4. **Additive inverse**: for every $\mathbf{u}$, there exists $-\mathbf{u}$ with $\mathbf{u} + (-\mathbf{u}) = \mathbf{0}$
 ;;
 ;; **Scalar multiplication axioms:**
 ;;
-;; 5. **Compatibility**: $\alpha(\beta \mathbf{u}) = (\alpha \beta) \mathbf{u}$
-;; 6. **Identity**: $1 \cdot \mathbf{u} = \mathbf{u}$
-;; 7. **Distributivity over vectors**: $\alpha(\mathbf{u} + \mathbf{v}) = \alpha\mathbf{u} + \alpha\mathbf{v}$
-;; 8. **Distributivity over scalars**: $(\alpha + \beta)\mathbf{u} = \alpha\mathbf{u} + \beta\mathbf{u}$
+;; 5. **Compatibility**: for all scalars $\alpha, \beta$ and every vector $\mathbf{u}$: $\alpha(\beta \mathbf{u}) = (\alpha \beta) \mathbf{u}$
+;; 6. **Identity**: for every vector $\mathbf{u}$: $1 \cdot \mathbf{u} = \mathbf{u}$
+;; 7. **Distributivity over vectors**: for every scalar $\alpha$ and all vectors $\mathbf{u}, \mathbf{v}$: $\alpha(\mathbf{u} + \mathbf{v}) = \alpha\mathbf{u} + \alpha\mathbf{v}$
+;; 8. **Distributivity over scalars**: for all scalars $\alpha, \beta$ and every vector $\mathbf{u}$: $(\alpha + \beta)\mathbf{u} = \alpha\mathbf{u} + \beta\mathbf{u}$
 ;;
 ;; Let us verify each one on our concrete vectors
 ;; $\mathbf{u} = [3,1]^T$, $\mathbf{v} = [1,2]^T$ in the plane.
