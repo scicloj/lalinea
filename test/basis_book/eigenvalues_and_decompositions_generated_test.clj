@@ -53,7 +53,7 @@
      ev
      (nth (:eigenvectors eig-result) i)]
     (<
-     (la/norm (la/sub (la/mmul A-eig ev) (la/scale lam ev)))
+     (la/norm (la/sub (la/mmul A-eig ev) (la/scale ev lam)))
      1.0E-10)))
   (range 3)))
 
@@ -220,104 +220,104 @@
  (def
   A-rank1
   (la/scale
-   (first sigmas)
    (la/mmul
     (la/submatrix (:U svd-lr) :all [0])
-    (la/submatrix (:Vt svd-lr) [0] :all)))))
+    (la/submatrix (:Vt svd-lr) [0] :all))
+   (first sigmas))))
 
 
-(def v62_l351 (def approx-err (la/norm (la/sub A-lr A-rank1))))
+(def v62_l350 (def approx-err (la/norm (la/sub A-lr A-rank1))))
 
 
-(def v63_l353 (< (Math/abs (- approx-err (second sigmas))) 1.0E-10))
+(def v63_l352 (< (Math/abs (- approx-err (second sigmas))) 1.0E-10))
 
 
-(deftest t64_l355 (is (true? v63_l353)))
+(deftest t64_l354 (is (true? v63_l352)))
 
 
-(def v66_l381 (def ATA (la/mmul (la/transpose A-svd) A-svd)))
+(def v66_l380 (def ATA (la/mmul (la/transpose A-svd) A-svd)))
 
 
 (def
- v67_l383
+ v67_l382
  (every?
-  (fn* [p1__134870#] (>= p1__134870# -1.0E-10))
+  (fn* [p1__141097#] (>= p1__141097# -1.0E-10))
   (cx/re (:eigenvalues (la/eigen ATA)))))
 
 
-(deftest t68_l385 (is (true? v67_l383)))
+(deftest t68_l384 (is (true? v67_l382)))
 
 
 (def
- v70_l396
+ v70_l395
  (def spd-mat (la/add (la/mmul (la/transpose A-eig) A-eig) (la/eye 3))))
 
 
-(def v71_l399 (def chol-L (la/cholesky spd-mat)))
+(def v71_l398 (def chol-L (la/cholesky spd-mat)))
 
 
 (def
- v73_l403
+ v73_l402
  (la/norm (la/sub (la/mmul chol-L (la/transpose chol-L)) spd-mat)))
 
 
-(deftest t74_l405 (is ((fn [d] (< d 1.0E-10)) v73_l403)))
+(deftest t74_l404 (is ((fn [d] (< d 1.0E-10)) v73_l402)))
 
 
-(def v76_l410 (la/cholesky (la/matrix [[1 2] [2 1]])))
+(def v76_l409 (la/cholesky (la/matrix [[1 2] [2 1]])))
 
 
-(deftest t77_l412 (is (nil? v76_l410)))
+(deftest t77_l411 (is (nil? v76_l409)))
 
 
-(def v79_l424 (def A-final (la/matrix [[2 1 0] [1 3 1] [0 1 2]])))
+(def v79_l423 (def A-final (la/matrix [[2 1 0] [1 3 1] [0 1 2]])))
 
 
-(def v81_l434 (la/close? A-final (la/transpose A-final)))
+(def v81_l433 (la/close? A-final (la/transpose A-final)))
 
 
-(deftest t82_l436 (is (true? v81_l434)))
+(deftest t82_l435 (is (true? v81_l433)))
 
 
-(def v84_l440 (def eig-final (la/eigen A-final)))
+(def v84_l439 (def eig-final (la/eigen A-final)))
 
 
-(def v85_l442 (def final-eigenvalues (la/real-eigenvalues A-final)))
+(def v85_l441 (def final-eigenvalues (la/real-eigenvalues A-final)))
 
 
-(def v86_l445 final-eigenvalues)
+(def v86_l444 final-eigenvalues)
 
 
 (deftest
- t87_l447
- (is ((fn [v] (and (= 3 (count v)) (every? pos? v))) v86_l445)))
+ t87_l446
+ (is ((fn [v] (and (= 3 (count v)) (every? pos? v))) v86_l444)))
 
 
 (def
- v89_l455
+ v89_l454
  (<
   (Math/abs (- (la/trace A-final) (reduce + final-eigenvalues)))
   1.0E-10))
 
 
-(deftest t90_l459 (is (true? v89_l455)))
+(deftest t90_l458 (is (true? v89_l454)))
 
 
 (def
- v92_l463
+ v92_l462
  (<
   (Math/abs (- (la/det A-final) (reduce * final-eigenvalues)))
   1.0E-10))
 
 
-(deftest t93_l467 (is (true? v92_l463)))
+(deftest t93_l466 (is (true? v92_l462)))
 
 
-(def v95_l471 (def final-svd (la/svd A-final)))
+(def v95_l470 (def final-svd (la/svd A-final)))
 
 
 (def
- v96_l473
+ v96_l472
  (<
   (dfn/reduce-max
    (dfn/abs
@@ -327,35 +327,35 @@
   1.0E-10))
 
 
-(deftest t97_l478 (is (true? v96_l473)))
+(deftest t97_l477 (is (true? v96_l472)))
 
 
 (def
- v99_l482
+ v99_l481
  (count
   (filter
-   (fn* [p1__134871#] (> p1__134871# 1.0E-10))
+   (fn* [p1__141098#] (> p1__141098# 1.0E-10))
    (vec (:S final-svd)))))
 
 
-(deftest t100_l484 (is ((fn [r] (= r 3)) v99_l482)))
+(deftest t100_l483 (is ((fn [r] (= r 3)) v99_l481)))
 
 
-(def v101_l487 (def A-inv (la/invert A-final)))
+(def v101_l486 (def A-inv (la/invert A-final)))
 
 
-(def v102_l489 (la/close? (la/mmul A-final A-inv) (la/eye 3)))
+(def v102_l488 (la/close? (la/mmul A-final A-inv) (la/eye 3)))
 
 
-(deftest t103_l491 (is (true? v102_l489)))
+(deftest t103_l490 (is (true? v102_l488)))
 
 
-(def v105_l495 (def chol-final (la/cholesky A-final)))
+(def v105_l494 (def chol-final (la/cholesky A-final)))
 
 
 (def
- v106_l497
+ v106_l496
  (la/close? (la/mmul chol-final (la/transpose chol-final)) A-final))
 
 
-(deftest t107_l499 (is (true? v106_l497)))
+(deftest t107_l498 (is (true? v106_l496)))

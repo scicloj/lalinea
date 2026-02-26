@@ -184,8 +184,7 @@
 ;; ### Kernel definitions
 
 (def blur-kernel
-  (la/scale (/ 1.0 9.0)
-            (la/matrix [[1 1 1] [1 1 1] [1 1 1]])))
+  (la/scale (la/matrix [[1 1 1] [1 1 1] [1 1 1]]) (/ 1.0 9.0)))
 
 (def sharpen-kernel
   (la/matrix [[0 -1  0]

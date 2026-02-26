@@ -165,7 +165,7 @@
   ((fn
     [v]
     (every?
-     (fn* [p1__133823#] (< (Math/abs p1__133823#) 1.0E-10))
+     (fn* [p1__141802#] (< (Math/abs p1__141802#) 1.0E-10))
      (map - v [1.0 2.0 3.0 4.0])))
    v48_l143)))
 
@@ -178,7 +178,7 @@
 
 (def
  v54_l160
- (tensor/mget (la/scale 2.0 (la/matrix [[1 2] [3 4]])) 1 1))
+ (tensor/mget (la/scale (la/matrix [[1 2] [3 4]]) 2.0) 1 1))
 
 
 (deftest t55_l162 (is (= v54_l160 8.0)))

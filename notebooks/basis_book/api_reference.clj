@@ -23,7 +23,6 @@
 
 ;; ## `scicloj.basis.linalg`
 
-
 (kind/doc #'la/matrix)
 
 (la/matrix [[1 2] [3 4]])
@@ -64,7 +63,6 @@
 
 (kind/test-last [(fn [v] (= [1 3] (vec (dtype/shape v))))])
 
-
 (kind/doc #'la/add)
 
 (la/add (la/matrix [[1 2] [3 4]])
@@ -81,7 +79,7 @@
 
 (kind/doc #'la/scale)
 
-(la/scale 3.0 (la/matrix [[1 2] [3 4]]))
+(la/scale (la/matrix [[1 2] [3 4]]) 3.0)
 
 (kind/test-last [(fn [m] (== 6.0 (tensor/mget m 0 1)))])
 
@@ -99,7 +97,6 @@
 
 (kind/test-last [(fn [m] (== 3.0 (tensor/mget m 0 0)))])
 
-
 (kind/doc #'la/mmul)
 
 (la/mmul (la/matrix [[1 2] [3 4]])
@@ -108,20 +105,17 @@
 (kind/test-last [(fn [m] (and (= [2 1] (vec (dtype/shape m)))
                               (== 17.0 (tensor/mget m 0 0))))])
 
-
 (kind/doc #'la/transpose)
 
 (la/transpose (la/matrix [[1 2 3] [4 5 6]]))
 
 (kind/test-last [(fn [m] (= [3 2] (vec (dtype/shape m))))])
 
-
 (kind/doc #'la/submatrix)
 
 (la/submatrix (la/eye 4) :all (range 2))
 
 (kind/test-last [(fn [m] (= [4 2] (vec (dtype/shape m))))])
-
 
 (kind/doc #'la/trace)
 
@@ -147,7 +141,6 @@
 
 (kind/test-last [(fn [v] (== 32.0 v))])
 
-
 (kind/doc #'la/close?)
 
 (la/close? (la/eye 2) (la/eye 2))
@@ -163,7 +156,6 @@
 (la/close-scalar? 1.00000000001 1.0)
 
 (kind/test-last [true?])
-
 
 (kind/doc #'la/invert)
 
@@ -181,7 +173,6 @@
 
 (kind/test-last [(fn [x] (and (la/close-scalar? (tensor/mget x 0 0) 1.6)
                               (la/close-scalar? (tensor/mget x 1 0) 1.8)))])
-
 
 (kind/doc #'la/eigen)
 
@@ -227,7 +218,6 @@
 
 (kind/test-last [true?])
 
-
 (kind/doc #'la/tensor->dmat)
 
 (let [t (la/matrix [[1 2] [3 4]])
@@ -265,7 +255,6 @@
 ;; A ComplexTensor wraps a dtype-next tensor whose last dimension
 ;; is 2 (interleaved real/imaginary pairs).
 
-
 (kind/doc #'cx/complex-tensor)
 
 (cx/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0])
@@ -285,7 +274,6 @@
 (kind/test-last [(fn [ct] (and (cx/scalar? ct)
                                (== 3.0 (cx/re ct))
                                (== 4.0 (cx/im ct))))])
-
 
 (kind/doc #'cx/re)
 
@@ -334,7 +322,6 @@
   (vec (cx/->double-array ct)))
 
 (kind/test-last [= [1.0 3.0 2.0 4.0]])
-
 
 (kind/doc #'cx/add)
 
@@ -415,7 +402,6 @@
 ;; Bridge between Fastmath transforms and basis tensors.
 ;; The FFT takes a real signal and returns a ComplexTensor spectrum.
 
-
 (kind/doc #'bfft/forward)
 
 (let [signal [1.0 0.0 0.0 0.0]
@@ -447,7 +433,6 @@
   (cx/complex-shape spectrum))
 
 (kind/test-last [= [4]])
-
 
 (kind/doc #'bfft/dct-forward)
 

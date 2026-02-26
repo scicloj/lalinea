@@ -46,7 +46,7 @@
   {:width 300}))
 
 
-(def v12_l72 (la/scale 2.0 u))
+(def v12_l72 (la/scale u 2.0))
 
 
 (deftest
@@ -66,7 +66,7 @@
   {:width 300}))
 
 
-(def v16_l84 (la/scale -1.0 u))
+(def v16_l84 (la/scale u -1.0))
 
 
 (deftest
@@ -112,7 +112,7 @@
 (deftest t30_l144 (is (true? v29_l142)))
 
 
-(def v32_l148 (la/close? (la/add u (la/scale -1.0 u)) zero2))
+(def v32_l148 (la/close? (la/add u (la/scale u -1.0)) zero2))
 
 
 (deftest t33_l150 (is (true? v32_l148)))
@@ -120,13 +120,13 @@
 
 (def
  v35_l154
- (la/close? (la/scale 2.0 (la/scale 3.0 u)) (la/scale 6.0 u)))
+ (la/close? (la/scale (la/scale u 3.0) 2.0) (la/scale u 6.0)))
 
 
 (deftest t36_l157 (is (true? v35_l154)))
 
 
-(def v38_l161 (la/close? (la/scale 1.0 u) u))
+(def v38_l161 (la/close? (la/scale u 1.0) u))
 
 
 (deftest t39_l163 (is (true? v38_l161)))
@@ -135,8 +135,8 @@
 (def
  v41_l167
  (la/close?
-  (la/scale 5.0 (la/add u v))
-  (la/add (la/scale 5.0 u) (la/scale 5.0 v))))
+  (la/scale (la/add u v) 5.0)
+  (la/add (la/scale u 5.0) (la/scale v 5.0))))
 
 
 (deftest t42_l170 (is (true? v41_l167)))
@@ -145,14 +145,14 @@
 (def
  v44_l174
  (la/close?
-  (la/scale (+ 2.0 3.0) u)
-  (la/add (la/scale 2.0 u) (la/scale 3.0 u))))
+  (la/scale u (+ 2.0 3.0))
+  (la/add (la/scale u 2.0) (la/scale u 3.0))))
 
 
 (deftest t45_l177 (is (true? v44_l174)))
 
 
-(def v47_l208 (la/add (la/scale 2.0 u) (la/scale -1.0 v)))
+(def v47_l208 (la/add (la/scale u 2.0) (la/scale v -1.0)))
 
 
 (deftest
@@ -296,8 +296,8 @@
  (la/close?
   w
   (la/add
-   (la/scale 5.0 e1)
-   (la/add (la/scale -3.0 e2) (la/scale 7.0 e3)))))
+   (la/scale e1 5.0)
+   (la/add (la/scale e2 -3.0) (la/scale e3 7.0)))))
 
 
 (deftest t79_l398 (is (true? v78_l393)))
@@ -328,8 +328,8 @@
  (la/close?
   v4
   (la/add
-   (la/scale 2.0 v1)
-   (la/add (la/scale 3.0 v2) (la/scale 1.0 v3)))))
+   (la/scale v1 2.0)
+   (la/add (la/scale v2 3.0) (la/scale v3 1.0)))))
 
 
 (deftest t89_l442 (is (true? v88_l437)))

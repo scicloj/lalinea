@@ -183,8 +183,7 @@
 ;; ### Compute covariance matrix and eigendecompose
 
 (def cov-matrix
-  (la/scale (/ 1.0 (dec n-points))
-            (la/mmul (la/transpose X) X)))
+  (la/scale (la/mmul (la/transpose X) X) (/ 1.0 (dec n-points))))
 
 cov-matrix
 

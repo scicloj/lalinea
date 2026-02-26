@@ -204,22 +204,22 @@
  v31_l185
  (def
   cov-matrix
-  (la/scale (/ 1.0 (dec n-points)) (la/mmul (la/transpose X) X))))
+  (la/scale (la/mmul (la/transpose X) X) (/ 1.0 (dec n-points)))))
 
 
-(def v32_l189 cov-matrix)
+(def v32_l188 cov-matrix)
 
 
 (deftest
- t33_l191
- (is ((fn [m] (= [2 2] (vec (dtype/shape m)))) v32_l189)))
+ t33_l190
+ (is ((fn [m] (= [2 2] (vec (dtype/shape m)))) v32_l188)))
 
 
-(def v34_l194 (def pca-eigen (la/eigen cov-matrix)))
+(def v34_l193 (def pca-eigen (la/eigen cov-matrix)))
 
 
 (def
- v36_l198
+ v36_l197
  (let
   [eigenvalues
    (:eigenvalues pca-eigen)
@@ -232,12 +232,12 @@
 
 
 (deftest
- t37_l204
- (is ((fn [evs] (> (first evs) (second evs))) v36_l198)))
+ t37_l203
+ (is ((fn [evs] (> (first evs) (second evs))) v36_l197)))
 
 
 (def
- v39_l211
+ v39_l210
  (let
   [{:keys [eigenvalues eigenvectors]}
    pca-eigen
@@ -281,11 +281,11 @@
    plotly/plot)))
 
 
-(deftest t40_l237 (is ((fn [_] true) v39_l211)))
+(deftest t40_l236 (is ((fn [_] true) v39_l210)))
 
 
 (def
- v42_l244
+ v42_l243
  (let
   [{:keys [eigenvalues eigenvectors]}
    pca-eigen
@@ -306,23 +306,23 @@
   explained))
 
 
-(deftest t44_l257 (is ((fn [v] (> v 0.8)) v42_l244)))
+(deftest t44_l256 (is ((fn [v] (> v 0.8)) v42_l243)))
 
 
-(def v46_l270 (def test-matrix (la/matrix [[4 1 0] [1 3 1] [0 1 2]])))
+(def v46_l269 (def test-matrix (la/matrix [[4 1 0] [1 3 1] [0 1 2]])))
 
 
-(def v48_l277 (def true-eigenvalues (la/real-eigenvalues test-matrix)))
+(def v48_l276 (def true-eigenvalues (la/real-eigenvalues test-matrix)))
 
 
-(def v49_l280 true-eigenvalues)
+(def v49_l279 true-eigenvalues)
 
 
-(deftest t50_l282 (is ((fn [evs] (= 3 (count evs))) v49_l280)))
+(deftest t50_l281 (is ((fn [evs] (= 3 (count evs))) v49_l279)))
 
 
 (def
- v52_l287
+ v52_l286
  (def
   qr-history
   (loop
@@ -359,7 +359,7 @@
 
 
 (def
- v54_l317
+ v54_l316
  (->
   (tc/dataset qr-history)
   (plotly/base {:=x :iteration, :=y :off-diagonal})
@@ -367,14 +367,14 @@
   plotly/plot))
 
 
-(def v55_l322 (:off-diagonal (last qr-history)))
+(def v55_l321 (:off-diagonal (last qr-history)))
 
 
-(deftest t56_l324 (is ((fn [v] (< v 1.0E-6)) v55_l322)))
+(deftest t56_l323 (is ((fn [v] (< v 1.0E-6)) v55_l321)))
 
 
 (def
- v58_l329
+ v58_l328
  (let
   [final
    (last qr-history)
@@ -388,11 +388,11 @@
     true-eigenvalues))))
 
 
-(deftest t59_l335 (is (true? v58_l329)))
+(deftest t59_l334 (is (true? v58_l328)))
 
 
 (def
- v61_l339
+ v61_l338
  (->
   (tc/dataset
    (mapcat
@@ -407,4 +407,4 @@
   plotly/plot))
 
 
-(deftest t62_l348 (is ((fn [_] true) v61_l339)))
+(deftest t62_l347 (is ((fn [_] true) v61_l338)))

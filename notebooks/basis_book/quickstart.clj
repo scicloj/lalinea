@@ -157,6 +157,6 @@
 
 ;; Element-wise operations preserve tensor structure:
 
-(tensor/mget (la/scale 2.0 (la/matrix [[1 2] [3 4]])) 1 1)
+(tensor/mget (la/scale (la/matrix [[1 2] [3 4]]) 2.0) 1 1)
 
 (kind/test-last [= 8.0])

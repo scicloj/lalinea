@@ -181,7 +181,7 @@
 
 (defn scale
   "Scalar multiply: alpha * A."
-  [alpha a]
+  [a alpha]
   (if (cx/complex? a)
     (cx/scale a alpha)
     (dfn/* a (double alpha))))

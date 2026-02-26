@@ -146,7 +146,7 @@
       [new-pi
        (la/mmul pi P)
        new-pi
-       (la/scale (/ 1.0 (dfn/sum new-pi)) new-pi)
+       (la/scale new-pi (/ 1.0 (dfn/sum new-pi)))
        change
        (la/norm (la/sub new-pi pi))]
       (recur
@@ -194,19 +194,19 @@
   google-matrix
   (la/add
    (la/scale
-    (/ (- 1.0 damping) n-pages)
-    (la/matrix (repeat n-pages (repeat n-pages 1.0))))
-   (la/scale damping H))))
+    (la/matrix (repeat n-pages (repeat n-pages 1.0)))
+    (/ (- 1.0 damping) n-pages))
+   (la/scale H damping))))
 
 
 (def
- v35_l219
+ v35_l218
  (def
   pagerank
   (let
    [iters 50]
    (loop
-    [pi (la/scale (/ 1.0 n-pages) (la/row (repeat n-pages 1.0))) k 0]
+    [pi (la/scale (la/row (repeat n-pages 1.0)) (/ 1.0 n-pages)) k 0]
     (if
      (>= k iters)
      pi
@@ -214,12 +214,12 @@
       [new-pi
        (la/mmul pi google-matrix)
        new-pi
-       (la/scale (/ 1.0 (dfn/sum new-pi)) new-pi)]
+       (la/scale new-pi (/ 1.0 (dfn/sum new-pi)))]
       (recur new-pi (inc k))))))))
 
 
 (def
- v37_l231
+ v37_l230
  (->
   (tc/dataset
    {:page ["Page 0" "Page 1" "Page 2" "Page 3" "Page 4"],
@@ -229,15 +229,15 @@
   plotly/plot))
 
 
-(def v39_l239 (dfn/sum pagerank))
+(def v39_l238 (dfn/sum pagerank))
 
 
 (deftest
- t40_l241
- (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v39_l239)))
+ t40_l240
+ (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v39_l238)))
 
 
-(def v42_l246 (argops/argmax pagerank))
+(def v42_l245 (argops/argmax pagerank))
 
 
-(deftest t43_l248 (is ((fn [idx] (contains? #{0 2} idx)) v42_l246)))
+(deftest t43_l247 (is ((fn [idx] (contains? #{0 2} idx)) v42_l245)))

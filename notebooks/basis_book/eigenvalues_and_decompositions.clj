@@ -80,7 +80,7 @@
           (let [lam (cx/re ((:eigenvalues eig-result) i))
                 ev (nth (:eigenvectors eig-result) i)]
             (< (la/norm (la/sub (la/mmul A-eig ev)
-                                (la/scale lam ev)))
+                                (la/scale ev lam)))
                1e-10)))
         (range 3))
 
@@ -342,9 +342,8 @@ sigmas
 ;; Rank-1 approximation — keep only $\sigma_1$:
 
 (def A-rank1
-  (la/scale (first sigmas)
-            (la/mmul (la/submatrix (:U svd-lr) :all [0])
-                     (la/submatrix (:Vt svd-lr) [0] :all))))
+  (la/scale (la/mmul (la/submatrix (:U svd-lr) :all [0])
+                     (la/submatrix (:Vt svd-lr) [0] :all)) (first sigmas)))
 
 ;; The approximation error equals $\sigma_2$:
 

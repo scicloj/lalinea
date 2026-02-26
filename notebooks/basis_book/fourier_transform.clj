@@ -71,8 +71,8 @@
       beta -1.5
       combined (double-array (dfn/+ (dfn/* alpha (double-array x)) (dfn/* beta (double-array y))))
       lhs (bfft/forward combined)
-      rhs (la/add (la/scale alpha (bfft/forward x))
-                  (la/scale beta (bfft/forward y)))]
+      rhs (la/add (la/scale (bfft/forward x) alpha)
+                  (la/scale (bfft/forward y) beta))]
   (and (< (dfn/reduce-max (dfn/abs (dfn/- (cx/re lhs) (cx/re rhs)))) 1e-10)
        (< (dfn/reduce-max (dfn/abs (dfn/- (cx/im lhs) (cx/im rhs)))) 1e-10)))
 

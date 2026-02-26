@@ -75,8 +75,8 @@
    (bfft/forward combined)
    rhs
    (la/add
-    (la/scale alpha (bfft/forward x))
-    (la/scale beta (bfft/forward y)))]
+    (la/scale (bfft/forward x) alpha)
+    (la/scale (bfft/forward y) beta))]
   (and
    (<
     (dfn/reduce-max (dfn/abs (dfn/- (cx/re lhs) (cx/re rhs))))
@@ -153,7 +153,7 @@
     [v]
     (and
      (< (Math/abs (- (double (:dc v)) 12.0)) 1.0E-10)
-     (every? (fn* [p1__134178#] (< p1__134178# 1.0E-10)) (:others v))))
+     (every? (fn* [p1__141240#] (< p1__141240# 1.0E-10)) (:others v))))
    v19_l115)))
 
 

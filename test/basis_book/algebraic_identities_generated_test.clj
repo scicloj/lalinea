@@ -56,8 +56,8 @@
  (let
   [alpha 3.5]
   (la/close?
-   (la/scale alpha (la/add A B))
-   (la/add (la/scale alpha A) (la/scale alpha B)))))
+   (la/scale (la/add A B) alpha)
+   (la/add (la/scale A alpha) (la/scale B alpha)))))
 
 
 (deftest t22_l84 (is (true? v21_l80)))
@@ -68,8 +68,8 @@
  (let
   [alpha 2.0 beta 3.0]
   (la/close?
-   (la/scale (* alpha beta) A)
-   (la/scale alpha (la/scale beta A)))))
+   (la/scale A (* alpha beta))
+   (la/scale (la/scale A beta) alpha))))
 
 
 (deftest t25_l92 (is (true? v24_l88)))
@@ -121,11 +121,11 @@
   [alpha 2.5]
   (and
    (la/close?
-    (la/scale alpha (la/mmul A B))
-    (la/mmul (la/scale alpha A) B))
+    (la/scale (la/mmul A B) alpha)
+    (la/mmul (la/scale A alpha) B))
    (la/close?
-    (la/scale alpha (la/mmul A B))
-    (la/mmul A (la/scale alpha B))))))
+    (la/scale (la/mmul A B) alpha)
+    (la/mmul A (la/scale B alpha))))))
 
 
 (deftest t43_l142 (is (true? v42_l136)))
@@ -168,8 +168,8 @@
  (let
   [alpha 4.0]
   (la/close?
-   (la/transpose (la/scale alpha A))
-   (la/scale alpha (la/transpose A)))))
+   (la/transpose (la/scale A alpha))
+   (la/scale (la/transpose A) alpha))))
 
 
 (deftest t58_l191 (is (true? v57_l187)))
@@ -180,7 +180,7 @@
  (let
   [alpha 2.0 beta 3.0]
   (la/close-scalar?
-   (la/trace (la/add (la/scale alpha A) (la/scale beta B)))
+   (la/trace (la/add (la/scale A alpha) (la/scale B beta)))
    (+ (* alpha (la/trace A)) (* beta (la/trace B))))))
 
 
@@ -249,7 +249,7 @@
  (let
   [alpha 2.0 n 3]
   (la/close-scalar?
-   (la/det (la/scale alpha A))
+   (la/det (la/scale A alpha))
    (* (Math/pow alpha n) (la/det A)))))
 
 
@@ -297,8 +297,8 @@
  (let
   [alpha 2.0]
   (la/close?
-   (la/invert (la/scale alpha A))
-   (la/scale (/ 1.0 alpha) (la/invert A)))))
+   (la/invert (la/scale A alpha))
+   (la/scale (la/invert A) (/ 1.0 alpha)))))
 
 
 (deftest t103_l329 (is (true? v102_l325)))
@@ -320,7 +320,7 @@
  (let
   [alpha -2.5]
   (la/close-scalar?
-   (la/norm (la/scale alpha A))
+   (la/norm (la/scale A alpha))
    (* (Math/abs alpha) (la/norm A)))))
 
 
@@ -384,7 +384,7 @@
     (when
      evec
      (let
-      [Av (la/mmul A evec) lam-v (la/scale (double (reals i)) evec)]
+      [Av (la/mmul A evec) lam-v (la/scale evec (double (reals i)))]
       (la/close? Av lam-v))))
    (map-indexed vector eigenvectors))))
 
@@ -456,7 +456,7 @@
    AtA-eigs
    (la/real-eigenvalues (la/mmul (la/transpose A) A))
    sv-squared
-   (sort > (map (fn* [p1__135765#] (* p1__135765# p1__135765#)) S))]
+   (sort > (map (fn* [p1__140198#] (* p1__140198# p1__140198#)) S))]
   (every?
    identity
    (map
@@ -477,7 +477,7 @@
    (Math/sqrt
     (reduce
      +
-     (map (fn* [p1__135766#] (* p1__135766# p1__135766#)) S)))]
+     (map (fn* [p1__140199#] (* p1__140199# p1__140199#)) S)))]
   (la/close-scalar? (la/norm A) sv-norm)))
 
 

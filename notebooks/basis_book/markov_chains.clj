@@ -156,7 +156,7 @@ stationary-eigen
       (if (>= k iters)
         history
         (let [new-pi (la/mmul pi P)
-              new-pi (la/scale (/ 1.0 (dfn/sum new-pi)) new-pi)
+              new-pi (la/scale new-pi (/ 1.0 (dfn/sum new-pi)))
               change (la/norm (la/sub new-pi pi))]
           (recur new-pi (inc k)
                  (conj history {:iteration (inc k)
@@ -210,20 +210,19 @@ stationary-eigen
 (def n-pages 5)
 
 (def google-matrix
-  (la/add (la/scale (/ (- 1.0 damping) n-pages)
-                    (la/matrix (repeat n-pages (repeat n-pages 1.0))))
-          (la/scale damping H)))
+  (la/add (la/scale (la/matrix (repeat n-pages (repeat n-pages 1.0))) (/ (- 1.0 damping) n-pages))
+          (la/scale H damping)))
 
 ;; Find PageRank via power iteration:
 
 (def pagerank
   (let [iters 50]
-    (loop [pi (la/scale (/ 1.0 n-pages) (la/row (repeat n-pages 1.0)))
+    (loop [pi (la/scale (la/row (repeat n-pages 1.0)) (/ 1.0 n-pages))
            k  0]
       (if (>= k iters)
         pi
         (let [new-pi (la/mmul pi google-matrix)
-              new-pi (la/scale (/ 1.0 (dfn/sum new-pi)) new-pi)]
+              new-pi (la/scale new-pi (/ 1.0 (dfn/sum new-pi)))]
           (recur new-pi (inc k)))))))
 
 ;; Page 0 and 2 receive the most links and have the highest rank:

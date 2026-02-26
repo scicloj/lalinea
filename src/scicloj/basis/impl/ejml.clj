@@ -10,7 +10,7 @@
             [tech.v3.tensor :as tensor]
             [tech.v3.datatype :as dtype])
   (:import [org.ejml.data DMatrixRMaj ZMatrixRMaj Complex_F64]
-           [org.ejml.dense.row CommonOps_DDRM NormOps_DDRM MatrixFeatures_DDRM]
+           [org.ejml.dense.row CommonOps_DDRM MatrixFeatures_DDRM]
            [org.ejml.dense.row CommonOps_ZDRM NormOps_ZDRM MatrixFeatures_ZDRM]
            [org.ejml.dense.row.factory DecompositionFactory_DDRM DecompositionFactory_ZDRM]))
 
@@ -29,27 +29,6 @@
     (CommonOps_DDRM/mult a b c)
     c))
 
-(defn dadd
-  "Real matrix addition: C = A + B. Returns a new DMatrixRMaj."
-  ^DMatrixRMaj [^DMatrixRMaj a ^DMatrixRMaj b]
-  (let [c (DMatrixRMaj. (.numRows a) (.numCols a))]
-    (CommonOps_DDRM/add a b c)
-    c))
-
-(defn dsub
-  "Real matrix subtraction: C = A - B. Returns a new DMatrixRMaj."
-  ^DMatrixRMaj [^DMatrixRMaj a ^DMatrixRMaj b]
-  (let [c (DMatrixRMaj. (.numRows a) (.numCols a))]
-    (CommonOps_DDRM/subtract a b c)
-    c))
-
-(defn dscale
-  "Scale matrix: B = alpha * A. Returns a new DMatrixRMaj."
-  ^DMatrixRMaj [alpha ^DMatrixRMaj a]
-  (let [b (DMatrixRMaj. (.numRows a) (.numCols a))]
-    (CommonOps_DDRM/scale (double alpha) a b)
-    b))
-
 (defn dtranspose
   "Matrix transpose: B = A^T. Returns a new DMatrixRMaj."
   ^DMatrixRMaj [^DMatrixRMaj a]
@@ -61,20 +40,10 @@
 ;; Scalar queries
 ;; ---------------------------------------------------------------------------
 
-(defn dtrace
-  "Matrix trace: sum of diagonal elements."
-  ^double [^DMatrixRMaj a]
-  (CommonOps_DDRM/trace a))
-
 (defn ddet
   "Matrix determinant."
   ^double [^DMatrixRMaj a]
   (CommonOps_DDRM/det a))
-
-(defn dnorm-f
-  "Frobenius norm: ||A||_F = sqrt(Σ a_ij²)."
-  ^double [^DMatrixRMaj a]
-  (NormOps_DDRM/normF a))
 
 ;; ---------------------------------------------------------------------------
 ;; Inverse and solve

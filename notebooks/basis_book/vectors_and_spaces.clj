@@ -69,7 +69,7 @@
 ;; Multiplying a vector by a number (a **scalar**) scales every entry.
 ;; Geometrically, it stretches (or shrinks, or reverses) the arrow.
 
-(la/scale 2.0 u)
+(la/scale u 2.0)
 
 (kind/test-last
  [(fn [r] (and (= 6.0 (tensor/mget r 0 0))
@@ -81,7 +81,7 @@
 
 ;; Scaling by $-1$ reverses the direction:
 
-(la/scale -1.0 u)
+(la/scale u -1.0)
 
 (kind/test-last
  [(fn [r] (and (= -3.0 (tensor/mget r 0 0))
@@ -145,34 +145,34 @@
 
 ;; **Axiom 4 — Additive inverse:**
 
-(la/close? (la/add u (la/scale -1.0 u)) zero2)
+(la/close? (la/add u (la/scale u -1.0)) zero2)
 
 (kind/test-last [true?])
 
 ;; **Axiom 5 — Scalar compatibility:**
 
-(la/close? (la/scale 2.0 (la/scale 3.0 u))
-           (la/scale 6.0 u))
+(la/close? (la/scale (la/scale u 3.0) 2.0)
+           (la/scale u 6.0))
 
 (kind/test-last [true?])
 
 ;; **Axiom 6 — Scalar identity:**
 
-(la/close? (la/scale 1.0 u) u)
+(la/close? (la/scale u 1.0) u)
 
 (kind/test-last [true?])
 
 ;; **Axiom 7 — Distributivity over vectors:**
 
-(la/close? (la/scale 5.0 (la/add u v))
-           (la/add (la/scale 5.0 u) (la/scale 5.0 v)))
+(la/close? (la/scale (la/add u v) 5.0)
+           (la/add (la/scale u 5.0) (la/scale v 5.0)))
 
 (kind/test-last [true?])
 
 ;; **Axiom 8 — Distributivity over scalars:**
 
-(la/close? (la/scale (+ 2.0 3.0) u)
-           (la/add (la/scale 2.0 u) (la/scale 3.0 u)))
+(la/close? (la/scale u (+ 2.0 3.0))
+           (la/add (la/scale u 2.0) (la/scale u 3.0)))
 
 (kind/test-last [true?])
 
@@ -205,7 +205,7 @@
 ;; where the $\alpha_i$ are scalars. This is the most fundamental
 ;; operation in linear algebra — everything else builds on it.
 
-(la/add (la/scale 2.0 u) (la/scale -1.0 v))
+(la/add (la/scale u 2.0) (la/scale v -1.0))
 
 (kind/test-last
  [(fn [r] (and (= 5.0 (tensor/mget r 0 0))
@@ -391,9 +391,9 @@
 ;; $\mathbf{w} = 5\mathbf{e}_1 + (-3)\mathbf{e}_2 + 7\mathbf{e}_3$:
 
 (la/close? w
-           (la/add (la/scale 5.0 e1)
-                   (la/add (la/scale -3.0 e2)
-                           (la/scale 7.0 e3))))
+           (la/add (la/scale e1 5.0)
+                   (la/add (la/scale e2 -3.0)
+                           (la/scale e3 7.0))))
 
 (kind/test-last [true?])
 
@@ -435,9 +435,9 @@
 (def v4 (la/column [2 3 1]))
 
 (la/close? v4
-           (la/add (la/scale 2.0 v1)
-                   (la/add (la/scale 3.0 v2)
-                           (la/scale 1.0 v3))))
+           (la/add (la/scale v1 2.0)
+                   (la/add (la/scale v2 3.0)
+                           (la/scale v3 1.0))))
 
 (kind/test-last [true?])
 

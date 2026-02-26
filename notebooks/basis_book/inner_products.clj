@@ -78,7 +78,7 @@
 ;; **Axiom 1 — Linearity:**
 
 (la/close-scalar?
- (la/dot (la/add (la/scale 2.0 a3) (la/scale 3.0 b3)) c3)
+ (la/dot (la/add (la/scale a3 2.0) (la/scale b3 3.0)) c3)
  (+ (* 2.0 (la/dot a3 c3))
     (* 3.0 (la/dot b3 c3))))
 
@@ -292,7 +292,7 @@ projected-pt
 
 ;; Step 1 — normalise $\mathbf{a}$:
 
-(def q1-gs (la/scale (/ 1.0 (la/norm a-gs)) a-gs))
+(def q1-gs (la/scale a-gs (/ 1.0 (la/norm a-gs))))
 
 q1-gs
 
@@ -302,12 +302,12 @@ q1-gs
   (la/dot q1-gs b-gs))
 
 (def orthogonal-part
-  (la/sub b-gs (la/scale proj-b-on-q1 q1-gs)))
+  (la/sub b-gs (la/scale q1-gs proj-b-on-q1)))
 
 ;; Normalise:
 
 (def q2-gs
-  (la/scale (/ 1.0 (la/norm orthogonal-part)) orthogonal-part))
+  (la/scale orthogonal-part (/ 1.0 (la/norm orthogonal-part))))
 
 q2-gs
 

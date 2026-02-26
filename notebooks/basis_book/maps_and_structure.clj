@@ -105,8 +105,8 @@
 
 ;; **Homogeneity**: $R(3\mathbf{u}) = 3 R(\mathbf{u})$:
 
-(la/close? (la/mmul R90 (la/scale 3.0 u))
-           (la/scale 3.0 (la/mmul R90 u)))
+(la/close? (la/mmul R90 (la/scale u 3.0))
+           (la/scale (la/mmul R90 u) 3.0))
 
 (kind/test-last [true?])
 
@@ -274,7 +274,7 @@
 ;; scalar multiples. Any scalar times a null space vector
 ;; is again a null space vector (that is the subspace property):
 
-(la/mmul M (la/scale 7.0 (la/column [1 1 -1])))
+(la/mmul M (la/scale (la/column [1 1 -1]) 7.0))
 
 (kind/test-last
  [(fn [r] (< (la/norm r) 1e-10))])

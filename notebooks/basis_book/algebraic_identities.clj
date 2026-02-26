@@ -78,16 +78,16 @@
 ;; ### Scalar distribution: $\alpha(A + B) = \alpha A + \alpha B$
 
 (let [alpha 3.5]
-  (la/close? (la/scale alpha (la/add A B))
-             (la/add (la/scale alpha A) (la/scale alpha B))))
+  (la/close? (la/scale (la/add A B) alpha)
+             (la/add (la/scale A alpha) (la/scale B alpha))))
 
 (kind/test-last [true?])
 
 ;; ### Scalar associativity: $(\alpha \beta) A = \alpha (\beta A)$
 
 (let [alpha 2.0 beta 3.0]
-  (la/close? (la/scale (* alpha beta) A)
-             (la/scale alpha (la/scale beta A))))
+  (la/close? (la/scale A (* alpha beta))
+             (la/scale (la/scale A beta) alpha)))
 
 (kind/test-last [true?])
 
@@ -134,10 +134,10 @@
 ;; ### Scalar compatibility: $\alpha(AB) = (\alpha A)B = A(\alpha B)$
 
 (let [alpha 2.5]
-  (and (la/close? (la/scale alpha (la/mmul A B))
-                  (la/mmul (la/scale alpha A) B))
-       (la/close? (la/scale alpha (la/mmul A B))
-                  (la/mmul A (la/scale alpha B)))))
+  (and (la/close? (la/scale (la/mmul A B) alpha)
+                  (la/mmul (la/scale A alpha) B))
+       (la/close? (la/scale (la/mmul A B) alpha)
+                  (la/mmul A (la/scale B alpha)))))
 
 (kind/test-last [true?])
 
@@ -185,8 +185,8 @@
 ;; ### Scalar: $(\alpha A)^T = \alpha A^T$
 
 (let [alpha 4.0]
-  (la/close? (la/transpose (la/scale alpha A))
-             (la/scale alpha (la/transpose A))))
+  (la/close? (la/transpose (la/scale A alpha))
+             (la/scale (la/transpose A) alpha)))
 
 (kind/test-last [true?])
 
@@ -201,8 +201,8 @@
 ;; ### Linearity: $\operatorname{tr}(\alpha A + \beta B) = \alpha\operatorname{tr}(A) + \beta\operatorname{tr}(B)$
 
 (let [alpha 2.0 beta 3.0]
-  (la/close-scalar? (la/trace (la/add (la/scale alpha A)
-                                      (la/scale beta B)))
+  (la/close-scalar? (la/trace (la/add (la/scale A alpha)
+                                      (la/scale B beta)))
                     (+ (* alpha (la/trace A))
                        (* beta (la/trace B)))))
 
@@ -272,7 +272,7 @@
 ;; ### Scalar: $\det(\alpha A) = \alpha^n \det(A)$ for $n \times n$ matrix
 
 (let [alpha 2.0 n 3]
-  (la/close-scalar? (la/det (la/scale alpha A))
+  (la/close-scalar? (la/det (la/scale A alpha))
                     (* (Math/pow alpha n) (la/det A))))
 
 (kind/test-last [true?])
@@ -323,8 +323,8 @@
 ;; ### Scalar: $(\alpha A)^{-1} = \frac{1}{\alpha} A^{-1}$
 
 (let [alpha 2.0]
-  (la/close? (la/invert (la/scale alpha A))
-             (la/scale (/ 1.0 alpha) (la/invert A))))
+  (la/close? (la/invert (la/scale A alpha))
+             (la/scale (la/invert A) (/ 1.0 alpha))))
 
 (kind/test-last [true?])
 
@@ -346,7 +346,7 @@
 ;; ### Scale: $\|\alpha A\|_F = |\alpha| \|A\|_F$
 
 (let [alpha -2.5]
-  (la/close-scalar? (la/norm (la/scale alpha A))
+  (la/close-scalar? (la/norm (la/scale A alpha))
                     (* (Math/abs alpha) (la/norm A))))
 
 (kind/test-last [true?])
@@ -408,7 +408,7 @@
   (every? (fn [[i evec]]
             (when evec
               (let [Av (la/mmul A evec)
-                    lam-v (la/scale (double (reals i)) evec)]
+                    lam-v (la/scale evec (double (reals i)))]
                 (la/close? Av lam-v))))
           (map-indexed vector eigenvectors)))
 

@@ -71,8 +71,8 @@
 (def
  v19_l108
  (la/close?
-  (la/mmul R90 (la/scale 3.0 u))
-  (la/scale 3.0 (la/mmul R90 u))))
+  (la/mmul R90 (la/scale u 3.0))
+  (la/scale (la/mmul R90 u) 3.0)))
 
 
 (deftest t20_l111 (is (true? v19_l108)))
@@ -86,12 +86,12 @@
  (let
   [angles
    (mapv
-    (fn* [p1__137281#] (* 2.0 Math/PI (/ p1__137281# 40.0)))
+    (fn* [p1__141562#] (* 2.0 Math/PI (/ p1__141562# 40.0)))
     (range 41))
    circle-x
-   (mapv (fn* [p1__137282#] (Math/cos p1__137282#)) angles)
+   (mapv (fn* [p1__141563#] (Math/cos p1__141563#)) angles)
    circle-y
-   (mapv (fn* [p1__137283#] (Math/sin p1__137283#)) angles)
+   (mapv (fn* [p1__141564#] (Math/sin p1__141564#)) angles)
    stretched
    (mapv
     (fn
@@ -189,7 +189,7 @@
 (deftest t50_l266 (is ((fn [r] (< (la/norm r) 1.0E-10)) v49_l264)))
 
 
-(def v52_l277 (la/mmul M (la/scale 7.0 (la/column [1 1 -1]))))
+(def v52_l277 (la/mmul M (la/scale (la/column [1 1 -1]) 7.0)))
 
 
 (deftest t53_l279 (is ((fn [r] (< (la/norm r) 1.0E-10)) v52_l277)))
@@ -208,7 +208,7 @@
  v58_l301
  (def
   rank-M
-  (count (filter (fn* [p1__137284#] (> p1__137284# 1.0E-10)) sv-M))))
+  (count (filter (fn* [p1__141565#] (> p1__141565# 1.0E-10)) sv-M))))
 
 
 (def v59_l303 rank-M)
@@ -221,7 +221,7 @@
  v62_l316
  (def
   nullity-M
-  (count (filter (fn* [p1__137285#] (<= p1__137285# 1.0E-10)) sv-M))))
+  (count (filter (fn* [p1__141566#] (<= p1__141566# 1.0E-10)) sv-M))))
 
 
 (def v63_l318 nullity-M)
@@ -266,7 +266,7 @@
  v76_l370
  (count
   (filter
-   (fn* [p1__137286#] (> p1__137286# 1.0E-10))
+   (fn* [p1__141567#] (> p1__141567# 1.0E-10))
    (vec (:S (la/svd A-full))))))
 
 

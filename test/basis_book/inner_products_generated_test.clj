@@ -29,7 +29,7 @@
 (def
  v11_l80
  (la/close-scalar?
-  (la/dot (la/add (la/scale 2.0 a3) (la/scale 3.0 b3)) c3)
+  (la/dot (la/add (la/scale a3 2.0) (la/scale b3 3.0)) c3)
   (+ (* 2.0 (la/dot a3 c3)) (* 3.0 (la/dot b3 c3)))))
 
 
@@ -184,7 +184,7 @@
 (def v64_l291 (def b-gs (la/column [1 0 1])))
 
 
-(def v66_l295 (def q1-gs (la/scale (/ 1.0 (la/norm a-gs)) a-gs)))
+(def v66_l295 (def q1-gs (la/scale a-gs (/ 1.0 (la/norm a-gs)))))
 
 
 (def v67_l297 q1-gs)
@@ -195,14 +195,14 @@
 
 (def
  v70_l304
- (def orthogonal-part (la/sub b-gs (la/scale proj-b-on-q1 q1-gs))))
+ (def orthogonal-part (la/sub b-gs (la/scale q1-gs proj-b-on-q1))))
 
 
 (def
  v72_l309
  (def
   q2-gs
-  (la/scale (/ 1.0 (la/norm orthogonal-part)) orthogonal-part)))
+  (la/scale orthogonal-part (/ 1.0 (la/norm orthogonal-part)))))
 
 
 (def v73_l312 q2-gs)
