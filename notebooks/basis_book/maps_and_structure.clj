@@ -24,7 +24,7 @@
    ;; Arrow diagrams for 2D vectors:
    [scicloj.basis.vis :as vis]))
 
-;; We re-use the standard example vectors from the previous chapter:
+;; We use the same example vectors as in the previous chapter:
 
 (def u (la/column [3 1]))
 (def v (la/column [1 2]))

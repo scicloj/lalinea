@@ -13,8 +13,6 @@
    [scicloj.basis.linalg :as la]
    ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
    [tech.v3.tensor :as tensor]
-   ;; Element-wise array math:
-   [tech.v3.datatype.functional :as dfn]
    ;; Low-level buffer operations:
    [tech.v3.datatype :as dtype]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
@@ -301,7 +299,7 @@ q1-gs
 ;; Step 2 — subtract the projection of $\mathbf{b}$ onto $\mathbf{q}_1$:
 
 (def proj-b-on-q1
-  (dfn/sum (dfn/* q1-gs b-gs)))
+  (la/dot q1-gs b-gs))
 
 (def orthogonal-part
   (la/sub b-gs (la/scale proj-b-on-q1 q1-gs)))
@@ -317,7 +315,7 @@ q2-gs
 
 {:q1-norm (la/norm q1-gs)
  :q2-norm (la/norm q2-gs)
- :dot (dfn/sum (dfn/* q1-gs q2-gs))}
+ :dot (la/dot q1-gs q2-gs)}
 
 (kind/test-last
  [(fn [m]

@@ -2,8 +2,21 @@
 ;;
 ;; Linear algebra shines brightest when it meets real problems.
 ;; This chapter solves systems of equations in two contrasting
-;; styles: **purely functional** (build the matrices, call `solve`)
-;; and **imperative** (iterate in-place until convergence).
+;; styles. First, a **high-level** approach: build the matrices,
+;; call `la/solve`, and get back a result — the mutation happens
+;; inside EJML, hidden behind a functional interface. Then, an
+;; **imperative** approach: Gauss-Seidel iteration, where we
+;; update each unknown in place and watch convergence step
+;; by step.
+;;
+;; Both approaches solve the same physical problem — a
+;; **steady-state heat equation** — so we can compare their
+;; results directly.
+;;
+;; _Partly inspired by the
+;; [CFD Python in Clojure](https://scicloj.github.io/cfd-python-in-clojure/)
+;; project, which ports computational fluid dynamics
+;; simulations to Clojure._
 
 (ns basis-book.linear-systems
   (:require
@@ -13,162 +26,147 @@
    [tech.v3.tensor :as tensor]
    ;; Low-level buffer operations:
    [tech.v3.datatype :as dtype]
-   ;; Element-wise array math:
-   [tech.v3.datatype.functional :as dfn]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
    [scicloj.tableplot.v1.plotly :as plotly]
-   ;; Seeded random number generation (https://generateme.github.io/fastmath/):
-   [fastmath.random :as frand]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]))
 
-;; ## Least-squares polynomial fitting
+;; ## Heat conduction in a rod
 ;;
-;; Given noisy measurements $(x_i, y_i)$, fit a polynomial
-;; $y = \beta_0 + \beta_1 x + \cdots + \beta_d x^d$
-;; by solving the normal equations
+;; A metal rod of length 1 is held at fixed temperatures:
+;; $T(0) = 100°$ on the left and $T(1) = 0°$ on the right.
+;; After enough time the temperature reaches a **steady state**
+;; — it stops changing.
 ;;
-;; $X^T X \, \boldsymbol{\beta} = X^T \mathbf{y}$
+;; The steady-state temperature satisfies
+;; [Laplace's equation](https://en.wikipedia.org/wiki/Laplace%27s_equation)
+;; in one dimension:
 ;;
-;; where $X$ is the [Vandermonde matrix](https://en.wikipedia.org/wiki/Vandermonde_matrix).
-;; This is a purely functional approach — build data, build matrices,
-;; call `la/solve`.
-
-;; ### Generate noisy data
-
-(def xs (vec (range -3.0 3.1 0.3)))
-
-(def ys
-  (let [rng (frand/rng :mersenne 42)]
-    (mapv (fn [x]
-            (+ (* 0.5 x x) (* -1.2 x) 3.0
-               (* 0.5 (frand/drandom rng -0.5 0.5))))
-          xs)))
-
-;; ### Build the Vandermonde matrix
+;; $$\frac{d^2 T}{dx^2} = 0$$
 ;;
-;; For degree $d$, row $i$ of $X$ is $[1, x_i, x_i^2, \ldots, x_i^d]$.
+;; We discretize the rod into $n$ interior points with spacing
+;; $h = 1/(n+1)$. Replacing the second derivative with a
+;; [finite difference](https://en.wikipedia.org/wiki/Finite_difference)
+;; gives, at each interior point $i$:
+;;
+;; $$-T_{i-1} + 2\,T_i - T_{i+1} = 0$$
+;;
+;; Stacking these equations for all interior points produces
+;; a tridiagonal linear system $A \mathbf{T} = \mathbf{b}$,
+;; where the known boundary temperatures enter the right-hand
+;; side.
 
-(def degree 2)
+;; ### Building the system
 
-(def vandermonde
-  (tensor/compute-tensor [(count xs) (inc degree)]
-                         (fn [r c] (Math/pow (nth xs r) (double c)))
-                         :float64))
+(def n 20)
 
-vandermonde
+(def T-left 100.0)
+(def T-right 0.0)
+
+;; The coefficient matrix $A$ has 2 on the diagonal and $-1$
+;; on each adjacent diagonal:
+
+(def A-heat
+  (dtype/clone
+   (tensor/compute-tensor
+    [n n]
+    (fn [i j]
+      (cond (= i j) 2.0
+            (= (Math/abs (- i j)) 1) -1.0
+            :else 0.0))
+    :float64)))
+
+A-heat
 
 (kind/test-last
- [(fn [m] (= [(count xs) (inc degree)]
-             (vec (dtype/shape m))))])
+ [(fn [m] (= [n n] (vec (dtype/shape m))))])
 
-;; ### Solve the normal equations
-;;
-;; $\boldsymbol{\beta} = (X^T X)^{-1} X^T \mathbf{y}$
+;; The right-hand side absorbs the boundary conditions.
+;; Only the first and last entries are nonzero:
 
-(def y-col (la/column ys))
+(def b-heat
+  (let [b (double-array n 0.0)]
+    (aset b 0 T-left)
+    (aset b (dec n) T-right)
+    (la/column (vec b))))
 
-(def beta
-  (la/solve (la/mmul (la/transpose vandermonde) vandermonde)
-            (la/mmul (la/transpose vandermonde) y-col)))
+;; ### Direct solution
 
-beta
+(def T-direct (la/solve A-heat b-heat))
 
-;; The fitted coefficients should be close to
-;; $\beta_0 \approx 3$, $\beta_1 \approx -1.2$, $\beta_2 \approx 0.5$.
+T-direct
 
 (kind/test-last
- [(fn [b] (let [b0 (tensor/mget b 0 0)
-                b1 (tensor/mget b 1 0)
-                b2 (tensor/mget b 2 0)]
-            (and (< (Math/abs (- b0 3.0)) 0.5)
-                 (< (Math/abs (- b1 -1.2)) 0.5)
-                 (< (Math/abs (- b2 0.5)) 0.3))))])
+ [(fn [t] (some? t))])
 
-;; ### Plot data and fitted curve
+;; The solution is a straight line from 100° to 0° — exactly
+;; what physical intuition predicts for uniform conduction
+;; with no heat source.
 
-(def fitted-ys
-  (vec (dtype/->reader (tensor/select (la/mmul vandermonde beta) :all 0))))
+;; ### Temperature profile
 
-(-> (tc/dataset {:x (concat xs xs)
-                 :y (concat ys fitted-ys)
-                 :series (concat (repeat (count xs) "data")
-                                 (repeat (count xs) "fit"))})
-    (plotly/base {:=x :x :=y :y :=color :series})
-    (plotly/layer-point {:=mark-size 6})
+(def x-interior
+  (mapv (fn [i] (/ (double (inc i)) (double (inc n))))
+        (range n)))
+
+(-> (tc/dataset {:x x-interior
+                 :T (vec (dtype/->reader
+                          (tensor/select T-direct :all 0)))})
+    (plotly/base {:=x :x :=y :T})
     (plotly/layer-line)
+    (plotly/layer-point {:=mark-size 5})
     plotly/plot)
 
-;; ## Weighted least squares
+;; The temperature decreases linearly — the left end is
+;; close to 100° and the right end close to 0°:
+
+(tensor/mget T-direct 0 0)
+
+(kind/test-last [(fn [t] (> t 90.0))])
+
+(tensor/mget T-direct (dec n) 0)
+
+(kind/test-last [(fn [t] (< t 10.0))])
+
+;; ---
 ;;
-;; Sometimes measurements have different reliabilities.
-;; Weighted least squares solves
-;;
-;; $X^T W X \, \boldsymbol{\beta} = X^T W \mathbf{y}$
-;;
-;; where $W$ is a diagonal weight matrix. Points near the center
-;; get higher weight.
-
-(def weights
-  (mapv (fn [x] (Math/exp (- (* 0.5 x x)))) xs))
-
-(def W (la/diag weights))
-
-(def beta-weighted
-  (la/solve (la/mmul (la/transpose vandermonde) (la/mmul W vandermonde))
-            (la/mmul (la/transpose vandermonde) (la/mmul W y-col))))
-
-beta-weighted
-
-(kind/test-last
- [(fn [b] (let [b0 (tensor/mget b 0 0)]
-            (< (Math/abs (- b0 3.0)) 0.5)))])
-
 ;; ## Gauss-Seidel iterative solver
 ;;
 ;; For large sparse systems, direct solvers are expensive.
 ;; [Gauss-Seidel iteration](https://en.wikipedia.org/wiki/Gauss%E2%80%93Seidel_method)
 ;; updates each unknown in place:
 ;;
-;; $x_i^{(k+1)} = \frac{1}{a_{ii}} \left( b_i - \sum_{j \ne i} a_{ij} x_j \right)$
+;; $$T_i^{(k+1)} = \frac{1}{a_{ii}} \left( b_i - \sum_{j \ne i} a_{ij}\, T_j \right)$$
+;;
+;; For our tridiagonal heat matrix this simplifies to
+;;
+;; $$T_i^{(k+1)} = \frac{T_{i-1} + T_{i+1} + b_i}{2}$$
+;;
+;; Each temperature becomes the **average of its neighbors**
+;; — the discrete version of the physical law that heat flows
+;; from hot to cold until equilibrium.
 ;;
 ;; This is an **imperative** algorithm — each update reads the
-;; latest values from a mutable array.
+;; latest values from a mutable array, and the order of updates
+;; matters.
 
-;; ### A diagonally dominant test system
+;; ### Iteration with history
 ;;
-;; Gauss-Seidel converges when $A$ is
-;; [diagonally dominant](https://en.wikipedia.org/wiki/Diagonally_dominant_matrix).
+;; Starting from $\mathbf{T} = \mathbf{0}$, we iterate and
+;; record the temperature profile and residual at each step.
 
-(def A-gs
-  (la/matrix [[10  1  2]
-              [1 12  3]
-              [2  3 15]]))
-
-(def b-gs (la/column [13 16 20]))
-
-;; Direct solution for comparison:
-
-(def x-direct (la/solve A-gs b-gs))
-
-x-direct
-
-(kind/test-last [(fn [x] (some? x))])
-
-;; ### Imperative iteration
-
-(def gauss-seidel-history
-  (let [n     3
-        A-arr (dtype/->double-array A-gs)
-        b-arr (dtype/->double-array b-gs)
+(def gs-result
+  (let [A-arr (dtype/->double-array A-heat)
+        b-arr (dtype/->double-array b-heat)
         x     (double-array n 0.0)
-        iters 30]
+        iters 500]
     (loop [k 0
            history []]
       (if (>= k iters)
-        history
+        {:x-final (vec x)
+         :history history}
         (do
           (dotimes [i n]
             (let [sigma (loop [j 0 s 0.0]
@@ -179,44 +177,55 @@ x-direct
                                                  (aget x j)))))))]
               (aset x i (/ (- (aget b-arr i) sigma)
                            (aget A-arr (+ (* i n) i))))))
-          (let [x-tensor (tensor/reshape (tensor/ensure-tensor (dtype/clone x)) [n 1])
-                residual (la/norm (la/sub (la/mmul A-gs x-tensor) b-gs))]
+          (let [x-tensor (tensor/reshape
+                          (tensor/ensure-tensor (dtype/clone x))
+                          [n 1])
+                residual (la/norm (la/sub (la/mmul A-heat x-tensor) b-heat))]
             (recur (inc k)
                    (conj history {:iteration (inc k)
-                                  :residual residual}))))))))
+                                  :residual residual
+                                  :profile (vec x)}))))))))
 
-;; Convergence — the residual drops rapidly:
+;; ### Watching convergence
+;;
+;; The temperature profile at selected iterations — the
+;; initial guess (all zeros) gradually relaxes into the
+;; steady-state line:
 
-(-> (tc/dataset gauss-seidel-history)
+(let [snapshots [1 2 5 10 50 200 500]
+      rows (mapcat
+            (fn [iter]
+              (let [profile (:profile (nth (:history gs-result) (dec iter)))]
+                (map (fn [x T]
+                       {:x x :T T :iteration (str "k=" iter)})
+                     x-interior profile)))
+            snapshots)]
+  (-> (tc/dataset rows)
+      (plotly/base {:=x :x :=y :T :=color :iteration})
+      (plotly/layer-line)
+      plotly/plot))
+
+;; The residual $\|A\mathbf{T}^{(k)} - \mathbf{b}\|$ drops
+;; over the iterations:
+
+(-> (tc/dataset (:history gs-result))
     (plotly/base {:=x :iteration :=y :residual})
     (plotly/layer-line)
     plotly/plot)
 
-;; After 30 iterations the residual is tiny:
+;; After 500 iterations the residual is small:
 
-(-> gauss-seidel-history last :residual)
+(-> gs-result :history last :residual)
 
-(kind/test-last [(fn [r] (< r 1e-10))])
+(kind/test-last [(fn [r] (< r 1e-3))])
 
-;; ## Comparing direct and iterative solutions
+;; ---
 ;;
-;; The iterative solution should converge to the direct one.
+;; ## Comparing the two solutions
+;;
+;; The iterative solution should be close to the direct one:
 
-(let [x-iter (let [n 3
-                   A-arr (dtype/->double-array A-gs)
-                   b-arr (dtype/->double-array b-gs)
-                   x (double-array n 0.0)]
-               (dotimes [_ 50]
-                 (dotimes [i n]
-                   (let [sigma (loop [j 0 s 0.0]
-                                 (if (>= j n) s
-                                     (recur (inc j)
-                                            (if (= i j) s
-                                                (+ s (* (aget A-arr (+ (* i n) j))
-                                                        (aget x j)))))))]
-                     (aset x i (/ (- (aget b-arr i) sigma)
-                                  (aget A-arr (+ (* i n) i)))))))
-               (tensor/reshape (tensor/ensure-tensor (dtype/clone x)) [n 1]))]
-  (la/norm (la/sub x-iter x-direct)))
+(let [x-iter (la/column (:x-final gs-result))]
+  (la/norm (la/sub x-iter T-direct)))
 
-(kind/test-last [(fn [d] (< d 1e-10))])
+(kind/test-last [(fn [d] (< d 0.01))])

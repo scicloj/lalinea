@@ -85,16 +85,8 @@
 
 ;; ### Extract individual channels
 ;;
-;; Selecting channel 0 gives a `[h w]` grayscale image.
-;; To display as grayscale, we replicate into 3 channels.
-
-(def extract-channel
-  (fn [img ch]
-    (let [[h w _c] (dtype/shape img)
-          channel (tensor/select img :all :all ch)]
-      (tensor/compute-tensor [h w 3]
-                             (fn [r c _] (int (tensor/mget channel r c)))
-                             :uint8))))
+;; `vis/extract-channel` extracts one channel from an `[h w 3]`
+;; image and replicates it into a grayscale `[h w 3]` tensor.
 
 (bufimg/tensor->image (vis/extract-channel gradient 0))
 
