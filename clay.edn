@@ -1,4 +1,4 @@
-{:remote-repo {:git-url "https://github.com/scicloj/basis"
+{:remote-repo {:git-url "https://github.com/scicloj/la-linea"
                :branch "main"}
  :quarto {:format {:html {:toc true
                           :toc-expand 3

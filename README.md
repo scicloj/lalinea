@@ -1,8 +1,8 @@
-# basis
+# La Linea
 
 **[Linear algebra](https://en.wikipedia.org/wiki/Linear_algebra) with [tensor](https://en.wikipedia.org/wiki/Tensor) abstractions in [Clojure](https://clojure.org/)**
 
-basis is a linear algebra library where matrices are [dtype-next](https://github.com/cnuernber/dtype-next) tensors
+La Linea is a linear algebra library where matrices are [dtype-next](https://github.com/cnuernber/dtype-next) tensors
 and [EJML](https://ejml.org/) provides the computational backend. The two share the same
 row-major `double[]` memory layout, enabling **zero-copy** interop — no allocation,
 no copying, just different views of the same data.
@@ -10,10 +10,10 @@ no copying, just different views of the same data.
 ## General info
 |||
 |-|-|
-|Website | [https://scicloj.github.io/basis/](https://scicloj.github.io/basis/)
-|Source |[![(GitHub repo)](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/scicloj/basis)|
-|Deps |[![Clojars Project](https://img.shields.io/clojars/v/org.scicloj/basis.svg)](https://clojars.org/org.scicloj/basis)|
-|License |[MIT](https://github.com/scicloj/basis/blob/main/LICENSE)|
+|Website | [https://scicloj.github.io/la-linea/](https://scicloj.github.io/la-linea/)
+|Source |[![(GitHub repo)](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/scicloj/la-linea)|
+|Deps |[![Clojars Project](https://img.shields.io/clojars/v/org.scicloj/la-linea.svg)](https://clojars.org/org.scicloj/la-linea)|
+|License |[MIT](https://github.com/scicloj/la-linea/blob/main/LICENSE)|
 |Status |🛠alpha🛠|
 
 ## Features
@@ -50,12 +50,12 @@ no copying, just different views of the same data.
 Add to your `deps.edn`:
 
 ```clojure
-{:deps {org.scicloj/basis {:mvn/version "0.1.0"}}}
+{:deps {org.scicloj/la-linea {:mvn/version "0.1.0"}}}
 ```
 
 ## Documentation
 
-The [basis book](https://scicloj.github.io/basis/) is a set of notebook-based chapters covering:
+The [La Linea book](https://scicloj.github.io/la-linea/) is a set of notebook-based chapters covering:
 
 - **Getting started** — quickstart
 - **Core concepts** — tensors & EJML interop, complex tensors, Fourier transforms, abstract linear algebra, sharing & mutation
@@ -69,18 +69,18 @@ Each chapter includes inline tests via `kind/test-last`.
 Most users need only two namespaces:
 
 ```clojure
-(require '[scicloj.basis.linalg :as la])
-(require '[scicloj.basis.transform :as xf])
+(require '[scicloj.la-linea.linalg :as la])
+(require '[scicloj.la-linea.transform :as xf])
 ```
 
-`scicloj.basis.linalg` is the main API — matrix construction, arithmetic,
-decompositions, inverse, and solve. `scicloj.basis.transform` bridges
+`scicloj.la-linea.linalg` is the main API — matrix construction, arithmetic,
+decompositions, inverse, and solve. `scicloj.la-linea.transform` bridges
 Fastmath's transform API to ComplexTensors.
 
 For complex tensor operations:
 
 ```clojure
-(require '[scicloj.basis.complex :as cx])
+(require '[scicloj.la-linea.complex :as cx])
 ```
 
 ## Built on
@@ -89,7 +89,7 @@ For complex tensor operations:
 - [EJML](https://ejml.org/) — efficient Java matrix library (real + complex)
 - [fastmath](https://github.com/generateme/fastmath) — transforms (FFT, DCT, DST, DHT)
 
-The [book notebooks](https://scicloj.github.io/basis/) also use
+The [book notebooks](https://scicloj.github.io/la-linea/) also use
 [tablecloth](https://github.com/scicloj/tablecloth),
 [tableplot](https://github.com/scicloj/tableplot), and
 [kindly](https://github.com/scicloj/kindly) (included in the `:dev` and `:test` aliases).
