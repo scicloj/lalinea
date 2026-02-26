@@ -206,31 +206,30 @@ cov-matrix
 ;; ### Visualize principal axes
 ;;
 ;; The eigenvectors point along the directions of maximum variance.
+;; We overlay them on the scatter plot, scaled by the square root
+;; of the corresponding eigenvalue.
 
 (let [{:keys [eigenvalues eigenvectors]} pca-eigen
-      ;; Sort by eigenvalue (real part) descending
       reals (cx/re eigenvalues)
       sorted-idx (sort-by (fn [i] (- (double (reals i)))) (range (count eigenvectors)))
       lam1 (double (reals (first sorted-idx)))
       ev1 (nth eigenvectors (first sorted-idx))
       lam2 (double (reals (second sorted-idx)))
       ev2 (nth eigenvectors (second sorted-idx))
-      ;; Eigenvector endpoints (scaled by sqrt of eigenvalue)
       pc1-x (* (Math/sqrt lam1) (tensor/mget ev1 0 0))
       pc1-y (* (Math/sqrt lam1) (tensor/mget ev1 1 0))
       pc2-x (* (Math/sqrt lam2) (tensor/mget ev2 0 0))
       pc2-y (* (Math/sqrt lam2) (tensor/mget ev2 1 0))
-      ;; Data points
-      pts (map (fn [i] {:x (tensor/mget X i 0) :y (tensor/mget X i 1) :type "data"})
-               (range n-points))
-      ;; Arrow endpoints for PC1 and PC2
-      arrows [{:x 0.0 :y 0.0 :type "PC1-start"}
-              {:x pc1-x :y pc1-y :type "PC1-end"}
-              {:x 0.0 :y 0.0 :type "PC2-start"}
-              {:x pc2-x :y pc2-y :type "PC2-end"}]]
-  (-> (tc/dataset (concat pts))
-      (plotly/base {:=x :x :=y :y})
+      pts (mapv (fn [i] {:x (tensor/mget X i 0) :y (tensor/mget X i 1) :type "data"})
+                (range n-points))
+      pc1-pts [{:x 0.0 :y 0.0 :type "PC1"}
+               {:x pc1-x :y pc1-y :type "PC1"}]
+      pc2-pts [{:x 0.0 :y 0.0 :type "PC2"}
+               {:x pc2-x :y pc2-y :type "PC2"}]]
+  (-> (tc/dataset (concat pts pc1-pts pc2-pts))
+      (plotly/base {:=x :x :=y :y :=color :type})
       (plotly/layer-point {:=mark-size 4 :=mark-opacity 0.4})
+      (plotly/layer-line)
       plotly/plot))
 
 (kind/test-last

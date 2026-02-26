@@ -180,7 +180,7 @@
     (dfn/- a b)))
 
 (defn scale
-  "Scalar multiply: alpha * A."
+  "Scalar multiply. Returns alpha * a."
   [a alpha]
   (if (cx/complex? a)
     (cx/scale a alpha)
@@ -329,7 +329,7 @@
   "Singular value decomposition: A = U * diag(S) * V^T.
    Returns a map:
    :U  — left singular vectors as tensor
-   :S  — singular values as vector of doubles
+   :S  — singular values as 1D tensor
    :Vt — right singular vectors (transposed) as tensor
 
    Currently accepts real matrices only (EJML limitation)."

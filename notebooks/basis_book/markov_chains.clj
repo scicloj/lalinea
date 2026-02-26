@@ -225,7 +225,7 @@ stationary-eigen
               new-pi (la/scale new-pi (/ 1.0 (dfn/sum new-pi)))]
           (recur new-pi (inc k)))))))
 
-;; Page 0 and 2 receive the most links and have the highest rank:
+;; Pages 0 and 2 receive the most inbound links:
 
 (-> (tc/dataset {:page ["Page 0" "Page 1" "Page 2" "Page 3" "Page 4"]
                  :rank (vec (dtype/->reader pagerank))})
@@ -239,8 +239,7 @@ stationary-eigen
 
 (kind/test-last [(fn [s] (< (Math/abs (- s 1.0)) 1e-10))])
 
-;; Page 2 (which page 0 and 1 link to, and also receives links from 3 and 4)
-;; has the highest rank:
+;; Pages 0 and 2 receive the most links and compete for the top rank:
 
 (argops/argmax pagerank)
 

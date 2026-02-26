@@ -237,7 +237,7 @@
  (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v39_l238)))
 
 
-(def v42_l245 (argops/argmax pagerank))
+(def v42_l244 (argops/argmax pagerank))
 
 
-(deftest t43_l247 (is ((fn [idx] (contains? #{0 2} idx)) v42_l245)))
+(deftest t43_l246 (is ((fn [idx] (contains? #{0 2} idx)) v42_l244)))

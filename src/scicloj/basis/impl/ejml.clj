@@ -92,7 +92,7 @@
 
 (defn dsvd
   "Singular value decomposition: A = U * S * V^T.
-   Returns a map with :U, :S (singular values as double[]), :Vt."
+   Returns a map with :U, :S (singular values as 1D tensor), :Vt."
   [^DMatrixRMaj a]
   (let [svd (DecompositionFactory_DDRM/svd (.numRows a) (.numCols a) true true false)]
     (when (.decompose svd (.copy a))
@@ -100,7 +100,7 @@
             Vt (.getV svd nil true)
             S (.getSingularValues svd)]
         {:U U
-         :S (vec S)
+         :S (tensor/ensure-tensor S)
          :Vt Vt}))))
 
 (defn dqr
@@ -163,7 +163,6 @@
   (let [c (ZMatrixRMaj. (.numRows a) (.numCols b))]
     (CommonOps_ZDRM/mult a b c)
     c))
-
 
 (defn ztranspose-conj
   "Conjugate transpose (Hermitian adjoint): B = A†."
