@@ -412,3 +412,10 @@
 ;; **The guideline**: treat all data as immutable. When you need to
 ;; mutate (e.g., in a performance-critical inner loop), use
 ;; `dtype/clone` first to ensure you own the backing array.
+;;
+;; That said, sharing and mutation can be a **deliberate technique**
+;; when used with care. For example, a small helper function might
+;; allocate a `double-array`, fill it element by element with `aset`,
+;; and return the finished tensor — mutation stays inside the function,
+;; and callers see only the immutable result. The key is to keep the
+;; mutable scope small and focused, so that nothing outside the function can mutate the result.
