@@ -17,7 +17,6 @@
    [scicloj.basis.vis :as vis]
    [tech.v3.tensor :as tensor]
    [tech.v3.datatype :as dtype]
-   [tech.v3.datatype.functional :as dfn]
    [tech.v3.libs.buffered-image :as bufimg]
    [scicloj.kindly.v4.kind :as kind]))
 

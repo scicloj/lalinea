@@ -246,15 +246,21 @@
  (def R-thin (la/submatrix (:R qr-result) (range ncols-qr) :all)))
 
 
+(def v85_l350 Q-thin)
+
+
+(def v87_l354 R-thin)
+
+
 (def
- v85_l350
+ v89_l358
  (la/norm (la/sub (la/mmul (la/transpose Q-thin) Q-thin) (la/eye 2))))
 
 
-(deftest t86_l352 (is ((fn [d] (< d 1.0E-10)) v85_l350)))
+(deftest t90_l360 (is ((fn [d] (< d 1.0E-10)) v89_l358)))
 
 
-(def v88_l357 (la/norm (la/sub (la/mmul Q-thin R-thin) A-qr)))
+(def v92_l365 (la/norm (la/sub (la/mmul Q-thin R-thin) A-qr)))
 
 
-(deftest t89_l359 (is ((fn [d] (< d 1.0E-10)) v88_l357)))
+(deftest t93_l367 (is ((fn [d] (< d 1.0E-10)) v92_l365)))

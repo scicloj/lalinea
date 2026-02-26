@@ -204,13 +204,13 @@ cos-theta
 
 ;; ### Orthogonal projection
 ;;
-;; **Projection** is one of the most useful operations in
-;; applied mathematics. Given a subspace $W$ and a vector
+;; Given a subspace and a vector
 ;; $\mathbf{b}$, the **orthogonal projection** of $\mathbf{b}$
-;; onto $W$ is the closest point in $W$ to $\mathbf{b}$.
+;; onto that subspace is the closest point in it to $\mathbf{b}$.
 ;;
-;; If $W$ has columns forming a basis for the subspace,
-;; the projection matrix is:
+;; We represent a subspace by a matrix $W$ whose columns form
+;; a basis for it (recall that the column space of a matrix is
+;; the span of its columns). The projection matrix is then:
 ;;
 ;; $$P = W (W^T W)^{-1} W^T$$
 ;;
@@ -344,6 +344,14 @@ q2-gs
 (def ncols-qr (second (dtype/shape A-qr)))
 (def Q-thin (la/submatrix (:Q qr-result) :all (range ncols-qr)))
 (def R-thin (la/submatrix (:R qr-result) (range ncols-qr) :all))
+
+;; $Q$ (orthonormal columns):
+
+Q-thin
+
+;; $R$ (upper triangular):
+
+R-thin
 
 ;; Verify $Q^T Q = I$ (orthonormal columns):
 

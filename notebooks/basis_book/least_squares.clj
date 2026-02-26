@@ -1,8 +1,8 @@
 ;; # Least Squares and Curve Fitting
 ;;
 ;; Given noisy data, how do we find the "best" curve that fits it?
-;; **Least squares** minimises the sum of squared residuals, and the
-;; solution turns out to be a linear algebra problem.
+;; **Least squares** minimises the sum of squared residuals.
+;; The solution is a linear algebra problem.
 ;;
 ;; This notebook derives the **normal equations**, solves them with
 ;; `la/solve`, connects the solution to QR and SVD decompositions,
@@ -139,10 +139,10 @@ rms-linear
                      (- (* 0.2 idx) 3.0)))
 
 (def noise-poly
-  (tensor/->tensor [ 0.132 -0.541  0.269  0.370  0.067  0.284 -0.096 -0.651
+  (tensor/->tensor [0.132 -0.541  0.269  0.370  0.067  0.284 -0.096 -0.651
                     -0.228  0.055  0.483 -0.301  0.088 -0.104  0.612  0.073
                     -0.318  0.247 -0.428  0.518 -0.092  0.146 -0.190  0.398
-                     0.031 -0.263  0.195 -0.416  0.347  0.010]
+                    0.031 -0.263  0.195 -0.416  0.347  0.010]
                    :datatype :float64))
 
 (def y-poly
@@ -293,8 +293,8 @@ c-poly
 (def noise-trig
   (tensor/->tensor [-0.058  0.218 -0.109  0.034  0.192 -0.277  0.138  0.065
                     -0.193  0.145 -0.044  0.291 -0.180  0.077  0.253 -0.116
-                     0.162 -0.207  0.098 -0.151  0.184 -0.023  0.211 -0.138
-                     0.073 -0.246  0.119  0.047 -0.183  0.264 -0.091  0.156
+                    0.162 -0.207  0.098 -0.151  0.184 -0.023  0.211 -0.138
+                    0.073 -0.246  0.119  0.047 -0.183  0.264 -0.091  0.156
                     -0.228  0.103  0.189 -0.144  0.268 -0.076  0.131 -0.201]
                    :datatype :float64))
 

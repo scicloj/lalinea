@@ -16,8 +16,6 @@
    [scicloj.basis.complex :as cx]
    ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
    [tech.v3.tensor :as tensor]
-   ;; Low-level buffer operations:
-   [tech.v3.datatype :as dtype]
    ;; Element-wise array math:
    [tech.v3.datatype.functional :as dfn]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
@@ -144,7 +142,6 @@
 ;; ### Non-commutativity: $AB \neq BA$ in general
 ;;
 ;; Unlike addition, matrix multiplication is **not** commutative.
-;; This is one of the most important facts in linear algebra.
 
 (> (la/norm (la/sub (la/mmul A B) (la/mmul B A))) 0.01)
 

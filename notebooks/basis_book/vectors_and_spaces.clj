@@ -2,10 +2,9 @@
 ;;
 ;; A **vector space** is an abstract concept: any collection of
 ;; objects that can be added together and scaled by numbers, following
-;; a short list of axioms. The power of linear algebra is that
-;; theorems proved from these axioms apply to *every* vector space
-;; simultaneously — columns of numbers, polynomials, functions,
-;; matrices, and more.
+;; a short list of axioms. Theorems proved from these axioms
+;; apply to every vector space simultaneously — columns of numbers,
+;; polynomials, functions, matrices, and more.
 ;;
 ;; This chapter develops the foundations using $\mathbb{R}^n$ — columns
 ;; of real numbers — as our main concrete example. We define addition
@@ -95,7 +94,7 @@
 ;;
 ;; These two operations — addition and scalar multiplication —
 ;; satisfy a list of rules that feel obvious for columns of
-;; numbers, but turn out to define a powerful abstraction.
+;; numbers, but they define a useful abstraction.
 ;; Any collection of objects obeying these rules is called
 ;; a **vector space**.
 ;;
@@ -176,9 +175,9 @@
 
 (kind/test-last [true?])
 
-;; These eight rules are all we need. Any collection of objects
-;; satisfying them is a vector space, and every theorem in linear
-;; algebra follows from them alone. The axioms *are* the concept.
+;; Any collection of objects satisfying these rules is a vector
+;; space, and theorems proved from these axioms apply to all of
+;; them.
 ;;
 ;; The rules feel unsurprising for number columns, but the same
 ;; structure appears in surprising places:
@@ -403,8 +402,8 @@
 
 ;; ### Dimension
 ;;
-;; A remarkable fact: **every basis for a given vector space has
-;; the same number of vectors**. This number is the **dimension**.
+;; **Every basis for a given vector space has the same number
+;; of vectors.** This number is the **dimension**.
 ;;
 ;; - $\mathbb{R}^2$ has dimension 2 (every basis has 2 vectors)
 ;; - $\mathbb{R}^3$ has dimension 3

@@ -10,17 +10,17 @@
   [clojure.test :refer [deftest is]]))
 
 
-(def v3_l63 (def n 20))
+(def v3_l62 (def n 20))
 
 
-(def v4_l65 (def T-left 100.0))
+(def v4_l64 (def T-left 100.0))
 
 
-(def v5_l66 (def T-right 0.0))
+(def v5_l65 (def T-right 0.0))
 
 
 (def
- v7_l71
+ v7_l70
  (def
   A-heat
   (dtype/clone
@@ -32,14 +32,14 @@
     :float64))))
 
 
-(def v8_l81 A-heat)
+(def v8_l80 A-heat)
 
 
-(deftest t9_l83 (is ((fn [m] (= [n n] (vec (dtype/shape m)))) v8_l81)))
+(deftest t9_l82 (is ((fn [m] (= [n n] (vec (dtype/shape m)))) v8_l80)))
 
 
 (def
- v11_l89
+ v11_l88
  (def
   b-heat
   (let
@@ -49,24 +49,24 @@
    (la/column (vec b)))))
 
 
-(def v13_l97 (def T-direct (la/solve A-heat b-heat)))
+(def v13_l96 (def T-direct (la/solve A-heat b-heat)))
 
 
-(def v14_l99 T-direct)
+(def v14_l98 T-direct)
 
 
-(deftest t15_l101 (is ((fn [t] (some? t)) v14_l99)))
+(deftest t15_l100 (is ((fn [t] (some? t)) v14_l98)))
 
 
 (def
- v17_l110
+ v17_l109
  (def
   x-interior
   (mapv (fn [i] (/ (double (inc i)) (double (inc n)))) (range n))))
 
 
 (def
- v18_l114
+ v18_l113
  (->
   (tc/dataset
    {:x x-interior,
@@ -77,20 +77,20 @@
   plotly/plot))
 
 
-(def v20_l125 (tensor/mget T-direct 0 0))
+(def v20_l124 (tensor/mget T-direct 0 0))
 
 
-(deftest t21_l127 (is ((fn [t] (> t 90.0)) v20_l125)))
+(deftest t21_l126 (is ((fn [t] (> t 90.0)) v20_l124)))
 
 
-(def v22_l129 (tensor/mget T-direct (dec n) 0))
+(def v22_l128 (tensor/mget T-direct (dec n) 0))
 
 
-(deftest t23_l131 (is ((fn [t] (< t 10.0)) v22_l129)))
+(deftest t23_l130 (is ((fn [t] (< t 10.0)) v22_l128)))
 
 
 (def
- v25_l160
+ v25_l159
  (def
   gs-result
   (let
@@ -142,7 +142,7 @@
 
 
 (def
- v27_l195
+ v27_l194
  (let
   [snapshots
    [1 2 5 10 50 200 500]
@@ -165,7 +165,7 @@
 
 
 (def
- v29_l211
+ v29_l210
  (->
   (tc/dataset (:history gs-result))
   (plotly/base {:=x :iteration, :=y :residual})
@@ -173,17 +173,17 @@
   plotly/plot))
 
 
-(def v31_l218 (-> gs-result :history last :residual))
+(def v31_l217 (-> gs-result :history last :residual))
 
 
-(deftest t32_l220 (is ((fn [r] (< r 0.001)) v31_l218)))
+(deftest t32_l219 (is ((fn [r] (< r 0.001)) v31_l217)))
 
 
 (def
- v34_l228
+ v34_l227
  (let
   [x-iter (la/column (:x-final gs-result))]
   (la/norm (la/sub x-iter T-direct))))
 
 
-(deftest t35_l231 (is ((fn [d] (< d 0.01)) v34_l228)))
+(deftest t35_l230 (is ((fn [d] (< d 0.01)) v34_l227)))

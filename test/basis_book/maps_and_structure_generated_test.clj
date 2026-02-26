@@ -86,12 +86,12 @@
  (let
   [angles
    (mapv
-    (fn* [p1__77834#] (* 2.0 Math/PI (/ p1__77834# 40.0)))
+    (fn* [p1__74264#] (* 2.0 Math/PI (/ p1__74264# 40.0)))
     (range 41))
    circle-x
-   (mapv (fn* [p1__77835#] (Math/cos p1__77835#)) angles)
+   (mapv (fn* [p1__74265#] (Math/cos p1__74265#)) angles)
    circle-y
-   (mapv (fn* [p1__77836#] (Math/sin p1__77836#)) angles)
+   (mapv (fn* [p1__74266#] (Math/sin p1__74266#)) angles)
    stretched
    (mapv
     (fn
@@ -208,7 +208,7 @@
  v58_l315
  (def
   rank-M
-  (count (filter (fn* [p1__77837#] (> p1__77837# 1.0E-10)) sv-M))))
+  (count (filter (fn* [p1__74267#] (> p1__74267# 1.0E-10)) sv-M))))
 
 
 (def v59_l317 rank-M)
@@ -221,7 +221,7 @@
  v62_l330
  (def
   nullity-M
-  (count (filter (fn* [p1__77838#] (<= p1__77838# 1.0E-10)) sv-M))))
+  (count (filter (fn* [p1__74268#] (<= p1__74268# 1.0E-10)) sv-M))))
 
 
 (def v63_l332 nullity-M)
@@ -230,17 +230,17 @@
 (deftest t64_l334 (is ((fn [n] (= n 1)) v63_l332)))
 
 
-(def v66_l348 (= (+ rank-M nullity-M) (second (dtype/shape M))))
+(def v66_l346 (= (+ rank-M nullity-M) (second (dtype/shape M))))
 
 
-(deftest t67_l351 (is (true? v66_l348)))
+(deftest t67_l349 (is (true? v66_l346)))
 
 
-(def v69_l356 (def svd-M (la/svd M)))
+(def v69_l354 (def svd-M (la/svd M)))
 
 
 (def
- v70_l358
+ v70_l356
  (def
   null-basis
   (let
@@ -253,40 +253,40 @@
    (la/submatrix (la/transpose Vt) :all null-idx))))
 
 
-(def v72_l366 (la/norm (la/mmul M null-basis)))
+(def v72_l364 (la/norm (la/mmul M null-basis)))
 
 
-(deftest t73_l368 (is ((fn [d] (< d 1.0E-10)) v72_l366)))
+(deftest t73_l366 (is ((fn [d] (< d 1.0E-10)) v72_l364)))
 
 
-(def v75_l382 (def A-full (la/matrix [[2 1] [1 3]])))
+(def v75_l380 (def A-full (la/matrix [[2 1] [1 3]])))
 
 
 (def
- v76_l384
+ v76_l382
  (count
   (filter
-   (fn* [p1__77839#] (> p1__77839# 1.0E-10))
+   (fn* [p1__74269#] (> p1__74269# 1.0E-10))
    (vec (:S (la/svd A-full))))))
 
 
-(deftest t77_l386 (is ((fn [r] (= r 2)) v76_l384)))
+(deftest t77_l384 (is ((fn [r] (= r 2)) v76_l382)))
 
 
-(def v79_l391 (la/solve A-full (la/column [5 7])))
+(def v79_l389 (la/solve A-full (la/column [5 7])))
 
 
-(deftest t80_l393 (is ((fn [x] (some? x)) v79_l391)))
+(deftest t80_l391 (is ((fn [x] (some? x)) v79_l389)))
 
 
-(def v82_l398 (la/solve M (la/column [1 2 3])))
+(def v82_l396 (la/solve M (la/column [1 2 3])))
 
 
-(deftest t83_l400 (is (nil? v82_l398)))
+(deftest t83_l398 (is (nil? v82_l396)))
 
 
 (def
- v85_l426
+ v85_l424
  (def
   col-space-basis
   (let
@@ -300,7 +300,7 @@
 
 
 (def
- v87_l434
+ v87_l432
  (def
   left-null-basis
   (let
@@ -314,7 +314,7 @@
 
 
 (def
- v89_l443
+ v89_l441
  (def
   row-space-basis
   (let
@@ -328,7 +328,7 @@
 
 
 (def
- v91_l453
+ v91_l451
  {:col-space (second (dtype/shape col-space-basis)),
   :left-null (second (dtype/shape left-null-basis)),
   :row-space (second (dtype/shape row-space-basis)),
@@ -336,7 +336,7 @@
 
 
 (deftest
- t92_l458
+ t92_l456
  (is
   ((fn
     [m]
@@ -345,4 +345,4 @@
      (= 1 (:left-null m))
      (= 2 (:row-space m))
      (= 1 (:null-space m))))
-   v91_l453)))
+   v91_l451)))

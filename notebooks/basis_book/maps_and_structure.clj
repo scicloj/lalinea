@@ -51,8 +51,8 @@
 ;; These operate on infinite-dimensional function spaces and cannot
 ;; be represented as finite matrices.
 ;;
-;; For *finite-dimensional* spaces, however, a remarkable theorem
-;; gives us a concrete handle:
+;; For *finite-dimensional* spaces, there is a concrete
+;; representation:
 ;;
 ;; **Every linear map from $\mathbb{R}^n$ to $\mathbb{R}^m$ can
 ;; be written as multiplication by an $m \times n$ matrix.**
@@ -336,8 +336,6 @@ nullity-M
 
 ;; ### The rank-nullity theorem
 ;;
-;; One of the most important theorems in linear algebra:
-;;
 ;; $$\text{rank}(A) + \text{nullity}(A) = n$$
 ;;
 ;; where $n$ is the number of columns. The rank counts
@@ -404,7 +402,7 @@ nullity-M
 ;; ## The four fundamental subspaces
 ;;
 ;; Every $m \times n$ matrix $A$ defines not two but **four**
-;; subspaces, arranged in a beautiful symmetric pattern:
+;; subspaces:
 ;;
 ;; | Subspace | Dimension | Lives in |
 ;; |:---------|:----------|:---------|
@@ -413,7 +411,7 @@ nullity-M
 ;; | Row space $\text{Row}(A) = \text{Col}(A^T)$ | $r$ | $\mathbb{R}^n$ |
 ;; | Null space $\text{Null}(A)$ | $n - r$ | $\mathbb{R}^n$ |
 ;;
-;; The key insight: in each ambient space, the two subspaces
+;; In each ambient space, the two subspaces
 ;; are **complementary** — every vector can be written uniquely
 ;; as a sum of one vector from each subspace, so their
 ;; dimensions add up to the dimension of the ambient space.

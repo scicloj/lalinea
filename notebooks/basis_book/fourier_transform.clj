@@ -1,7 +1,7 @@
 ;; # Fourier Transform
 ;;
 ;; **basis** bridges [Fastmath](https://generateme.github.io/fastmath/clay)'s
-;; transform API to ComplexTensors. The key insight: Fastmath's
+;; transform API to ComplexTensors. Fastmath's
 ;; `(:complex :fftr)` transformer outputs interleaved `double[]`
 ;; with `[re₀ im₀ re₁ im₁ ...]` — **exactly** the memory layout
 ;; of ComplexTensor. So the bridge is zero-copy.
@@ -14,10 +14,6 @@
    [scicloj.basis.complex :as cx]
    ;; FFT bridge — Fastmath transforms ↔ ComplexTensor:
    [scicloj.basis.transform :as bfft]
-   ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
-   [tech.v3.tensor :as tensor]
-   ;; Low-level buffer operations:
-   [tech.v3.datatype :as dtype]
    ;; Element-wise array math:
    [tech.v3.datatype.functional :as dfn]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):

@@ -1,6 +1,5 @@
 ;; # Solving Linear Systems
 ;;
-;; Linear algebra shines brightest when it meets real problems.
 ;; This chapter solves systems of equations in two contrasting
 ;; styles. First, a **high-level** approach: build the matrices,
 ;; call `la/solve`, and get back a result — the mutation happens

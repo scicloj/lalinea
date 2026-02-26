@@ -1,7 +1,6 @@
 ;; # Decompositions in Action
 ;;
-;; Matrix decompositions are the workhorses of numerical linear
-;; algebra. This chapter shows three practical applications:
+;; This chapter shows three applications of matrix decompositions:
 ;;
 ;; - **SVD** for image compression (purely functional)
 ;; - **Eigendecomposition** for Principal Component Analysis

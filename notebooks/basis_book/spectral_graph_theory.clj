@@ -2,7 +2,7 @@
 ;;
 ;; A graph is a set of vertices connected by edges.
 ;; The *spectrum* — the eigenvalues of matrices derived from a graph
-;; — reveals surprising structural properties: how many connected
+;; — reveals structural properties: how many connected
 ;; components there are, which vertices form tightly-knit clusters,
 ;; and how quickly information spreads across the network.
 ;;

@@ -63,6 +63,14 @@
 
 (def eig-result (la/eigen A-eig))
 
+;; `la/eigen` returns eigenvalues as a **ComplexTensor**, because
+;; eigenvalues of a real matrix can be complex — the roots of the
+;; characteristic polynomial may leave $\mathbb{R}$.  For this
+;; matrix they happen to be real.  When we know all eigenvalues
+;; are real (e.g., for symmetric matrices), `la/real-eigenvalues`
+;; is a convenience that extracts the real parts and returns them
+;; as a sorted real tensor:
+
 (la/real-eigenvalues A-eig)
 
 (kind/test-last
@@ -205,7 +213,7 @@ D-result
 ;; - Graph Laplacians in network analysis
 ;; - Hessians of scalar-valued functions in optimization
 ;;
-;; They have three remarkable properties that general matrices lack:
+;; They have three properties that general matrices lack:
 ;;
 ;; 1. **All eigenvalues are real** (no imaginary parts)
 ;; 2. **Eigenvectors for distinct eigenvalues are orthogonal**
@@ -254,9 +262,8 @@ D-result
 ;; where $Q$ is orthogonal (its columns are the eigenvectors)
 ;; and $\Lambda$ is diagonal (the eigenvalues on the diagonal).
 ;;
-;; This is the most important decomposition in applied linear
-;; algebra. It says every symmetric matrix is just scaling
-;; along orthogonal axes.
+;; It says every symmetric matrix is just scaling along
+;; orthogonal axes.
 ;;
 ;; The word "spectrum" for the eigenvalues comes from this
 ;; theorem — the eigenvalues are the "spectral lines" of the matrix.
@@ -497,10 +504,9 @@ final-eigenvalues
 
 (kind/test-last [true?])
 
-;; Every concept in this notebook connects to the others.
-;; The eigenvalues control the trace, determinant, singular
-;; values, and positive definiteness. The rank controls
-;; invertibility. The symmetry guarantees orthogonal
-;; eigenvectors and the spectral theorem. The positive
-;; definiteness guarantees Cholesky. It is all one coherent
-;; theory.
+;; These concepts are more connected than they may first
+;; appear. Eigenvalues show up in the trace, determinant,
+;; and singular values. Symmetry leads to orthogonal
+;; eigenvectors and the spectral theorem. Positive
+;; definiteness gives us Cholesky. The threads run
+;; through most of what follows in the book.

@@ -164,7 +164,7 @@
 
 ;; ### Gallery of Julia sets
 ;;
-;; Different values of $c$ produce strikingly different shapes.
+;; Different values of $c$ produce different shapes.
 
 ;; $c = -0.7 + 0.27i$ — a "dendrite" Julia set:
 
