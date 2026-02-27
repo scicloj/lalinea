@@ -228,7 +228,7 @@ stationary-eigen
 ;; Pages 0 and 2 receive the most inbound links:
 
 (-> (tc/dataset {:page ["Page 0" "Page 1" "Page 2" "Page 3" "Page 4"]
-                 :rank (vec (dtype/->reader pagerank))})
+                 :rank (dtype/->reader pagerank)})
     (plotly/base {:=x :page :=y :rank})
     (plotly/layer-bar)
     plotly/plot)

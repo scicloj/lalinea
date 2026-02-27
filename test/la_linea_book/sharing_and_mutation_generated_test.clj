@@ -1,0 +1,457 @@
+(ns
+ la-linea-book.sharing-and-mutation-generated-test
+ (:require
+  [scicloj.la-linea.linalg :as la]
+  [scicloj.la-linea.complex :as cx]
+  [tech.v3.tensor :as tensor]
+  [tech.v3.datatype :as dtype]
+  [tech.v3.datatype.functional :as dfn]
+  [scicloj.kindly.v4.kind :as kind]
+  [clojure.test :refer [deftest is]])
+ (:import [org.ejml.data DMatrixRMaj]))
+
+
+(def
+ v3_l37
+ (let
+  [flat
+   (double-array [1 2 3 4 5 6])
+   t1
+   (tensor/reshape (tensor/ensure-tensor flat) [2 3])
+   t2
+   (tensor/reshape (tensor/ensure-tensor flat) [3 2])
+   _
+   (aset flat 0 99.0)
+   result
+   {:t1-00 (tensor/mget t1 0 0), :t2-00 (tensor/mget t2 0 0)}]
+  result))
+
+
+(deftest
+ t4_l45
+ (is
+  ((fn [{:keys [t1-00 t2-00]}] (and (== 99.0 t1-00) (== 99.0 t2-00)))
+   v3_l37)))
+
+
+(def
+ v6_l57
+ (let
+  [A
+   (tensor/->tensor [[10 20 30] [40 50 60]] {:datatype :float64})
+   row0
+   (tensor/select A 0 :all)
+   arr
+   (.ary-data (dtype/as-array-buffer A))
+   _
+   (aset arr 0 999.0)
+   result
+   {:A-00 (tensor/mget A 0 0), :row0-0 (double (row0 0))}]
+  result))
+
+
+(deftest
+ t7_l66
+ (is
+  ((fn [{:keys [A-00 row0-0]}] (and (== 999.0 A-00) (== 999.0 row0-0)))
+   v6_l57)))
+
+
+(def
+ v9_l78
+ (let
+  [M (la/matrix [[1 2] [3 4]]) dm (la/tensor->dmat M)]
+  (identical? (.ary-data (dtype/as-array-buffer M)) (.data dm))))
+
+
+(deftest t10_l83 (is (true? v9_l78)))
+
+
+(def
+ v12_l87
+ (let
+  [M
+   (la/matrix [[1 2] [3 4]])
+   dm
+   (la/tensor->dmat M)
+   _
+   (.set dm 0 0 -1.0)]
+  {:M-00 (tensor/mget M 0 0), :dm-00 (.get dm 0 0)}))
+
+
+(deftest
+ t13_l93
+ (is
+  ((fn [{:keys [M-00 dm-00]}] (and (== -1.0 M-00) (== -1.0 dm-00)))
+   v12_l87)))
+
+
+(def
+ v15_l100
+ (let
+  [M (la/matrix [[1 2] [3 4]]) dm (la/tensor->dmat M)]
+  (tensor/mset! M 1 1 99.0)
+  (.get dm 1 1)))
+
+
+(deftest t16_l105 (is ((fn [v] (== 99.0 v)) v15_l100)))
+
+
+(def
+ v18_l112
+ (let
+  [ct-data
+   (tensor/->tensor [[1 2] [3 4] [5 6]] {:datatype :float64})
+   ct
+   (cx/complex-tensor ct-data)]
+  (identical? ct-data (cx/->tensor ct))))
+
+
+(deftest t19_l116 (is (true? v18_l112)))
+
+
+(def
+ v21_l120
+ (let
+  [ct-data
+   (tensor/->tensor [[1 2] [3 4] [5 6]] {:datatype :float64})
+   ct
+   (cx/complex-tensor ct-data)
+   arr
+   (.ary-data (dtype/as-array-buffer ct-data))
+   _
+   (aset arr 1 99.0)]
+  (cx/im (ct 0))))
+
+
+(deftest t22_l126 (is ((fn [v] (== 99.0 v)) v21_l120)))
+
+
+(def
+ v24_l135
+ (let
+  [ct
+   (cx/complex-tensor
+    (tensor/->tensor [[10 40] [20 50] [30 60]] {:datatype :float64}))
+   re-view
+   (cx/re ct)
+   arr
+   (.ary-data (dtype/as-array-buffer (cx/->tensor ct)))
+   _
+   (aset arr 0 -10.0)]
+  (double (re-view 0))))
+
+
+(deftest t25_l142 (is ((fn [v] (== -10.0 v)) v24_l135)))
+
+
+(def
+ v27_l154
+ (let
+  [x
+   (tensor/->tensor [1 2 3] {:datatype :float64})
+   y
+   (tensor/->tensor [10 20 30] {:datatype :float64})
+   lazy-sum
+   (dfn/+ x y)]
+  (vec lazy-sum)))
+
+
+(deftest t28_l159 (is ((fn [v] (= [11.0 22.0 33.0] v)) v27_l154)))
+
+
+(def
+ v30_l164
+ (let
+  [x
+   (tensor/->tensor [1 2 3] {:datatype :float64})
+   y
+   (tensor/->tensor [10 20 30] {:datatype :float64})
+   lazy-sum
+   (dfn/+ x y)
+   arr
+   (.ary-data (dtype/as-array-buffer x))
+   _
+   (aset arr 0 100.0)]
+  (vec lazy-sum)))
+
+
+(deftest t31_l171 (is ((fn [v] (= [110.0 22.0 33.0] v)) v30_l164)))
+
+
+(def
+ v33_l181
+ (let
+  [ca
+   (cx/complex-tensor
+    (tensor/->tensor [[1 3] [2 4]] {:datatype :float64}))
+   cb
+   (cx/complex-tensor
+    (tensor/->tensor [[10 30] [20 40]] {:datatype :float64}))
+   lazy-sum
+   (cx/add ca cb)]
+  {:re (vec (dtype/->reader (cx/re lazy-sum))),
+   :im (vec (dtype/->reader (cx/im lazy-sum)))}))
+
+
+(deftest
+ t34_l189
+ (is
+  ((fn [{:keys [re im]}] (and (= [11.0 22.0] re) (= [33.0 44.0] im)))
+   v33_l181)))
+
+
+(def
+ v36_l196
+ (let
+  [ca
+   (cx/complex-tensor
+    (tensor/->tensor [[1 3] [2 4]] {:datatype :float64}))
+   cb
+   (cx/complex-tensor
+    (tensor/->tensor [[10 30] [20 40]] {:datatype :float64}))
+   lazy-sum
+   (cx/add ca cb)
+   arr
+   (.ary-data (dtype/as-array-buffer (cx/->tensor ca)))
+   _
+   (aset arr 0 100.0)]
+  (vec (dtype/->reader (cx/re lazy-sum)))))
+
+
+(deftest t37_l205 (is ((fn [v] (= [110.0 22.0] v)) v36_l196)))
+
+
+(def
+ v39_l212
+ (let
+  [original (la/matrix [[1 2] [3 4]]) cloned (dtype/clone original)]
+  (identical?
+   (.ary-data (dtype/as-array-buffer original))
+   (.ary-data (dtype/as-array-buffer cloned)))))
+
+
+(deftest t40_l217 (is (false? v39_l212)))
+
+
+(def
+ v42_l221
+ (let
+  [original
+   (la/matrix [[1 2] [3 4]])
+   cloned
+   (dtype/clone original)
+   arr
+   (.ary-data (dtype/as-array-buffer original))
+   _
+   (aset arr 0 -999.0)]
+  {:original-00 (tensor/mget original 0 0),
+   :cloned-00 (tensor/mget cloned 0 0)}))
+
+
+(deftest
+ t43_l228
+ (is
+  ((fn
+    [{:keys [original-00 cloned-00]}]
+    (and (== -999.0 original-00) (== 1.0 cloned-00)))
+   v42_l221)))
+
+
+(def
+ v45_l238
+ (let
+  [ct-orig
+   (cx/complex-tensor
+    (tensor/->tensor [[1 4] [2 5] [3 6]] {:datatype :float64}))
+   ct-clone
+   (dtype/clone ct-orig)
+   orig-arr
+   (.ary-data (dtype/as-array-buffer (cx/->tensor ct-orig)))
+   _
+   (aset orig-arr 0 -1.0)]
+  {:orig-re (cx/re (ct-orig 0)), :clone-re (cx/re (ct-clone 0))}))
+
+
+(deftest
+ t46_l246
+ (is
+  ((fn
+    [{:keys [orig-re clone-re]}]
+    (and (== -1.0 orig-re) (== 1.0 clone-re)))
+   v45_l238)))
+
+
+(def
+ v48_l257
+ (let
+  [p
+   (cx/complex-tensor
+    (tensor/->tensor [[1 3] [2 4]] {:datatype :float64}))
+   q
+   (cx/complex-tensor
+    (tensor/->tensor [[10 30] [20 40]] {:datatype :float64}))
+   lazy-pq
+   (cx/add p q)
+   materialized-pq
+   (dtype/clone lazy-pq)]
+  (some? (dtype/as-array-buffer (cx/->tensor materialized-pq)))))
+
+
+(deftest t49_l265 (is (true? v48_l257)))
+
+
+(def
+ v51_l269
+ (let
+  [p
+   (cx/complex-tensor
+    (tensor/->tensor [[1 3] [2 4]] {:datatype :float64}))
+   q
+   (cx/complex-tensor
+    (tensor/->tensor [[10 30] [20 40]] {:datatype :float64}))
+   lazy-pq
+   (cx/add p q)
+   materialized-pq
+   (dtype/clone lazy-pq)
+   arr
+   (.ary-data (dtype/as-array-buffer (cx/->tensor p)))
+   _
+   (aset arr 0 999.0)]
+  {:lazy-re (vec (dtype/->reader (cx/re lazy-pq))),
+   :materialized-re (vec (dtype/->reader (cx/re materialized-pq)))}))
+
+
+(deftest
+ t52_l280
+ (is
+  ((fn
+    [{:keys [lazy-re materialized-re]}]
+    (and (= [1009.0 22.0] lazy-re) (= [11.0 22.0] materialized-re)))
+   v51_l269)))
+
+
+(def
+ v54_l291
+ (let
+  [big
+   (la/matrix [[1 2 3] [4 5 6] [7 8 9]])
+   sub
+   (la/submatrix big (range 2) (range 2))
+   arr
+   (.ary-data (dtype/as-array-buffer big))
+   _
+   (aset arr 0 -1.0)]
+  {:big-00 (tensor/mget big 0 0), :sub-00 (tensor/mget sub 0 0)}))
+
+
+(deftest
+ t55_l298
+ (is
+  ((fn
+    [{:keys [big-00 sub-00]}]
+    (and (== -1.0 big-00) (== 1.0 sub-00)))
+   v54_l291)))
+
+
+(def
+ v57_l309
+ (let
+  [E (la/matrix [[1 2] [3 4]]) Et (la/transpose E)]
+  (identical?
+   (.ary-data (dtype/as-array-buffer E))
+   (.ary-data (dtype/as-array-buffer Et)))))
+
+
+(deftest t58_l314 (is (false? v57_l309)))
+
+
+(def
+ v60_l318
+ (let
+  [E
+   (la/matrix [[1 2] [3 4]])
+   Et
+   (la/transpose E)
+   arr
+   (.ary-data (dtype/as-array-buffer E))
+   _
+   (aset arr 0 -1.0)]
+  {:E-00 (tensor/mget E 0 0), :Et-00 (tensor/mget Et 0 0)}))
+
+
+(deftest
+ t61_l325
+ (is
+  ((fn [{:keys [E-00 Et-00]}] (and (== -1.0 E-00) (== 1.0 Et-00)))
+   v60_l318)))
+
+
+(def
+ v63_l338
+ (let
+  [rng
+   (java.util.Random. 42)
+   t
+   (tensor/compute-tensor
+    [4 4]
+    (fn [_ _] (.nextGaussian rng))
+    :float64)]
+  (la/close? t t)))
+
+
+(deftest t64_l342 (is (false? v63_l338)))
+
+
+(def
+ v66_l347
+ (let
+  [rng
+   (java.util.Random. 42)
+   t
+   (dtype/clone
+    (tensor/compute-tensor
+     [4 4]
+     (fn [_ _] (.nextGaussian rng))
+     :float64))]
+  (la/close? t t)))
+
+
+(deftest t67_l352 (is (true? v66_l347)))
+
+
+(def
+ v69_l362
+ (let
+  [make-random-tensor
+   (fn
+    []
+    (let
+     [rng (java.util.Random. 42)]
+     (dtype/clone
+      (tensor/compute-tensor
+       [100 100]
+       (fn [_ _] (.nextGaussian rng))
+       :float64))))]
+  (la/close? (make-random-tensor) (make-random-tensor))))
+
+
+(deftest t70_l369 (is (false? v69_l362)))
+
+
+(def
+ v72_l378
+ (let
+  [make-random-tensor
+   (fn
+    []
+    (let
+     [rng (java.util.Random. 42)]
+     (->>
+      (repeatedly (* 4 4) (fn* [] (.nextGaussian rng)))
+      (dtype/make-container :float64)
+      (tensor/reshape [4 4]))))]
+  (la/close? (make-random-tensor) (make-random-tensor))))
+
+
+(deftest t73_l386 (is (true? v72_l378)))

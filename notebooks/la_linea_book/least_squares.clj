@@ -69,7 +69,7 @@
 
 ;; The observation vector $\mathbf{y}$ as a column:
 
-(def y-col (la/column (vec y-linear)))
+(def y-col (la/column y-linear))
 
 ;; ## The normal equations
 ;;
@@ -113,11 +113,11 @@ rms-linear
       c1 (tensor/mget c-linear 1 0)
       x-fit (dtype/make-reader :float64 100 (* 0.019 idx))
       y-fit (dfn/+ c0 (dfn/* c1 x-fit))]
-  (-> (tc/dataset {:x (vec x-data)
-                   :y (vec y-linear)
+  (-> (tc/dataset {:x x-data
+                   :y y-linear
                    :type (repeat (count x-data) "data")})
-      (tc/concat (tc/dataset {:x (vec x-fit)
-                              :y (vec y-fit)
+      (tc/concat (tc/dataset {:x x-fit
+                              :y y-fit
                               :type (repeat 100 "fit")}))
       (plotly/base {:=x :x :=y :y :=color :type})
       (plotly/layer-point {:=mark-size 8
@@ -162,7 +162,7 @@ rms-linear
 
 (def c-poly
   (la/solve (la/mmul (la/transpose A-poly) A-poly)
-            (la/mmul (la/transpose A-poly) (la/column (vec y-poly)))))
+            (la/mmul (la/transpose A-poly) (la/column y-poly))))
 
 c-poly
 
@@ -181,11 +181,11 @@ c-poly
       c2 (tensor/mget c-poly 2 0)
       x-fit (dtype/make-reader :float64 100 (- (* 0.06 idx) 3.0))
       y-fit (dfn/+ c0 (dfn/+ (dfn/* c1 x-fit) (dfn/* c2 (dfn/* x-fit x-fit))))]
-  (-> (tc/dataset {:x (vec x-poly)
-                   :y (vec y-poly)
+  (-> (tc/dataset {:x x-poly
+                   :y y-poly
                    :type (repeat 30 "data")})
-      (tc/concat (tc/dataset {:x (vec x-fit)
-                              :y (vec y-fit)
+      (tc/concat (tc/dataset {:x x-fit
+                              :y y-fit
                               :type (repeat 100 "fit")}))
       (plotly/base {:=x :x :=y :y :=color :type})
       (plotly/layer-point {:=mark-size 8
@@ -223,7 +223,7 @@ c-poly
 ;; Solve $R_1 \mathbf{c} = Q_1^T \mathbf{y}$:
 
 (def c-qr
-  (la/solve R1 (la/mmul (la/transpose Q1) (la/column (vec y-poly)))))
+  (la/solve R1 (la/mmul (la/transpose Q1) (la/column y-poly))))
 
 ;; Compare with the normal-equation solution:
 
@@ -266,7 +266,7 @@ c-poly
   (let [k (count S-svd)
         S-inv (la/diag (dtype/make-reader :float64 k
                                           (/ 1.0 (S-svd idx))))
-        Ut-y (la/mmul (la/transpose U-thin) (la/column (vec y-poly)))]
+        Ut-y (la/mmul (la/transpose U-thin) (la/column y-poly))]
     (la/mmul (la/transpose Vt-svd) (la/mmul S-inv Ut-y))))
 
 ;; Compare:
@@ -318,7 +318,7 @@ c-poly
 
 (def c-trig
   (la/solve (la/mmul (la/transpose A-trig) A-trig)
-            (la/mmul (la/transpose A-trig) (la/column (vec y-trig)))))
+            (la/mmul (la/transpose A-trig) (la/column y-trig))))
 
 c-trig
 
@@ -341,11 +341,11 @@ c-trig
                           (dfn/+ (dfn/* (tensor/mget c-trig 2 0) (dfn/sin x-fit))
                                  (dfn/+ (dfn/* (tensor/mget c-trig 3 0) (dfn/cos (dfn/* 2.0 x-fit)))
                                         (dfn/* (tensor/mget c-trig 4 0) (dfn/sin (dfn/* 2.0 x-fit)))))))]
-  (-> (tc/dataset {:x (vec x-trig)
-                   :y (vec y-trig)
+  (-> (tc/dataset {:x x-trig
+                   :y y-trig
                    :type (repeat 40 "data")})
-      (tc/concat (tc/dataset {:x (vec x-fit)
-                              :y (vec y-fit)
+      (tc/concat (tc/dataset {:x x-fit
+                              :y y-fit
                               :type (repeat 200 "fit")}))
       (plotly/base {:=x :x :=y :y :=color :type})
       (plotly/layer-point {:=mark-size 6
@@ -364,8 +364,8 @@ c-trig
 (def poly-svd (la/svd A-poly))
 
 (def condition-number
-  (let [sv (vec (:S poly-svd))]
-    (/ (apply max sv) (apply min sv))))
+  (let [sv (:S poly-svd)]
+    (/  (dfn/reduce-max sv) (dfn/reduce-min sv))))
 
 condition-number
 
@@ -378,9 +378,9 @@ condition-number
 (def A-high
   (vandermonde (dtype/make-reader :float64 30 (* 1.0 idx)) 8))
 
-(def high-sv (vec (:S (la/svd A-high))))
+(def high-sv (:S (la/svd A-high)))
 
-(/ (apply max high-sv) (apply min high-sv))
+(/  (dfn/reduce-max high-sv) (dfn/reduce-min high-sv))
 
 (kind/test-last
  [(fn [v] (> v 1e6))])

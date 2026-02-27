@@ -69,8 +69,8 @@
 
 ;; ### Verifying the axioms
 ;;
-;; Just as we verified the vector space axioms in the previous
-;; chapter, let us check that the dot product satisfies the
+;; Just as we verified the vector space axioms in the
+;; Vectors and Spaces chapter, let us check that the dot product satisfies the
 ;; three inner product axioms.
 
 (def c3 (la/column [7 8 9]))

@@ -471,7 +471,7 @@
 ;; ### Frobenius norm from singular values: $\|A\|_F = \sqrt{\sum \sigma_i^2}$
 
 (let [{:keys [S]} (la/svd A)
-      sv-norm (Math/sqrt (reduce + (map #(* % %) S)))]
+      sv-norm (Math/sqrt (dfn/sum (dfn/* S S)))]
   (la/close-scalar? (la/norm A) sv-norm))
 
 (kind/test-last [true?])

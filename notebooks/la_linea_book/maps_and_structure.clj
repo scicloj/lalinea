@@ -15,6 +15,8 @@
    [tech.v3.tensor :as tensor]
    ;; Low-level buffer operations:
    [tech.v3.datatype :as dtype]
+   ;; Element-wise array math:
+   [tech.v3.datatype.functional :as dfn]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
@@ -133,9 +135,9 @@
 ;; Stretches the x-direction by 3, leaves y unchanged.
 ;; Let us see what it does to a set of points on the unit circle:
 
-(let [angles (mapv #(* 2.0 Math/PI (/ % 40.0)) (range 41))
-      circle-x (mapv #(Math/cos %) angles)
-      circle-y (mapv #(Math/sin %) angles)
+(let [angles (dfn/* (/ (* 2.0 Math/PI) 40.0) (dtype/make-reader :float64 41 idx))
+      circle-x (dfn/cos angles)
+      circle-y (dfn/sin angles)
       stretched (mapv (fn [cx cy]
                         (let [out (la/mmul stretch-mat (la/column [cx cy]))]
                           [(tensor/mget out 0 0) (tensor/mget out 1 0)]))
@@ -305,14 +307,14 @@
 ;; The SVD reveals the rank: it equals the number of non-zero
 ;; singular values.
 
-(def sv-M (vec (:S (la/svd M))))
+(def sv-M (:S (la/svd M)))
 
 sv-M
 
 (kind/test-last
  [(fn [v] (= 3 (count v)))])
 
-(def rank-M (count (filter #(> % 1e-10) sv-M)))
+(def rank-M (long (dfn/sum (dfn/> sv-M 1e-10))))
 
 rank-M
 
@@ -327,7 +329,7 @@ rank-M
 ;; The **nullity** is the dimension of the null space —
 ;; the number of independent directions collapsed to zero.
 
-(def nullity-M (count (filter #(<= % 1e-10) sv-M)))
+(def nullity-M (long (dfn/sum (dfn/<= sv-M 1e-10))))
 
 nullity-M
 
@@ -379,7 +381,7 @@ nullity-M
 
 (def A-full (la/matrix [[2 1] [1 3]]))
 
-(count (filter #(> % 1e-10) (vec (:S (la/svd A-full)))))
+(long (dfn/sum (dfn/> (:S (la/svd A-full)) 1e-10)))
 
 (kind/test-last
  [(fn [r] (= r 2))])

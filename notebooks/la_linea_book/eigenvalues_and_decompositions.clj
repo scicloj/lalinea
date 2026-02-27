@@ -459,7 +459,7 @@ final-eigenvalues
 ;; ### Trace = sum of eigenvalues
 
 (< (Math/abs (- (la/trace A-final)
-                (reduce + final-eigenvalues)))
+                (dfn/sum final-eigenvalues)))
    1e-10)
 
 (kind/test-last [true?])
@@ -489,7 +489,7 @@ final-eigenvalues
 
 ;; ### Full rank — invertible
 
-(count (filter #(> % 1e-10) (vec (:S final-svd))))
+(long (dfn/sum (dfn/> (:S final-svd) 1e-10)))
 
 (kind/test-last
  [(fn [r] (= r 3))])

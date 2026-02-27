@@ -1,5 +1,5 @@
 (ns scicloj.la-linea.transform
-  "Bridge between Fastmath transforms and basis tensors.
+  "Bridge between Fastmath transforms and La Linea tensors.
 
    Fastmath's (:complex :fftr) transformer takes a real signal and
    returns an interleaved double[] with [re₀ im₀ re₁ im₁ ...] —

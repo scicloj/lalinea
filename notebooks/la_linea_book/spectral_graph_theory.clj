@@ -306,8 +306,8 @@ K5-eigenvalues
   (la/real-eigenvalues (laplacian cycle-adj)))
 
 (def cycle-theoretical
-  (sort (mapv (fn [k] (- 2.0 (* 2.0 (Math/cos (/ (* 2.0 Math/PI k) cn)))))
-              (range cn))))
+  (sort (dtype/make-reader :float64 cn
+                           (- 2.0 (* 2.0 (Math/cos (/ (* 2.0 Math/PI idx) cn)))))))
 
 ;; Computed eigenvalues:
 
@@ -347,8 +347,8 @@ cycle-theoretical
   (la/real-eigenvalues (laplacian path-adj)))
 
 (def path-theoretical
-  (sort (mapv (fn [k] (- 2.0 (* 2.0 (Math/cos (/ (* Math/PI k) pn)))))
-              (range pn))))
+  (sort (dtype/make-reader :float64 pn
+                           (- 2.0 (* 2.0 (Math/cos (/ (* Math/PI idx) pn)))))))
 
 (< (dfn/reduce-max
     (dfn/abs (dfn/- (double-array path-eigenvalues)
@@ -432,8 +432,8 @@ comm-eigenvalues
   (let [ev2 (nth (:eigenvectors comm-eig) (nth sorted-comm-indices 1))
         ev3 (nth (:eigenvectors comm-eig) (nth sorted-comm-indices 2))]
     (tc/dataset {:vertex (range 9)
-                 :x (vec (dtype/->reader ev2))
-                 :y (vec (dtype/->reader ev3))
+                 :x (dtype/->reader ev2)
+                 :y (dtype/->reader ev3)
                  :community (mapv #(cond (<= % 2) "A"
                                          (<= % 5) "B"
                                          :else "C")

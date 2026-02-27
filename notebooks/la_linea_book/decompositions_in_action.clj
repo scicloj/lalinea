@@ -246,7 +246,7 @@ cov-matrix
       projected (la/mmul (la/mmul X ev1) (la/transpose ev1))
       ;; Fraction of variance explained
       variances (sort > (seq reals))
-      explained (/ (first variances) (reduce + variances))]
+      explained (/ (first variances) (dfn/sum variances))]
   explained)
 
 ;; The first PC explains most of the variance:

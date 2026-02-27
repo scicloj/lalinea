@@ -86,11 +86,10 @@ A-heat
 ;; Only the first and last entries are nonzero:
 
 (def b-heat
-  (let [b (double-array n 0.0)]
-    (aset b 0 T-left)
-    (aset b (dec n) T-right)
-    (la/column (vec b))))
-
+  (la/column (dtype/make-reader :float64 n
+                                (cond (== idx 0) T-left
+                                      (== idx (dec n)) T-right
+                                      :else 0.0))))
 ;; ### Direct solution
 
 (def T-direct (la/solve A-heat b-heat))
@@ -111,8 +110,8 @@ T-direct
         (range n)))
 
 (-> (tc/dataset {:x x-interior
-                 :T (vec (dtype/->reader
-                          (tensor/select T-direct :all 0)))})
+                 :T (dtype/->reader
+                     (tensor/select T-direct :all 0))})
     (plotly/base {:=x :x :=y :T})
     (plotly/layer-line)
     (plotly/layer-point {:=mark-size 5})
