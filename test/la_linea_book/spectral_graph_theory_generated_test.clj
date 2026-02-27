@@ -370,8 +370,11 @@
  (def path-eigenvalues (la/real-eigenvalues (laplacian path-adj))))
 
 
+(def v77_l349 path-eigenvalues)
+
+
 (def
- v77_l349
+ v78_l351
  (def
   path-theoretical
   (sort
@@ -381,8 +384,11 @@
     (- 2.0 (* 2.0 (Math/cos (/ (* Math/PI idx) pn))))))))
 
 
+(def v79_l355 path-theoretical)
+
+
 (def
- v78_l353
+ v80_l357
  (<
   (dfn/reduce-max
    (dfn/abs
@@ -392,11 +398,11 @@
   1.0E-10))
 
 
-(deftest t79_l358 (is (true? v78_l353)))
+(deftest t81_l362 (is (true? v80_l357)))
 
 
 (def
- v81_l368
+ v83_l372
  (def
   community-adj
   (la/matrix
@@ -412,7 +418,7 @@
 
 
 (def
- v82_l383
+ v84_l387
  (vis/graph-plot
   [[0 0.8]
    [0 -0.8]
@@ -438,19 +444,19 @@
    :width 400}))
 
 
-(def v83_l397 (def comm-eig (la/eigen (laplacian community-adj))))
+(def v85_l401 (def comm-eig (la/eigen (laplacian community-adj))))
 
 
 (def
- v85_l401
+ v87_l405
  (def comm-eigenvalues (la/real-eigenvalues (laplacian community-adj))))
 
 
-(def v86_l403 comm-eigenvalues)
+(def v88_l407 comm-eigenvalues)
 
 
 (deftest
- t87_l405
+ t89_l409
  (is
   ((fn
     [v]
@@ -459,11 +465,11 @@
      (< (Math/abs (first v)) 1.0E-10)
      (< (nth v 2) 1.0)
      (> (nth v 3) (* 2.0 (nth v 2)))))
-   v86_l403)))
+   v88_l407)))
 
 
 (def
- v88_l412
+ v90_l416
  (->
   (tc/dataset
    {:index (range (count comm-eigenvalues)),
@@ -474,7 +480,7 @@
 
 
 (def
- v90_l424
+ v92_l428
  (def
   sorted-comm-indices
   (let
@@ -485,7 +491,7 @@
 
 
 (def
- v92_l431
+ v94_l435
  (def
   embed-data
   (let
@@ -500,13 +506,13 @@
      :community
      (mapv
       (fn*
-       [p1__73431#]
-       (cond (<= p1__73431# 2) "A" (<= p1__73431# 5) "B" :else "C"))
+       [p1__77954#]
+       (cond (<= p1__77954# 2) "A" (<= p1__77954# 5) "B" :else "C"))
       (range 9))}))))
 
 
 (def
- v93_l442
+ v95_l446
  (->
   embed-data
   (plotly/base {:=x :x, :=y :y, :=color :community})
@@ -514,14 +520,14 @@
   plotly/plot))
 
 
-(def v95_l464 (def conductance (/ 1.0 3.0)))
+(def v97_l468 (def conductance (/ 1.0 3.0)))
 
 
 (def
- v96_l466
+ v98_l470
  (and
   (<= (/ fiedler-value 2.0) conductance)
   (<= conductance (Math/sqrt (* 2.0 fiedler-value)))))
 
 
-(deftest t97_l469 (is (true? v96_l466)))
+(deftest t99_l473 (is (true? v98_l470)))

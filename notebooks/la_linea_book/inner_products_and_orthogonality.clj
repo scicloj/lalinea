@@ -240,6 +240,8 @@ cos-theta
   (la/mmul W-proj (la/mmul (la/invert (la/mmul (la/transpose W-proj) W-proj))
                            (la/transpose W-proj))))
 
+P-proj
+
 ;; A projection matrix is **idempotent**: applying it twice
 ;; is the same as applying it once ($P^2 = P$). Once you
 ;; are on the subspace, projecting again does nothing.
@@ -261,6 +263,8 @@ projected-pt
 ;; closest point:
 
 (def resid (la/sub point3d projected-pt))
+
+resid
 
 (la/mmul (la/transpose W-proj) resid)
 

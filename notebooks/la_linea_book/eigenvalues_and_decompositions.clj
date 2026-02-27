@@ -404,6 +404,8 @@ sigmas
 
 (def chol-L (la/cholesky spd-mat))
 
+chol-L
+
 ;; Verify $L L^T = M$:
 
 (la/norm (la/sub (la/mmul chol-L (la/transpose chol-L)) spd-mat))
@@ -496,6 +498,8 @@ final-eigenvalues
 
 (def A-inv (la/invert A-final))
 
+A-inv
+
 (la/close? (la/mmul A-final A-inv) (la/eye 3))
 
 (kind/test-last [true?])
@@ -506,6 +510,8 @@ final-eigenvalues
 ;; a Cholesky factorisation $A = LL^T$ where $L$ is lower triangular.
 
 (def chol-final (la/cholesky A-final))
+
+chol-final
 
 (la/close? (la/mmul chol-final (la/transpose chol-final)) A-final)
 

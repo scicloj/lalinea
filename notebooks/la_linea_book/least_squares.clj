@@ -67,6 +67,8 @@
                        [1.0 (x-data i)])
                      (range m)))))
 
+A-linear
+
 ;; The observation vector $\mathbf{y}$ as a column:
 
 (def y-col (la/column y-linear))
@@ -254,7 +256,7 @@ c-poly
 
 ;; The singular values:
 
-(vec S-svd)
+S-svd
 
 (kind/test-last
  [(fn [v] (every? pos? v))])

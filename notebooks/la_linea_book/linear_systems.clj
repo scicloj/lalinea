@@ -90,6 +90,12 @@ A-heat
                                 (cond (== idx 0) T-left
                                       (== idx (dec n)) T-right
                                       :else 0.0))))
+
+b-heat
+
+(kind/test-last
+ [(fn [b] (= [n 1] (vec (dtype/shape b))))])
+
 ;; ### Direct solution
 
 (def T-direct (la/solve A-heat b-heat))

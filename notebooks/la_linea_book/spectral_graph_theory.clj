@@ -346,9 +346,13 @@ cycle-theoretical
 (def path-eigenvalues
   (la/real-eigenvalues (laplacian path-adj)))
 
+path-eigenvalues
+
 (def path-theoretical
   (sort (dtype/make-reader :float64 pn
                            (- 2.0 (* 2.0 (Math/cos (/ (* Math/PI idx) pn)))))))
+
+path-theoretical
 
 (< (dfn/reduce-max
     (dfn/abs (dfn/- (double-array path-eigenvalues)

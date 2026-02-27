@@ -361,6 +361,8 @@ nullity-M
         null-idx (vec (keep-indexed (fn [i s] (when (< s 1e-10) i)) sv))]
     (la/submatrix (la/transpose Vt) :all null-idx)))
 
+null-basis
+
 ;; Verify it lies in the null space:
 
 (la/norm (la/mmul M null-basis))
@@ -429,6 +431,8 @@ nullity-M
         col-idx (vec (keep-indexed (fn [i s] (when (> s 1e-10) i)) sv))]
     (la/submatrix U :all col-idx)))
 
+col-space-basis
+
 ;; **Left null space** — the remaining columns of $U$:
 
 (def left-null-basis
@@ -436,6 +440,8 @@ nullity-M
         U (:U svd-M)
         null-idx (vec (keep-indexed (fn [i s] (when (< s 1e-10) i)) sv))]
     (la/submatrix U :all null-idx)))
+
+left-null-basis
 
 ;; **Row space** — the columns of $V$ corresponding to
 ;; non-zero singular values:
@@ -445,6 +451,8 @@ nullity-M
         Vt (:Vt svd-M)
         row-idx (vec (keep-indexed (fn [i s] (when (> s 1e-10) i)) sv))]
     (la/submatrix (la/transpose Vt) :all row-idx)))
+
+row-space-basis
 
 ;; **Null space** — already computed above as `null-basis`.
 

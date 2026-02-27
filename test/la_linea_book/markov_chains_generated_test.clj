@@ -199,8 +199,11 @@
    (la/scale H damping))))
 
 
+(def v34_l216 google-matrix)
+
+
 (def
- v35_l218
+ v36_l220
  (def
   pagerank
   (let
@@ -219,7 +222,7 @@
 
 
 (def
- v37_l230
+ v38_l232
  (->
   (tc/dataset
    {:page ["Page 0" "Page 1" "Page 2" "Page 3" "Page 4"],
@@ -229,15 +232,15 @@
   plotly/plot))
 
 
-(def v39_l238 (dfn/sum pagerank))
+(def v40_l240 (dfn/sum pagerank))
 
 
 (deftest
- t40_l240
- (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v39_l238)))
+ t41_l242
+ (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v40_l240)))
 
 
-(def v42_l244 (argops/argmax pagerank))
+(def v43_l246 (argops/argmax pagerank))
 
 
-(deftest t43_l246 (is ((fn [idx] (contains? #{0 2} idx)) v42_l244)))
+(deftest t44_l248 (is ((fn [idx] (contains? #{0 2} idx)) v43_l246)))

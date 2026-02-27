@@ -213,6 +213,8 @@ stationary-eigen
   (la/add (la/scale (la/matrix (repeat n-pages (repeat n-pages 1.0))) (/ (- 1.0 damping) n-pages))
           (la/scale H damping)))
 
+google-matrix
+
 ;; Find PageRank via power iteration:
 
 (def pagerank

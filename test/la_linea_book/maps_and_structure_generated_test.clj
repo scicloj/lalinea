@@ -244,35 +244,38 @@
    (la/submatrix (la/transpose Vt) :all null-idx))))
 
 
-(def v72_l366 (la/norm (la/mmul M null-basis)))
+(def v71_l364 null-basis)
 
 
-(deftest t73_l368 (is ((fn [d] (< d 1.0E-10)) v72_l366)))
+(def v73_l368 (la/norm (la/mmul M null-basis)))
 
 
-(def v75_l382 (def A-full (la/matrix [[2 1] [1 3]])))
+(deftest t74_l370 (is ((fn [d] (< d 1.0E-10)) v73_l368)))
 
 
-(def v76_l384 (long (dfn/sum (dfn/> (:S (la/svd A-full)) 1.0E-10))))
+(def v76_l384 (def A-full (la/matrix [[2 1] [1 3]])))
 
 
-(deftest t77_l386 (is ((fn [r] (= r 2)) v76_l384)))
+(def v77_l386 (long (dfn/sum (dfn/> (:S (la/svd A-full)) 1.0E-10))))
 
 
-(def v79_l391 (la/solve A-full (la/column [5 7])))
+(deftest t78_l388 (is ((fn [r] (= r 2)) v77_l386)))
 
 
-(deftest t80_l393 (is ((fn [x] (some? x)) v79_l391)))
+(def v80_l393 (la/solve A-full (la/column [5 7])))
 
 
-(def v82_l398 (la/solve M (la/column [1 2 3])))
+(deftest t81_l395 (is ((fn [x] (some? x)) v80_l393)))
 
 
-(deftest t83_l400 (is (nil? v82_l398)))
+(def v83_l400 (la/solve M (la/column [1 2 3])))
+
+
+(deftest t84_l402 (is (nil? v83_l400)))
 
 
 (def
- v85_l426
+ v86_l428
  (def
   col-space-basis
   (let
@@ -285,8 +288,11 @@
    (la/submatrix U :all col-idx))))
 
 
+(def v87_l434 col-space-basis)
+
+
 (def
- v87_l434
+ v89_l438
  (def
   left-null-basis
   (let
@@ -299,8 +305,11 @@
    (la/submatrix U :all null-idx))))
 
 
+(def v90_l444 left-null-basis)
+
+
 (def
- v89_l443
+ v92_l449
  (def
   row-space-basis
   (let
@@ -313,8 +322,11 @@
    (la/submatrix (la/transpose Vt) :all row-idx))))
 
 
+(def v93_l455 row-space-basis)
+
+
 (def
- v91_l453
+ v95_l461
  {:col-space (second (dtype/shape col-space-basis)),
   :left-null (second (dtype/shape left-null-basis)),
   :row-space (second (dtype/shape row-space-basis)),
@@ -322,7 +334,7 @@
 
 
 (deftest
- t92_l458
+ t96_l466
  (is
   ((fn
     [m]
@@ -331,4 +343,4 @@
      (= 1 (:left-null m))
      (= 2 (:row-space m))
      (= 1 (:null-space m))))
-   v91_l453)))
+   v95_l461)))

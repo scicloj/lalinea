@@ -49,24 +49,32 @@
     (cond (== idx 0) T-left (== idx (dec n)) T-right :else 0.0)))))
 
 
-(def v13_l95 (def T-direct (la/solve A-heat b-heat)))
+(def v12_l94 b-heat)
 
 
-(def v14_l97 T-direct)
+(deftest
+ t13_l96
+ (is ((fn [b] (= [n 1] (vec (dtype/shape b)))) v12_l94)))
 
 
-(deftest t15_l99 (is ((fn [t] (some? t)) v14_l97)))
+(def v15_l101 (def T-direct (la/solve A-heat b-heat)))
+
+
+(def v16_l103 T-direct)
+
+
+(deftest t17_l105 (is ((fn [t] (some? t)) v16_l103)))
 
 
 (def
- v17_l108
+ v19_l114
  (def
   x-interior
   (mapv (fn [i] (/ (double (inc i)) (double (inc n)))) (range n))))
 
 
 (def
- v18_l112
+ v20_l118
  (->
   (tc/dataset
    {:x x-interior,
@@ -77,20 +85,20 @@
   plotly/plot))
 
 
-(def v20_l123 (tensor/mget T-direct 0 0))
+(def v22_l129 (tensor/mget T-direct 0 0))
 
 
-(deftest t21_l125 (is ((fn [t] (> t 90.0)) v20_l123)))
+(deftest t23_l131 (is ((fn [t] (> t 90.0)) v22_l129)))
 
 
-(def v22_l127 (tensor/mget T-direct (dec n) 0))
+(def v24_l133 (tensor/mget T-direct (dec n) 0))
 
 
-(deftest t23_l129 (is ((fn [t] (< t 10.0)) v22_l127)))
+(deftest t25_l135 (is ((fn [t] (< t 10.0)) v24_l133)))
 
 
 (def
- v25_l158
+ v27_l164
  (def
   gs-result
   (let
@@ -142,7 +150,7 @@
 
 
 (def
- v27_l193
+ v29_l199
  (let
   [snapshots
    [1 2 5 10 50 200 500]
@@ -165,7 +173,7 @@
 
 
 (def
- v29_l209
+ v31_l215
  (->
   (tc/dataset (:history gs-result))
   (plotly/base {:=x :iteration, :=y :residual})
@@ -173,17 +181,17 @@
   plotly/plot))
 
 
-(def v31_l216 (-> gs-result :history last :residual))
+(def v33_l222 (-> gs-result :history last :residual))
 
 
-(deftest t32_l218 (is ((fn [r] (< r 0.001)) v31_l216)))
+(deftest t34_l224 (is ((fn [r] (< r 0.001)) v33_l222)))
 
 
 (def
- v34_l226
+ v36_l232
  (let
   [x-iter (la/column (:x-final gs-result))]
   (la/norm (la/sub x-iter T-direct))))
 
 
-(deftest t35_l229 (is ((fn [d] (< d 0.01)) v34_l226)))
+(deftest t37_l235 (is ((fn [d] (< d 0.01)) v36_l232)))

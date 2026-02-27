@@ -154,69 +154,75 @@
     (la/transpose W-proj)))))
 
 
-(def v52_l247 (la/close? (la/mmul P-proj P-proj) P-proj))
+(def v51_l243 P-proj)
 
 
-(deftest t53_l249 (is (true? v52_l247)))
+(def v53_l249 (la/close? (la/mmul P-proj P-proj) P-proj))
 
 
-(def v55_l253 (def point3d (la/column [1 2 3])))
+(deftest t54_l251 (is (true? v53_l249)))
 
 
-(def v56_l255 (def projected-pt (la/mmul P-proj point3d)))
+(def v56_l255 (def point3d (la/column [1 2 3])))
 
 
-(def v57_l257 projected-pt)
+(def v57_l257 (def projected-pt (la/mmul P-proj point3d)))
 
 
-(def v59_l263 (def resid (la/sub point3d projected-pt)))
+(def v58_l259 projected-pt)
 
 
-(def v60_l265 (la/mmul (la/transpose W-proj) resid))
+(def v60_l265 (def resid (la/sub point3d projected-pt)))
 
 
-(deftest t61_l267 (is ((fn [r] (< (la/norm r) 1.0E-10)) v60_l265)))
+(def v61_l267 resid)
 
 
-(def v63_l290 (def a-gs (la/column [1 1 0])))
+(def v62_l269 (la/mmul (la/transpose W-proj) resid))
 
 
-(def v64_l291 (def b-gs (la/column [1 0 1])))
+(deftest t63_l271 (is ((fn [r] (< (la/norm r) 1.0E-10)) v62_l269)))
 
 
-(def v66_l295 (def q1-gs (la/scale a-gs (/ 1.0 (la/norm a-gs)))))
+(def v65_l294 (def a-gs (la/column [1 1 0])))
 
 
-(def v67_l297 q1-gs)
+(def v66_l295 (def b-gs (la/column [1 0 1])))
 
 
-(def v69_l301 (def proj-b-on-q1 (la/dot q1-gs b-gs)))
+(def v68_l299 (def q1-gs (la/scale a-gs (/ 1.0 (la/norm a-gs)))))
+
+
+(def v69_l301 q1-gs)
+
+
+(def v71_l305 (def proj-b-on-q1 (la/dot q1-gs b-gs)))
 
 
 (def
- v70_l304
+ v72_l308
  (def orthogonal-part (la/sub b-gs (la/scale q1-gs proj-b-on-q1))))
 
 
 (def
- v72_l309
+ v74_l313
  (def
   q2-gs
   (la/scale orthogonal-part (/ 1.0 (la/norm orthogonal-part)))))
 
 
-(def v73_l312 q2-gs)
+(def v75_l316 q2-gs)
 
 
 (def
- v75_l316
+ v77_l320
  {:q1-norm (la/norm q1-gs),
   :q2-norm (la/norm q2-gs),
   :dot (la/dot q1-gs q2-gs)})
 
 
 (deftest
- t76_l320
+ t78_l324
  (is
   ((fn
     [m]
@@ -224,43 +230,43 @@
      (< (Math/abs (- (:q1-norm m) 1.0)) 1.0E-10)
      (< (Math/abs (- (:q2-norm m) 1.0)) 1.0E-10)
      (< (Math/abs (:dot m)) 1.0E-10)))
-   v75_l316)))
+   v77_l320)))
 
 
-(def v78_l336 (def A-qr (la/matrix [[1 1] [1 0] [0 1]])))
+(def v80_l340 (def A-qr (la/matrix [[1 1] [1 0] [0 1]])))
 
 
-(def v79_l340 (def qr-result (la/qr A-qr)))
+(def v81_l344 (def qr-result (la/qr A-qr)))
 
 
-(def v81_l344 (def ncols-qr (second (dtype/shape A-qr))))
+(def v83_l348 (def ncols-qr (second (dtype/shape A-qr))))
 
 
 (def
- v82_l345
+ v84_l349
  (def Q-thin (la/submatrix (:Q qr-result) :all (range ncols-qr))))
 
 
 (def
- v83_l346
+ v85_l350
  (def R-thin (la/submatrix (:R qr-result) (range ncols-qr) :all)))
 
 
-(def v85_l350 Q-thin)
+(def v87_l354 Q-thin)
 
 
-(def v87_l354 R-thin)
+(def v89_l358 R-thin)
 
 
 (def
- v89_l358
+ v91_l362
  (la/norm (la/sub (la/mmul (la/transpose Q-thin) Q-thin) (la/eye 2))))
 
 
-(deftest t90_l360 (is ((fn [d] (< d 1.0E-10)) v89_l358)))
+(deftest t92_l364 (is ((fn [d] (< d 1.0E-10)) v91_l362)))
 
 
-(def v92_l365 (la/norm (la/sub (la/mmul Q-thin R-thin) A-qr)))
+(def v94_l369 (la/norm (la/sub (la/mmul Q-thin R-thin) A-qr)))
 
 
-(deftest t93_l367 (is ((fn [d] (< d 1.0E-10)) v92_l365)))
+(deftest t95_l371 (is ((fn [d] (< d 1.0E-10)) v94_l369)))

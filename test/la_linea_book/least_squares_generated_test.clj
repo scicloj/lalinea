@@ -57,11 +57,14 @@
    (la/matrix (mapv (fn [i] [1.0 (x-data i)]) (range m))))))
 
 
-(def v9_l72 (def y-col (la/column y-linear)))
+(def v8_l70 A-linear)
+
+
+(def v10_l74 (def y-col (la/column y-linear)))
 
 
 (def
- v11_l82
+ v12_l84
  (def
   c-linear
   (la/solve
@@ -69,27 +72,27 @@
    (la/mmul (la/transpose A-linear) y-col))))
 
 
-(def v12_l86 c-linear)
+(def v13_l88 c-linear)
 
 
 (deftest
- t13_l88
+ t14_l90
  (is
   ((fn
     [c]
     (and
      (< (Math/abs (- (tensor/mget c 0 0) 2.0)) 0.5)
      (< (Math/abs (- (tensor/mget c 1 0) 3.0)) 0.5)))
-   v12_l86)))
+   v13_l88)))
 
 
 (def
- v15_l98
+ v16_l100
  (def residual-linear (la/sub (la/mmul A-linear c-linear) y-col)))
 
 
 (def
- v16_l101
+ v17_l103
  (def
   rms-linear
   (Math/sqrt
@@ -98,14 +101,14 @@
     (count x-data)))))
 
 
-(def v17_l105 rms-linear)
+(def v18_l107 rms-linear)
 
 
-(deftest t18_l107 (is ((fn [v] (< v 0.5)) v17_l105)))
+(deftest t19_l109 (is ((fn [v] (< v 0.5)) v18_l107)))
 
 
 (def
- v20_l112
+ v21_l114
  (let
   [c0
    (tensor/mget c-linear 0 0)
@@ -127,12 +130,12 @@
 
 
 (def
- v22_l137
+ v23_l139
  (def x-poly (dtype/make-reader :float64 30 (- (* 0.2 idx) 3.0))))
 
 
 (def
- v23_l141
+ v24_l143
  (def
   noise-poly
   (tensor/->tensor
@@ -171,7 +174,7 @@
 
 
 (def
- v24_l148
+ v25_l150
  (def
   y-poly
   (dfn/+
@@ -180,7 +183,7 @@
 
 
 (def
- v25_l152
+ v26_l154
  (def
   vandermonde
   (fn
@@ -193,11 +196,11 @@
       (range m)))))))
 
 
-(def v26_l161 (def A-poly (vandermonde x-poly 2)))
+(def v27_l163 (def A-poly (vandermonde x-poly 2)))
 
 
 (def
- v27_l163
+ v28_l165
  (def
   c-poly
   (la/solve
@@ -205,11 +208,11 @@
    (la/mmul (la/transpose A-poly) (la/column y-poly)))))
 
 
-(def v28_l167 c-poly)
+(def v29_l169 c-poly)
 
 
 (deftest
- t29_l169
+ t30_l171
  (is
   ((fn
     [c]
@@ -217,11 +220,11 @@
      (< (Math/abs (- (tensor/mget c 0 0) 1.0)) 1.0)
      (< (Math/abs (- (tensor/mget c 1 0) -2.0)) 1.0)
      (< (Math/abs (- (tensor/mget c 2 0) 1.0)) 1.0)))
-   v28_l167)))
+   v29_l169)))
 
 
 (def
- v31_l179
+ v32_l181
  (let
   [c0
    (tensor/mget c-poly 0 0)
@@ -243,59 +246,59 @@
    plotly/plot)))
 
 
-(def v33_l206 (def qr-result (la/qr A-poly)))
+(def v34_l208 (def qr-result (la/qr A-poly)))
 
 
-(def v35_l211 (def ncols (second (dtype/shape A-poly))))
+(def v36_l213 (def ncols (second (dtype/shape A-poly))))
 
 
-(def v36_l213 (def Q1 (la/submatrix (:Q qr-result) :all (range ncols))))
+(def v37_l215 (def Q1 (la/submatrix (:Q qr-result) :all (range ncols))))
 
 
-(def v37_l214 (def R1 (la/submatrix (:R qr-result) (range ncols) :all)))
+(def v38_l216 (def R1 (la/submatrix (:R qr-result) (range ncols) :all)))
 
 
-(def v39_l218 (la/norm (la/sub (la/mmul Q1 R1) A-poly)))
+(def v40_l220 (la/norm (la/sub (la/mmul Q1 R1) A-poly)))
 
 
-(deftest t40_l220 (is ((fn [v] (< v 1.0E-10)) v39_l218)))
+(deftest t41_l222 (is ((fn [v] (< v 1.0E-10)) v40_l220)))
 
 
 (def
- v42_l225
+ v43_l227
  (def
   c-qr
   (la/solve R1 (la/mmul (la/transpose Q1) (la/column y-poly)))))
 
 
-(def v44_l230 (la/norm (la/sub c-qr c-poly)))
+(def v45_l232 (la/norm (la/sub c-qr c-poly)))
 
 
-(deftest t45_l232 (is ((fn [v] (< v 1.0E-10)) v44_l230)))
+(deftest t46_l234 (is ((fn [v] (< v 1.0E-10)) v45_l232)))
 
 
-(def v47_l246 (def svd-result (la/svd A-poly)))
+(def v48_l248 (def svd-result (la/svd A-poly)))
 
 
-(def v49_l251 (def S-svd (:S svd-result)))
+(def v50_l253 (def S-svd (:S svd-result)))
 
 
 (def
- v50_l252
+ v51_l254
  (def U-thin (la/submatrix (:U svd-result) :all (range (count S-svd)))))
 
 
-(def v51_l253 (def Vt-svd (:Vt svd-result)))
+(def v52_l255 (def Vt-svd (:Vt svd-result)))
 
 
-(def v53_l257 (vec S-svd))
+(def v54_l259 S-svd)
 
 
-(deftest t54_l259 (is ((fn [v] (every? pos? v)) v53_l257)))
+(deftest t55_l261 (is ((fn [v] (every? pos? v)) v54_l259)))
 
 
 (def
- v56_l265
+ v57_l267
  (def
   c-svd
   (let
@@ -308,21 +311,21 @@
    (la/mmul (la/transpose Vt-svd) (la/mmul S-inv Ut-y)))))
 
 
-(def v58_l274 (la/norm (la/sub c-svd c-poly)))
+(def v59_l276 (la/norm (la/sub c-svd c-poly)))
 
 
-(deftest t59_l276 (is ((fn [v] (< v 1.0E-8)) v58_l274)))
+(deftest t60_l278 (is ((fn [v] (< v 1.0E-8)) v59_l276)))
 
 
 (def
- v61_l289
+ v62_l291
  (def
   x-trig
   (dtype/make-reader :float64 40 (* (/ (* 2.0 Math/PI) 40.0) idx))))
 
 
 (def
- v62_l293
+ v63_l295
  (def
   noise-trig
   (tensor/->tensor
@@ -371,7 +374,7 @@
 
 
 (def
- v63_l301
+ v64_l303
  (def
   y-trig
   (dfn/+
@@ -382,7 +385,7 @@
 
 
 (def
- v64_l307
+ v65_l309
  (def
   A-trig
   (let
@@ -402,7 +405,7 @@
 
 
 (def
- v65_l319
+ v66_l321
  (def
   c-trig
   (la/solve
@@ -410,11 +413,11 @@
    (la/mmul (la/transpose A-trig) (la/column y-trig)))))
 
 
-(def v66_l323 c-trig)
+(def v67_l325 c-trig)
 
 
 (deftest
- t67_l325
+ t68_l327
  (is
   ((fn
     [c]
@@ -423,11 +426,11 @@
      (< (Math/abs (- (tensor/mget c 1 0) 2.0)) 0.3)
      (< (Math/abs (- (tensor/mget c 2 0) -1.5)) 0.3)
      (< (Math/abs (- (tensor/mget c 3 0) 0.5)) 0.3)))
-   v66_l323)))
+   v67_l325)))
 
 
 (def
- v69_l337
+ v70_l339
  (let
   [x-fit
    (dtype/make-reader :float64 200 (* (/ (* 2.0 Math/PI) 200.0) idx))
@@ -453,33 +456,33 @@
    plotly/plot)))
 
 
-(def v71_l364 (def poly-svd (la/svd A-poly)))
+(def v72_l366 (def poly-svd (la/svd A-poly)))
 
 
 (def
- v72_l366
+ v73_l368
  (def
   condition-number
   (let [sv (:S poly-svd)] (/ (dfn/reduce-max sv) (dfn/reduce-min sv)))))
 
 
-(def v73_l370 condition-number)
+(def v74_l372 condition-number)
 
 
-(deftest t74_l372 (is ((fn [v] (> v 1.0)) v73_l370)))
+(deftest t75_l374 (is ((fn [v] (> v 1.0)) v74_l372)))
 
 
 (def
- v76_l378
+ v77_l380
  (def
   A-high
   (vandermonde (dtype/make-reader :float64 30 (* 1.0 idx)) 8)))
 
 
-(def v77_l381 (def high-sv (:S (la/svd A-high))))
+(def v78_l383 (def high-sv (:S (la/svd A-high))))
 
 
-(def v78_l383 (/ (dfn/reduce-max high-sv) (dfn/reduce-min high-sv)))
+(def v79_l385 (/ (dfn/reduce-max high-sv) (dfn/reduce-min high-sv)))
 
 
-(deftest t79_l385 (is ((fn [v] (> v 1000000.0)) v78_l383)))
+(deftest t80_l387 (is ((fn [v] (> v 1000000.0)) v79_l385)))
