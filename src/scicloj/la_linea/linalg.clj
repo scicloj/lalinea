@@ -152,14 +152,13 @@
 (defn transpose
   "Matrix transpose (real) or conjugate transpose (complex).
 
-   For real matrices: B = A^T
-   For complex matrices: B = A† (Hermitian adjoint)"
+   For real matrices: returns a zero-copy strided view sharing the
+   same backing data. For complex matrices: B = A† (Hermitian adjoint)."
   [a]
   (if (cx/complex? a)
     (let [za (ejml/ct->zmat a)]
       (ejml/zmat->ct (ejml/ztranspose-conj za)))
-    (let [da (bt/tensor->dmat a)]
-      (bt/dmat->tensor (ejml/dtranspose da)))))
+    (tensor/transpose a [1 0])))
 
 ;; ---------------------------------------------------------------------------
 ;; Addition and subtraction

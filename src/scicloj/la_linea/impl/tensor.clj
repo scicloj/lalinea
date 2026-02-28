@@ -43,22 +43,41 @@
     (tensor/reshape (tensor/ensure-tensor arr) [r c])))
 
 (defn matrix
-  "Create an [r c] tensor from nested sequences.
-   The tensor is backed by a contiguous double[]."
+  "Create an [r c] tensor from nested sequences or pass through
+   an existing float64 rank-2 tensor unchanged.
+   For nested sequences, allocates a contiguous double[]."
   [rows]
-  (tensor/->tensor rows {:datatype :float64}))
+  (if (and (tensor/tensor? rows)
+           (= :float64 (dtype/elemwise-datatype rows))
+           (= 2 (count (dtype/shape rows))))
+    rows
+    (tensor/->tensor rows {:datatype :float64})))
+
+(defn- ->float64-reader
+  "Coerce to a float64 reader. Zero-copy for arrays/buffers/tensors;
+   realizes seqs into a container (seqs have no backing to view)."
+  [xs]
+  (if (dtype/as-reader xs)
+    (dtype/->reader xs :float64)
+    (dtype/make-container :float64 xs)))
 
 (defn row-vector
-  "Create a [1 c] tensor from a flat sequence."
+  "Create a [1 c] tensor from a flat sequence.
+   Zero-copy when the input is already a float64 buffer or array;
+   wraps lazily otherwise. Copies are deferred to the EJML boundary."
   [xs]
-  (let [buf (dtype/make-container :float64 xs)]
-    (tensor/reshape (tensor/ensure-tensor buf) [1 (count buf)])))
+  (let [r (->float64-reader xs)
+        n (dtype/ecount r)]
+    (tensor/reshape (tensor/ensure-tensor r) [1 n])))
 
 (defn col-vector
-  "Create a [r 1] tensor from a flat sequence."
+  "Create a [r 1] tensor from a flat sequence.
+   Zero-copy when the input is already a float64 buffer or array;
+   wraps lazily otherwise. Copies are deferred to the EJML boundary."
   [xs]
-  (let [buf (dtype/make-container :float64 xs)]
-    (tensor/reshape (tensor/ensure-tensor buf) [(count buf) 1])))
+  (let [r (->float64-reader xs)
+        n (dtype/ecount r)]
+    (tensor/reshape (tensor/ensure-tensor r) [n 1])))
 
 (defn eye
   "Create an n x n identity matrix as a tensor."

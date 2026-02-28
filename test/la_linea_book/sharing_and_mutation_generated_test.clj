@@ -617,51 +617,126 @@
 (def
  v99_l493
  (let
-  [E (la/matrix [[1 2] [3 4]]) Et (la/transpose E)]
-  (identical? (dtype/->double-array E) (dtype/->double-array Et))))
+  [arr (double-array [1 2 3]) col (la/column arr)]
+  (aset arr 0 99.0)
+  (tensor/mget col 0 0)))
 
 
-(deftest t100_l498 (is (false? v99_l493)))
+(deftest t100_l498 (is ((fn [v] (== 99.0 v)) v99_l493)))
 
 
 (def
- v102_l502
+ v102_l503
  (let
-  [E
-   (la/matrix [[1 2] [3 4]])
-   Et
-   (la/transpose E)
-   arr
-   (dtype/->double-array E)
-   _
-   (aset arr 0 -1.0)]
-  {:E-00 (tensor/mget E 0 0), :Et-00 (tensor/mget Et 0 0)}))
+  [a
+   (tensor/->tensor [1 2 3] {:datatype :float64})
+   b
+   (tensor/->tensor [10 20 30] {:datatype :float64})
+   col
+   (la/column (dfn/+ a b))]
+  {:shape (vec (dtype/shape col)),
+   :contiguous? (some? (dtype/as-array-buffer col)),
+   :values (vec (dtype/->reader col))}))
 
 
 (deftest
- t103_l509
+ t103_l510
  (is
-  ((fn [{:keys [E-00 Et-00]}] (and (== -1.0 E-00) (== 1.0 Et-00)))
-   v102_l502)))
+  ((fn
+    [{:keys [shape contiguous? values]}]
+    (and
+     (= [3 1] shape)
+     (not contiguous?)
+     (= [11.0 22.0 33.0] values)))
+   v102_l503)))
 
 
 (def
- v105_l516
+ v105_l519
+ (let
+  [col
+   (la/column
+    (dfn/+
+     (tensor/->tensor [1 0] {:datatype :float64})
+     (tensor/->tensor [0 1] {:datatype :float64})))
+   A
+   (la/matrix [[2 0] [0 3]])]
+  (la/mmul A col)))
+
+
+(deftest
+ t106_l524
+ (is
+  ((fn
+    [r]
+    (and (== 2.0 (tensor/mget r 0 0)) (== 3.0 (tensor/mget r 1 0))))
+   v105_l519)))
+
+
+(def
+ v108_l532
+ (let [A (la/matrix [[1 2] [3 4]]) B (la/matrix A)] (identical? A B)))
+
+
+(deftest t109_l536 (is (true? v108_l532)))
+
+
+(def
+ v111_l541
+ (let
+  [A (la/matrix [[1 2] [3 4]])]
+  (identical? A (la/matrix [[1 2] [3 4]]))))
+
+
+(deftest t112_l544 (is (false? v111_l541)))
+
+
+(def
+ v114_l552
  (let
   [E (la/matrix [[1 2] [3 4]]) Et (la/transpose E)]
+  (tensor/mset! E 0 1 99.0)
+  (tensor/mget Et 1 0)))
+
+
+(deftest t115_l557 (is ((fn [v] (== 99.0 v)) v114_l552)))
+
+
+(def
+ v117_l561
+ (let
+  [E (la/matrix [[1 2] [3 4]]) Et (la/transpose E)]
+  (tensor/mset! Et 0 0 -1.0)
+  (tensor/mget E 0 0)))
+
+
+(deftest t118_l566 (is ((fn [v] (== -1.0 v)) v117_l561)))
+
+
+(def
+ v120_l571
+ (let
+  [E (la/matrix [[1 2] [3 4]]) Et (dtype/clone (la/transpose E))]
   (tensor/mset! E 0 0 -1.0)
-  {:E-00 (tensor/mget E 0 0), :Et-00 (tensor/mget Et 0 0)}))
+  (tensor/mget Et 0 0)))
 
 
-(deftest
- t106_l522
- (is
-  ((fn [{:keys [E-00 Et-00]}] (and (== -1.0 E-00) (== 1.0 Et-00)))
-   v105_l516)))
+(deftest t121_l576 (is ((fn [v] (== 1.0 v)) v120_l571)))
 
 
 (def
- v108_l535
+ v123_l584
+ (let
+  [E (la/matrix [[1 2] [3 4]]) P (la/mmul E E)]
+  (tensor/mset! E 0 0 -1.0)
+  (tensor/mget P 0 0)))
+
+
+(deftest t124_l589 (is ((fn [v] (== 7.0 v)) v123_l584)))
+
+
+(def
+ v126_l599
  (let
   [rng
    (java.util.Random. 42)
@@ -673,11 +748,11 @@
   (la/close? t t)))
 
 
-(deftest t109_l539 (is (false? v108_l535)))
+(deftest t127_l603 (is (false? v126_l599)))
 
 
 (def
- v111_l544
+ v129_l608
  (let
   [rng
    (java.util.Random. 42)
@@ -690,11 +765,11 @@
   (la/close? t t)))
 
 
-(deftest t112_l549 (is (true? v111_l544)))
+(deftest t130_l613 (is (true? v129_l608)))
 
 
 (def
- v114_l559
+ v132_l623
  (let
   [make-random-tensor
    (fn
@@ -709,11 +784,11 @@
   (la/close? (make-random-tensor) (make-random-tensor))))
 
 
-(deftest t115_l566 (is (false? v114_l559)))
+(deftest t133_l630 (is (false? v132_l623)))
 
 
 (def
- v117_l575
+ v135_l639
  (let
   [make-random-tensor
    (fn
@@ -727,4 +802,4 @@
   (la/close? (make-random-tensor) (make-random-tensor))))
 
 
-(deftest t118_l583 (is (true? v117_l575)))
+(deftest t136_l647 (is (true? v135_l639)))

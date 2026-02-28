@@ -484,45 +484,109 @@
     (and (== -1.0 big-00)
          (== 1.0 sub-00)))])
 
+;; ## la/column and la/row wrap without copying
+
+;; `la/column` and `la/row` wrap their input as a `[n 1]` or `[1 n]`
+;; tensor without copying. When the input is a `double[]` or a
+;; float64 tensor, the result shares the same backing memory:
+
+(let [arr (double-array [1 2 3])
+      col (la/column arr)]
+  (aset arr 0 99.0)
+  (tensor/mget col 0 0))
+
+(kind/test-last [(fn [v] (== 99.0 v))])
+
+;; A lazy dfn result stays lazy through `la/column` — no copy,
+;; no materialization:
+
+(let [a (tensor/->tensor [1 2 3] {:datatype :float64})
+      b (tensor/->tensor [10 20 30] {:datatype :float64})
+      col (la/column (dfn/+ a b))]
+  {:shape (vec (dtype/shape col))
+   :contiguous? (some? (dtype/as-array-buffer col))
+   :values (vec (dtype/->reader col))})
+
+(kind/test-last
+ [(fn [{:keys [shape contiguous? values]}]
+    (and (= [3 1] shape)
+         (not contiguous?)
+         (= [11.0 22.0 33.0] values)))])
+
+;; Copies are deferred to the EJML boundary — `la/mmul` and
+;; other decompositions copy when they need to:
+
+(let [col (la/column (dfn/+ (tensor/->tensor [1 0] {:datatype :float64})
+                             (tensor/->tensor [0 1] {:datatype :float64})))
+      A (la/matrix [[2 0] [0 3]])]
+  (la/mmul A col))
+
+(kind/test-last [(fn [r] (and (== 2.0 (tensor/mget r 0 0))
+                              (== 3.0 (tensor/mget r 1 0))))])
+
+;; ## la/matrix passes through existing tensors
+
+;; When the input is already a float64 rank-2 tensor,
+;; `la/matrix` returns it unchanged:
+
+(let [A (la/matrix [[1 2] [3 4]])
+      B (la/matrix A)]
+  (identical? A B))
+
+(kind/test-last [true?])
+
+;; For nested sequences or non-float64 data, it allocates
+;; as usual:
+
+(let [A (la/matrix [[1 2] [3 4]])]
+  (identical? A (la/matrix [[1 2] [3 4]])))
+
+(kind/test-last [false?])
+
+;; ## la/transpose is a zero-copy view
+
+;; `la/transpose` returns a strided view — no allocation,
+;; same backing memory. Mutating the original changes
+;; the transpose:
+
+(let [E (la/matrix [[1 2] [3 4]])
+      Et (la/transpose E)]
+  (tensor/mset! E 0 1 99.0)
+  (tensor/mget Et 1 0))
+
+(kind/test-last [(fn [v] (== 99.0 v))])
+
+;; And vice versa — mutating the transpose changes the original:
+
+(let [E (la/matrix [[1 2] [3 4]])
+      Et (la/transpose E)]
+  (tensor/mset! Et 0 0 -1.0)
+  (tensor/mget E 0 0))
+
+(kind/test-last [(fn [v] (== -1.0 v))])
+
+;; This is consistent with `tensor/reshape` and `tensor/select` —
+;; views share memory. Use `dtype/clone` to get an independent copy:
+
+(let [E (la/matrix [[1 2] [3 4]])
+      Et (dtype/clone (la/transpose E))]
+  (tensor/mset! E 0 0 -1.0)
+  (tensor/mget Et 0 0))
+
+(kind/test-last [(fn [v] (== 1.0 v))])
+
 ;; ## EJML results are independent
 
-;; EJML operations (`la/mmul`, `la/invert`, `la/transpose`, etc.)
+;; EJML operations (`la/mmul`, `la/invert`, etc.)
 ;; allocate new result matrices. The output does not share memory
 ;; with the input.
 
 (let [E (la/matrix [[1 2] [3 4]])
-      Et (la/transpose E)]
-  (identical? (dtype/->double-array E)
-              (dtype/->double-array Et)))
-
-(kind/test-last [false?])
-
-;; Mutating the input does not affect the transposed result:
-
-(let [E (la/matrix [[1 2] [3 4]])
-      Et (la/transpose E)
-      arr (dtype/->double-array E)
-      _ (aset arr 0 -1.0)]
-  {:E-00 (tensor/mget E 0 0)
-   :Et-00 (tensor/mget Et 0 0)})
-
-(kind/test-last
- [(fn [{:keys [E-00 Et-00]}]
-    (and (== -1.0 E-00)
-         (== 1.0 Et-00)))])
-
-;; Using `tensor/mset!`:
-
-(let [E (la/matrix [[1 2] [3 4]])
-      Et (la/transpose E)]
+      P (la/mmul E E)]
   (tensor/mset! E 0 0 -1.0)
-  {:E-00 (tensor/mget E 0 0)
-   :Et-00 (tensor/mget Et 0 0)})
+  (tensor/mget P 0 0))
 
-(kind/test-last
- [(fn [{:keys [E-00 Et-00]}]
-    (and (== -1.0 E-00)
-         (== 1.0 Et-00)))])
+(kind/test-last [(fn [v] (== 7.0 v))])
 
 ;; ## Noncaching tensors from compute-tensor
 ;;
@@ -600,7 +664,10 @@
 ;; | `tensor/compute-tensor` | No | No — lazy, noncaching | May evaluate out of element order |
 ;; | `dtype/clone` | Yes | Yes — independent | Breaks all links to source |
 ;; | `la/submatrix` | Yes | Yes — independent | Always clones |
-;; | `la/mmul`, `la/transpose`, etc. | Yes | Yes — independent | EJML allocates new result |
+;; | `la/column`, `la/row` | No | Yes — wraps input | Zero-copy for arrays/buffers; lazy for seqs |
+;; | `la/matrix` | Only for nested seqs | Yes | Pass-through for existing float64 tensors |
+;; | `la/transpose` (real) | No | Yes — strided view | Zero-copy, shares memory with input |
+;; | `la/mmul`, `la/invert`, etc. | Yes | Yes — independent | EJML allocates new result |
 ;; | `dtype/->double-array` | Only if needed | N/A — raw `double[]` | Zero-copy when contiguous; copies for subviews/lazy |
 ;; | `cx/->double-array` | Only if needed | N/A — raw `double[]` | Same convention, on ComplexTensor |
 ;;
