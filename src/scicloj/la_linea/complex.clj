@@ -321,11 +321,8 @@
   "Access the underlying interleaved double[].
    Zero-copy when the tensor is backed by a contiguous array;
    falls back to copying otherwise."
-  [^ComplexTensor ct]
-  (let [ab (dtype/as-array-buffer (.-tensor ct))]
-    (if ab
-      (.ary-data ab)
-      (dtype/->double-array (.-tensor ct)))))
+  ^doubles [^ComplexTensor ct]
+  (dtype/->double-array (.-tensor ct)))
 
 (defn complex-shape
   "The complex shape (underlying shape without trailing 2)."

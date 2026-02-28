@@ -27,10 +27,7 @@
             (throw (ex-info (str "Expected rank-2 tensor, got shape " (vec shape))
                             {:shape (vec shape)})))
         [r c] shape
-        ab (dtype/as-array-buffer tensor)
-        arr (if ab
-              (.ary-data ab)
-              (dtype/->double-array tensor))
+        arr (dtype/->double-array tensor)
         dm (DMatrixRMaj. (int r) (int c))]
     (.setData dm arr)
     dm))

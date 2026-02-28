@@ -130,6 +130,70 @@
 
 (kind/test-last [(fn [v] (== 99.0 v))])
 
+
+;; ## Extracting the backing double[]
+
+;; `dtype/->double-array` is the idiomatic way to get a `double[]`
+;; from a tensor. It is **zero-copy when possible, copying only
+;; when necessary**:
+;;
+;; - Contiguous, full-array-backed tensor → returns the same `double[]`
+;; - Subview or lazy tensor → allocates and copies
+
+;; A matrix built with `la/matrix` is backed by a contiguous array.
+;; `dtype/->double-array` returns the same object — zero-copy:
+
+(let [M (la/matrix [[1 2] [3 4]])
+      arr (dtype/->double-array M)]
+  (aset arr 0 99.0)
+  (tensor/mget M 0 0))
+
+(kind/test-last [(fn [v] (== 99.0 v))])
+
+;; A row selected with `tensor/select` is a strided view —
+;; contiguous within the parent array, but not spanning all of it.
+;; `dtype/->double-array` correctly returns a copy:
+
+(let [M (la/matrix [[1 2 3] [4 5 6]])
+      row0 (tensor/select M 0 :all)
+      arr (dtype/->double-array row0)]
+  {:length (alength arr)
+   :values (vec arr)
+   :shares-memory? (identical? arr (dtype/->double-array M))})
+
+(kind/test-last
+ [(fn [{:keys [length values shares-memory?]}]
+    (and (== 3 length)
+         (= [1.0 2.0 3.0] values)
+         (not shares-memory?)))])
+
+;; A lazy tensor (from `dfn/+` or `tensor/compute-tensor`) has
+;; no backing array at all — `dtype/->double-array` allocates one:
+
+(let [a (la/matrix [[1 2] [3 4]])
+      b (la/matrix [[10 20] [30 40]])
+      lazy-sum (dfn/+ a b)
+      arr (dtype/->double-array lazy-sum)]
+  {:values (vec arr)
+   :has-array-buffer? (some? (dtype/as-array-buffer lazy-sum))})
+
+(kind/test-last
+ [(fn [{:keys [values has-array-buffer?]}]
+    (and (= [11.0 22.0 33.0 44.0] values)
+         (not has-array-buffer?)))])
+
+;; `cx/->double-array` follows the same convention for
+;; ComplexTensors — it delegates to `dtype/->double-array`
+;; on the underlying `[... 2]` tensor:
+
+(let [ct (cx/complex-tensor
+          (tensor/->tensor [[1 2] [3 4] [5 6]] {:datatype :float64}))
+      arr (cx/->double-array ct)]
+  (aset arr 0 99.0)
+  (cx/re (ct 0)))
+
+(kind/test-last [(fn [v] (== 99.0 v))])
+
 ;; ## ComplexTensor wraps a real tensor
 
 ;; A ComplexTensor wraps an `[... 2]` real tensor. The `cx/->tensor`
@@ -537,6 +601,8 @@
 ;; | `dtype/clone` | Yes | Yes — independent | Breaks all links to source |
 ;; | `la/submatrix` | Yes | Yes — independent | Always clones |
 ;; | `la/mmul`, `la/transpose`, etc. | Yes | Yes — independent | EJML allocates new result |
+;; | `dtype/->double-array` | Only if needed | N/A — raw `double[]` | Zero-copy when contiguous; copies for subviews/lazy |
+;; | `cx/->double-array` | Only if needed | N/A — raw `double[]` | Same convention, on ComplexTensor |
 ;;
 ;; Lazy readers have no array of their own, but they **read through**
 ;; to the source arrays — mutating a source changes what the lazy
