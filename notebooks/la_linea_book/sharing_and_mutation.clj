@@ -71,7 +71,7 @@
 (let [A (tensor/->tensor [[10 20 30]
                           [40 50 60]] {:datatype :float64})
       row0 (tensor/select A 0 :all)
-      arr (.ary-data (dtype/as-array-buffer A))
+      arr (dtype/->double-array A)
       _ (aset arr 0 999.0)
       result {:A-00 (tensor/mget A 0 0)
               :row0-0 (double (row0 0))}]
@@ -103,7 +103,7 @@
 
 (let [M (la/matrix [[1 2] [3 4]])
       dm (la/tensor->dmat M)]
-  (identical? (.ary-data (dtype/as-array-buffer M))
+  (identical? (dtype/->double-array M)
               (.data dm)))
 
 (kind/test-last [true?])
@@ -209,7 +209,7 @@
 
 (let [ct-data (tensor/->tensor [[1 2] [3 4] [5 6]] {:datatype :float64})
       ct (cx/complex-tensor ct-data)
-      arr (.ary-data (dtype/as-array-buffer ct-data))
+      arr (dtype/->double-array ct-data)
       _ (aset arr 1 99.0)]
   (cx/im (ct 0)))
 
@@ -233,7 +233,7 @@
 (let [ct (cx/complex-tensor
           (tensor/->tensor [[10 40] [20 50] [30 60]] {:datatype :float64}))
       re-view (cx/re ct)
-      arr (.ary-data (dtype/as-array-buffer (cx/->tensor ct)))
+      arr (dtype/->double-array (cx/->tensor ct))
       _ (aset arr 0 -10.0)]
   (double (re-view 0)))
 
@@ -271,7 +271,7 @@
 (let [x (tensor/->tensor [1 2 3] {:datatype :float64})
       y (tensor/->tensor [10 20 30] {:datatype :float64})
       lazy-sum (dfn/+ x y)
-      arr (.ary-data (dtype/as-array-buffer x))
+      arr (dtype/->double-array x)
       _ (aset arr 0 100.0)]
   (vec lazy-sum))
 
@@ -313,7 +313,7 @@
       cb (cx/complex-tensor
           (tensor/->tensor [[10 30] [20 40]] {:datatype :float64}))
       lazy-sum (cx/add ca cb)
-      arr (.ary-data (dtype/as-array-buffer (cx/->tensor ca)))
+      arr (dtype/->double-array (cx/->tensor ca))
       _ (aset arr 0 100.0)]
   (vec (dtype/->reader (cx/re lazy-sum))))
 
@@ -338,8 +338,8 @@
 
 (let [original (la/matrix [[1 2] [3 4]])
       cloned (dtype/clone original)]
-  (identical? (.ary-data (dtype/as-array-buffer original))
-              (.ary-data (dtype/as-array-buffer cloned))))
+  (identical? (dtype/->double-array original)
+              (dtype/->double-array cloned)))
 
 (kind/test-last [false?])
 
@@ -347,7 +347,7 @@
 
 (let [original (la/matrix [[1 2] [3 4]])
       cloned (dtype/clone original)
-      arr (.ary-data (dtype/as-array-buffer original))
+      arr (dtype/->double-array original)
       _ (aset arr 0 -999.0)]
   {:original-00 (tensor/mget original 0 0)
    :cloned-00 (tensor/mget cloned 0 0)})
@@ -378,7 +378,7 @@
 (let [ct-orig (cx/complex-tensor
                (tensor/->tensor [[1 4] [2 5] [3 6]] {:datatype :float64}))
       ct-clone (dtype/clone ct-orig)
-      orig-arr (.ary-data (dtype/as-array-buffer (cx/->tensor ct-orig)))
+      orig-arr (dtype/->double-array (cx/->tensor ct-orig))
       _ (aset orig-arr 0 -1.0)]
   {:orig-re (cx/re (ct-orig 0))
    :clone-re (cx/re (ct-clone 0))})
@@ -426,7 +426,7 @@
          (tensor/->tensor [[10 30] [20 40]] {:datatype :float64}))
       lazy-pq (cx/add p q)
       materialized-pq (dtype/clone lazy-pq)
-      arr (.ary-data (dtype/as-array-buffer (cx/->tensor p)))
+      arr (dtype/->double-array (cx/->tensor p))
       _ (aset arr 0 999.0)]
   {:lazy-re (vec (dtype/->reader (cx/re lazy-pq)))
    :materialized-re (vec (dtype/->reader (cx/re materialized-pq)))})
@@ -461,7 +461,7 @@
 
 (let [big (la/matrix [[1 2 3] [4 5 6] [7 8 9]])
       sub (la/submatrix big (range 2) (range 2))
-      arr (.ary-data (dtype/as-array-buffer big))
+      arr (dtype/->double-array big)
       _ (aset arr 0 -1.0)]
   {:big-00 (tensor/mget big 0 0)
    :sub-00 (tensor/mget sub 0 0)})
@@ -492,8 +492,8 @@
 
 (let [E (la/matrix [[1 2] [3 4]])
       Et (la/transpose E)]
-  (identical? (.ary-data (dtype/as-array-buffer E))
-              (.ary-data (dtype/as-array-buffer Et))))
+  (identical? (dtype/->double-array E)
+              (dtype/->double-array Et)))
 
 (kind/test-last [false?])
 
@@ -501,7 +501,7 @@
 
 (let [E (la/matrix [[1 2] [3 4]])
       Et (la/transpose E)
-      arr (.ary-data (dtype/as-array-buffer E))
+      arr (dtype/->double-array E)
       _ (aset arr 0 -1.0)]
   {:E-00 (tensor/mget E 0 0)
    :Et-00 (tensor/mget Et 0 0)})

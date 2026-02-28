@@ -75,8 +75,7 @@
  v22_l129
  (let
   [t (la/matrix [[1.0 2.0] [3.0 4.0]]) dm (la/tensor->dmat t)]
-  {:identical?
-   (identical? (.ary-data (dtype/as-array-buffer t)) (.data dm)),
+  {:identical? (identical? (dtype/->double-array t) (.data dm)),
    :rows (.numRows dm),
    :cols (.numCols dm)}))
 

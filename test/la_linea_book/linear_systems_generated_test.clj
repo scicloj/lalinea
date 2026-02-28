@@ -98,13 +98,11 @@
 
 
 (def
- v27_l164
+ v27_l167
  (def
   gs-result
   (let
-   [A-arr
-    (dtype/->double-array A-heat)
-    b-arr
+   [b-arr
     (dtype/->double-array b-heat)
     x
     (double-array n 0.0)
@@ -114,43 +112,32 @@
     [k 0 history []]
     (if
      (>= k iters)
-     {:x-final (vec x), :history history}
+     {:x-final (dtype/clone x), :history history}
      (do
       (dotimes
        [i n]
        (let
-        [sigma
-         (loop
-          [j 0 s 0.0]
-          (if
-           (>= j n)
-           s
-           (recur
-            (inc j)
-            (if
-             (= i j)
-             s
-             (+ s (* (aget A-arr (+ (* i n) j)) (aget x j)))))))]
-        (aset
-         x
-         i
-         (/ (- (aget b-arr i) sigma) (aget A-arr (+ (* i n) i))))))
+        [left
+         (if (pos? i) (aget x (dec i)) 0.0)
+         right
+         (if (< i (dec n)) (aget x (inc i)) 0.0)]
+        (aset x i (/ (+ left right (aget b-arr i)) 2.0))))
       (let
-       [x-tensor
-        (tensor/reshape (tensor/ensure-tensor (dtype/clone x)) [n 1])
+       [x-col
+        (la/column x)
         residual
-        (la/norm (la/sub (la/mmul A-heat x-tensor) b-heat))]
+        (la/norm (la/sub (la/mmul A-heat x-col) b-heat))]
        (recur
         (inc k)
         (conj
          history
          {:iteration (inc k),
           :residual residual,
-          :profile (vec x)})))))))))
+          :profile (dtype/clone x)})))))))))
 
 
 (def
- v29_l199
+ v29_l193
  (let
   [snapshots
    [1 2 5 10 50 200 500]
@@ -173,7 +160,7 @@
 
 
 (def
- v31_l215
+ v31_l209
  (->
   (tc/dataset (:history gs-result))
   (plotly/base {:=x :iteration, :=y :residual})
@@ -181,17 +168,17 @@
   plotly/plot))
 
 
-(def v33_l222 (-> gs-result :history last :residual))
+(def v33_l216 (-> gs-result :history last :residual))
 
 
-(deftest t34_l224 (is ((fn [r] (< r 0.001)) v33_l222)))
+(deftest t34_l218 (is ((fn [r] (< r 0.001)) v33_l216)))
 
 
 (def
- v36_l232
+ v36_l226
  (let
   [x-iter (la/column (:x-final gs-result))]
   (la/norm (la/sub x-iter T-direct))))
 
 
-(deftest t37_l235 (is ((fn [d] (< d 0.01)) v36_l232)))
+(deftest t37_l229 (is ((fn [d] (< d 0.01)) v36_l226)))

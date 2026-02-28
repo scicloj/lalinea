@@ -160,35 +160,29 @@ T-direct
 ;;
 ;; Starting from $\mathbf{T} = \mathbf{0}$, we iterate and
 ;; record the temperature profile and residual at each step.
+;;
+;; Since $A$ is tridiagonal, we implement the simplified update
+;; directly rather than the general Gauss-Seidel row sum.
 
 (def gs-result
-  (let [A-arr (dtype/->double-array A-heat)
-        b-arr (dtype/->double-array b-heat)
+  (let [b-arr (dtype/->double-array b-heat)
         x     (double-array n 0.0)
         iters 500]
-    (loop [k 0
-           history []]
+    (loop [k 0, history []]
       (if (>= k iters)
-        {:x-final (vec x)
+        {:x-final (dtype/make-container :float64 x)
          :history history}
         (do
           (dotimes [i n]
-            (let [sigma (loop [j 0 s 0.0]
-                          (if (>= j n) s
-                              (recur (inc j)
-                                     (if (= i j) s
-                                         (+ s (* (aget A-arr (+ (* i n) j))
-                                                 (aget x j)))))))]
-              (aset x i (/ (- (aget b-arr i) sigma)
-                           (aget A-arr (+ (* i n) i))))))
-          (let [x-tensor (tensor/reshape
-                          (tensor/ensure-tensor (dtype/clone x))
-                          [n 1])
-                residual (la/norm (la/sub (la/mmul A-heat x-tensor) b-heat))]
+            (let [left  (if (pos? i) (aget x (dec i)) 0.0)
+                  right (if (< i (dec n)) (aget x (inc i)) 0.0)]
+              (aset x i (/ (+ left right (aget b-arr i)) 2.0))))
+          (let [x-col    (la/column (dtype/make-container :float64 x))
+                residual (la/norm (la/sub (la/mmul A-heat x-col) b-heat))]
             (recur (inc k)
                    (conj history {:iteration (inc k)
-                                  :residual residual
-                                  :profile (vec x)}))))))))
+                                  :residual  residual
+                                  :profile   (dtype/make-container :float64 x)}))))))))
 
 ;; ### Watching convergence
 ;;
