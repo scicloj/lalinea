@@ -161,26 +161,22 @@
     (Math/sin theta)
     rng
     (frand/rng :mersenne 42)
-    arr
-    (double-array (* n-points 2))]
-   (dotimes
-    [i n-points]
-    (let
-     [p1
-      (frand/grandom rng 0.0 3.0)
-      p2
-      (frand/grandom rng 0.0 0.8)
-      x
-      (+ (* cos-t p1) (* (- sin-t) p2))
-      y
-      (+ (* sin-t p1) (* cos-t p2))]
-     (aset arr (* i 2) x)
-     (aset arr (inc (* i 2)) y)))
-   (tensor/reshape (tensor/ensure-tensor arr) [n-points 2]))))
+    flat
+    (->>
+     (range n-points)
+     (mapcat
+      (fn
+       [_]
+       (let
+        [p1 (frand/grandom rng 0.0 3.0) p2 (frand/grandom rng 0.0 0.8)]
+        [(+ (* cos-t p1) (* (- sin-t) p2))
+         (+ (* sin-t p1) (* cos-t p2))])))
+     (dtype/make-container :float64))]
+   (tensor/reshape flat [n-points 2]))))
 
 
 (def
- v29_l172
+ v29_l171
  (def
   X
   (let
@@ -201,25 +197,25 @@
 
 
 (def
- v31_l184
+ v31_l183
  (def
   cov-matrix
   (la/scale (la/mmul (la/transpose X) X) (/ 1.0 (dec n-points)))))
 
 
-(def v32_l187 cov-matrix)
+(def v32_l186 cov-matrix)
 
 
 (deftest
- t33_l189
- (is ((fn [m] (= [2 2] (vec (dtype/shape m)))) v32_l187)))
+ t33_l188
+ (is ((fn [m] (= [2 2] (vec (dtype/shape m)))) v32_l186)))
 
 
-(def v34_l192 (def pca-eigen (la/eigen cov-matrix)))
+(def v34_l191 (def pca-eigen (la/eigen cov-matrix)))
 
 
 (def
- v36_l196
+ v36_l195
  (let
   [eigenvalues
    (:eigenvalues pca-eigen)
@@ -232,12 +228,12 @@
 
 
 (deftest
- t37_l202
- (is ((fn [evs] (> (first evs) (second evs))) v36_l196)))
+ t37_l201
+ (is ((fn [evs] (> (first evs) (second evs))) v36_l195)))
 
 
 (def
- v39_l211
+ v39_l210
  (let
   [{:keys [eigenvalues eigenvectors]}
    pca-eigen
@@ -281,11 +277,11 @@
    plotly/plot)))
 
 
-(deftest t40_l234 (is ((fn [_] true) v39_l211)))
+(deftest t40_l233 (is ((fn [_] true) v39_l210)))
 
 
 (def
- v42_l241
+ v42_l240
  (let
   [{:keys [eigenvalues eigenvectors]}
    pca-eigen
@@ -306,23 +302,23 @@
   explained))
 
 
-(deftest t44_l254 (is ((fn [v] (> v 0.8)) v42_l241)))
+(deftest t44_l253 (is ((fn [v] (> v 0.8)) v42_l240)))
 
 
-(def v46_l267 (def test-matrix (la/matrix [[4 1 0] [1 3 1] [0 1 2]])))
+(def v46_l266 (def test-matrix (la/matrix [[4 1 0] [1 3 1] [0 1 2]])))
 
 
-(def v48_l274 (def true-eigenvalues (la/real-eigenvalues test-matrix)))
+(def v48_l273 (def true-eigenvalues (la/real-eigenvalues test-matrix)))
 
 
-(def v49_l277 true-eigenvalues)
+(def v49_l276 true-eigenvalues)
 
 
-(deftest t50_l279 (is ((fn [evs] (= 3 (count evs))) v49_l277)))
+(deftest t50_l278 (is ((fn [evs] (= 3 (count evs))) v49_l276)))
 
 
 (def
- v52_l284
+ v52_l283
  (def
   qr-history
   (loop
@@ -359,7 +355,7 @@
 
 
 (def
- v54_l314
+ v54_l313
  (->
   (tc/dataset qr-history)
   (plotly/base {:=x :iteration, :=y :off-diagonal})
@@ -367,14 +363,14 @@
   plotly/plot))
 
 
-(def v55_l319 (:off-diagonal (last qr-history)))
+(def v55_l318 (:off-diagonal (last qr-history)))
 
 
-(deftest t56_l321 (is ((fn [v] (< v 1.0E-6)) v55_l319)))
+(deftest t56_l320 (is ((fn [v] (< v 1.0E-6)) v55_l318)))
 
 
 (def
- v58_l326
+ v58_l325
  (let
   [final
    (last qr-history)
@@ -388,11 +384,11 @@
     true-eigenvalues))))
 
 
-(deftest t59_l332 (is (true? v58_l326)))
+(deftest t59_l331 (is (true? v58_l325)))
 
 
 (def
- v61_l336
+ v61_l335
  (->
   (tc/dataset
    (mapcat
@@ -407,4 +403,4 @@
   plotly/plot))
 
 
-(deftest t62_l345 (is ((fn [_] true) v61_l336)))
+(deftest t62_l344 (is ((fn [_] true) v61_l335)))

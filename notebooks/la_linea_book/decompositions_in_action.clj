@@ -157,15 +157,14 @@
   (let [theta (/ Math/PI 6)
         cos-t (Math/cos theta) sin-t (Math/sin theta)
         rng (frand/rng :mersenne 42)
-        arr (double-array (* n-points 2))]
-    (dotimes [i n-points]
-      (let [p1 (frand/grandom rng 0.0 3.0)
-            p2 (frand/grandom rng 0.0 0.8)
-            x (+ (* cos-t p1) (* (- sin-t) p2))
-            y (+ (* sin-t p1) (* cos-t p2))]
-        (aset arr (* i 2) x)
-        (aset arr (inc (* i 2)) y)))
-    (tensor/reshape (tensor/ensure-tensor arr) [n-points 2])))
+        flat (->> (range n-points)
+                  (mapcat (fn [_]
+                            (let [p1 (frand/grandom rng 0.0 3.0)
+                                  p2 (frand/grandom rng 0.0 0.8)]
+                              [(+ (* cos-t p1) (* (- sin-t) p2))
+                               (+ (* sin-t p1) (* cos-t p2))])))
+                  (dtype/make-container :float64))]
+    (tensor/reshape flat [n-points 2])))
 
 ;; ### Center the data
 

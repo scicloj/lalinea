@@ -4,8 +4,7 @@
 
 La Linea is a linear algebra library where matrices are [dtype-next](https://github.com/cnuernber/dtype-next) tensors
 and [EJML](https://ejml.org/) provides the computational backend. The two share the same
-row-major `double[]` memory layout, enabling **zero-copy** interop — no allocation,
-no copying, just different views of the same data.
+row-major `double[]` memory layout, enabling **zero-copy** interop.
 
 ## General info
 |||
@@ -66,21 +65,11 @@ Each chapter includes inline tests via `kind/test-last`.
 
 ## API
 
-Most users need only two namespaces:
-
 ```clojure
-(require '[scicloj.la-linea.linalg :as la])
-(require '[scicloj.la-linea.transform :as xf])
-```
-
-`scicloj.la-linea.linalg` is the main API — matrix construction, arithmetic,
-decompositions, inverse, and solve. `scicloj.la-linea.transform` bridges
-Fastmath's transform API to ComplexTensors.
-
-For complex tensor operations:
-
-```clojure
-(require '[scicloj.la-linea.complex :as cx])
+(require '[scicloj.la-linea.linalg :as la])      ; matrix construction, arithmetic, decompositions, solve
+(require '[scicloj.la-linea.complex :as cx])      ; complex tensor operations
+(require '[scicloj.la-linea.transform :as xf])    ; FFT / DCT / DST / DHT bridge
+(require '[scicloj.la-linea.vis :as vis])         ; visualization helpers
 ```
 
 ## Built on
@@ -98,7 +87,7 @@ The [book notebooks](https://scicloj.github.io/la-linea/) also use
 
 ```bash
 clojure -M:dev -m nrepl.cmdline   # start REPL
-./run_tests.sh                     # run tests (268 tests, 268 assertions)
+./run_tests.sh                     # run tests (378 tests, 378 assertions)
 clojure -T:build ci                # test + build JAR
 ```
 
