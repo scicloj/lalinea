@@ -12,7 +12,6 @@
   (:require [scicloj.la-linea.linalg :as la]
             [scicloj.la-linea.tape :as tape]
             [scicloj.la-linea.complex :as cx]
-            [tech.v3.datatype :as dtype]
             [tech.v3.datatype.functional :as dfn]
             [tech.v3.tensor :as tensor]
             [scicloj.kindly.v4.kind :as kind])
@@ -109,6 +108,9 @@
       D)))
 
 (:result tape-result)
+
+(kind/test-last
+ [(fn [r] (tensor/tensor? r))])
 
 ;; The tape captured 6 operations.
 
@@ -254,6 +256,8 @@
 
 (tape/summary tape-result)
 
+(kind/test-last [(fn [s] (= 6 (:total s)))])
+
 ;; The summary shows:
 ;;
 ;; - `:by-op` — one of each operation
@@ -301,6 +305,8 @@
       projection)))
 
 (tape/summary pipeline-result)
+
+(kind/test-last [(fn [s] (= 9 (:total s)))])
 
 ;; The summary reveals the mix of lazy intermediate operations
 ;; and EJML-backed materializations.

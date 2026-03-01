@@ -67,14 +67,27 @@
 
 
 (def
- v19_l114
+ v19_l110
+ (let
+  [xs
+   (mapv (fn [i] (/ (double (inc i)) (double (inc n)))) (range n))
+   expected
+   (la/column (mapv (fn [x] (* 100.0 (- 1.0 x))) xs))]
+  (la/close? T-direct expected)))
+
+
+(deftest t20_l114 (is (true? v19_l110)))
+
+
+(def
+ v22_l122
  (def
   x-interior
   (mapv (fn [i] (/ (double (inc i)) (double (inc n)))) (range n))))
 
 
 (def
- v20_l118
+ v23_l126
  (->
   (tc/dataset
    {:x x-interior,
@@ -85,20 +98,20 @@
   plotly/plot))
 
 
-(def v22_l129 (tensor/mget T-direct 0 0))
+(def v25_l137 (tensor/mget T-direct 0 0))
 
 
-(deftest t23_l131 (is ((fn [t] (> t 90.0)) v22_l129)))
+(deftest t26_l139 (is ((fn [t] (> t 90.0)) v25_l137)))
 
 
-(def v24_l133 (tensor/mget T-direct (dec n) 0))
+(def v27_l141 (tensor/mget T-direct (dec n) 0))
 
 
-(deftest t25_l135 (is ((fn [t] (< t 10.0)) v24_l133)))
+(deftest t28_l143 (is ((fn [t] (< t 10.0)) v27_l141)))
 
 
 (def
- v27_l167
+ v30_l175
  (def
   gs-result
   (let
@@ -137,7 +150,7 @@
 
 
 (def
- v29_l193
+ v32_l201
  (let
   [snapshots
    [1 2 5 10 50 200 500]
@@ -160,7 +173,7 @@
 
 
 (def
- v31_l209
+ v34_l217
  (->
   (tc/dataset (:history gs-result))
   (plotly/base {:=x :iteration, :=y :residual})
@@ -168,17 +181,17 @@
   plotly/plot))
 
 
-(def v33_l216 (-> gs-result :history last :residual))
+(def v36_l224 (-> gs-result :history last :residual))
 
 
-(deftest t34_l218 (is ((fn [r] (< r 0.001)) v33_l216)))
+(deftest t37_l226 (is ((fn [r] (< r 0.001)) v36_l224)))
 
 
 (def
- v36_l226
+ v39_l234
  (let
   [x-iter (la/column (:x-final gs-result))]
   (la/norm (la/sub x-iter T-direct))))
 
 
-(deftest t37_l229 (is ((fn [d] (< d 0.01)) v36_l226)))
+(deftest t40_l237 (is ((fn [d] (< d 0.01)) v39_l234)))

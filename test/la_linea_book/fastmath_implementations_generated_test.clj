@@ -17,7 +17,6 @@
   [fastmath.calculus.quadrature :as quad]
   [fastmath.polynomials :as poly]
   [fastmath.kernel :as k]
-  [fastmath.matrix :as mat]
   [fastmath.random :as frand]
   [fastmath.core :as m]
   [tablecloth.api :as tc]
@@ -27,7 +26,7 @@
 
 
 (def
- v3_l49
+ v3_l48
  (def
   bench-fn
   (fn
@@ -39,14 +38,14 @@
     (/ (- (System/nanoTime) start) (* n 1000000.0))))))
 
 
-(def v5_l68 (def rng (frand/rng :mersenne 42)))
+(def v5_l67 (def rng (frand/rng :mersenne 42)))
 
 
-(def v6_l70 (def n-obs 200))
+(def v6_l69 (def n-obs 200))
 
 
 (def
- v7_l72
+ v7_l71
  (def
   ols-xs
   (mapv
@@ -54,11 +53,11 @@
    (range n-obs))))
 
 
-(def v8_l77 (def true-beta [3.0 -1.5]))
+(def v8_l76 (def true-beta [3.0 -1.5]))
 
 
 (def
- v9_l79
+ v9_l78
  (def
   ols-ys
   (mapv
@@ -68,20 +67,20 @@
    ols-xs)))
 
 
-(def v11_l89 (def fm-model (reg/lm ols-ys ols-xs)))
+(def v11_l88 (def fm-model (reg/lm ols-ys ols-xs)))
 
 
-(def v12_l91 (def fm-intercept (:intercept fm-model)))
+(def v12_l90 (def fm-intercept (:intercept fm-model)))
 
 
-(def v13_l92 (def fm-beta (:beta fm-model)))
+(def v13_l91 (def fm-beta (:beta fm-model)))
 
 
-(def v14_l94 [fm-intercept fm-beta])
+(def v14_l93 [fm-intercept fm-beta])
 
 
 (def
- v16_l101
+ v16_l100
  (def
   la-ols
   (fn
@@ -116,14 +115,14 @@
      :beta (mapv (fn [i] (tensor/mget beta (inc i) 0)) (range p))}))))
 
 
-(def v17_l123 (def la-result (la-ols ols-xs ols-ys)))
+(def v17_l122 (def la-result (la-ols ols-xs ols-ys)))
 
 
-(def v18_l125 la-result)
+(def v18_l124 la-result)
 
 
 (def
- v20_l132
+ v20_l131
  (def
   la-ols-normal
   (fn
@@ -152,14 +151,14 @@
      :beta (mapv (fn [i] (tensor/mget beta (inc i) 0)) (range p))}))))
 
 
-(def v21_l149 (def la-normal-result (la-ols-normal ols-xs ols-ys)))
+(def v21_l148 (def la-normal-result (la-ols-normal ols-xs ols-ys)))
 
 
-(def v22_l151 la-normal-result)
+(def v22_l150 la-normal-result)
 
 
 (def
- v24_l155
+ v24_l154
  (let
   [fm-coeffs
    (cons fm-intercept fm-beta)
@@ -170,11 +169,11 @@
    (map vector fm-coeffs la-svd-coeffs))))
 
 
-(deftest t25_l160 (is (true? v24_l155)))
+(deftest t25_l159 (is (true? v24_l154)))
 
 
 (def
- v26_l162
+ v26_l161
  (let
   [fm-coeffs
    (cons fm-intercept fm-beta)
@@ -185,11 +184,11 @@
    (map vector fm-coeffs la-ne-coeffs))))
 
 
-(deftest t27_l167 (is (true? v26_l162)))
+(deftest t27_l166 (is (true? v26_l161)))
 
 
 (def
- v29_l175
+ v29_l174
  (let
   [n-iter 200]
   (tc/dataset
@@ -200,16 +199,16 @@
      (bench-fn (fn* [] (la-ols-normal ols-xs ols-ys)) n-iter)]})))
 
 
-(def v31_l191 (def gp-n 50))
+(def v31_l190 (def gp-n 50))
 
 
 (def
- v32_l193
+ v32_l192
  (def gp-xs (mapv (fn [i] (/ (double i) gp-n)) (range gp-n))))
 
 
 (def
- v33_l194
+ v33_l193
  (def
   gp-ys
   (mapv
@@ -219,11 +218,11 @@
    gp-xs)))
 
 
-(def v35_l201 (def gp-kernel (k/kernel :gaussian 0.2)))
+(def v35_l200 (def gp-kernel (k/kernel :gaussian 0.2)))
 
 
 (def
- v36_l203
+ v36_l202
  (def
   fm-gp
   (gp/gaussian-process
@@ -233,12 +232,12 @@
 
 
 (def
- v37_l209
+ v37_l208
  (def fm-gp-preds (mapv (fn [x] (gp/predict fm-gp [x])) gp-xs)))
 
 
 (def
- v39_l217
+ v39_l216
  (def
   la-gp
   (fn
@@ -268,7 +267,7 @@
 
 
 (def
- v40_l236
+ v40_l235
  (def
   la-gp-predict
   (fn
@@ -283,29 +282,29 @@
 
 
 (def
- v41_l245
+ v41_l244
  (def la-gp-model (la-gp (mapv vector gp-xs) gp-ys gp-kernel 1.0 0.01)))
 
 
 (def
- v42_l248
+ v42_l247
  (def
   la-gp-preds
   (mapv (fn [x] (la-gp-predict la-gp-model [x])) gp-xs)))
 
 
 (def
- v44_l253
+ v44_l252
  (every?
   (fn [[a b]] (< (Math/abs (- (double a) (double b))) 1.0E-6))
   (map vector fm-gp-preds la-gp-preds)))
 
 
-(deftest t45_l257 (is (true? v44_l253)))
+(deftest t45_l256 (is (true? v44_l252)))
 
 
 (def
- v47_l261
+ v47_l260
  (let
   [xvs (mapv vector gp-xs) n-iter 100]
   (tc/dataset
@@ -325,7 +324,7 @@
 
 
 (def
- v49_l278
+ v49_l277
  (def
   gp-scaling
   (let
@@ -359,7 +358,7 @@
 
 
 (def
- v50_l298
+ v50_l297
  (->
   (tc/dataset gp-scaling)
   (plotly/base {:=x :n, :=y :ms, :=color :method})
@@ -368,34 +367,34 @@
   plotly/plot))
 
 
-(deftest t51_l304 (is ((fn [_] true) v50_l298)))
+(deftest t51_l303 (is ((fn [_] true) v50_l297)))
 
 
-(def v53_l314 (def rbf-xs [0.0 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0]))
+(def v53_l313 (def rbf-xs [0.0 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0]))
 
 
 (def
- v54_l315
+ v54_l314
  (def rbf-ys [0.0 0.84 0.91 0.14 -0.76 -0.96 -0.28 0.66 0.99 0.41]))
 
 
-(def v56_l319 (def rbf-kernel (k/rbf :gaussian)))
+(def v56_l318 (def rbf-kernel (k/rbf :gaussian)))
 
 
-(def v57_l321 (def fm-rbf (rbf/rbf rbf-xs rbf-ys rbf-kernel)))
+(def v57_l320 (def fm-rbf (rbf/rbf rbf-xs rbf-ys rbf-kernel)))
 
 
-(def v58_l323 (def rbf-test-pts [0.5 1.5 2.5 3.5 4.5]))
+(def v58_l322 (def rbf-test-pts [0.5 1.5 2.5 3.5 4.5]))
 
 
-(def v59_l325 (def fm-rbf-preds (mapv fm-rbf rbf-test-pts)))
+(def v59_l324 (def fm-rbf-preds (mapv fm-rbf rbf-test-pts)))
 
 
-(def v60_l327 fm-rbf-preds)
+(def v60_l326 fm-rbf-preds)
 
 
 (def
- v62_l331
+ v62_l330
  (def
   la-rbf
   (fn
@@ -417,7 +416,7 @@
 
 
 (def
- v63_l344
+ v63_l343
  (def
   la-rbf-predict
   (fn
@@ -429,33 +428,33 @@
     (tensor/mget (la/mmul (la/transpose w) phi-vec) 0 0)))))
 
 
-(def v64_l352 (def la-rbf-model (la-rbf rbf-xs rbf-ys rbf-kernel)))
+(def v64_l351 (def la-rbf-model (la-rbf rbf-xs rbf-ys rbf-kernel)))
 
 
 (def
- v65_l354
+ v65_l353
  (def
   la-rbf-preds
   (mapv
-   (fn* [p1__104375#] (la-rbf-predict la-rbf-model p1__104375#))
+   (fn* [p1__38604#] (la-rbf-predict la-rbf-model p1__38604#))
    rbf-test-pts)))
 
 
-(def v66_l356 la-rbf-preds)
+(def v66_l355 la-rbf-preds)
 
 
 (def
- v68_l360
+ v68_l359
  (every?
   (fn [[a b]] (< (Math/abs (- (double a) (double b))) 1.0E-6))
   (map vector fm-rbf-preds la-rbf-preds)))
 
 
-(deftest t69_l364 (is (true? v68_l360)))
+(deftest t69_l363 (is (true? v68_l359)))
 
 
 (def
- v71_l368
+ v71_l367
  (let
   [n-iter 2000]
   (tc/dataset
@@ -466,17 +465,17 @@
 
 
 (def
- v73_l380
+ v73_l379
  (def kriging-xs [0.0 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0]))
 
 
 (def
- v74_l381
+ v74_l380
  (def kriging-ys [0.0 0.84 0.91 0.14 -0.76 -0.96 -0.28 0.66 0.99 0.41]))
 
 
 (def
- v76_l387
+ v76_l386
  (def
   auto-variogram
   (let
@@ -485,7 +484,7 @@
 
 
 (def
- v77_l391
+ v77_l390
  (def
   fm-kriging
   (kriging/kriging
@@ -495,17 +494,17 @@
    {:polynomial-terms (constantly [1.0])})))
 
 
-(def v78_l395 (def kriging-test-pts [0.5 1.5 2.5 3.5 4.5]))
+(def v78_l394 (def kriging-test-pts [0.5 1.5 2.5 3.5 4.5]))
 
 
-(def v79_l397 (def fm-kriging-preds (mapv fm-kriging kriging-test-pts)))
+(def v79_l396 (def fm-kriging-preds (mapv fm-kriging kriging-test-pts)))
 
 
-(def v80_l399 fm-kriging-preds)
+(def v80_l398 fm-kriging-preds)
 
 
 (def
- v82_l406
+ v82_l405
  (def
   la-kriging
   (fn
@@ -558,7 +557,7 @@
 
 
 (def
- v83_l441
+ v83_l440
  (def
   la-kriging-predict
   (fn
@@ -574,38 +573,36 @@
 
 
 (def
- v84_l448
+ v84_l447
  (def
   la-kriging-model
   (la-kriging kriging-xs kriging-ys auto-variogram (constantly [1.0]))))
 
 
 (def
- v85_l451
+ v85_l450
  (def
   la-kriging-preds
   (mapv
-   (fn*
-    [p1__104376#]
-    (la-kriging-predict la-kriging-model p1__104376#))
+   (fn* [p1__38605#] (la-kriging-predict la-kriging-model p1__38605#))
    kriging-test-pts)))
 
 
-(def v86_l454 la-kriging-preds)
+(def v86_l453 la-kriging-preds)
 
 
 (def
- v88_l458
+ v88_l457
  (every?
   (fn [[a b]] (< (Math/abs (- (double a) (double b))) 1.0E-6))
   (map vector fm-kriging-preds la-kriging-preds)))
 
 
-(deftest t89_l462 (is (true? v88_l458)))
+(deftest t89_l461 (is (true? v88_l457)))
 
 
 (def
- v91_l466
+ v91_l465
  (let
   [n-iter 1000]
   (tc/dataset
@@ -631,23 +628,23 @@
       n-iter)]})))
 
 
-(def v93_l485 (def mah-cov [[2.0 0.5 0.3] [0.5 1.0 0.2] [0.3 0.2 1.5]]))
+(def v93_l484 (def mah-cov [[2.0 0.5 0.3] [0.5 1.0 0.2] [0.3 0.2 1.5]]))
 
 
-(def v94_l489 (def mah-x [3.0 1.0 2.0]))
+(def v94_l488 (def mah-x [3.0 1.0 2.0]))
 
 
-(def v95_l490 (def mah-mean [1.0 0.0 0.5]))
+(def v95_l489 (def mah-mean [1.0 0.0 0.5]))
 
 
-(def v97_l494 (def fm-mah (dist/mahalanobis mah-x mah-mean mah-cov)))
+(def v97_l493 (def fm-mah (dist/mahalanobis mah-x mah-mean mah-cov)))
 
 
-(def v98_l496 fm-mah)
+(def v98_l495 fm-mah)
 
 
 (def
- v100_l500
+ v100_l499
  (def
   la-mahalanobis
   (fn
@@ -665,20 +662,20 @@
     (Math/sqrt d-sq)))))
 
 
-(def v101_l510 (def la-mah (la-mahalanobis mah-x mah-mean mah-cov)))
+(def v101_l509 (def la-mah (la-mahalanobis mah-x mah-mean mah-cov)))
 
 
-(def v102_l512 la-mah)
+(def v102_l511 la-mah)
 
 
-(def v104_l516 (< (Math/abs (- fm-mah la-mah)) 1.0E-10))
+(def v104_l515 (< (Math/abs (- fm-mah la-mah)) 1.0E-10))
 
 
-(deftest t105_l518 (is (true? v104_l516)))
+(deftest t105_l517 (is (true? v104_l515)))
 
 
 (def
- v107_l526
+ v107_l525
  (let
   [n-iter 5000]
   (tc/dataset
@@ -692,21 +689,21 @@
       n-iter)]})))
 
 
-(def v109_l539 (def levels [:low :medium :high :very-high]))
+(def v109_l538 (def levels [:low :medium :high :very-high]))
 
 
 (def
- v110_l541
+ v110_l540
  (def
   fm-helmert-contrasts
   (contrast/mean-contrasts (contrast/helmert levels) false)))
 
 
-(def v111_l544 fm-helmert-contrasts)
+(def v111_l543 fm-helmert-contrasts)
 
 
 (def
- v113_l550
+ v113_l549
  (def
   la-mean-contrasts
   (fn
@@ -732,17 +729,17 @@
 
 
 (def
- v114_l566
+ v114_l565
  (def
   la-helmert-contrasts
   (la-mean-contrasts (contrast/helmert levels))))
 
 
-(def v115_l569 la-helmert-contrasts)
+(def v115_l568 la-helmert-contrasts)
 
 
 (def
- v117_l573
+ v117_l572
  (every?
   (fn
    [k]
@@ -757,11 +754,11 @@
   (keys fm-helmert-contrasts)))
 
 
-(deftest t118_l581 (is (true? v117_l573)))
+(deftest t118_l580 (is (true? v117_l572)))
 
 
 (def
- v120_l585
+ v120_l584
  (let
   [helmert-coding (contrast/helmert levels) n-iter 5000]
   (tc/dataset
@@ -774,7 +771,7 @@
 
 
 (def
- v122_l598
+ v122_l597
  (def
   sg-signal
   (mapv
@@ -782,14 +779,14 @@
    (range 100))))
 
 
-(def v124_l606 (def fm-sg (signal/savgol-filter 7 3 0)))
+(def v124_l605 (def fm-sg (signal/savgol-filter 7 3 0)))
 
 
-(def v125_l608 (def fm-sg-result (fm-sg sg-signal)))
+(def v125_l607 (def fm-sg-result (fm-sg sg-signal)))
 
 
 (def
- v127_l614
+ v127_l613
  (def
   la-savgol-coeffs
   (fn
@@ -822,21 +819,21 @@
     coeffs))))
 
 
-(def v128_l635 (def la-sg-coeffs (la-savgol-coeffs 7 3 0)))
+(def v128_l634 (def la-sg-coeffs (la-savgol-coeffs 7 3 0)))
 
 
-(def v129_l637 la-sg-coeffs)
+(def v129_l636 la-sg-coeffs)
 
 
 (def
- v131_l644
+ v131_l643
  (let
   [fm-coeffs
    (->
     (for
      [v (range -3 4)]
      (mapv
-      (fn* [p1__104377#] (Math/pow (double v) (double p1__104377#)))
+      (fn* [p1__38606#] (Math/pow (double v) (double p1__38606#)))
       (range 4)))
     (m/seq->double-double-array)
     (org.apache.commons.math3.linear.Array2DRowRealMatrix.)
@@ -850,11 +847,11 @@
    (map vector fm-coeffs la-sg-coeffs))))
 
 
-(deftest t132_l658 (is (true? v131_l644)))
+(deftest t132_l657 (is (true? v131_l643)))
 
 
 (def
- v134_l664
+ v134_l663
  (let
   [n-iter 5000]
   (tc/dataset
@@ -864,14 +861,14 @@
      (bench-fn (fn* [] (la-savgol-coeffs 7 3 0)) n-iter)]})))
 
 
-(def v136_l676 (def fm-fd (finite/fd-coeffs 1 [-1 0 1])))
+(def v136_l675 (def fm-fd (finite/fd-coeffs 1 [-1 0 1])))
 
 
-(def v137_l678 fm-fd)
+(def v137_l677 fm-fd)
 
 
 (def
- v139_l682
+ v139_l681
  (def
   la-fd-coeffs
   (fn
@@ -900,40 +897,40 @@
     [offsets (mapv (fn [i] (tensor/mget w i 0)) (range noff))]))))
 
 
-(def v140_l701 (def la-fd (la-fd-coeffs 1 [-1 0 1])))
+(def v140_l700 (def la-fd (la-fd-coeffs 1 [-1 0 1])))
 
 
-(def v141_l703 la-fd)
+(def v141_l702 la-fd)
 
 
 (def
- v143_l707
+ v143_l706
  (every?
   (fn [[a b]] (< (Math/abs (- (double a) (double b))) 1.0E-10))
   (map vector (second fm-fd) (second la-fd))))
 
 
-(deftest t144_l711 (is (true? v143_l707)))
+(deftest t144_l710 (is (true? v143_l706)))
 
 
-(def v146_l715 (def fm-fd2 (finite/fd-coeffs 2 [-2 -1 0 1 2])))
+(def v146_l714 (def fm-fd2 (finite/fd-coeffs 2 [-2 -1 0 1 2])))
 
 
-(def v147_l716 (def la-fd2 (la-fd-coeffs 2 [-2 -1 0 1 2])))
+(def v147_l715 (def la-fd2 (la-fd-coeffs 2 [-2 -1 0 1 2])))
 
 
 (def
- v148_l718
+ v148_l717
  (every?
   (fn [[a b]] (< (Math/abs (- (double a) (double b))) 1.0E-10))
   (map vector (second fm-fd2) (second la-fd2))))
 
 
-(deftest t149_l722 (is (true? v148_l718)))
+(deftest t149_l721 (is (true? v148_l717)))
 
 
 (def
- v151_l726
+ v151_l725
  (let
   [offsets [-2 -1 0 1 2] n-iter 5000]
   (tc/dataset
@@ -943,11 +940,11 @@
      (bench-fn (fn* [] (la-fd-coeffs 2 offsets)) n-iter)]})))
 
 
-(def v153_l747 (def quad-n 5))
+(def v153_l746 (def quad-n 5))
 
 
 (def
- v154_l749
+ v154_l748
  (def
   jacobi-b
   (mapv
@@ -958,15 +955,15 @@
 
 
 (def
- v155_l755
+ v155_l754
  (def fm-quad-nodes (quad/get-quadrature-points jacobi-b quad-n)))
 
 
-(def v156_l758 fm-quad-nodes)
+(def v156_l757 fm-quad-nodes)
 
 
 (def
- v158_l764
+ v158_l763
  (def
   la-quad-nodes
   (fn
@@ -992,24 +989,24 @@
     (vec (reverse (take-last n evals)))))))
 
 
-(def v159_l780 (def la-nodes (la-quad-nodes jacobi-b quad-n)))
+(def v159_l779 (def la-nodes (la-quad-nodes jacobi-b quad-n)))
 
 
-(def v160_l782 la-nodes)
+(def v160_l781 la-nodes)
 
 
 (def
- v162_l786
+ v162_l785
  (every?
   (fn [[a b]] (< (Math/abs (- (double a) (double b))) 1.0E-10))
   (map vector (sort fm-quad-nodes) (sort la-nodes))))
 
 
-(deftest t163_l790 (is (true? v162_l786)))
+(deftest t163_l789 (is (true? v162_l785)))
 
 
 (def
- v165_l794
+ v165_l793
  (let
   [n-iter 5000]
   (tc/dataset
@@ -1021,14 +1018,14 @@
      (bench-fn (fn* [] (la-quad-nodes jacobi-b quad-n)) n-iter)]})))
 
 
-(def v167_l807 (def fm-ince-c (poly/ince-C-coeffs 4 2 0.5 :none)))
+(def v167_l806 (def fm-ince-c (poly/ince-C-coeffs 4 2 0.5 :none)))
 
 
-(def v168_l809 (vec fm-ince-c))
+(def v168_l808 (vec fm-ince-c))
 
 
 (def
- v170_l815
+ v170_l814
  (def
   la-ince-c-coeffs-even
   (fn
@@ -1074,14 +1071,14 @@
     (mapv (fn [v] (* sgn v)) coeffs)))))
 
 
-(def v171_l845 (def la-ince-c (la-ince-c-coeffs-even 4 2 0.5)))
+(def v171_l844 (def la-ince-c (la-ince-c-coeffs-even 4 2 0.5)))
 
 
-(def v172_l847 la-ince-c)
+(def v172_l846 la-ince-c)
 
 
 (def
- v174_l854
+ v174_l853
  (let
   [normalize
    (fn
@@ -1091,8 +1088,8 @@
       (Math/sqrt
        (reduce
         +
-        (map (fn* [p1__104378#] (* p1__104378# p1__104378#)) v)))]
-     (mapv (fn* [p1__104379#] (/ (double p1__104379#) norm)) v)))
+        (map (fn* [p1__38607#] (* p1__38607# p1__38607#)) v)))]
+     (mapv (fn* [p1__38608#] (/ (double p1__38608#) norm)) v)))
    fm-normed
    (normalize (vec fm-ince-c))
    la-normed
@@ -1102,11 +1099,11 @@
    (map vector fm-normed la-normed))))
 
 
-(deftest t175_l863 (is (true? v174_l854)))
+(deftest t175_l862 (is (true? v174_l853)))
 
 
 (def
- v177_l867
+ v177_l866
  (let
   [n-iter 5000]
   (tc/dataset

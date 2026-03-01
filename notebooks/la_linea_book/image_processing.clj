@@ -196,6 +196,12 @@
               [-1  8 -1]
               [-1 -1 -1]]))
 
+;; Edge detection kernels sum to zero (no DC response):
+
+(dfn/sum edge-kernel)
+
+(kind/test-last [(fn [v] (== 0.0 v))])
+
 ;; ### Applying a kernel
 ;;
 ;; For each output pixel, extract a 3*3 patch and compute

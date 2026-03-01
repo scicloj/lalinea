@@ -215,6 +215,10 @@ stationary-eigen
 
 google-matrix
 
+(kind/test-last
+ [(fn [m] (let [row-sums (la/mmul m (la/column (repeat 5 1.0)))]
+            (< (la/norm (la/sub row-sums (la/column (repeat 5 1.0)))) 1e-10)))])
+
 ;; Find PageRank via power iteration:
 
 (def pagerank

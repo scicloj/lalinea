@@ -11,8 +11,6 @@
   (:require [scicloj.la-linea.linalg :as la]
             [scicloj.la-linea.tape :as tape]
             [scicloj.la-linea.grad :as grad]
-            [tech.v3.datatype :as dtype]
-            [tech.v3.tensor :as tensor]
             [scicloj.kindly.v4.kind :as kind]))
 
 ;; ## How it works
@@ -102,6 +100,9 @@
 
 grad-x
 
+(kind/test-last
+ [(fn [g] (la/close? g (la/column [-8 -4])))])
+
 ;; Verify against the analytic gradient 2Aᵀ(Ax − b):
 
 (def expected-grad
@@ -134,6 +135,9 @@ expected-grad
 (def grad-A2 (.get grads-A A2))
 
 grad-A2
+
+(kind/test-last
+ [(fn [g] (la/close? g (la/matrix [[-4 -4] [0 0] [-4 -4]])))])
 
 (def residual (la/sub (la/mmul A2 x) b))
 

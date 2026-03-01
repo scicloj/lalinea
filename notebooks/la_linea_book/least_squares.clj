@@ -69,6 +69,9 @@
 
 A-linear
 
+(kind/test-last
+ [(fn [m] (= [20 2] (vec (dtype/shape m))))])
+
 ;; The observation vector $\mathbf{y}$ as a column:
 
 (def y-col (la/column y-linear))

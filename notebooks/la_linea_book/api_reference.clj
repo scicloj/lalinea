@@ -560,6 +560,8 @@
 
 (mapv tape/detect-memory-status (:entries tape-example))
 
+(kind/test-last [(fn [v] (every? #{:lazy :shared :independent} v))])
+
 ;; ## `scicloj.la-linea.elementwise`
 ;;
 ;; Tape-aware element-wise operations with complex dispatch.
@@ -590,6 +592,12 @@
 
 (kind/test-last [true?])
 
+(kind/doc #'elem/log10)
+
+(la/close-scalar? (tensor/mget (elem/log10 (la/column [100])) 0 0) 2.0)
+
+(kind/test-last [true?])
+
 (kind/doc #'elem/sin)
 
 (la/close-scalar? (tensor/mget (elem/sin (la/column [(/ Math/PI 2)])) 0 0) 1.0)
@@ -599,6 +607,30 @@
 (kind/doc #'elem/cos)
 
 (la/close-scalar? (tensor/mget (elem/cos (la/column [0])) 0 0) 1.0)
+
+(kind/test-last [true?])
+
+(kind/doc #'elem/tan)
+
+(la/close-scalar? (tensor/mget (elem/tan (la/column [(/ Math/PI 4)])) 0 0) 1.0)
+
+(kind/test-last [true?])
+
+(kind/doc #'elem/sinh)
+
+(la/close-scalar? (tensor/mget (elem/sinh (la/column [0])) 0 0) 0.0)
+
+(kind/test-last [true?])
+
+(kind/doc #'elem/cosh)
+
+(la/close-scalar? (tensor/mget (elem/cosh (la/column [0])) 0 0) 1.0)
+
+(kind/test-last [true?])
+
+(kind/doc #'elem/tanh)
+
+(la/close-scalar? (tensor/mget (elem/tanh (la/column [0])) 0 0) 0.0)
 
 (kind/test-last [true?])
 
@@ -625,6 +657,12 @@
 (tensor/mget (elem/pow (la/column [2]) 3) 0 0)
 
 (kind/test-last [(fn [v] (== 8.0 v))])
+
+(kind/doc #'elem/cbrt)
+
+(la/close-scalar? (tensor/mget (elem/cbrt (la/column [27])) 0 0) 3.0)
+
+(kind/test-last [true?])
 
 (kind/doc #'elem/floor)
 

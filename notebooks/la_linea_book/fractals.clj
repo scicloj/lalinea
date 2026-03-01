@@ -239,6 +239,16 @@
        (dfn// (dfn/+ (dfn/* ar br) (dfn/* ai bi)) denom)
        (dfn// (dfn/- (dfn/* ai br) (dfn/* ar bi)) denom)))))
 
+;;  Verify: (3+4i)/(1+2i) = (11-2i)/5 = 2.2-0.4i
+
+(let [a (cx/complex-tensor (la/matrix [[3]]) (la/matrix [[4]]))
+      b (cx/complex-tensor (la/matrix [[1]]) (la/matrix [[2]]))
+      result (complex-div a b)]
+  (and (< (Math/abs (- (tensor/mget (cx/re result) 0 0) 2.2)) 1e-10)
+       (< (Math/abs (- (tensor/mget (cx/im result) 0 0) -0.4)) 1e-10)))
+
+(kind/test-last [true?])
+
 ;; ### Newton iteration
 
 (def newton-roots

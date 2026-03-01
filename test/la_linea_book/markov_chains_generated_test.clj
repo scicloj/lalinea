@@ -202,8 +202,21 @@
 (def v34_l216 google-matrix)
 
 
+(deftest
+ t35_l218
+ (is
+  ((fn
+    [m]
+    (let
+     [row-sums (la/mmul m (la/column (repeat 5 1.0)))]
+     (<
+      (la/norm (la/sub row-sums (la/column (repeat 5 1.0))))
+      1.0E-10)))
+   v34_l216)))
+
+
 (def
- v36_l220
+ v37_l224
  (def
   pagerank
   (let
@@ -222,7 +235,7 @@
 
 
 (def
- v38_l232
+ v39_l236
  (->
   (tc/dataset
    {:page ["Page 0" "Page 1" "Page 2" "Page 3" "Page 4"],
@@ -232,15 +245,15 @@
   plotly/plot))
 
 
-(def v40_l240 (dfn/sum pagerank))
+(def v41_l244 (dfn/sum pagerank))
 
 
 (deftest
- t41_l242
- (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v40_l240)))
+ t42_l246
+ (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v41_l244)))
 
 
-(def v43_l246 (argops/argmax pagerank))
+(def v44_l250 (argops/argmax pagerank))
 
 
-(deftest t44_l248 (is ((fn [idx] (contains? #{0 2} idx)) v43_l246)))
+(deftest t45_l252 (is ((fn [idx] (contains? #{0 2} idx)) v44_l250)))

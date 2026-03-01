@@ -34,7 +34,6 @@
    [fastmath.calculus.quadrature :as quad]
    [fastmath.polynomials :as poly]
    [fastmath.kernel :as k]
-   [fastmath.matrix :as mat]
    [fastmath.random :as frand]
    [fastmath.core :as m]
    ;; Visualization:
@@ -470,8 +469,8 @@ la-kriging-preds
                                                 {:polynomial-terms (constantly [1.0])})
                               n-iter)
                     (bench-fn #(la-kriging kriging-xs kriging-ys
-                                          auto-variogram
-                                          (constantly [1.0]))
+                                           auto-variogram
+                                           (constantly [1.0]))
                               n-iter)]}))
 
 ;; ## Mahalanobis Distance

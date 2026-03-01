@@ -105,6 +105,14 @@ T-direct
 (kind/test-last
  [(fn [t] (some? t))])
 
+;; The exact solution is linear: $T(x) = 100(1-x)$
+
+(let [xs (mapv (fn [i] (/ (double (inc i)) (double (inc n)))) (range n))
+      expected (la/column (mapv (fn [x] (* 100.0 (- 1.0 x))) xs))]
+  (la/close? T-direct expected))
+
+(kind/test-last [true?])
+
 ;; The solution is a straight line from 100° to 0° — exactly
 ;; what physical intuition predicts for uniform conduction
 ;; with no heat source.

@@ -12,7 +12,6 @@
 
 (ns la-linea-book.first-class-tensors
   (:require [scicloj.la-linea.linalg :as la]
-            [scicloj.la-linea.complex :as cx]
             [tech.v3.tensor :as tensor]
             [tech.v3.datatype :as dtype]
             [tech.v3.datatype.functional :as dfn]
@@ -88,7 +87,13 @@
 
 (la/add (la/column [1 2 3]) (la/column [10 20 30]))
 
+(kind/test-last
+ [(fn [v] (la/close? v (la/column [11 22 33])))])
+
 (la/scale (la/matrix [[1 2] [3 4]]) 2)
+
+(kind/test-last
+ [(fn [m] (la/close? m (la/matrix [[2 4] [6 8]])))])
 
 ;; Chaining with `->` threads cleanly:
 

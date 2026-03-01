@@ -208,8 +208,14 @@
  (def edge-kernel (la/matrix [[-1 -1 -1] [-1 8 -1] [-1 -1 -1]])))
 
 
+(def v37_l201 (dfn/sum edge-kernel))
+
+
+(deftest t38_l203 (is ((fn [v] (== 0.0 v)) v37_l201)))
+
+
 (def
- v37_l206
+ v40_l212
  (def
   apply-kernel
   (fn
@@ -260,43 +266,43 @@
 
 
 (def
- v39_l233
+ v42_l239
  (bufimg/tensor->image (apply-kernel checkerboard blur-kernel)))
 
 
 (deftest
- t40_l235
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v39_l233)))
+ t43_l241
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v42_l239)))
 
 
 (def
- v42_l243
+ v45_l249
  (bufimg/tensor->image (apply-kernel checkerboard edge-kernel)))
 
 
 (deftest
- t43_l245
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v42_l243)))
+ t46_l251
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v45_l249)))
 
 
 (def
- v45_l252
+ v48_l258
  (bufimg/tensor->image (apply-kernel circle-img sharpen-kernel)))
 
 
 (deftest
- t46_l254
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v45_l252)))
+ t49_l260
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v48_l258)))
 
 
-(def v48_l265 (def sobel-x (la/matrix [[-1 0 1] [-2 0 2] [-1 0 1]])))
+(def v51_l271 (def sobel-x (la/matrix [[-1 0 1] [-2 0 2] [-1 0 1]])))
 
 
-(def v49_l268 (def sobel-y (la/matrix [[-1 -2 -1] [0 0 0] [1 2 1]])))
+(def v52_l274 (def sobel-y (la/matrix [[-1 -2 -1] [0 0 0] [1 2 1]])))
 
 
 (def
- v50_l271
+ v53_l277
  (def
   sobel-edges
   (fn
@@ -370,9 +376,9 @@
      :uint8)))))
 
 
-(def v51_l306 (bufimg/tensor->image (sobel-edges circle-img)))
+(def v54_l312 (bufimg/tensor->image (sobel-edges circle-img)))
 
 
 (deftest
- t52_l308
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v51_l306)))
+ t55_l314
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v54_l312)))

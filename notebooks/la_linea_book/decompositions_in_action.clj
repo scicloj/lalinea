@@ -78,6 +78,12 @@
 ;; The singular values drop off rapidly — most of the information
 ;; is in the first few:
 
+(:S svd-result)
+
+(kind/test-last
+ [(fn [sv] (and (> (first sv) (nth sv 5) (nth sv 20))
+                (> (first sv) (* 10 (nth sv 5)))))])
+
 (-> (tc/dataset {:index (range (count (:S svd-result)))
                  :singular-value (:S svd-result)})
     (plotly/base {:=x :index :=y :singular-value})
