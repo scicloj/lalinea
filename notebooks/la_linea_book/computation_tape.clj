@@ -1,6 +1,6 @@
 ;; # Computation tape
 
-;; dtype-next's laziness is powerful but opaque. When you chain
+;; dtype-next's laziness is useful but opaque. When you chain
 ;; operations like `la/add`, `la/scale`, and `la/transpose`, it is
 ;; not obvious which results share memory, which are lazy, and where
 ;; copies happen. The tape namespace provides tools to answer these
@@ -293,8 +293,8 @@
                            [0 3 0]
                            [4 0 5]])
           centered (la/sub data (la/scale (la/matrix [[1 1 1]
-                                                       [1 1 1]
-                                                       [1 1 1]])
+                                                      [1 1 1]
+                                                      [1 1 1]])
                                           (/ (double (la/trace data)) 3.0)))
           {:keys [U S Vt]} (la/svd centered)
           projection (la/mmul (la/transpose Vt) (la/column [1 0 0]))]
