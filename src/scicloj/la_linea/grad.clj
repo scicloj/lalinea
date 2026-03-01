@@ -23,9 +23,9 @@
   "VJP rules: op keyword -> fn of [adjoint, inputs, output] -> vector of
    input adjoints (nil for non-differentiable inputs like scalars)."
   {:la/add       (fn [g [_a _b] _out] [g g])
-   :la/sub       (fn [g [_a _b] _out] [g (dfn/- g)])
+   :la/sub       (fn [g [_a _b] _out] [g (tensor/reshape (dfn/* -1.0 g) (dtype/shape g))])
    :la/scale     (fn [g [_a alpha] _out]
-                   [(dfn/* g (double alpha))
+                   [(tensor/reshape (dfn/* g (double alpha)) (dtype/shape g))
                     nil])
    :la/mmul      (fn [g [a b] _out]
                    [(la/mmul g (la/transpose b))
@@ -33,12 +33,13 @@
    :la/transpose (fn [g [_a] _out]
                    [(la/transpose g)])
    :la/mul       (fn [g [a b] _out]
-                   [(dfn/* g b) (dfn/* g a)])
+                   [(tensor/reshape (dfn/* g b) (dtype/shape g))
+                    (tensor/reshape (dfn/* g a) (dtype/shape g))])
    :la/trace     (fn [g [a] _out]
                    (let [n (first (dtype/shape a))]
                      [(la/scale (la/eye n) (double g))]))
    :la/sq        (fn [g [a] _out]
-                   [(dfn/* g (dfn/* 2.0 a))])
+                   [(tensor/reshape (dfn/* g (dfn/* 2.0 a)) (dtype/shape g))])
    :la/sum       (fn [g [a] _out]
                    (let [shape (dtype/shape a)]
                      [(dtype/clone
@@ -59,7 +60,7 @@
     (if (tensor/tensor? new-grad)
       (dtype/clone new-grad)
       new-grad)
-    (dtype/clone (dfn/+ existing new-grad))))
+    (dtype/clone (tensor/reshape (dfn/+ existing new-grad) (dtype/shape existing)))))
 
 ;; ---------------------------------------------------------------------------
 ;; grad

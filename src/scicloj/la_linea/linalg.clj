@@ -178,7 +178,7 @@
   (tape/record! :la/add [a b]
                 (if (cx/complex? a)
                   (cx/add a b)
-                  (dfn/+ a b))))
+                  (tensor/reshape (dfn/+ a b) (dtype/shape a)))))
 
 (defn sub
   "Matrix subtraction."
@@ -186,7 +186,7 @@
   (tape/record! :la/sub [a b]
                 (if (cx/complex? a)
                   (cx/sub a b)
-                  (dfn/- a b))))
+                  (tensor/reshape (dfn/- a b) (dtype/shape a)))))
 
 (defn scale
   "Scalar multiply. Returns alpha * a."
@@ -194,7 +194,7 @@
   (tape/record! :la/scale [a alpha]
                 (if (cx/complex? a)
                   (cx/scale a alpha)
-                  (dfn/* a (double alpha)))))
+                  (tensor/reshape (dfn/* a (double alpha)) (dtype/shape a)))))
 
 (defn mul
   "Element-wise multiply (Hadamard product for real, pointwise complex multiply for complex)."
@@ -202,7 +202,7 @@
   (tape/record! :la/mul [a b]
                 (if (cx/complex? a)
                   (cx/mul a b)
-                  (dfn/* a b))))
+                  (tensor/reshape (dfn/* a b) (dtype/shape a)))))
 
 (defn abs
   "Element-wise absolute value (magnitude for complex). Returns a real tensor."
@@ -210,7 +210,7 @@
   (tape/record! :la/abs [a]
                 (if (cx/complex? a)
                   (cx/abs a)
-                  (dfn/abs a))))
+                  (tensor/reshape (dfn/abs a) (dtype/shape a)))))
 
 (defn sq
   "Element-wise square."
@@ -218,7 +218,7 @@
   (tape/record! :la/sq [a]
                 (if (cx/complex? a)
                   (cx/mul a a)
-                  (dfn/* a a))))
+                  (tensor/reshape (dfn/* a a) (dtype/shape a)))))
 
 (defn sum
   "Sum of all elements. Returns a double for real tensors,

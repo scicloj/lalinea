@@ -190,7 +190,7 @@
         means (tensor/compute-tensor [n-points 2]
                                      (fn [_i j] (if (zero? j) mean0 mean1))
                                      :float64)]
-    (dtype/clone (dfn/- data-tensor means))))
+    (dtype/clone (la/sub data-tensor means))))
 
 ;; ### Compute covariance matrix and eigendecompose
 

@@ -67,7 +67,7 @@
   (tape/record! :elem/pow [a exponent]
                 (if (cx/complex? a)
                   (unsupported-complex! :elem/pow)
-                  (dfn/pow a (double exponent)))))
+                  (tensor/reshape (dfn/pow a (double exponent)) (dtype/shape a)))))
 
 (defn cbrt
   "Element-wise cube root. Real only."
@@ -238,7 +238,7 @@
   (tape/record! :elem/min [a b]
                 (if (cx/complex? a)
                   (unsupported-complex! :elem/min)
-                  (dfn/min a b))))
+                  (tensor/reshape (dfn/min a b) (dtype/shape a)))))
 
 (defn max
   "Element-wise maximum. Real only."
@@ -246,4 +246,4 @@
   (tape/record! :elem/max [a b]
                 (if (cx/complex? a)
                   (unsupported-complex! :elem/max)
-                  (dfn/max a b))))
+                  (tensor/reshape (dfn/max a b) (dtype/shape a)))))

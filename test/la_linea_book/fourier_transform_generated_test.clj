@@ -139,7 +139,7 @@
   (let
    [t
     (mapv
-     (fn* [p1__104764#] (/ (double p1__104764#) N-vis))
+     (fn* [p1__108345#] (/ (double p1__108345#) N-vis))
      (range N-vis))]
    (mapv
     (fn
@@ -156,7 +156,7 @@
   (tc/dataset
    {:t
     (mapv
-     (fn* [p1__104765#] (/ (double p1__104765#) N-vis))
+     (fn* [p1__108346#] (/ (double p1__108346#) N-vis))
      (range N-vis)),
     :amplitude (vec signal-composed)})
   (plotly/base {:=x :t, :=y :amplitude})
@@ -214,7 +214,7 @@
     [v]
     (and
      (< (Math/abs (- (double (:dc v)) 12.0)) 1.0E-10)
-     (every? (fn* [p1__104766#] (< p1__104766# 1.0E-10)) (:others v))))
+     (every? (fn* [p1__108347#] (< p1__108347# 1.0E-10)) (:others v))))
    v29_l157)))
 
 

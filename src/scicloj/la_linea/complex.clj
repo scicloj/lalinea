@@ -197,6 +197,22 @@
 (declare ->ComplexTensor)
 
 (deftype ComplexTensor [tensor]
+  dtype-proto/PElemwiseDatatype
+  (elemwise-datatype [_ct] :float64)
+
+  dtype-proto/PECount
+  (ecount [ct] (dtype/ecount tensor))
+
+  dtype-proto/PShape
+  (shape [ct] (dtype/shape tensor))
+
+  dtype-proto/PClone
+  (clone [ct] (->ComplexTensor (dtype/clone tensor)))
+
+  dtype-proto/PToReader
+  (convertible-to-reader? [_ct] true)
+  (->reader [ct] (dtype/->reader tensor))
+
   PComplex
   (re [_]
     (if (= 1 (count (dtype/shape tensor)))
@@ -391,14 +407,18 @@
 (defn scale
   "Scale by a real scalar."
   [^ComplexTensor ct alpha]
-  (->ComplexTensor (dfn/* (double alpha) (->tensor ct))))
+  (let [t (->tensor ct)]
+    (->ComplexTensor (tensor/reshape (dfn/* (double alpha) t) (dtype/shape t)))))
 
 (defn abs
   "Element-wise complex magnitude: sqrt(re² + im²).
    Returns a real tensor (or double for scalar)."
   [^ComplexTensor ct]
-  (let [r (re ct) i (im ct)]
-    (dfn/sqrt (dfn/+ (dfn/* r r) (dfn/* i i)))))
+  (let [r (re ct) i (im ct)
+        result (dfn/sqrt (dfn/+ (dfn/* r r) (dfn/* i i)))]
+    (if (number? r)
+      result
+      (tensor/reshape result (dtype/shape r)))))
 
 (defn dot
   "Complex dot product: Σ a_i * b_i.
@@ -424,7 +444,8 @@
   (if (and (scalar? a) (scalar? b))
     (complex (+ (double (re a)) (double (re b)))
              (+ (double (im a)) (double (im b))))
-    (->ComplexTensor (dfn/+ (->tensor a) (->tensor b)))))
+    (let [ta (->tensor a)]
+      (->ComplexTensor (tensor/reshape (dfn/+ ta (->tensor b)) (dtype/shape ta))))))
 
 (defn sub
   "Pointwise complex subtraction."
@@ -432,7 +453,8 @@
   (if (and (scalar? a) (scalar? b))
     (complex (- (double (re a)) (double (re b)))
              (- (double (im a)) (double (im b))))
-    (->ComplexTensor (dfn/- (->tensor a) (->tensor b)))))
+    (let [ta (->tensor a)]
+      (->ComplexTensor (tensor/reshape (dfn/- ta (->tensor b)) (dtype/shape ta))))))
 
 (defn sum
   "Complex-aware summation. Returns a scalar ComplexTensor."
@@ -443,22 +465,7 @@
 ;; dtype-next protocol extensions
 ;; ---------------------------------------------------------------------------
 
-(extend-type ComplexTensor
-  dtype-proto/PElemwiseDatatype
-  (elemwise-datatype [_ct] :float64)
-
-  dtype-proto/PECount
-  (ecount [ct] (dtype/ecount (->tensor ct)))
-
-  dtype-proto/PShape
-  (shape [ct] (dtype/shape (->tensor ct)))
-
-  dtype-proto/PClone
-  (clone [ct] (->ComplexTensor (dtype/clone (->tensor ct))))
-
-  dtype-proto/PToReader
-  (convertible-to-reader? [_ct] true)
-  (->reader [ct] (dtype/->reader (->tensor ct))))
+;; dtype-next protocol implementations moved into deftype (v11 compatibility)
 
 
 

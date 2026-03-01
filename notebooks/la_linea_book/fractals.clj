@@ -234,10 +234,11 @@
   (fn [a b]
     (let [ar (cx/re a) ai (cx/im a)
           br (cx/re b) bi (cx/im b)
+          shape (dtype/shape ar)
           denom (dfn/+ (dfn/* br br) (dfn/* bi bi))]
       (cx/complex-tensor
-       (dfn// (dfn/+ (dfn/* ar br) (dfn/* ai bi)) denom)
-       (dfn// (dfn/- (dfn/* ai br) (dfn/* ar bi)) denom)))))
+       (tensor/reshape (dfn// (dfn/+ (dfn/* ar br) (dfn/* ai bi)) denom) shape)
+       (tensor/reshape (dfn// (dfn/- (dfn/* ai br) (dfn/* ar bi)) denom) shape)))))
 
 ;;  Verify: (3+4i)/(1+2i) = (11-2i)/5 = 2.2-0.4i
 
