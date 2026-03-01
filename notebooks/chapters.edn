@@ -2,7 +2,8 @@
  "Core Concepts" ["tensors_and_ejml"
                   "complex_tensors"
                   "fourier_transform"
-                  "sharing_and_mutation"]
+                  "sharing_and_mutation"
+                  "computation_tape"]
  "Abstract Linear Algebra" ["vectors_and_spaces"
                             "maps_and_structure"
                             "inner_products_and_orthogonality"
