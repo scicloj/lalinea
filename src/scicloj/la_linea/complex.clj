@@ -264,6 +264,21 @@
   (.write w (.toString ct)))
 
 ;; ---------------------------------------------------------------------------
+;; Tape recording (lazy resolution to avoid circular dep with tape ns)
+;; ---------------------------------------------------------------------------
+
+(def ^:private tape-var   (delay (requiring-resolve 'scicloj.la-linea.tape/*tape*)))
+(def ^:private inside-var (delay (requiring-resolve 'scicloj.la-linea.tape/*inside-record*)))
+(def ^:private record-fn  (delay (requiring-resolve 'scicloj.la-linea.tape/do-record!)))
+
+(defn- tape-record!
+  "Record to tape if active. No-op when tape is nil or inside a parent record."
+  [op inputs result]
+  (when (and @@tape-var (not @@inside-var))
+    (@@record-fn op inputs result))
+  result)
+
+;; ---------------------------------------------------------------------------
 ;; Constructors
 ;; ---------------------------------------------------------------------------
 
@@ -283,15 +298,16 @@
    (let [t (if (instance? ComplexTensor tensor-or-re)
              (.-tensor ^ComplexTensor tensor-or-re)
              (tensor/ensure-tensor tensor-or-re))
-         shape (vec (dtype/shape t))]
-     (if (= 2 (last shape))
-       (->ComplexTensor t)
-       ;; Flat input — reshape to [n/2, 2]
-       (let [n (long (reduce * shape))]
-         (when-not (even? n)
-           (throw (ex-info (str "Cannot interpret odd-length data as complex: " n)
-                           {:shape shape :n n})))
-         (->ComplexTensor (tensor/reshape t [(/ n 2) 2]))))))
+         shape (vec (dtype/shape t))
+         result (if (= 2 (last shape))
+                  (->ComplexTensor t)
+                  ;; Flat input — reshape to [n/2, 2]
+                  (let [n (long (reduce * shape))]
+                    (when-not (even? n)
+                      (throw (ex-info (str "Cannot interpret odd-length data as complex: " n)
+                                      {:shape shape :n n})))
+                    (->ComplexTensor (tensor/reshape t [(/ n 2) 2]))))]
+     (tape-record! :cx/complex-tensor [tensor-or-re] result)))
   ([re-data im-data]
    (let [re-t (tensor/ensure-tensor re-data)
          im-t (tensor/ensure-tensor im-data)
@@ -307,8 +323,9 @@
                                           (if (even? idx)
                                             (double (re-flat (quot idx 2)))
                                             (double (im-flat (quot idx 2)))))
-           full-shape (clojure.core/conj re-shape 2)]
-       (->ComplexTensor (tensor/reshape interleaved full-shape))))))
+           full-shape (clojure.core/conj re-shape 2)
+           result (->ComplexTensor (tensor/reshape interleaved full-shape))]
+       (tape-record! :cx/complex-tensor [re-data im-data] result)))))
 
 (defn complex-tensor-real
   "Create a ComplexTensor from real data only (imaginary parts = 0)."
@@ -321,8 +338,9 @@
                                        (if (even? idx)
                                          (double (re-flat (quot idx 2)))
                                          0.0))
-        full-shape (clojure.core/conj re-shape 2)]
-    (->ComplexTensor (tensor/reshape interleaved full-shape))))
+        full-shape (clojure.core/conj re-shape 2)
+        result (->ComplexTensor (tensor/reshape interleaved full-shape))]
+    (tape-record! :cx/complex-tensor-real [re-data] result)))
 
 ;; ---------------------------------------------------------------------------
 ;; Accessors
@@ -370,96 +388,108 @@
 (defn mul
   "Pointwise complex multiply: (a+bi)(c+di) = (ac-bd) + (ad+bc)i"
   [^ComplexTensor a ^ComplexTensor b]
-  (if (and (scalar? a) (scalar? b))
-    (let [ar (double (re a)) ai (double (im a))
-          br (double (re b)) bi (double (im b))]
-      (complex (- (* ar br) (* ai bi))
-               (+ (* ar bi) (* ai br))))
-    (let [a-flat (dtype/->reader (->tensor a))
-          b-flat (dtype/->reader (->tensor b))
-          n (dtype/ecount (->tensor a))]
-      (->ComplexTensor
-       (tensor/reshape
-        (dtype/make-reader :float64 n
-                           (let [base (-> idx (quot 2) (* 2))
-                                 ar (double (a-flat base))
-                                 ai (double (a-flat (unchecked-inc base)))
-                                 br (double (b-flat base))
-                                 bi (double (b-flat (unchecked-inc base)))]
-                             (if (even? idx)
-                               (- (* ar br) (* ai bi))
-                               (+ (* ar bi) (* ai br)))))
-        (dtype/shape (->tensor a)))))))
+  (let [result
+        (if (and (scalar? a) (scalar? b))
+          (let [ar (double (re a)) ai (double (im a))
+                br (double (re b)) bi (double (im b))]
+            (complex (- (* ar br) (* ai bi))
+                     (+ (* ar bi) (* ai br))))
+          (let [a-flat (dtype/->reader (->tensor a))
+                b-flat (dtype/->reader (->tensor b))
+                n (dtype/ecount (->tensor a))]
+            (->ComplexTensor
+             (tensor/reshape
+              (dtype/make-reader :float64 n
+                                 (let [base (-> idx (quot 2) (* 2))
+                                       ar (double (a-flat base))
+                                       ai (double (a-flat (unchecked-inc base)))
+                                       br (double (b-flat base))
+                                       bi (double (b-flat (unchecked-inc base)))]
+                                   (if (even? idx)
+                                     (- (* ar br) (* ai bi))
+                                     (+ (* ar bi) (* ai br)))))
+              (dtype/shape (->tensor a))))))]
+    (tape-record! :cx/mul [a b] result)))
 
 (defn conj
   "Complex conjugate: negate imaginary part."
   [^ComplexTensor ct]
   (let [t (->tensor ct)
         flat (dtype/->reader t)
-        n (dtype/ecount t)]
-    (->ComplexTensor
-     (tensor/reshape
-      (dtype/make-reader :float64 n
-                         (let [v (double (flat idx))]
-                           (if (even? idx) v (- v))))
-      (dtype/shape t)))))
+        n (dtype/ecount t)
+        result (->ComplexTensor
+                (tensor/reshape
+                 (dtype/make-reader :float64 n
+                                    (let [v (double (flat idx))]
+                                      (if (even? idx) v (- v))))
+                 (dtype/shape t)))]
+    (tape-record! :cx/conj [ct] result)))
 
 (defn scale
   "Scale by a real scalar."
   [^ComplexTensor ct alpha]
-  (let [t (->tensor ct)]
-    (->ComplexTensor (tensor/reshape (dfn/* (double alpha) t) (dtype/shape t)))))
+  (let [t (->tensor ct)
+        result (->ComplexTensor (tensor/reshape (dfn/* (double alpha) t) (dtype/shape t)))]
+    (tape-record! :cx/scale [ct alpha] result)))
 
 (defn abs
   "Element-wise complex magnitude: sqrt(re² + im²).
    Returns a real tensor (or double for scalar)."
   [^ComplexTensor ct]
   (let [r (re ct) i (im ct)
-        result (dfn/sqrt (dfn/+ (dfn/* r r) (dfn/* i i)))]
-    (if (number? r)
-      result
-      (tensor/reshape result (dtype/shape r)))))
+        result (dfn/sqrt (dfn/+ (dfn/* r r) (dfn/* i i)))
+        result (if (number? r)
+                 result
+                 (tensor/reshape result (dtype/shape r)))]
+    (tape-record! :cx/abs [ct] result)))
 
 (defn dot
   "Complex dot product: Σ a_i * b_i.
    Returns a scalar ComplexTensor."
   [^ComplexTensor a ^ComplexTensor b]
   (let [ar (re a) ai (im a)
-        br (re b) bi (im b)]
-    (complex (- (dfn/sum (dfn/* ar br)) (dfn/sum (dfn/* ai bi)))
-             (+ (dfn/sum (dfn/* ar bi)) (dfn/sum (dfn/* ai br))))))
+        br (re b) bi (im b)
+        result (complex (- (dfn/sum (dfn/* ar br)) (dfn/sum (dfn/* ai bi)))
+                        (+ (dfn/sum (dfn/* ar bi)) (dfn/sum (dfn/* ai br))))]
+    (tape-record! :cx/dot [a b] result)))
 
 (defn dot-conj
   "Hermitian inner product: Σ a_i * conj(b_i).
    Returns a scalar ComplexTensor."
   [^ComplexTensor a ^ComplexTensor b]
   (let [ar (re a) ai (im a)
-        br (re b) bi (im b)]
-    (complex (+ (dfn/sum (dfn/* ar br)) (dfn/sum (dfn/* ai bi)))
-             (- (dfn/sum (dfn/* ai br)) (dfn/sum (dfn/* ar bi))))))
+        br (re b) bi (im b)
+        result (complex (+ (dfn/sum (dfn/* ar br)) (dfn/sum (dfn/* ai bi)))
+                        (- (dfn/sum (dfn/* ai br)) (dfn/sum (dfn/* ar bi))))]
+    (tape-record! :cx/dot-conj [a b] result)))
 
 (defn add
   "Pointwise complex addition."
   [^ComplexTensor a ^ComplexTensor b]
-  (if (and (scalar? a) (scalar? b))
-    (complex (+ (double (re a)) (double (re b)))
-             (+ (double (im a)) (double (im b))))
-    (let [ta (->tensor a)]
-      (->ComplexTensor (tensor/reshape (dfn/+ ta (->tensor b)) (dtype/shape ta))))))
+  (let [result
+        (if (and (scalar? a) (scalar? b))
+          (complex (+ (double (re a)) (double (re b)))
+                   (+ (double (im a)) (double (im b))))
+          (let [ta (->tensor a)]
+            (->ComplexTensor (tensor/reshape (dfn/+ ta (->tensor b)) (dtype/shape ta)))))]
+    (tape-record! :cx/add [a b] result)))
 
 (defn sub
   "Pointwise complex subtraction."
   [^ComplexTensor a ^ComplexTensor b]
-  (if (and (scalar? a) (scalar? b))
-    (complex (- (double (re a)) (double (re b)))
-             (- (double (im a)) (double (im b))))
-    (let [ta (->tensor a)]
-      (->ComplexTensor (tensor/reshape (dfn/- ta (->tensor b)) (dtype/shape ta))))))
+  (let [result
+        (if (and (scalar? a) (scalar? b))
+          (complex (- (double (re a)) (double (re b)))
+                   (- (double (im a)) (double (im b))))
+          (let [ta (->tensor a)]
+            (->ComplexTensor (tensor/reshape (dfn/- ta (->tensor b)) (dtype/shape ta)))))]
+    (tape-record! :cx/sub [a b] result)))
 
 (defn sum
   "Complex-aware summation. Returns a scalar ComplexTensor."
   [^ComplexTensor ct]
-  (complex (dfn/sum (re ct)) (dfn/sum (im ct))))
+  (let [result (complex (dfn/sum (re ct)) (dfn/sum (im ct)))]
+    (tape-record! :cx/sum [ct] result)))
 
 ;; ---------------------------------------------------------------------------
 ;; dtype-next protocol extensions

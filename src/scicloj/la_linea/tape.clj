@@ -20,9 +20,15 @@
 ;; ---------------------------------------------------------------------------
 
 (def ^:dynamic *tape*
-  "When bound to a tape object, `la/` functions record operations.
+  "When bound to a tape object, `la/`, `cx/`, and `elem/` functions record operations.
    nil by default — no recording, negligible overhead."
   nil)
+
+(def ^:dynamic *inside-record*
+  "True when inside a `record!` body. Prevents nested recording —
+   e.g., `la/add` on ComplexTensors delegates to `cx/add`, but only
+   the outermost operation is recorded."
+  false)
 
 ;; ---------------------------------------------------------------------------
 ;; Standalone utilities (no tape needed)
@@ -102,13 +108,8 @@
         {:id id :external true})
       {:external true})))
 
-(defn record!
-  "Record an operation on the tape. No-op when `*tape*` is nil.
-   Returns `result` unchanged.
-
-   `op`     — keyword identifying the operation (e.g. `:la/add`)
-   `inputs` — vector of input tensors/values
-   `result` — the computed result"
+(defn do-record!
+  "Internal: record an entry on the active tape. Called by the `record!` macro."
   [op inputs result]
   (when-some [tape *tape*]
     (when (some? result)
@@ -126,6 +127,22 @@
         (swap! (:entries tape) conj entry)
         (.put registry result id))))
   result)
+
+(defmacro record!
+  "Record an operation on the tape. No-op when `*tape*` is nil.
+   Prevents nested recording: inner operations called from within
+   the body are suppressed (the outermost caller wins).
+
+   `op`     — keyword identifying the operation (e.g. `:la/add`)
+   `inputs` — vector of input tensors/values
+   `body`   — expression(s) computing the result"
+  [op inputs & body]
+  `(if (and *tape* (not *inside-record*))
+     (let [inputs# ~inputs
+           result# (binding [*inside-record* true] (do ~@body))]
+       (do-record! ~op inputs# result#)
+       result#)
+     (do ~@body)))
 
 (defmacro with-tape
   "Execute body while recording a computation tape.

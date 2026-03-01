@@ -114,7 +114,7 @@
 
 ;; ## Recording a computation tape
 
-;; `tape/with-tape` records all `la/` operations within its scope.
+;; `tape/with-tape` records all `la/`, `cx/`, and `elem/` operations within its scope.
 ;; It returns `{:result ... :entries ...}`.
 
 (def tape-result
@@ -139,8 +139,9 @@
 
 ;; ## External inputs
 
-;; The tape only tracks `la/` operations. Inputs that originate
-;; outside La Linea appear as `{:external true}`.
+;; The tape tracks `la/`, `cx/`, and `elem/` operations. Inputs that
+;; originate outside La Linea (raw arrays, Clojure data structures,
+;; `dfn/` results, EJML objects) appear as `{:external true}`.
 
 ;; ### Double arrays
 
@@ -231,10 +232,10 @@
     (and (= [:la/matrix :la/add] (mapv :op entries))
          (:external (second (:inputs (second entries))))))])
 
-;; ### Complex tensors
+;; ## Complex operations
 
-;; Complex operations are tracked too. `cx/complex-tensor` is not
-;; an `la/` function, but `la/add` on complex inputs is recorded.
+;; `cx/` operations are recorded alongside `la/` operations. The tape
+;; shows the full chain: `la/matrix` → `cx/complex-tensor` → `la/add`.
 
 (def complex-tape
   (tape/with-tape
@@ -243,20 +244,23 @@
           s  (la/add z1 z2)]
       s)))
 
-(:complex? (last (:entries complex-tape)))
-
-(kind/test-last
- [(fn [c?] (true? c?))])
-
-;; The matrices inside the ComplexTensors were built with `la/matrix`,
-;; so they are on the tape. The ComplexTensor wrapping is external.
-;; The `la/add` is recorded with the ComplexTensors as external inputs,
-;; since `cx/complex-tensor` is not an `la/` function.
-
 (mapv :op (:entries complex-tape))
 
 (kind/test-last
- [(fn [ops] (= [:la/matrix :la/matrix :la/add] ops))])
+ [(fn [ops] (= [:la/matrix :cx/complex-tensor :la/matrix :cx/complex-tensor :la/add] ops))])
+
+;; When `la/add` dispatches to `cx/add` for complex inputs, only the
+;; outermost operation is recorded — the tape shows `:la/add`, not
+;; both `:la/add` and `:cx/add`.
+;;
+;; Calling `cx/add` directly records as `:cx/add`:
+
+(mapv :op (:entries (tape/with-tape
+                      (cx/add (cx/complex-tensor [1 2])
+                              (cx/complex-tensor [3 4])))))
+
+(kind/test-last
+ [(fn [ops] (= [:cx/complex-tensor :cx/complex-tensor :cx/add] ops))])
 
 ;; ## Tape summary
 
