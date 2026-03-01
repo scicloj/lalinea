@@ -83,7 +83,7 @@ A-heat
  [(fn [m] (= [n n] (vec (dtype/shape m))))])
 
 ;; The right-hand side absorbs the boundary conditions.
-;; Only the first and last entries are nonzero:
+;; Only the first entry is nonzero (since $T(1) = 0$):
 
 (def b-heat
   (la/column (dtype/make-reader :float64 n
