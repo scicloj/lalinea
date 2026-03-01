@@ -21,7 +21,7 @@
 (def v4_l33 (la/matrix [[1 2] [3 4]]))
 
 
-(deftest t5_l35 (is ((fn [m] (= [2 2] (vec (dtype/shape m)))) v4_l33)))
+(deftest t5_l35 (is ((fn [m] (= [2 2] (dtype/shape m))) v4_l33)))
 
 
 (def v6_l37 (kind/doc #'la/eye))
@@ -36,7 +36,7 @@
   ((fn
     [m]
     (and
-     (= [3 3] (vec (dtype/shape m)))
+     (= [3 3] (dtype/shape m))
      (== 1.0 (tensor/mget m 0 0))
      (== 0.0 (tensor/mget m 0 1))))
    v7_l39)))
@@ -48,9 +48,7 @@
 (def v10_l47 (la/zeros 2 3))
 
 
-(deftest
- t11_l49
- (is ((fn [m] (= [2 3] (vec (dtype/shape m)))) v10_l47)))
+(deftest t11_l49 (is ((fn [m] (= [2 3] (dtype/shape m))) v10_l47)))
 
 
 (def v12_l51 (kind/doc #'la/diag))
@@ -65,7 +63,7 @@
   ((fn
     [m]
     (and
-     (= [3 3] (vec (dtype/shape m)))
+     (= [3 3] (dtype/shape m))
      (== 5.0 (tensor/mget m 1 1))
      (== 0.0 (tensor/mget m 0 1))))
    v13_l53)))
@@ -77,9 +75,7 @@
 (def v16_l61 (la/column [1 2 3]))
 
 
-(deftest
- t17_l63
- (is ((fn [v] (= [3 1] (vec (dtype/shape v)))) v16_l61)))
+(deftest t17_l63 (is ((fn [v] (= [3 1] (dtype/shape v))) v16_l61)))
 
 
 (def v18_l65 (kind/doc #'la/row))
@@ -88,9 +84,7 @@
 (def v19_l67 (la/row [1 2 3]))
 
 
-(deftest
- t20_l69
- (is ((fn [v] (= [1 3] (vec (dtype/shape v)))) v19_l67)))
+(deftest t20_l69 (is ((fn [v] (= [1 3] (dtype/shape v))) v19_l67)))
 
 
 (def v21_l71 (kind/doc #'la/add))
@@ -179,9 +173,7 @@
  (is
   ((fn
     [m]
-    (and
-     (= [2 1] (vec (dtype/shape m)))
-     (== 17.0 (tensor/mget m 0 0))))
+    (and (= [2 1] (dtype/shape m)) (== 17.0 (tensor/mget m 0 0))))
    v43_l119)))
 
 
@@ -191,9 +183,7 @@
 (def v46_l127 (la/transpose (la/matrix [[1 2 3] [4 5 6]])))
 
 
-(deftest
- t47_l129
- (is ((fn [m] (= [3 2] (vec (dtype/shape m)))) v46_l127)))
+(deftest t47_l129 (is ((fn [m] (= [3 2] (dtype/shape m))) v46_l127)))
 
 
 (def v48_l131 (kind/doc #'la/submatrix))
@@ -202,9 +192,7 @@
 (def v49_l133 (la/submatrix (la/eye 4) :all (range 2)))
 
 
-(deftest
- t50_l135
- (is ((fn [m] (= [4 2] (vec (dtype/shape m)))) v49_l133)))
+(deftest t50_l135 (is ((fn [m] (= [4 2] (dtype/shape m))) v49_l133)))
 
 
 (def v51_l137 (kind/doc #'la/trace))
@@ -341,7 +329,7 @@
  v85_l213
  (let
   [{:keys [U S Vt]} (la/svd (la/matrix [[1 0] [0 2] [0 0]]))]
-  [(vec (dtype/shape U)) (count S) (vec (dtype/shape Vt))]))
+  [(dtype/shape U) (count S) (dtype/shape Vt)]))
 
 
 (deftest
@@ -399,7 +387,7 @@
  v97_l248
  (let
   [dm (la/tensor->dmat (la/eye 2)) t (la/dmat->tensor dm)]
-  (= [2 2] (vec (dtype/shape t)))))
+  (= [2 2] (dtype/shape t))))
 
 
 (deftest t98_l252 (is (true? v97_l248)))
@@ -454,9 +442,7 @@
 (def v110_l283 (cx/complex-tensor-real [5.0 6.0 7.0]))
 
 
-(deftest
- t111_l285
- (is ((fn [ct] (every? zero? (seq (cx/im ct)))) v110_l283)))
+(deftest t111_l285 (is ((fn [ct] (every? zero? (cx/im ct))) v110_l283)))
 
 
 (def v112_l287 (kind/doc #'cx/complex))
@@ -477,7 +463,7 @@
 (def v115_l295 (kind/doc #'cx/re))
 
 
-(def v116_l297 (vec (cx/re (cx/complex-tensor [1.0 2.0] [3.0 4.0]))))
+(def v116_l297 (cx/re (cx/complex-tensor [1.0 2.0] [3.0 4.0])))
 
 
 (deftest t117_l299 (is (= v116_l297 [1.0 2.0])))
@@ -486,7 +472,7 @@
 (def v118_l301 (kind/doc #'cx/im))
 
 
-(def v119_l303 (vec (cx/im (cx/complex-tensor [1.0 2.0] [3.0 4.0]))))
+(def v119_l303 (cx/im (cx/complex-tensor [1.0 2.0] [3.0 4.0])))
 
 
 (deftest t120_l305 (is (= v119_l303 [3.0 4.0])))
@@ -533,8 +519,7 @@
 
 (def
  v133_l332
- (vec
-  (dtype/shape (cx/->tensor (cx/complex-tensor [1.0 2.0] [3.0 4.0])))))
+ (dtype/shape (cx/->tensor (cx/complex-tensor [1.0 2.0] [3.0 4.0]))))
 
 
 (deftest t134_l334 (is (= v133_l332 [2 2])))
@@ -563,7 +548,7 @@
    (cx/complex-tensor [1.0 2.0] [3.0 4.0])
    b
    (cx/complex-tensor [10.0 20.0] [30.0 40.0])]
-  (vec (cx/re (cx/add a b)))))
+  (cx/re (cx/add a b))))
 
 
 (deftest t140_l349 (is (= v139_l345 [11.0 22.0])))
@@ -579,7 +564,7 @@
    (cx/complex-tensor [10.0 20.0] [30.0 40.0])
    b
    (cx/complex-tensor [1.0 2.0] [3.0 4.0])]
-  (vec (cx/re (cx/sub a b)))))
+  (cx/re (cx/sub a b))))
 
 
 (deftest t143_l357 (is (= v142_l353 [9.0 18.0])))
@@ -592,7 +577,7 @@
  v145_l361
  (let
   [ct (cx/scale (cx/complex-tensor [1.0 2.0] [3.0 4.0]) 2.0)]
-  [(vec (cx/re ct)) (vec (cx/im ct))]))
+  [(cx/re ct) (cx/im ct)]))
 
 
 (deftest t146_l364 (is (= v145_l361 [[2.0 4.0] [6.0 8.0]])))
@@ -623,7 +608,7 @@
  v152_l378
  (let
   [ct (cx/conj (cx/complex-tensor [1.0 2.0] [3.0 -4.0]))]
-  (vec (cx/im ct))))
+  (cx/im ct)))
 
 
 (deftest t153_l381 (is (= v152_l378 [-3.0 4.0])))

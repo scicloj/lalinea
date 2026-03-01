@@ -80,7 +80,7 @@
 A-heat
 
 (kind/test-last
- [(fn [m] (= [n n] (vec (dtype/shape m))))])
+ [(fn [m] (= [n n] (dtype/shape m)))])
 
 ;; The right-hand side absorbs the boundary conditions.
 ;; Only the first entry is nonzero (since $T(1) = 0$):
@@ -94,7 +94,7 @@ A-heat
 b-heat
 
 (kind/test-last
- [(fn [b] (= [n 1] (vec (dtype/shape b))))])
+ [(fn [b] (= [n 1] (dtype/shape b)))])
 
 ;; ### Direct solution
 

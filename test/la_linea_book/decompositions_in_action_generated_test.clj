@@ -220,9 +220,7 @@
 (def v34_l192 cov-matrix)
 
 
-(deftest
- t35_l194
- (is ((fn [m] (= [2 2] (vec (dtype/shape m)))) v34_l192)))
+(deftest t35_l194 (is ((fn [m] (= [2 2] (dtype/shape m))) v34_l192)))
 
 
 (def v36_l197 (def pca-eigen (la/eigen cov-matrix)))
@@ -310,7 +308,7 @@
    projected
    (la/mmul (la/mmul X ev1) (la/transpose ev1))
    variances
-   (sort > (seq reals))
+   (sort > reals)
    explained
    (/ (first variances) (dfn/sum variances))]
   explained))

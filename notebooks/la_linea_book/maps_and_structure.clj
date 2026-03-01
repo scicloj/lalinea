@@ -356,7 +356,7 @@ nullity-M
 (def svd-M (la/svd M))
 
 (def null-basis
-  (let [sv (vec (:S svd-M))
+  (let [sv (:S svd-M)
         Vt (:Vt svd-M)
         null-idx (vec (keep-indexed (fn [i s] (when (< s 1e-10) i)) sv))]
     (la/submatrix (la/transpose Vt) :all null-idx)))
@@ -426,7 +426,7 @@ null-basis
 ;; non-zero singular values:
 
 (def col-space-basis
-  (let [sv (vec (:S svd-M))
+  (let [sv (:S svd-M)
         U (:U svd-M)
         col-idx (vec (keep-indexed (fn [i s] (when (> s 1e-10) i)) sv))]
     (la/submatrix U :all col-idx)))
@@ -436,7 +436,7 @@ col-space-basis
 ;; **Left null space** — the remaining columns of $U$:
 
 (def left-null-basis
-  (let [sv (vec (:S svd-M))
+  (let [sv (:S svd-M)
         U (:U svd-M)
         null-idx (vec (keep-indexed (fn [i s] (when (< s 1e-10) i)) sv))]
     (la/submatrix U :all null-idx)))
@@ -447,7 +447,7 @@ left-null-basis
 ;; non-zero singular values:
 
 (def row-space-basis
-  (let [sv (vec (:S svd-M))
+  (let [sv (:S svd-M)
         Vt (:Vt svd-M)
         row-idx (vec (keep-indexed (fn [i s] (when (> s 1e-10) i)) sv))]
     (la/submatrix (la/transpose Vt) :all row-idx)))

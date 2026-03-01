@@ -410,7 +410,7 @@
   [{:keys [eigenvalues]}
    (la/eigen A)
    eig-prod
-   (reduce * (seq (cx/re eigenvalues)))]
+   (reduce * (cx/re eigenvalues))]
   (la/close-scalar? (la/det A) eig-prod)))
 
 
@@ -455,13 +455,13 @@
    AtA-eigs
    (la/real-eigenvalues (la/mmul (la/transpose A) A))
    sv-squared
-   (sort > (map (fn* [p1__99610#] (* p1__99610# p1__99610#)) S))]
+   (sort > (map (fn* [p1__74875#] (* p1__74875# p1__74875#)) S))]
   (every?
    identity
    (map
     (fn [a b] (< (Math/abs (- a b)) 1.0E-8))
     sv-squared
-    (reverse (seq AtA-eigs))))))
+    (reverse AtA-eigs)))))
 
 
 (deftest t142_l469 (is (true? v141_l462)))

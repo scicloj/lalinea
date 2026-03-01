@@ -4,6 +4,7 @@
   [scicloj.la-linea.linalg :as la]
   [scicloj.la-linea.complex :as cx]
   [scicloj.la-linea.transform :as bfft]
+  [tech.v3.datatype :as dtype]
   [tech.v3.datatype.functional :as dfn]
   [tablecloth.api :as tc]
   [scicloj.tableplot.v1.plotly :as plotly]
@@ -11,16 +12,16 @@
   [clojure.test :refer [deftest is]]))
 
 
-(def v3_l30 (bfft/forward [1.0 0.0 -1.0 0.0]))
+(def v3_l32 (bfft/forward [1.0 0.0 -1.0 0.0]))
 
 
 (deftest
- t5_l34
- (is ((fn [ct] (< (Math/abs (double (cx/re (ct 0)))) 1.0E-10)) v3_l30)))
+ t5_l36
+ (is ((fn [ct] (< (Math/abs (double (cx/re (ct 0)))) 1.0E-10)) v3_l32)))
 
 
 (def
- v7_l40
+ v7_l42
  (let
   [signal
    [1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0]
@@ -28,14 +29,14 @@
    (bfft/forward signal)
    recovered
    (bfft/inverse-real spectrum)]
-  (dfn/reduce-max (dfn/abs (dfn/- recovered (double-array signal))))))
+  (dfn/reduce-max (dfn/abs (dfn/- recovered signal)))))
 
 
-(deftest t8_l45 (is ((fn [v] (< v 1.0E-10)) v7_l40)))
+(deftest t8_l47 (is ((fn [v] (< v 1.0E-10)) v7_l42)))
 
 
 (def
- v10_l54
+ v10_l56
  (let
   [signal
    [1.0 2.0 3.0 4.0]
@@ -44,7 +45,7 @@
    spectrum
    (bfft/forward signal)
    time-energy
-   (dfn/sum (dfn/* (double-array signal) (double-array signal)))
+   (dfn/sum (dfn/* signal signal))
    magnitudes
    (la/abs spectrum)
    freq-energy
@@ -52,11 +53,11 @@
   (< (Math/abs (- time-energy freq-energy)) 1.0E-10)))
 
 
-(deftest t11_l62 (is (true? v10_l54)))
+(deftest t11_l64 (is (true? v10_l56)))
 
 
 (def
- v13_l68
+ v13_l70
  (let
   [x
    [1.0 2.0 3.0 4.0]
@@ -67,10 +68,7 @@
    beta
    -1.5
    combined
-   (double-array
-    (dfn/+
-     (dfn/* alpha (double-array x))
-     (dfn/* beta (double-array y))))
+   (dfn/+ (dfn/* alpha x) (dfn/* beta y))
    lhs
    (bfft/forward combined)
    rhs
@@ -86,11 +84,11 @@
     1.0E-10))))
 
 
-(deftest t14_l79 (is (true? v13_l68)))
+(deftest t14_l81 (is (true? v13_l70)))
 
 
 (def
- v16_l88
+ v16_l90
  (let
   [x
    [1.0 2.0 0.0 0.0]
@@ -106,13 +104,9 @@
    (bfft/inverse-real product-spectrum)
    n
    (count x)
-   xarr
-   (double-array x)
-   yarr
-   (double-array y)
    manual-conv
    (let
-    [out (double-array n)]
+    [out (dtype/make-container :float64 n)]
     (dotimes
      [k n]
      (let
@@ -124,15 +118,15 @@
          acc
          (recur
           (inc j)
-          (+ acc (* (aget xarr j) (aget yarr (mod (- k j) n)))))))]
-      (aset out k s)))
+          (+ acc (* (double (x j)) (double (y (mod (- k j) n))))))))]
+      (dtype/set-value! out k s)))
     out)]
   (<
    (dfn/reduce-max (dfn/abs (dfn/- conv-result manual-conv)))
    1.0E-10)))
 
 
-(deftest t17_l108 (is (true? v16_l88)))
+(deftest t17_l108 (is (true? v16_l90)))
 
 
 (def v19_l114 (def N-vis 64))
@@ -145,16 +139,15 @@
   (let
    [t
     (mapv
-     (fn* [p1__97559#] (/ (double p1__97559#) N-vis))
+     (fn* [p1__76672#] (/ (double p1__76672#) N-vis))
      (range N-vis))]
-   (double-array
-    (mapv
-     (fn
-      [ti]
-      (+
-       (Math/sin (* 2 Math/PI 3 ti))
-       (* 0.5 (Math/sin (* 2 Math/PI 7 ti)))))
-     t)))))
+   (mapv
+    (fn
+     [ti]
+     (+
+      (Math/sin (* 2 Math/PI 3 ti))
+      (* 0.5 (Math/sin (* 2 Math/PI 7 ti)))))
+    t))))
 
 
 (def
@@ -163,7 +156,7 @@
   (tc/dataset
    {:t
     (mapv
-     (fn* [p1__97560#] (/ (double p1__97560#) N-vis))
+     (fn* [p1__76673#] (/ (double p1__76673#) N-vis))
      (range N-vis)),
     :amplitude (vec signal-composed)})
   (plotly/base {:=x :t, :=y :amplitude})
@@ -202,7 +195,7 @@
     [v]
     (and
      (< (Math/abs (- (double (:dc v)) 12.0)) 1.0E-10)
-     (every? (fn* [p1__97561#] (< p1__97561# 1.0E-10)) (:others v))))
+     (every? (fn* [p1__76674#] (< p1__76674# 1.0E-10)) (:others v))))
    v26_l146)))
 
 
@@ -255,9 +248,7 @@
    (bfft/dct-forward signal)
    recovered
    (bfft/dct-inverse dct)]
-  (<
-   (dfn/reduce-max (dfn/abs (dfn/- recovered (double-array signal))))
-   1.0E-10)))
+  (< (dfn/reduce-max (dfn/abs (dfn/- recovered signal))) 1.0E-10)))
 
 
 (deftest t36_l183 (is (true? v35_l178)))

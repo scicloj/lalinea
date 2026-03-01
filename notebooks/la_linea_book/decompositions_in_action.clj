@@ -192,7 +192,7 @@
 cov-matrix
 
 (kind/test-last
- [(fn [m] (= [2 2] (vec (dtype/shape m))))])
+ [(fn [m] (= [2 2] (dtype/shape m)))])
 
 (def pca-eigen (la/eigen cov-matrix))
 
@@ -250,7 +250,7 @@ cov-matrix
       ;; Project: X * v1 * v1^T
       projected (la/mmul (la/mmul X ev1) (la/transpose ev1))
       ;; Fraction of variance explained
-      variances (sort > (seq reals))
+      variances (sort > reals)
       explained (/ (first variances) (dfn/sum variances))]
   explained)
 

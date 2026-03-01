@@ -640,7 +640,7 @@
    (tensor/->tensor [10 20 30] {:datatype :float64})
    col
    (la/column (dfn/+ a b))]
-  {:shape (vec (dtype/shape col)),
+  {:shape (dtype/shape col),
    :contiguous? (some? (dtype/as-array-buffer col)),
    :values (vec (dtype/->reader col))}))
 

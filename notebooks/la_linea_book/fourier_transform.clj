@@ -14,6 +14,8 @@
    [scicloj.la-linea.complex :as cx]
    ;; FFT bridge — Fastmath transforms ↔ ComplexTensor:
    [scicloj.la-linea.transform :as bfft]
+   ;; Low-level buffer operations:
+   [tech.v3.datatype :as dtype]
    ;; Element-wise array math:
    [tech.v3.datatype.functional :as dfn]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
@@ -40,7 +42,7 @@
 (let [signal [1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0]
       spectrum (bfft/forward signal)
       recovered (bfft/inverse-real spectrum)]
-  (dfn/reduce-max (dfn/abs (dfn/- recovered (double-array signal)))))
+  (dfn/reduce-max (dfn/abs (dfn/- recovered signal))))
 
 (kind/test-last [(fn [v] (< v 1e-10))])
 
@@ -54,7 +56,7 @@
 (let [signal [1.0 2.0 3.0 4.0]
       n (count signal)
       spectrum (bfft/forward signal)
-      time-energy (dfn/sum (dfn/* (double-array signal) (double-array signal)))
+      time-energy (dfn/sum (dfn/* signal signal))
       magnitudes (la/abs spectrum)
       freq-energy (/ (dfn/sum (dfn/* magnitudes magnitudes)) n)]
   (< (Math/abs (- time-energy freq-energy)) 1e-10))
@@ -69,7 +71,7 @@
       y [5.0 6.0 7.0 8.0]
       alpha 2.0
       beta -1.5
-      combined (double-array (dfn/+ (dfn/* alpha (double-array x)) (dfn/* beta (double-array y))))
+      combined (dfn/+ (dfn/* alpha x) (dfn/* beta y))
       lhs (bfft/forward combined)
       rhs (la/add (la/scale (bfft/forward x) alpha)
                   (la/scale (bfft/forward y) beta))]
@@ -92,16 +94,14 @@
       product-spectrum (la/mul Fx Fy)
       conv-result (bfft/inverse-real product-spectrum)
       n (count x)
-      xarr (double-array x)
-      yarr (double-array y)
-      manual-conv (let [out (double-array n)]
+      manual-conv (let [out (dtype/make-container :float64 n)]
                     (dotimes [k n]
                       (let [s (loop [j 0 acc 0.0]
                                 (if (>= j n) acc
                                     (recur (inc j)
-                                           (+ acc (* (aget xarr j)
-                                                     (aget yarr (mod (- k j) n)))))))]
-                        (aset out k s)))
+                                           (+ acc (* (double (x j))
+                                                     (double (y (mod (- k j) n))))))))]
+                        (dtype/set-value! out k s)))
                     out)]
   (< (dfn/reduce-max (dfn/abs (dfn/- conv-result manual-conv))) 1e-10))
 
@@ -115,9 +115,9 @@
 
 (def signal-composed
   (let [t (mapv #(/ (double %) N-vis) (range N-vis))]
-    (double-array (mapv (fn [ti] (+ (Math/sin (* 2 Math/PI 3 ti))
-                                    (* 0.5 (Math/sin (* 2 Math/PI 7 ti)))))
-                        t))))
+    (mapv (fn [ti] (+ (Math/sin (* 2 Math/PI 3 ti))
+                      (* 0.5 (Math/sin (* 2 Math/PI 7 ti)))))
+          t)))
 
 ;; The time-domain waveform:
 
@@ -178,6 +178,6 @@
 (let [signal [1.0 2.0 3.0 4.0]
       dct (bfft/dct-forward signal)
       recovered (bfft/dct-inverse dct)]
-  (< (dfn/reduce-max (dfn/abs (dfn/- recovered (double-array signal)))) 1e-10))
+  (< (dfn/reduce-max (dfn/abs (dfn/- recovered signal))) 1e-10))
 
 (kind/test-last [true?])

@@ -422,7 +422,7 @@
 ;; ### Determinant equals product of eigenvalues: $\det(A) = \prod \lambda_i$
 
 (let [{:keys [eigenvalues]} (la/eigen A)
-      eig-prod (reduce * (seq (cx/re eigenvalues)))]
+      eig-prod (reduce * (cx/re eigenvalues))]
   (la/close-scalar? (la/det A) eig-prod))
 
 (kind/test-last [true?])
@@ -464,7 +464,7 @@
       sv-squared (sort > (map #(* % %) S))]
   (every? identity
           (map (fn [a b] (< (Math/abs (- a b)) 1e-8))
-               sv-squared (reverse (seq AtA-eigs)))))
+               sv-squared (reverse AtA-eigs))))
 
 (kind/test-last [true?])
 

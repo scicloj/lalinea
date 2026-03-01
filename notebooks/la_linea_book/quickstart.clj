@@ -30,7 +30,7 @@
 (la/matrix [[1 2 3]
             [4 5 6]])
 
-(kind/test-last [(fn [m] (= [2 3] (vec (dtype/shape m))))])
+(kind/test-last [(fn [m] (= [2 3] (dtype/shape m)))])
 
 ;; Identity and zero matrices:
 
@@ -46,7 +46,7 @@
 
 (la/diag [1 2 3])
 
-(kind/test-last [(fn [m] (and (= [3 3] (vec (dtype/shape m)))
+(kind/test-last [(fn [m] (and (= [3 3] (dtype/shape m))
                               (= 2.0 (tensor/mget m 1 1))))])
 
 ;; ## Matrix arithmetic

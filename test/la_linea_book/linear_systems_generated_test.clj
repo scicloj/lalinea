@@ -35,7 +35,7 @@
 (def v8_l80 A-heat)
 
 
-(deftest t9_l82 (is ((fn [m] (= [n n] (vec (dtype/shape m)))) v8_l80)))
+(deftest t9_l82 (is ((fn [m] (= [n n] (dtype/shape m))) v8_l80)))
 
 
 (def
@@ -52,9 +52,7 @@
 (def v12_l94 b-heat)
 
 
-(deftest
- t13_l96
- (is ((fn [b] (= [n 1] (vec (dtype/shape b)))) v12_l94)))
+(deftest t13_l96 (is ((fn [b] (= [n 1] (dtype/shape b))) v12_l94)))
 
 
 (def v15_l101 (def T-direct (la/solve A-heat b-heat)))

@@ -189,17 +189,13 @@
 (def v69_l211 (read-matrix [[1 2] [3 4]]))
 
 
-(deftest
- t70_l213
- (is ((fn [m] (= [2 2] (vec (dtype/shape m)))) v69_l211)))
+(deftest t70_l213 (is ((fn [m] (= [2 2] (dtype/shape m))) v69_l211)))
 
 
 (def v71_l215 (read-column [1 2 3]))
 
 
-(deftest
- t72_l217
- (is ((fn [v] (= [3 1] (vec (dtype/shape v)))) v71_l215)))
+(deftest t72_l217 (is ((fn [v] (= [3 1] (dtype/shape v))) v71_l215)))
 
 
 (def
@@ -208,7 +204,7 @@
   tensor->tagged-str
   [t]
   (let
-   [shape (vec (dtype/shape t))]
+   [shape (dtype/shape t)]
    (cond
     (and (= 2 (count shape)) (= 1 (second shape)))
     (str "#la/v " (vec (dtype/->reader t :float64)))
@@ -246,9 +242,7 @@
 (def v82_l261 (v 1 2 3))
 
 
-(deftest
- t83_l263
- (is ((fn [c] (= [3 1] (vec (dtype/shape c)))) v82_l261)))
+(deftest t83_l263 (is ((fn [c] (= [3 1] (dtype/shape c))) v82_l261)))
 
 
 (def v84_l265 (m [1 2] [3 4]))
@@ -256,4 +250,4 @@
 
 (deftest
  t85_l267
- (is ((fn [mat] (= [2 2] (vec (dtype/shape mat)))) v84_l265)))
+ (is ((fn [mat] (= [2 2] (dtype/shape mat))) v84_l265)))

@@ -13,7 +13,7 @@
 (def v3_l42 (tensor/->tensor [[1 2 3] [4 5 6]] {:datatype :float64}))
 
 
-(deftest t4_l45 (is ((fn [t] (= [2 3] (vec (dtype/shape t)))) v3_l42)))
+(deftest t4_l45 (is ((fn [t] (= [2 3] (dtype/shape t))) v3_l42)))
 
 
 (def
@@ -112,9 +112,7 @@
 (def v31_l163 (la/matrix [[1 2 3] [4 5 6] [7 8 9]]))
 
 
-(deftest
- t32_l167
- (is ((fn [m] (= [3 3] (vec (dtype/shape m)))) v31_l163)))
+(deftest t32_l167 (is ((fn [m] (= [3 3] (dtype/shape m))) v31_l163)))
 
 
 (def v34_l179 (la/mmul (la/matrix [[1 2] [3 4]]) (la/eye 2)))
@@ -126,9 +124,7 @@
 (def v37_l186 (la/invert (la/matrix [[1 2] [3 4]])))
 
 
-(deftest
- t38_l188
- (is ((fn [m] (= [2 2] (vec (dtype/shape m)))) v37_l186)))
+(deftest t38_l188 (is ((fn [m] (= [2 2] (dtype/shape m))) v37_l186)))
 
 
 (def v40_l192 (la/norm (la/matrix [[1 2 3] [4 5 6]])))
@@ -162,6 +158,4 @@
 (def v52_l220 (la/cholesky (la/matrix [[4 2] [2 3]])))
 
 
-(deftest
- t53_l222
- (is ((fn [L] (= [2 2] (vec (dtype/shape L)))) v52_l220)))
+(deftest t53_l222 (is ((fn [L] (= [2 2] (dtype/shape L))) v52_l220)))

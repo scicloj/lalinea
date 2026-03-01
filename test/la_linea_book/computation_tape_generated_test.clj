@@ -112,8 +112,7 @@
  v39_l141
  (def
   array-tape
-  (tape/with-tape
-   (let [v (la/column (double-array [1 2 3])) w (la/scale v 5.0)] w))))
+  (tape/with-tape (let [v (la/column [1 2 3]) w (la/scale v 5.0)] w))))
 
 
 (def

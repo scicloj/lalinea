@@ -22,7 +22,7 @@
  v5_l44
  (let
   [ct (cx/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0])]
-  {:re (vec (cx/re ct)), :im (vec (cx/im ct))}))
+  {:re (cx/re ct), :im (cx/im ct)}))
 
 
 (deftest
@@ -38,18 +38,14 @@
 (deftest
  t9_l55
  (is
-  ((fn
-    [v]
-    (and (= [2] (cx/complex-shape v)) (= [1.0 3.0] (vec (cx/re v)))))
+  ((fn [v] (and (= [2] (cx/complex-shape v)) (= [1.0 3.0] (cx/re v))))
    v8_l53)))
 
 
 (def v11_l60 (cx/complex-tensor-real [5.0 6.0 7.0]))
 
 
-(deftest
- t12_l62
- (is ((fn [v] (= [0.0 0.0 0.0] (vec (cx/im v)))) v11_l60)))
+(deftest t12_l62 (is ((fn [v] (= [0.0 0.0 0.0] (cx/im v))) v11_l60)))
 
 
 (def v14_l66 (cx/complex 3.0 4.0))
@@ -88,7 +84,7 @@
  v25_l94
  (let
   [ct (cx/complex-tensor [[1.0 2.0] [3.0 4.0]] [[5.0 6.0] [7.0 8.0]])]
-  (vec (cx/re (ct 0)))))
+  (cx/re (ct 0))))
 
 
 (deftest t26_l98 (is (= v25_l94 [1.0 2.0])))
@@ -111,7 +107,7 @@
    (cx/complex-tensor [1.0 2.0] [3.0 4.0])
    b
    (cx/complex-tensor [5.0 6.0] [7.0 8.0])]
-  {:re (vec (cx/re (la/mul a b))), :im (vec (cx/im (la/mul a b)))}))
+  {:re (cx/re (la/mul a b)), :im (cx/im (la/mul a b))}))
 
 
 (deftest
@@ -139,7 +135,7 @@
  v37_l139
  (let
   [ct (cx/conj (cx/complex-tensor [1.0 2.0] [3.0 -4.0]))]
-  {:re (vec (cx/re ct)), :im (vec (cx/im ct))}))
+  {:re (cx/re ct), :im (cx/im ct)}))
 
 
 (deftest t38_l143 (is ((fn [v] (= (:im v) [-3.0 4.0])) v37_l139)))
@@ -251,14 +247,8 @@
    im-part
    (cx/im product)]
   (and
-   (<
-    (dfn/reduce-max
-     (dfn/abs
-      (dfn/- (dtype/->double-array re-part) (double-array [1 0 0 1]))))
-    1.0E-10)
-   (<
-    (dfn/reduce-max (dfn/abs (dtype/->double-array im-part)))
-    1.0E-10))))
+   (< (dfn/reduce-max (dfn/abs (dfn/- re-part (la/eye 2)))) 1.0E-10)
+   (< (dfn/reduce-max (dfn/abs im-part)) 1.0E-10))))
 
 
-(deftest t61_l221 (is (true? v60_l211)))
+(deftest t61_l220 (is (true? v60_l211)))

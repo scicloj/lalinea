@@ -84,7 +84,7 @@
 
 (def
  v20_l123
- (< (Math/abs (- (la/det A-eig) (reduce * (seq eig-reals)))) 1.0E-10))
+ (< (Math/abs (- (la/det A-eig) (reduce * eig-reals))) 1.0E-10))
 
 
 (deftest t21_l125 (is (true? v20_l123)))
@@ -205,7 +205,7 @@
 (def v54_l318 (def svd-A (la/svd A-svd)))
 
 
-(def v55_l320 (vec (:S svd-A)))
+(def v55_l320 (:S svd-A))
 
 
 (deftest
@@ -219,7 +219,7 @@
 (def v59_l352 (def svd-lr (la/svd A-lr)))
 
 
-(def v60_l354 (def sigmas (vec (:S svd-lr))))
+(def v60_l354 (def sigmas (:S svd-lr)))
 
 
 (def v61_l356 sigmas)
@@ -251,7 +251,7 @@
 (def
  v70_l398
  (every?
-  (fn* [p1__98679#] (>= p1__98679# -1.0E-10))
+  (fn* [p1__76342#] (>= p1__76342# -1.0E-10))
   (cx/re (:eigenvalues (la/eigen ATA)))))
 
 
@@ -333,10 +333,7 @@
  v100_l494
  (<
   (dfn/reduce-max
-   (dfn/abs
-    (dfn/-
-     (double-array (sort (vec (:S final-svd))))
-     (double-array final-eigenvalues))))
+   (dfn/abs (dfn/- (sort (:S final-svd)) final-eigenvalues)))
   1.0E-10))
 
 

@@ -143,7 +143,7 @@
     (dfn/min 255)
     (dtype/elemwise-cast :uint8)
     tensor/ensure-tensor
-    (tensor/reshape (vec (dtype/shape img)))))))
+    (tensor/reshape (dtype/shape img))))))
 
 
 (def v26_l143 (bufimg/tensor->image (brighten circle-img)))

@@ -42,7 +42,7 @@
 (tensor/->tensor [[1 2 3]
                   [4 5 6]] {:datatype :float64})
 
-(kind/test-last [(fn [t] (= [2 3] (vec (dtype/shape t))))])
+(kind/test-last [(fn [t] (= [2 3] (dtype/shape t)))])
 
 ;; `tensor/compute-tensor` creates a lazy tensor that calls a function
 ;; at each index on every read — useful for procedural construction.
@@ -164,7 +164,7 @@
             [4 5 6]
             [7 8 9]])
 
-(kind/test-last [(fn [m] (= [3 3] (vec (dtype/shape m))))])
+(kind/test-last [(fn [m] (= [3 3] (dtype/shape m)))])
 
 ;; ## Matrix operations
 ;;
@@ -185,7 +185,7 @@
 
 (la/invert (la/matrix [[1 2] [3 4]]))
 
-(kind/test-last [(fn [m] (= [2 2] (vec (dtype/shape m))))])
+(kind/test-last [(fn [m] (= [2 2] (dtype/shape m)))])
 
 ;; ### Frobenius norm
 
@@ -219,4 +219,4 @@
 
 (la/cholesky (la/matrix [[4 2] [2 3]]))
 
-(kind/test-last [(fn [L] (= [2 2] (vec (dtype/shape L))))])
+(kind/test-last [(fn [L] (= [2 2] (dtype/shape L)))])

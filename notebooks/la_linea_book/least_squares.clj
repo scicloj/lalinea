@@ -70,7 +70,7 @@
 A-linear
 
 (kind/test-last
- [(fn [m] (= [20 2] (vec (dtype/shape m))))])
+ [(fn [m] (= [20 2] (dtype/shape m)))])
 
 ;; The observation vector $\mathbf{y}$ as a column:
 

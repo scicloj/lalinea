@@ -102,7 +102,7 @@ L
 
 (kind/test-last
  [(fn [m]
-    (and (= [6 6] (vec (dtype/shape m)))
+    (and (= [6 6] (dtype/shape m))
          (= 2.0 (tensor/mget m 0 0))
          (= -1.0 (tensor/mget m 0 1))))])
 
@@ -320,8 +320,7 @@ cycle-theoretical
 ;; They agree to machine precision:
 
 (< (dfn/reduce-max
-    (dfn/abs (dfn/- (double-array cycle-eigenvalues)
-                    (double-array cycle-theoretical))))
+    (dfn/abs (dfn/- cycle-eigenvalues cycle-theoretical)))
    1e-10)
 
 (kind/test-last [true?])
@@ -355,8 +354,7 @@ path-eigenvalues
 path-theoretical
 
 (< (dfn/reduce-max
-    (dfn/abs (dfn/- (double-array path-eigenvalues)
-                    (double-array path-theoretical))))
+    (dfn/abs (dfn/- path-eigenvalues path-theoretical)))
    1e-10)
 
 (kind/test-last [true?])

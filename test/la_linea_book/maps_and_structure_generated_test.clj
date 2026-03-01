@@ -236,7 +236,7 @@
   null-basis
   (let
    [sv
-    (vec (:S svd-M))
+    (:S svd-M)
     Vt
     (:Vt svd-M)
     null-idx
@@ -280,7 +280,7 @@
   col-space-basis
   (let
    [sv
-    (vec (:S svd-M))
+    (:S svd-M)
     U
     (:U svd-M)
     col-idx
@@ -297,7 +297,7 @@
   left-null-basis
   (let
    [sv
-    (vec (:S svd-M))
+    (:S svd-M)
     U
     (:U svd-M)
     null-idx
@@ -314,7 +314,7 @@
   row-space-basis
   (let
    [sv
-    (vec (:S svd-M))
+    (:S svd-M)
     Vt
     (:Vt svd-M)
     row-idx

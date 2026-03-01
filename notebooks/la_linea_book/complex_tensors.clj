@@ -42,8 +42,8 @@
 (kind/test-last [(fn [v] (= [3] (cx/complex-shape v)))])
 
 (let [ct (cx/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0])]
-  {:re (vec (cx/re ct))
-   :im (vec (cx/im ct))})
+  {:re (cx/re ct)
+   :im (cx/im ct)})
 
 (kind/test-last [(fn [v] (and (= (:re v) [1.0 2.0 3.0])
                               (= (:im v) [4.0 5.0 6.0])))])
@@ -53,13 +53,13 @@
 (cx/complex-tensor (tensor/->tensor [[1.0 2.0] [3.0 4.0]]))
 
 (kind/test-last [(fn [v] (and (= [2] (cx/complex-shape v))
-                              (= [1.0 3.0] (vec (cx/re v)))))])
+                              (= [1.0 3.0] (cx/re v))))])
 
 ;; ### Real-only construction
 
 (cx/complex-tensor-real [5.0 6.0 7.0])
 
-(kind/test-last [(fn [v] (= [0.0 0.0 0.0] (vec (cx/im v))))])
+(kind/test-last [(fn [v] (= [0.0 0.0 0.0] (cx/im v)))])
 
 ;; ### Scalar complex numbers
 
@@ -93,7 +93,7 @@
 
 (let [ct (cx/complex-tensor [[1.0 2.0] [3.0 4.0]]
                             [[5.0 6.0] [7.0 8.0]])]
-  (vec (cx/re (ct 0))))
+  (cx/re (ct 0)))
 
 (kind/test-last [= [1.0 2.0]])
 
@@ -113,8 +113,8 @@
 
 (let [a (cx/complex-tensor [1.0 2.0] [3.0 4.0])
       b (cx/complex-tensor [5.0 6.0] [7.0 8.0])]
-  {:re (vec (cx/re (la/mul a b)))
-   :im (vec (cx/im (la/mul a b)))})
+  {:re (cx/re (la/mul a b))
+   :im (cx/im (la/mul a b))})
 
 ;; $(1+3i)(5+7i) = -16 + 22i$, $(2+4i)(6+8i) = -20 + 40i$
 
@@ -137,8 +137,8 @@
 ;; ### Conjugate
 
 (let [ct (cx/conj (cx/complex-tensor [1.0 2.0] [3.0 -4.0]))]
-  {:re (vec (cx/re ct))
-   :im (vec (cx/im ct))})
+  {:re (cx/re ct)
+   :im (cx/im ct)})
 
 (kind/test-last [(fn [v] (= (:im v) [-3.0 4.0]))])
 
@@ -214,8 +214,7 @@
       product (la/mmul A Ainv)
       re-part (cx/re product)
       im-part (cx/im product)]
-  (and (< (dfn/reduce-max (dfn/abs (dfn/- (dtype/->double-array re-part)
-                                          (double-array [1 0 0 1])))) 1e-10)
-       (< (dfn/reduce-max (dfn/abs (dtype/->double-array im-part))) 1e-10)))
+  (and (< (dfn/reduce-max (dfn/abs (dfn/- re-part (la/eye 2)))) 1e-10)
+       (< (dfn/reduce-max (dfn/abs im-part)) 1e-10)))
 
 (kind/test-last [true?])

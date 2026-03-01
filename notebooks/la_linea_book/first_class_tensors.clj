@@ -210,16 +210,16 @@
 
 (read-matrix [[1 2] [3 4]])
 
-(kind/test-last [(fn [m] (= [2 2] (vec (dtype/shape m))))])
+(kind/test-last [(fn [m] (= [2 2] (dtype/shape m)))])
 
 (read-column [1 2 3])
 
-(kind/test-last [(fn [v] (= [3 1] (vec (dtype/shape v))))])
+(kind/test-last [(fn [v] (= [3 1] (dtype/shape v)))])
 
 ;; A function to produce tagged-literal format:
 
 (defn tensor->tagged-str [t]
-  (let [shape (vec (dtype/shape t))]
+  (let [shape (dtype/shape t)]
     (cond
       ;; Column vector [n 1]
       (and (= 2 (count shape)) (= 1 (second shape)))
@@ -260,11 +260,11 @@
 
 (v 1 2 3)
 
-(kind/test-last [(fn [c] (= [3 1] (vec (dtype/shape c))))])
+(kind/test-last [(fn [c] (= [3 1] (dtype/shape c)))])
 
 (m [1 2] [3 4])
 
-(kind/test-last [(fn [mat] (= [2 2] (vec (dtype/shape mat))))])
+(kind/test-last [(fn [mat] (= [2 2] (dtype/shape mat)))])
 
 ;; The variadic constructors are concise for literal construction.
 ;; The current `la/column` and `la/matrix` take sequences, which

@@ -32,13 +32,13 @@
 
 (la/matrix [[1 2] [3 4]])
 
-(kind/test-last [(fn [m] (= [2 2] (vec (dtype/shape m))))])
+(kind/test-last [(fn [m] (= [2 2] (dtype/shape m)))])
 
 (kind/doc #'la/eye)
 
 (la/eye 3)
 
-(kind/test-last [(fn [m] (and (= [3 3] (vec (dtype/shape m)))
+(kind/test-last [(fn [m] (and (= [3 3] (dtype/shape m))
                               (== 1.0 (tensor/mget m 0 0))
                               (== 0.0 (tensor/mget m 0 1))))])
 
@@ -46,13 +46,13 @@
 
 (la/zeros 2 3)
 
-(kind/test-last [(fn [m] (= [2 3] (vec (dtype/shape m))))])
+(kind/test-last [(fn [m] (= [2 3] (dtype/shape m)))])
 
 (kind/doc #'la/diag)
 
 (la/diag [3 5 7])
 
-(kind/test-last [(fn [m] (and (= [3 3] (vec (dtype/shape m)))
+(kind/test-last [(fn [m] (and (= [3 3] (dtype/shape m))
                               (== 5.0 (tensor/mget m 1 1))
                               (== 0.0 (tensor/mget m 0 1))))])
 
@@ -60,13 +60,13 @@
 
 (la/column [1 2 3])
 
-(kind/test-last [(fn [v] (= [3 1] (vec (dtype/shape v))))])
+(kind/test-last [(fn [v] (= [3 1] (dtype/shape v)))])
 
 (kind/doc #'la/row)
 
 (la/row [1 2 3])
 
-(kind/test-last [(fn [v] (= [1 3] (vec (dtype/shape v))))])
+(kind/test-last [(fn [v] (= [1 3] (dtype/shape v)))])
 
 (kind/doc #'la/add)
 
@@ -119,20 +119,20 @@
 (la/mmul (la/matrix [[1 2] [3 4]])
          (la/column [5 6]))
 
-(kind/test-last [(fn [m] (and (= [2 1] (vec (dtype/shape m)))
+(kind/test-last [(fn [m] (and (= [2 1] (dtype/shape m))
                               (== 17.0 (tensor/mget m 0 0))))])
 
 (kind/doc #'la/transpose)
 
 (la/transpose (la/matrix [[1 2 3] [4 5 6]]))
 
-(kind/test-last [(fn [m] (= [3 2] (vec (dtype/shape m))))])
+(kind/test-last [(fn [m] (= [3 2] (dtype/shape m)))])
 
 (kind/doc #'la/submatrix)
 
 (la/submatrix (la/eye 4) :all (range 2))
 
-(kind/test-last [(fn [m] (= [4 2] (vec (dtype/shape m))))])
+(kind/test-last [(fn [m] (= [4 2] (dtype/shape m)))])
 
 (kind/doc #'la/trace)
 
@@ -211,9 +211,9 @@
 (kind/doc #'la/svd)
 
 (let [{:keys [U S Vt]} (la/svd (la/matrix [[1 0] [0 2] [0 0]]))]
-  [(vec (dtype/shape U))
+  [(dtype/shape U)
    (count S)
-   (vec (dtype/shape Vt))])
+   (dtype/shape Vt)])
 
 (kind/test-last [(fn [[u-shape n-s vt-shape]]
                    (and (= [3 3] u-shape)
@@ -247,7 +247,7 @@
 
 (let [dm (la/tensor->dmat (la/eye 2))
       t (la/dmat->tensor dm)]
-  (= [2 2] (vec (dtype/shape t))))
+  (= [2 2] (dtype/shape t)))
 
 (kind/test-last [true?])
 
@@ -282,7 +282,7 @@
 
 (cx/complex-tensor-real [5.0 6.0 7.0])
 
-(kind/test-last [(fn [ct] (every? zero? (seq (cx/im ct))))])
+(kind/test-last [(fn [ct] (every? zero? (cx/im ct)))])
 
 (kind/doc #'cx/complex)
 
@@ -294,13 +294,13 @@
 
 (kind/doc #'cx/re)
 
-(vec (cx/re (cx/complex-tensor [1.0 2.0] [3.0 4.0])))
+(cx/re (cx/complex-tensor [1.0 2.0] [3.0 4.0]))
 
 (kind/test-last [= [1.0 2.0]])
 
 (kind/doc #'cx/im)
 
-(vec (cx/im (cx/complex-tensor [1.0 2.0] [3.0 4.0])))
+(cx/im (cx/complex-tensor [1.0 2.0] [3.0 4.0]))
 
 (kind/test-last [= [3.0 4.0]])
 
@@ -329,7 +329,7 @@
 
 (kind/doc #'cx/->tensor)
 
-(vec (dtype/shape (cx/->tensor (cx/complex-tensor [1.0 2.0] [3.0 4.0]))))
+(dtype/shape (cx/->tensor (cx/complex-tensor [1.0 2.0] [3.0 4.0])))
 
 (kind/test-last [= [2 2]])
 
@@ -344,7 +344,7 @@
 
 (let [a (cx/complex-tensor [1.0 2.0] [3.0 4.0])
       b (cx/complex-tensor [10.0 20.0] [30.0 40.0])]
-  (vec (cx/re (cx/add a b))))
+  (cx/re (cx/add a b)))
 
 (kind/test-last [= [11.0 22.0]])
 
@@ -352,14 +352,14 @@
 
 (let [a (cx/complex-tensor [10.0 20.0] [30.0 40.0])
       b (cx/complex-tensor [1.0 2.0] [3.0 4.0])]
-  (vec (cx/re (cx/sub a b))))
+  (cx/re (cx/sub a b)))
 
 (kind/test-last [= [9.0 18.0]])
 
 (kind/doc #'cx/scale)
 
 (let [ct (cx/scale (cx/complex-tensor [1.0 2.0] [3.0 4.0]) 2.0)]
-  [(vec (cx/re ct)) (vec (cx/im ct))])
+  [(cx/re ct) (cx/im ct)])
 
 (kind/test-last [= [[2.0 4.0] [6.0 8.0]]])
 
@@ -376,7 +376,7 @@
 (kind/doc #'cx/conj)
 
 (let [ct (cx/conj (cx/complex-tensor [1.0 2.0] [3.0 -4.0]))]
-  (vec (cx/im ct)))
+  (cx/im ct))
 
 (kind/test-last [= [-3.0 4.0]])
 

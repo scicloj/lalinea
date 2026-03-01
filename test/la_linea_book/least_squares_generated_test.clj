@@ -60,7 +60,7 @@
 (def v8_l70 A-linear)
 
 
-(deftest t9_l72 (is ((fn [m] (= [20 2] (vec (dtype/shape m)))) v8_l70)))
+(deftest t9_l72 (is ((fn [m] (= [20 2] (dtype/shape m))) v8_l70)))
 
 
 (def v11_l77 (def y-col (la/column y-linear)))

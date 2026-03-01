@@ -131,9 +131,7 @@
  (is
   ((fn
     [v]
-    (and
-     (< (Math/abs (- (dfn/sum (double-array v)) 1.0)) 1.0E-10)
-     (every? pos? v)))
+    (and (< (Math/abs (- (dfn/sum v) 1.0)) 1.0E-10) (every? pos? v)))
    v21_l151)))
 
 

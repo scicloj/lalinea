@@ -120,7 +120,7 @@
 
 (kind/test-last [true?])
 
-(< (Math/abs (- (la/det A-eig) (reduce * (seq eig-reals)))) 1e-10)
+(< (Math/abs (- (la/det A-eig) (reduce * eig-reals))) 1e-10)
 
 (kind/test-last [true?])
 
@@ -317,7 +317,7 @@ D-result
 
 (def svd-A (la/svd A-svd))
 
-(vec (:S svd-A))
+(:S svd-A)
 
 (kind/test-last
  [(fn [s] (and (= 2 (count s))
@@ -351,7 +351,7 @@ D-result
 
 (def svd-lr (la/svd A-lr))
 
-(def sigmas (vec (:S svd-lr)))
+(def sigmas (:S svd-lr))
 
 sigmas
 
@@ -492,8 +492,8 @@ final-eigenvalues
 (def final-svd (la/svd A-final))
 
 (< (dfn/reduce-max
-    (dfn/abs (dfn/- (double-array (sort (vec (:S final-svd))))
-                    (double-array final-eigenvalues))))
+    (dfn/abs (dfn/- (sort (:S final-svd))
+                    final-eigenvalues)))
    1e-10)
 
 (kind/test-last [true?])

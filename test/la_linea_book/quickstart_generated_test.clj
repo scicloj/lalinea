@@ -14,7 +14,7 @@
 (def v3_l30 (la/matrix [[1 2 3] [4 5 6]]))
 
 
-(deftest t4_l33 (is ((fn [m] (= [2 3] (vec (dtype/shape m)))) v3_l30)))
+(deftest t4_l33 (is ((fn [m] (= [2 3] (dtype/shape m))) v3_l30)))
 
 
 (def v6_l37 (la/eye 3))
@@ -35,9 +35,7 @@
 (deftest
  t12_l49
  (is
-  ((fn
-    [m]
-    (and (= [3 3] (vec (dtype/shape m))) (= 2.0 (tensor/mget m 1 1))))
+  ((fn [m] (and (= [3 3] (dtype/shape m)) (= 2.0 (tensor/mget m 1 1))))
    v11_l47)))
 
 
@@ -165,7 +163,7 @@
   ((fn
     [v]
     (every?
-     (fn* [p1__97200#] (< (Math/abs p1__97200#) 1.0E-10))
+     (fn* [p1__77320#] (< (Math/abs p1__77320#) 1.0E-10))
      (map - v [1.0 2.0 3.0 4.0])))
    v48_l143)))
 

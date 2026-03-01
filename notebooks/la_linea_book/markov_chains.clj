@@ -151,7 +151,7 @@
 stationary-eigen
 
 (kind/test-last
- [(fn [v] (and (< (Math/abs (- (dfn/sum (double-array v)) 1.0)) 1e-10)
+ [(fn [v] (and (< (Math/abs (- (dfn/sum v) 1.0)) 1e-10)
                (every? pos? v)))])
 
 ;; ## Power iteration
