@@ -32,41 +32,41 @@
    ```"
   [rows]
   (tape/record! :la/matrix [rows]
-    (bt/matrix rows)))
+                (bt/matrix rows)))
 
 (defn eye
   "Identity matrix of size n × n."
   [n]
   (tape/record! :la/eye [n]
-    (bt/eye n)))
+                (bt/eye n)))
 
 (defn zeros
   "Zero matrix of size r × c."
   [r c]
   (tape/record! :la/zeros [r c]
-    (bt/zeros r c)))
+                (bt/zeros r c)))
 
 (defn diag
   "Create a diagonal matrix from a sequence of diagonal values."
   [values]
   (tape/record! :la/diag [values]
-    (let [v (dtype/->reader (dtype/make-container :float64 values))
-          n (count v)]
-      (tensor/compute-tensor [n n]
-                             (fn [i j] (if (== i j) (double (v i)) 0.0))
-                             :float64))))
+                (let [v (dtype/->reader (dtype/make-container :float64 values))
+                      n (count v)]
+                  (tensor/compute-tensor [n n]
+                                         (fn [i j] (if (== i j) (double (v i)) 0.0))
+                                         :float64))))
 
 (defn column
   "Create a column vector (shape [n 1]) from a sequence."
   [xs]
   (tape/record! :la/column [xs]
-    (bt/col-vector xs)))
+                (bt/col-vector xs)))
 
 (defn row
   "Create a row vector (shape [1 n]) from a sequence."
   [xs]
   (tape/record! :la/row [xs]
-    (bt/row-vector xs)))
+                (bt/row-vector xs)))
 
 ;; ---------------------------------------------------------------------------
 ;; EJML interop
@@ -126,10 +126,10 @@
    ```"
   [m rows cols]
   (tape/record! :la/submatrix [m rows cols]
-    (if (cx/complex? m)
-      (cx/complex-tensor
-       (dtype/clone (tensor/select (cx/->tensor m) rows cols :all)))
-      (dtype/clone (tensor/select m rows cols)))))
+                (if (cx/complex? m)
+                  (cx/complex-tensor
+                   (dtype/clone (tensor/select (cx/->tensor m) rows cols :all)))
+                  (dtype/clone (tensor/select m rows cols)))))
 
 ;; ---------------------------------------------------------------------------
 ;; Matrix multiply
@@ -142,15 +142,15 @@
    For complex matrices: delegates to EJML's ZMatrixRMaj multiply."
   [a b]
   (tape/record! :la/mmul [a b]
-    (if (cx/complex? a)
-      (let [za (ejml/ct->zmat a)
-            zb (ejml/ct->zmat b)
-            zc (ejml/zmul za zb)]
-        (ejml/zmat->ct zc))
-      (let [da (bt/tensor->dmat a)
-            db (bt/tensor->dmat b)
-            dc (ejml/dmul da db)]
-        (bt/dmat->tensor dc)))))
+                (if (cx/complex? a)
+                  (let [za (ejml/ct->zmat a)
+                        zb (ejml/ct->zmat b)
+                        zc (ejml/zmul za zb)]
+                    (ejml/zmat->ct zc))
+                  (let [da (bt/tensor->dmat a)
+                        db (bt/tensor->dmat b)
+                        dc (ejml/dmul da db)]
+                    (bt/dmat->tensor dc)))))
 
 ;; ---------------------------------------------------------------------------
 ;; Transpose
@@ -163,10 +163,10 @@
    same backing data. For complex matrices: B = A† (Hermitian adjoint)."
   [a]
   (tape/record! :la/transpose [a]
-    (if (cx/complex? a)
-      (let [za (ejml/ct->zmat a)]
-        (ejml/zmat->ct (ejml/ztranspose-conj za)))
-      (tensor/transpose a [1 0]))))
+                (if (cx/complex? a)
+                  (let [za (ejml/ct->zmat a)]
+                    (ejml/zmat->ct (ejml/ztranspose-conj za)))
+                  (tensor/transpose a [1 0]))))
 
 ;; ---------------------------------------------------------------------------
 ;; Addition and subtraction
@@ -176,41 +176,58 @@
   "Matrix addition."
   [a b]
   (tape/record! :la/add [a b]
-    (if (cx/complex? a)
-      (cx/add a b)
-      (dfn/+ a b))))
+                (if (cx/complex? a)
+                  (cx/add a b)
+                  (dfn/+ a b))))
 
 (defn sub
   "Matrix subtraction."
   [a b]
   (tape/record! :la/sub [a b]
-    (if (cx/complex? a)
-      (cx/sub a b)
-      (dfn/- a b))))
+                (if (cx/complex? a)
+                  (cx/sub a b)
+                  (dfn/- a b))))
 
 (defn scale
   "Scalar multiply. Returns alpha * a."
   [a alpha]
   (tape/record! :la/scale [a alpha]
-    (if (cx/complex? a)
-      (cx/scale a alpha)
-      (dfn/* a (double alpha)))))
+                (if (cx/complex? a)
+                  (cx/scale a alpha)
+                  (dfn/* a (double alpha)))))
 
 (defn mul
   "Element-wise multiply (Hadamard product for real, pointwise complex multiply for complex)."
   [a b]
   (tape/record! :la/mul [a b]
-    (if (cx/complex? a)
-      (cx/mul a b)
-      (dfn/* a b))))
+                (if (cx/complex? a)
+                  (cx/mul a b)
+                  (dfn/* a b))))
 
 (defn abs
   "Element-wise absolute value (magnitude for complex). Returns a real tensor."
   [a]
   (tape/record! :la/abs [a]
-    (if (cx/complex? a)
-      (cx/abs a)
-      (dfn/abs a))))
+                (if (cx/complex? a)
+                  (cx/abs a)
+                  (dfn/abs a))))
+
+(defn sq
+  "Element-wise square."
+  [a]
+  (tape/record! :la/sq [a]
+                (if (cx/complex? a)
+                  (cx/mul a a)
+                  (dfn/* a a))))
+
+(defn sum
+  "Sum of all elements. Returns a double for real tensors,
+   a scalar ComplexTensor for complex."
+  [a]
+  (tape/record! :la/sum [a]
+                (if (cx/complex? a)
+                  (cx/sum a)
+                  (double (dfn/sum a)))))
 
 ;; ---------------------------------------------------------------------------
 ;; Scalar properties
@@ -220,13 +237,14 @@
   "Matrix trace. Returns a double for real matrices, a scalar ComplexTensor
    for complex matrices."
   [a]
-  (if (cx/complex? a)
-    (let [[re im] (ejml/ztrace (ejml/ct->zmat a))]
-      (cx/complex re im))
-    (let [shape (dtype/shape a)
-          n (min (long (first shape)) (long (second shape)))]
-      (dfn/sum (dtype/make-reader :float64 n
-                                  (tensor/mget a idx idx))))))
+  (tape/record! :la/trace [a]
+                (if (cx/complex? a)
+                  (let [[re im] (ejml/ztrace (ejml/ct->zmat a))]
+                    (cx/complex re im))
+                  (let [shape (dtype/shape a)
+                        n (min (long (first shape)) (long (second shape)))]
+                    (double (dfn/sum (dtype/make-reader :float64 n
+                                                        (tensor/mget a idx idx))))))))
 
 (defn det
   "Matrix determinant. Returns a double for real matrices, a scalar
@@ -276,26 +294,26 @@
   "Matrix inverse. Returns nil if singular."
   [a]
   (tape/record! :la/invert [a]
-    (if (cx/complex? a)
-      (when-let [inv (ejml/zinvert (ejml/ct->zmat a))]
-        (ejml/zmat->ct inv))
-      (when-let [inv (ejml/dinvert (bt/tensor->dmat a))]
-        (bt/dmat->tensor inv)))))
+                (if (cx/complex? a)
+                  (when-let [inv (ejml/zinvert (ejml/ct->zmat a))]
+                    (ejml/zmat->ct inv))
+                  (when-let [inv (ejml/dinvert (bt/tensor->dmat a))]
+                    (bt/dmat->tensor inv)))))
 
 (defn solve
   "Solve A * X = B for X. Returns nil if singular.
    A is [n n], B is [n m]. Returns X as tensor or ComplexTensor."
   [a b]
   (tape/record! :la/solve [a b]
-    (if (cx/complex? a)
-      (let [za (ejml/ct->zmat a)
-            zb (ejml/ct->zmat b)]
-        (when-let [zx (ejml/zsolve za zb)]
-          (ejml/zmat->ct zx)))
-      (let [da (bt/tensor->dmat a)
-            db (bt/tensor->dmat b)]
-        (when-let [x (ejml/dsolve da db)]
-          (bt/dmat->tensor x))))))
+                (if (cx/complex? a)
+                  (let [za (ejml/ct->zmat a)
+                        zb (ejml/ct->zmat b)]
+                    (when-let [zx (ejml/zsolve za zb)]
+                      (ejml/zmat->ct zx)))
+                  (let [da (bt/tensor->dmat a)
+                        db (bt/tensor->dmat b)]
+                    (when-let [x (ejml/dsolve da db)]
+                      (bt/dmat->tensor x))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Decompositions
@@ -313,22 +331,22 @@
    Currently accepts real matrices only (EJML limitation)."
   [a]
   (tape/record! :la/eigen [a]
-    (let [result (ejml/deig (bt/tensor->dmat a))]
-      (when result
-        (let [pairs (:eigenvalues result)
-              n (count pairs)
-              arr (double-array (* 2 n))]
-          (dotimes [i n]
-            (let [[re im] (nth pairs i)]
-              (aset arr (* 2 i) (double re))
-              (aset arr (inc (* 2 i)) (double im))))
-          (cond-> {:eigenvalues (cx/complex-tensor
-                                 (tensor/reshape (tensor/ensure-tensor arr) [n 2]))}
-            (:eigenvectors result)
-            (assoc :eigenvectors
-                   (mapv (fn [ev]
-                           (when ev (bt/dmat->tensor ev)))
-                         (:eigenvectors result)))))))))
+                (let [result (ejml/deig (bt/tensor->dmat a))]
+                  (when result
+                    (let [pairs (:eigenvalues result)
+                          n (count pairs)
+                          arr (double-array (* 2 n))]
+                      (dotimes [i n]
+                        (let [[re im] (nth pairs i)]
+                          (aset arr (* 2 i) (double re))
+                          (aset arr (inc (* 2 i)) (double im))))
+                      (cond-> {:eigenvalues (cx/complex-tensor
+                                             (tensor/reshape (tensor/ensure-tensor arr) [n 2]))}
+                        (:eigenvectors result)
+                        (assoc :eigenvectors
+                               (mapv (fn [ev]
+                                       (when ev (bt/dmat->tensor ev)))
+                                     (:eigenvectors result)))))))))
 
 (defn real-eigenvalues
   "Sorted real eigenvalues of a symmetric/Hermitian matrix.
@@ -352,34 +370,34 @@
    Currently accepts real matrices only (EJML limitation)."
   [a]
   (tape/record! :la/svd [a]
-    (let [result (ejml/dsvd (bt/tensor->dmat a))]
-      (when result
-        {:U (bt/dmat->tensor (:U result))
-         :S (:S result)
-         :Vt (bt/dmat->tensor (:Vt result))}))))
+                (let [result (ejml/dsvd (bt/tensor->dmat a))]
+                  (when result
+                    {:U (bt/dmat->tensor (:U result))
+                     :S (:S result)
+                     :Vt (bt/dmat->tensor (:Vt result))}))))
 
 (defn qr
   "QR decomposition: A = Q * R.
    Returns a map with :Q and :R as tensors (or ComplexTensors)."
   [a]
   (tape/record! :la/qr [a]
-    (if (cx/complex? a)
-      (let [result (ejml/zqr (ejml/ct->zmat a))]
-        (when result
-          {:Q (ejml/zmat->ct (:Q result))
-           :R (ejml/zmat->ct (:R result))}))
-      (let [result (ejml/dqr (bt/tensor->dmat a))]
-        (when result
-          {:Q (bt/dmat->tensor (:Q result))
-           :R (bt/dmat->tensor (:R result))})))))
+                (if (cx/complex? a)
+                  (let [result (ejml/zqr (ejml/ct->zmat a))]
+                    (when result
+                      {:Q (ejml/zmat->ct (:Q result))
+                       :R (ejml/zmat->ct (:R result))}))
+                  (let [result (ejml/dqr (bt/tensor->dmat a))]
+                    (when result
+                      {:Q (bt/dmat->tensor (:Q result))
+                       :R (bt/dmat->tensor (:R result))})))))
 
 (defn cholesky
   "Cholesky decomposition: A = L * L^T (real) or A = L * L† (complex).
    Returns the lower-triangular L, or nil if not SPD/HPD."
   [a]
   (tape/record! :la/cholesky [a]
-    (if (cx/complex? a)
-      (when-let [L (ejml/zcholesky (ejml/ct->zmat a))]
-        (ejml/zmat->ct L))
-      (when-let [L (ejml/dcholesky (bt/tensor->dmat a))]
-        (bt/dmat->tensor L)))))
+                (if (cx/complex? a)
+                  (when-let [L (ejml/zcholesky (ejml/ct->zmat a))]
+                    (ejml/zmat->ct L))
+                  (when-let [L (ejml/dcholesky (bt/tensor->dmat a))]
+                    (bt/dmat->tensor L)))))

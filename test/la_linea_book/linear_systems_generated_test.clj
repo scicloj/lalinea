@@ -112,7 +112,7 @@
     [k 0 history []]
     (if
      (>= k iters)
-     {:x-final (dtype/clone x), :history history}
+     {:x-final (dtype/make-container :float64 x), :history history}
      (do
       (dotimes
        [i n]
@@ -124,7 +124,7 @@
         (aset x i (/ (+ left right (aget b-arr i)) 2.0))))
       (let
        [x-col
-        (la/column x)
+        (la/column (dtype/make-container :float64 x))
         residual
         (la/norm (la/sub (la/mmul A-heat x-col) b-heat))]
        (recur
@@ -133,7 +133,7 @@
          history
          {:iteration (inc k),
           :residual residual,
-          :profile (dtype/clone x)})))))))))
+          :profile (dtype/make-container :float64 x)})))))))))
 
 
 (def

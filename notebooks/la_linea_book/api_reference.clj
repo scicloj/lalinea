@@ -6,6 +6,8 @@
 ;; - `scicloj.la-linea.complex` — complex tensors
 ;; - `scicloj.la-linea.transform` — FFT and real-valued transforms
 ;; - `scicloj.la-linea.tape` — computation tape and memory inspection
+;; - `scicloj.la-linea.elementwise` — tape-aware element-wise functions
+;; - `scicloj.la-linea.grad` — reverse-mode automatic differentiation
 ;; - `scicloj.la-linea.vis` — visualization helpers
 
 ^{:kindly/hide-code true
@@ -16,6 +18,8 @@
    [scicloj.la-linea.complex :as cx]
    [scicloj.la-linea.transform :as bfft]
    [scicloj.la-linea.tape :as tape]
+   [scicloj.la-linea.elementwise :as elem]
+   [scicloj.la-linea.grad :as grad]
    [scicloj.la-linea.vis :as vis]
    [tech.v3.tensor :as tensor]
    [tech.v3.datatype :as dtype]
@@ -97,6 +101,18 @@
 (la/abs (la/matrix [[-3 2] [-1 4]]))
 
 (kind/test-last [(fn [m] (== 3.0 (tensor/mget m 0 0)))])
+
+(kind/doc #'la/sq)
+
+(la/sq (la/matrix [[2 3] [4 5]]))
+
+(kind/test-last [(fn [m] (== 4.0 (tensor/mget m 0 0)))])
+
+(kind/doc #'la/sum)
+
+(la/sum (la/matrix [[1 2] [3 4]]))
+
+(kind/test-last [(fn [v] (== 10.0 v))])
 
 (kind/doc #'la/mmul)
 
@@ -517,7 +533,7 @@
 (select-keys tape-example [:result :entries])
 
 (kind/test-last [(fn [m] (and (contains? m :result)
-                               (contains? m :entries)))])
+                              (contains? m :entries)))])
 
 (kind/doc #'tape/summary)
 
@@ -533,10 +549,9 @@
 
 (kind/doc #'tape/mermaid)
 
-;; Returns a Mermaid flowchart string. Wrap with `kind/mermaid`
-;; for notebook rendering.
+;; Returns a renderable Mermaid diagram.
 
-(kind/mermaid (tape/mermaid tape-example (:result tape-example)))
+(tape/mermaid tape-example (:result tape-example))
 
 (kind/doc #'tape/detect-memory-status)
 
@@ -544,6 +559,110 @@
 ;; `:lazy`, `:shared`, or `:independent`.
 
 (mapv tape/detect-memory-status (:entries tape-example))
+
+;; ## `scicloj.la-linea.elementwise`
+;;
+;; Tape-aware element-wise operations with complex dispatch.
+;; Each function records on the tape (when active) and dispatches
+;; on `cx/complex?`.
+
+(kind/doc #'elem/sq)
+
+(elem/sq (la/column [2 3 4]))
+
+(kind/test-last [(fn [v] (la/close-scalar? (tensor/mget v 0 0) 4.0))])
+
+(kind/doc #'elem/sqrt)
+
+(elem/sqrt (la/column [4 9 16]))
+
+(kind/test-last [(fn [v] (la/close-scalar? (tensor/mget v 0 0) 2.0))])
+
+(kind/doc #'elem/exp)
+
+(la/close-scalar? (tensor/mget (elem/exp (la/column [0])) 0 0) 1.0)
+
+(kind/test-last [true?])
+
+(kind/doc #'elem/log)
+
+(la/close-scalar? (tensor/mget (elem/log (la/column [(Math/E)])) 0 0) 1.0)
+
+(kind/test-last [true?])
+
+(kind/doc #'elem/sin)
+
+(la/close-scalar? (tensor/mget (elem/sin (la/column [(/ Math/PI 2)])) 0 0) 1.0)
+
+(kind/test-last [true?])
+
+(kind/doc #'elem/cos)
+
+(la/close-scalar? (tensor/mget (elem/cos (la/column [0])) 0 0) 1.0)
+
+(kind/test-last [true?])
+
+(kind/doc #'elem/abs)
+
+(tensor/mget (elem/abs (la/column [-5])) 0 0)
+
+(kind/test-last [(fn [v] (== 5.0 v))])
+
+(kind/doc #'elem/sum)
+
+(elem/sum (la/column [1 2 3 4]))
+
+(kind/test-last [(fn [v] (== 10.0 v))])
+
+(kind/doc #'elem/mean)
+
+(elem/mean (la/column [2 4 6]))
+
+(kind/test-last [(fn [v] (== 4.0 v))])
+
+(kind/doc #'elem/pow)
+
+(tensor/mget (elem/pow (la/column [2]) 3) 0 0)
+
+(kind/test-last [(fn [v] (== 8.0 v))])
+
+(kind/doc #'elem/floor)
+
+(tensor/mget (elem/floor (la/column [2.7])) 0 0)
+
+(kind/test-last [(fn [v] (== 2.0 v))])
+
+(kind/doc #'elem/ceil)
+
+(tensor/mget (elem/ceil (la/column [2.3])) 0 0)
+
+(kind/test-last [(fn [v] (== 3.0 v))])
+
+(kind/doc #'elem/min)
+
+(tensor/mget (elem/min (la/column [3]) (la/column [5])) 0 0)
+
+(kind/test-last [(fn [v] (== 3.0 v))])
+
+(kind/doc #'elem/max)
+
+(tensor/mget (elem/max (la/column [3]) (la/column [5])) 0 0)
+
+(kind/test-last [(fn [v] (== 5.0 v))])
+
+;; ## `scicloj.la-linea.grad`
+;;
+;; Reverse-mode automatic differentiation on the computation tape.
+
+(kind/doc #'grad/grad)
+
+(let [A (la/matrix [[1 2] [3 4]])
+      tape-result (tape/with-tape
+                    (la/trace (la/mmul (la/transpose A) A)))
+      grads (grad/grad tape-result (:result tape-result))]
+  (la/close? (.get grads A) (la/scale A 2)))
+
+(kind/test-last [true?])
 
 ;; ## `scicloj.la-linea.vis`
 ;;

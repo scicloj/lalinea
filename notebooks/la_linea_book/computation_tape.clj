@@ -218,7 +218,7 @@
 (kind/test-last
  [(fn [entries]
     (and (= [:la/matrix :la/add] (mapv :op entries))
-         (= {:external true} (second (:inputs (second entries))))))])
+         (:external (second (:inputs (second entries))))))])
 
 ;; ### Complex tensors
 
@@ -280,7 +280,7 @@
 ;; - `=` shared (same backing array as an input)
 ;; - `+` independent (fresh allocation)
 
-(kind/mermaid (tape/mermaid tape-result (:result tape-result)))
+(tape/mermaid tape-result (:result tape-result))
 
 ;; ## Practical example: tracing a pipeline
 
@@ -305,4 +305,4 @@
 ;; The summary reveals the mix of lazy intermediate operations
 ;; and EJML-backed materializations.
 
-(kind/mermaid (tape/mermaid pipeline-result (:result pipeline-result)))
+(tape/mermaid pipeline-result (:result pipeline-result))

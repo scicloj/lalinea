@@ -211,7 +211,7 @@
     [entries]
     (and
      (= [:la/matrix :la/add] (mapv :op entries))
-     (= {:external true} (second (:inputs (second entries))))))
+     (:external (second (:inputs (second entries))))))
    v52_l212)))
 
 
@@ -250,9 +250,7 @@
 (def v65_l267 (tape/origin tape-result (:result tape-result)))
 
 
-(def
- v67_l283
- (kind/mermaid (tape/mermaid tape-result (:result tape-result))))
+(def v67_l283 (tape/mermaid tape-result (:result tape-result)))
 
 
 (def
@@ -279,7 +277,4 @@
 (def v70_l303 (tape/summary pipeline-result))
 
 
-(def
- v72_l308
- (kind/mermaid
-  (tape/mermaid pipeline-result (:result pipeline-result))))
+(def v72_l308 (tape/mermaid pipeline-result (:result pipeline-result)))

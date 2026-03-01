@@ -11,7 +11,8 @@
    `shares-memory?` for standalone inspection."
   (:require [tech.v3.datatype :as dtype]
             [tech.v3.tensor :as tensor]
-            [scicloj.la-linea.complex :as cx])
+            [scicloj.la-linea.complex :as cx]
+            [scicloj.kindly.v4.kind :as kind])
   (:import [java.util IdentityHashMap]))
 
 ;; ---------------------------------------------------------------------------
@@ -82,11 +83,16 @@
 
 (defn- lookup-input
   "Look up an input in the tape registry. Returns {:id ...} if tracked,
-   {:external true} otherwise."
-  [^IdentityHashMap registry input]
+   {:external true} otherwise. Tensor-typed externals are registered
+   in the registry so they get stable IDs across multiple uses."
+  [^IdentityHashMap registry ^clojure.lang.Atom counter input]
   (if-let [id (.get registry input)]
     {:id id}
-    {:external true}))
+    (if (or (tensor/tensor? input) (cx/complex? input))
+      (let [id (str "x" (swap! counter inc))]
+        (.put registry input id)
+        {:id id :external true})
+      {:external true})))
 
 (defn record!
   "Record an operation on the tape. No-op when `*tape*` is nil.
@@ -99,14 +105,16 @@
   (when-some [tape *tape*]
     (when (some? result)
       (let [^IdentityHashMap registry (:registry tape)
-            id (str "t" (swap! (:counter tape) inc))
-            input-refs (mapv (partial lookup-input registry) inputs)
-            entry {:id       id
-                   :op       op
-                   :inputs   input-refs
-                   :output   result
-                   :shape    (tensor-shape result)
-                   :complex? (cx/complex? result)}]
+            counter (:counter tape)
+            id (str "t" (swap! counter inc))
+            input-refs (mapv (partial lookup-input registry counter) inputs)
+            entry {:id            id
+                   :op            op
+                   :inputs        input-refs
+                   :input-tensors inputs
+                   :output        result
+                   :shape         (tensor-shape result)
+                   :complex?      (cx/complex? result)}]
         (swap! (:entries tape) conj entry)
         (.put registry result id))))
   result)
@@ -148,13 +156,9 @@
                                   (when-not (:external inp-ref)
                                     nil))
                                 (:inputs entry))
-            ;; Check inputs — but we don't have the actual input tensors
-            ;; in the entry (only refs). Use memory-status instead.
             status (memory-status result)]
         (if (= status :lazy)
           :lazy
-          ;; Check if any input shares the same backing array
-          ;; We need the actual input tensors, which are outputs of earlier entries
           :independent))
       :lazy)))
 
@@ -257,14 +261,14 @@
             (swap! lines conj (str "  " ext-id " --> " (:id entry)))))))))
 
 (defn mermaid
-  "Render the computation DAG for a value as a Mermaid flowchart string.
+  "Render the computation DAG for a value as a Mermaid diagram.
 
    Memory status is annotated on each node:
    - `~` lazy (recomputes on access)
    - `=` shared (shares backing array with an input)
    - `+` independent (fresh allocation)
 
-   Wrap with `(kind/mermaid ...)` for notebook rendering."
+   Returns a `kind/mermaid` value, renderable in notebooks."
   [tape-result value]
   (let [^IdentityHashMap registry (:registry tape-result)
         entries (:entries tape-result)
@@ -273,4 +277,4 @@
       (when-let [entry (get idx id)]
         (let [lines (atom [])]
           (walk-mermaid entry idx (atom #{}) lines)
-          (str "flowchart TD\n" (clojure.string/join "\n" @lines)))))))
+          (kind/mermaid (str "flowchart TD\n" (clojure.string/join "\n" @lines))))))))
