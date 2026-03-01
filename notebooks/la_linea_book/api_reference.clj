@@ -511,16 +511,20 @@
 
 (kind/test-last [(fn [s] (= :lazy s))])
 
-(kind/doc #'tape/shares-memory?)
+(kind/doc #'tape/memory-relation)
 
 (let [A (la/matrix [[1 2] [3 4]])]
-  (tape/shares-memory? A (la/transpose A)))
+  (tape/memory-relation A (la/transpose A)))
 
-(kind/test-last [true?])
+(kind/test-last [(fn [r] (= :shared r))])
 
-(tape/shares-memory? (la/eye 2) (la/eye 2))
+(tape/memory-relation (la/matrix [[1 0] [0 1]]) (la/matrix [[5 6] [7 8]]))
 
-(kind/test-last [false?])
+(kind/test-last [(fn [r] (= :independent r))])
+
+(tape/memory-relation (la/matrix [[1 2] [3 4]]) (la/add (la/eye 2) (la/eye 2)))
+
+(kind/test-last [(fn [r] (= :unknown-lazy r))])
 
 (kind/doc #'tape/with-tape)
 
@@ -556,11 +560,11 @@
 (kind/doc #'tape/detect-memory-status)
 
 ;; Classifies a tape entry's output relative to its inputs:
-;; `:lazy`, `:shared`, or `:independent`.
+;; `:reads-through`, `:shared`, or `:independent`.
 
 (mapv tape/detect-memory-status (:entries tape-example))
 
-(kind/test-last [(fn [v] (every? #{:lazy :shared :independent} v))])
+(kind/test-last [(fn [v] (every? #{:reads-through :shared :independent} v))])
 
 ;; ## `scicloj.la-linea.elementwise`
 ;;

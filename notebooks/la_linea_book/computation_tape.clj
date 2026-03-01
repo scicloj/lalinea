@@ -58,40 +58,59 @@
 (kind/test-last
  [(fn [s] (= :contiguous s))])
 
-;; ## Detecting shared memory
+;; ## Memory relation
+;;
+;; `tape/memory-relation` classifies the relationship between
+;; two tensors:
+;;
+;; - `:shared` — same backing `double[]`
+;; - `:independent` — separate backing arrays
+;; - `:unknown-lazy` — at least one is lazy; relationship indeterminate
 
-;; `tape/shares-memory?` checks whether two tensors share the same
-;; backing `double[]`. This detects sharing through transpose, column
-;; construction, and reshape.
+;; A matrix and its transpose share backing memory:
 
-(tape/shares-memory? A (la/transpose A))
-
-(kind/test-last
- [(fn [b] (true? b))])
-
-;; Independent allocations do not share memory.
-
-(tape/shares-memory? A B)
+(tape/memory-relation A (la/transpose A))
 
 (kind/test-last
- [(fn [b] (false? b))])
+ [(fn [r] (= :shared r))])
 
-;; Lazy tensors have no backing array, so they do not share memory
-;; with anything (even their inputs).
+;; Two separate matrices are independent:
 
-(tape/shares-memory? A (la/add A B))
+(tape/memory-relation A B)
 
 (kind/test-last
- [(fn [b] (false? b))])
+ [(fn [r] (= :independent r))])
 
-;; `la/column` on a `double[]` shares memory with it.
+;; `la/column` on a `double[]` shares memory with it:
 
 (def arr (double-array [10 20 30]))
 
-(tape/shares-memory? (la/column arr) (tensor/ensure-tensor arr))
+(tape/memory-relation (la/column arr) (tensor/ensure-tensor arr))
 
 (kind/test-last
- [(fn [b] (true? b))])
+ [(fn [r] (= :shared r))])
+
+;; A lazy result (from `la/add`) actually reads through to its
+;; inputs on every access — but without a tape, dtype-next does
+;; not expose that dependency chain:
+
+(tape/memory-relation A (la/add A B))
+
+(kind/test-last
+ [(fn [r] (= :unknown-lazy r))])
+
+;; With a tape, `detect-memory-status` gives the complete answer.
+;; It knows the inputs of each operation, so it can report
+;; `:reads-through` instead of `:unknown-lazy`:
+
+(let [tr (tape/with-tape
+           (let [M (la/matrix [[1 2] [3 4]])
+                 S (la/add M M)]
+             S))]
+  (tape/detect-memory-status (last (:entries tr))))
+
+(kind/test-last
+ [(fn [s] (= :reads-through s))])
 
 ;; ## Recording a computation tape
 
@@ -107,26 +126,16 @@
           D (la/mmul C (la/transpose M))]
       D)))
 
-(:result tape-result)
+(dissoc tape-result :registry)
 
 (kind/test-last
- [(fn [r] (tensor/tensor? r))])
+ [(fn [tr] (and (tensor/tensor? (:result tr))
+                (= 6 (count (:entries tr)))))])
 
-;; The tape captured 6 operations.
-
-(count (:entries tape-result))
-
-(kind/test-last
- [(fn [n] (= 6 n))])
-
-;; Each entry records the operation, its inputs (linked by ID or
-;; marked `:external`), and the output shape.
-
-(mapv (fn [e] (select-keys e [:id :op :inputs :shape]))
-      (:entries tape-result))
-
-;; Inputs that went through `la/` have IDs; everything else
-;; (scalars, raw data) is `:external`.
+;; The result is a map with `:result` (the computed value) and
+;; `:entries` (the recorded operations). Each entry tracks the
+;; operation, its inputs (linked by ID or marked `:external`),
+;; and the output shape.
 
 ;; ## External inputs
 
@@ -261,7 +270,7 @@
 ;; The summary shows:
 ;;
 ;; - `:by-op` — one of each operation
-;; - `:by-memory` — which operations are lazy, shared, or independent
+;; - `:by-memory` — which operations read through, share memory, or are independent
 
 ;; ## Origin DAG
 
@@ -280,7 +289,7 @@
 ;; `tape/mermaid` renders the DAG as a [Mermaid](https://mermaid.js.org/) flowchart.
 ;; Memory status annotations:
 ;;
-;; - `~` lazy
+;; - `~` reads-through (lazy, recomputes on access from inputs)
 ;; - `=` shared (same backing array as an input)
 ;; - `+` independent (fresh allocation)
 

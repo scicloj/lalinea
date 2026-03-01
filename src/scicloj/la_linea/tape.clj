@@ -8,7 +8,7 @@
    - What's the computation graph?
 
    Use `with-tape` to record operations, `memory-status` and
-   `shares-memory?` for standalone inspection."
+   `memory-relation` for standalone inspection."
   (:require [tech.v3.datatype :as dtype]
             [tech.v3.tensor :as tensor]
             [scicloj.la-linea.complex :as cx]
@@ -58,17 +58,25 @@
       (backing-array raw)         :strided
       :else                       :lazy)))
 
-(defn shares-memory?
-  "True if two tensors share the same backing double[].
+(defn memory-relation
+  "Classify the memory relationship between two tensors.
 
-   Detects sharing through transpose, reshape, column/row construction,
-   and any other operation that returns a view of the same data.
-   Returns false if either tensor is lazy (no backing array)."
+   Returns:
+   - `:shared`       — same backing double[]
+   - `:independent`  — separate backing arrays
+   - `:unknown-lazy` — at least one is lazy; relationship indeterminate
+
+   For lazy tensors, the relationship depends on whether the lazy
+   reader reads through to the other tensor's backing array — but
+   dtype-next does not expose this dependency chain. Use the tape
+   (`detect-memory-status`) for the full picture."
   [a b]
   (let [arr-a (backing-array a)
         arr-b (backing-array b)]
-    (and (some? arr-a)
-         (identical? arr-a arr-b))))
+    (cond
+      (and arr-a arr-b (identical? arr-a arr-b)) :shared
+      (and arr-a arr-b)                          :independent
+      :else                                      :unknown-lazy)))
 
 ;; ---------------------------------------------------------------------------
 ;; Tape recording
@@ -145,22 +153,18 @@
   "Classify a tape entry's output relative to its inputs.
 
    Returns:
-   - `:shared`      — output shares backing array with an input
-   - `:independent`  — output has its own backing array (fresh allocation)
-   - `:lazy`         — output has no backing array (recomputes on access)"
+   - `:shared`        — output shares backing array with an input
+   - `:independent`   — output has its own backing array (fresh allocation)
+   - `:reads-through` — output has no backing array; reads from inputs on access"
   [entry]
   (let [result (:output entry)
         result-arr (backing-array result)]
-    (if result-arr
-      (let [input-outputs (keep (fn [inp-ref]
-                                  (when-not (:external inp-ref)
-                                    nil))
-                                (:inputs entry))
-            status (memory-status result)]
-        (if (= status :lazy)
-          :lazy
-          :independent))
-      :lazy)))
+    (if (nil? result-arr)
+      :reads-through
+      (let [input-arrs (keep backing-array (:input-tensors entry))]
+        (if (some #(identical? result-arr %) input-arrs)
+          :shared
+          :independent)))))
 
 (defn- entry-memory-status
   "Determine memory status of a tape entry relative to its inputs.
@@ -169,7 +173,7 @@
   (let [result (:output entry)
         result-arr (backing-array result)]
     (if (nil? result-arr)
-      :lazy
+      :reads-through
       (let [input-arrs (keep (fn [inp-ref]
                                (when-let [id (:id inp-ref)]
                                  (when-let [inp-entry (get idx id)]
@@ -185,7 +189,7 @@
    Returns a map with:
    - `:total`       — total operations recorded
    - `:by-op`       — count per operation type
-   - `:by-memory`   — count per memory status (:lazy, :shared, :independent)"
+   - `:by-memory`   — count per memory status (:reads-through, :shared, :independent)"
   [tape-result]
   (let [entries (:entries tape-result)
         idx (entries-by-id entries)
@@ -231,7 +235,7 @@
 (defn- mermaid-node-label [entry idx]
   (let [status (entry-memory-status entry idx)
         status-icon (case status
-                      :lazy "~"
+                      :reads-through "~"
                       :shared "="
                       :independent "+"
                       "")]
@@ -264,7 +268,7 @@
   "Render the computation DAG for a value as a Mermaid diagram.
 
    Memory status is annotated on each node:
-   - `~` lazy (recomputes on access)
+   - `~` reads-through (lazy, recomputes on access)
    - `=` shared (shares backing array with an input)
    - `+` independent (fresh allocation)
 

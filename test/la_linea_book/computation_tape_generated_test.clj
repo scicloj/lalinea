@@ -41,37 +41,49 @@
 (deftest t15_l58 (is ((fn [s] (= :contiguous s)) v14_l56)))
 
 
-(def v17_l67 (tape/shares-memory? A (la/transpose A)))
+(def v17_l72 (tape/memory-relation A (la/transpose A)))
 
 
-(deftest t18_l69 (is ((fn [b] (true? b)) v17_l67)))
+(deftest t18_l74 (is ((fn [r] (= :shared r)) v17_l72)))
 
 
-(def v20_l74 (tape/shares-memory? A B))
+(def v20_l79 (tape/memory-relation A B))
 
 
-(deftest t21_l76 (is ((fn [b] (false? b)) v20_l74)))
+(deftest t21_l81 (is ((fn [r] (= :independent r)) v20_l79)))
 
 
-(def v23_l82 (tape/shares-memory? A (la/add A B)))
-
-
-(deftest t24_l84 (is ((fn [b] (false? b)) v23_l82)))
-
-
-(def v26_l89 (def arr (double-array [10 20 30])))
+(def v23_l86 (def arr (double-array [10 20 30])))
 
 
 (def
- v27_l91
- (tape/shares-memory? (la/column arr) (tensor/ensure-tensor arr)))
+ v24_l88
+ (tape/memory-relation (la/column arr) (tensor/ensure-tensor arr)))
 
 
-(deftest t28_l93 (is ((fn [b] (true? b)) v27_l91)))
+(deftest t25_l90 (is ((fn [r] (= :shared r)) v24_l88)))
+
+
+(def v27_l97 (tape/memory-relation A (la/add A B)))
+
+
+(deftest t28_l99 (is ((fn [r] (= :unknown-lazy r)) v27_l97)))
 
 
 (def
- v30_l101
+ v30_l106
+ (let
+  [tr
+   (tape/with-tape
+    (let [M (la/matrix [[1 2] [3 4]]) S (la/add M M)] S))]
+  (tape/detect-memory-status (last (:entries tr)))))
+
+
+(deftest t31_l112 (is ((fn [s] (= :reads-through s)) v30_l106)))
+
+
+(def
+ v33_l120
  (def
   tape-result
   (tape/with-tape
@@ -89,41 +101,34 @@
     D))))
 
 
-(def v31_l110 (:result tape-result))
+(def v34_l129 (dissoc tape-result :registry))
 
 
-(deftest t32_l112 (is ((fn [r] (tensor/tensor? r)) v31_l110)))
-
-
-(def v34_l117 (count (:entries tape-result)))
-
-
-(deftest t35_l119 (is ((fn [n] (= 6 n)) v34_l117)))
-
-
-(def
- v37_l125
- (mapv
-  (fn [e] (select-keys e [:id :op :inputs :shape]))
-  (:entries tape-result)))
+(deftest
+ t35_l131
+ (is
+  ((fn
+    [tr]
+    (and (tensor/tensor? (:result tr)) (= 6 (count (:entries tr)))))
+   v34_l129)))
 
 
 (def
- v39_l141
+ v37_l150
  (def
   array-tape
   (tape/with-tape (let [v (la/column [1 2 3]) w (la/scale v 5.0)] w))))
 
 
 (def
- v40_l147
+ v38_l156
  (mapv
   (fn [e] (select-keys e [:id :op :inputs]))
   (:entries array-tape)))
 
 
 (deftest
- t41_l150
+ t39_l159
  (is
   ((fn
     [entries]
@@ -131,11 +136,11 @@
      (= :la/column (:op (first entries)))
      (= [{:external true}] (:inputs (first entries)))
      (= {:id "t1"} (first (:inputs (second entries))))))
-   v40_l147)))
+   v38_l156)))
 
 
 (def
- v43_l161
+ v41_l170
  (def
   seq-tape
   (tape/with-tape
@@ -148,16 +153,16 @@
     (la/mmul M v)))))
 
 
-(def v44_l169 (mapv :op (:entries seq-tape)))
+(def v42_l178 (mapv :op (:entries seq-tape)))
 
 
 (deftest
- t45_l171
- (is ((fn [ops] (= [:la/matrix :la/column :la/mmul] ops)) v44_l169)))
+ t43_l180
+ (is ((fn [ops] (= [:la/matrix :la/column :la/mmul] ops)) v42_l178)))
 
 
 (def
- v47_l180
+ v45_l189
  (def
   dfn-tape
   (tape/with-tape
@@ -172,21 +177,21 @@
 
 
 (def
- v48_l187
+ v46_l196
  (mapv (fn [e] (select-keys e [:id :op :inputs])) (:entries dfn-tape)))
 
 
 (deftest
- t50_l194
+ t48_l203
  (is
   ((fn
     [entries]
     (= [:la/matrix :la/matrix :la/add] (mapv :op entries)))
-   v48_l187)))
+   v46_l196)))
 
 
 (def
- v52_l206
+ v50_l215
  (def
   ejml-tape
   (tape/with-tape
@@ -201,23 +206,23 @@
 
 
 (def
- v53_l214
+ v51_l223
  (mapv (fn [e] (select-keys e [:id :op :inputs])) (:entries ejml-tape)))
 
 
 (deftest
- t55_l220
+ t53_l229
  (is
   ((fn
     [entries]
     (and
      (= [:la/matrix :la/add] (mapv :op entries))
      (:external (second (:inputs (second entries))))))
-   v53_l214)))
+   v51_l223)))
 
 
 (def
- v57_l230
+ v55_l239
  (def
   complex-tape
   (tape/with-tape
@@ -231,34 +236,34 @@
     s))))
 
 
-(def v58_l237 (:complex? (last (:entries complex-tape))))
+(def v56_l246 (:complex? (last (:entries complex-tape))))
 
 
-(deftest t59_l239 (is ((fn [c?] (true? c?)) v58_l237)))
+(deftest t57_l248 (is ((fn [c?] (true? c?)) v56_l246)))
 
 
-(def v61_l247 (mapv :op (:entries complex-tape)))
+(def v59_l256 (mapv :op (:entries complex-tape)))
 
 
 (deftest
- t62_l249
- (is ((fn [ops] (= [:la/matrix :la/matrix :la/add] ops)) v61_l247)))
+ t60_l258
+ (is ((fn [ops] (= [:la/matrix :la/matrix :la/add] ops)) v59_l256)))
 
 
-(def v64_l257 (tape/summary tape-result))
+(def v62_l266 (tape/summary tape-result))
 
 
-(deftest t65_l259 (is ((fn [s] (= 6 (:total s))) v64_l257)))
+(deftest t63_l268 (is ((fn [s] (= 6 (:total s))) v62_l266)))
 
 
-(def v67_l271 (tape/origin tape-result (:result tape-result)))
+(def v65_l280 (tape/origin tape-result (:result tape-result)))
 
 
-(def v69_l287 (tape/mermaid tape-result (:result tape-result)))
+(def v67_l296 (tape/mermaid tape-result (:result tape-result)))
 
 
 (def
- v71_l294
+ v69_l303
  (def
   pipeline-result
   (tape/with-tape
@@ -278,10 +283,10 @@
     projection))))
 
 
-(def v72_l307 (tape/summary pipeline-result))
+(def v70_l316 (tape/summary pipeline-result))
 
 
-(deftest t73_l309 (is ((fn [s] (= 9 (:total s))) v72_l307)))
+(deftest t71_l318 (is ((fn [s] (= 9 (:total s))) v70_l316)))
 
 
-(def v75_l314 (tape/mermaid pipeline-result (:result pipeline-result)))
+(def v73_l323 (tape/mermaid pipeline-result (:result pipeline-result)))
