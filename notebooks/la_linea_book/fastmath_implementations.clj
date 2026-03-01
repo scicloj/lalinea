@@ -1,6 +1,6 @@
 ;; # Fastmath Algorithms with La Linea
 ;;
-;; [Fastmath](https://github.com/generateme/fastmath) implements several
+;; [Fastmath](https://generateme.github.io/fastmath/clay/) implements several
 ;; numerical algorithms using Apache Commons Math for their internal
 ;; linear algebra. This notebook reimplements the core matrix operations
 ;; using La Linea (dtype-next tensors + EJML), compares outputs for

@@ -1,6 +1,6 @@
 ;; # Vectors and Spaces
 ;;
-;; A **vector space** is an abstract concept: any collection of
+;; A **[vector space](https://en.wikipedia.org/wiki/Vector_space)** is an abstract concept: any collection of
 ;; objects that can be added together and scaled by numbers, following
 ;; a short list of axioms. Theorems proved from these axioms
 ;; apply to every vector space simultaneously — columns of numbers,
@@ -9,7 +9,7 @@
 ;; This chapter develops the foundations using $\mathbb{R}^n$ — columns
 ;; of real numbers — as our main concrete example. We define addition
 ;; and scaling, state the axioms, and build up to the key concepts
-;; of linear independence, basis, and dimension.
+;; of [linear independence](https://en.wikipedia.org/wiki/Linear_independence), [basis](https://en.wikipedia.org/wiki/Basis_(linear_algebra)), and dimension.
 
 (ns la-linea-book.vectors-and-spaces
   (:require
@@ -195,7 +195,7 @@
 
 ;; ---
 ;;
-;; ## Linear combinations and span
+;; ## [Linear combinations](https://en.wikipedia.org/wiki/Linear_combination) and span
 ;;
 ;; ### Linear combinations
 ;;

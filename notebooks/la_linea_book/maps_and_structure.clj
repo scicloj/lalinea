@@ -1,10 +1,10 @@
 ;; # Maps and Structure
 ;;
-;; A matrix is more than a grid of numbers — it is a **linear map**,
+;; A matrix is more than a grid of numbers — it is a **[linear map](https://en.wikipedia.org/wiki/Linear_map)**,
 ;; a function that transforms vectors while preserving the rules of
 ;; addition and scaling. This chapter explores what matrices do
 ;; geometrically and introduces the structural concepts — subspaces,
-;; rank, and the four fundamental subspaces — that reveal the full
+;; [rank](https://en.wikipedia.org/wiki/Rank_(linear_algebra)), and the [four fundamental subspaces](https://en.wikipedia.org/wiki/Fundamental_subspaces) — that reveal the full
 ;; picture of a linear map.
 
 (ns la-linea-book.maps-and-structure
@@ -336,7 +336,7 @@ nullity-M
 (kind/test-last
  [(fn [n] (= n 1))])
 
-;; ### The rank-nullity theorem
+;; ### The [rank-nullity theorem](https://en.wikipedia.org/wiki/Rank%E2%80%93nullity_theorem)
 ;;
 ;; $$\text{rank}(A) + \text{nullity}(A) = n$$
 ;;

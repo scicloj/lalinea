@@ -52,7 +52,7 @@
 ;; Consider a small social network with 6 people.
 ;; An edge between two people means they know each other.
 ;;
-;; The **adjacency matrix** $A$ has $A_{ij} = 1$ if vertices $i$ and
+;; The **[adjacency matrix](https://en.wikipedia.org/wiki/Adjacency_matrix)** $A$ has $A_{ij} = 1$ if vertices $i$ and
 ;; $j$ are connected, and $0$ otherwise. For an undirected graph,
 ;; $A$ is symmetric.
 
@@ -88,7 +88,7 @@
 
 ;; ## The graph Laplacian
 ;;
-;; The **Laplacian matrix** is defined as:
+;; The **[Laplacian matrix](https://en.wikipedia.org/wiki/Laplacian_matrix)** is defined as:
 ;;
 ;; $$L = D - A$$
 ;;
@@ -147,7 +147,7 @@ eigenvalues
 ;; there is exactly one zero eigenvalue).
 ;;
 ;; The second-smallest eigenvalue $\lambda_2$ is called the
-;; **algebraic connectivity** (or **Fiedler value**). It measures
+;; **[algebraic connectivity](https://en.wikipedia.org/wiki/Algebraic_connectivity)** (or **Fiedler value**). It measures
 ;; how well-connected the graph is — a larger $\lambda_2$ means
 ;; the graph is harder to disconnect.
 
@@ -361,7 +361,7 @@ path-theoretical
 
 (kind/test-last [true?])
 
-;; ## Spectral clustering
+;; ## [Spectral clustering](https://en.wikipedia.org/wiki/Spectral_clustering)
 ;;
 ;; The Fiedler vector gives a 2-way partition. For $k$-way clustering,
 ;; we use the first $k$ eigenvectors. Each vertex becomes a point in
@@ -451,7 +451,7 @@ comm-eigenvalues
 ;; Vertices from the same community cluster tightly in spectral space,
 ;; even though we only used the raw Laplacian eigenvectors.
 
-;; ## Cheeger's inequality
+;; ## [Cheeger's inequality](https://en.wikipedia.org/wiki/Cheeger%27s_inequality)
 ;;
 ;; Cheeger's inequality links the algebraic connectivity $\lambda_2$ to
 ;; the **edge expansion** (or conductance) $h(G)$ of the graph:

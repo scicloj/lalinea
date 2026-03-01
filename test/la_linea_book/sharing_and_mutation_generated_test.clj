@@ -136,18 +136,18 @@
 
 
 (def
- v24_l146
+ v24_l145
  (let
   [M (la/matrix [[1 2] [3 4]]) arr (dtype/->double-array M)]
   (aset arr 0 99.0)
   (tensor/mget M 0 0)))
 
 
-(deftest t25_l151 (is ((fn [v] (== 99.0 v)) v24_l146)))
+(deftest t25_l150 (is ((fn [v] (== 99.0 v)) v24_l145)))
 
 
 (def
- v27_l157
+ v27_l156
  (let
   [M
    (la/matrix [[1 2 3] [4 5 6]])
@@ -161,16 +161,16 @@
 
 
 (deftest
- t28_l164
+ t28_l163
  (is
   ((fn
     [{:keys [length values shares-memory?]}]
     (and (== 3 length) (= [1.0 2.0 3.0] values) (not shares-memory?)))
-   v27_l157)))
+   v27_l156)))
 
 
 (def
- v30_l173
+ v30_l172
  (let
   [a
    (la/matrix [[1 2] [3 4]])
@@ -185,16 +185,16 @@
 
 
 (deftest
- t31_l180
+ t31_l179
  (is
   ((fn
     [{:keys [values has-array-buffer?]}]
     (and (= [11.0 22.0 33.0 44.0] values) (not has-array-buffer?)))
-   v30_l173)))
+   v30_l172)))
 
 
 (def
- v33_l189
+ v33_l188
  (let
   [ct
    (cx/complex-tensor
@@ -205,11 +205,11 @@
   (cx/re (ct 0))))
 
 
-(deftest t34_l195 (is ((fn [v] (== 99.0 v)) v33_l189)))
+(deftest t34_l194 (is ((fn [v] (== 99.0 v)) v33_l188)))
 
 
 (def
- v36_l202
+ v36_l201
  (let
   [ct-data
    (tensor/->tensor [[1 2] [3 4] [5 6]] {:datatype :float64})
@@ -218,11 +218,11 @@
   (identical? ct-data (cx/->tensor ct))))
 
 
-(deftest t37_l206 (is (true? v36_l202)))
+(deftest t37_l205 (is (true? v36_l201)))
 
 
 (def
- v39_l210
+ v39_l209
  (let
   [ct-data
    (tensor/->tensor [[1 2] [3 4] [5 6]] {:datatype :float64})
@@ -235,11 +235,11 @@
   (cx/im (ct 0))))
 
 
-(deftest t40_l216 (is ((fn [v] (== 99.0 v)) v39_l210)))
+(deftest t40_l215 (is ((fn [v] (== 99.0 v)) v39_l209)))
 
 
 (def
- v42_l221
+ v42_l220
  (let
   [ct-data
    (tensor/->tensor [[1 2] [3 4] [5 6]] {:datatype :float64})
@@ -249,11 +249,11 @@
   (cx/im (ct 0))))
 
 
-(deftest t43_l226 (is ((fn [v] (== 99.0 v)) v42_l221)))
+(deftest t43_l225 (is ((fn [v] (== 99.0 v)) v42_l220)))
 
 
 (def
- v45_l233
+ v45_l232
  (let
   [ct
    (cx/complex-tensor
@@ -267,11 +267,11 @@
   (double (re-view 0))))
 
 
-(deftest t46_l240 (is ((fn [v] (== -10.0 v)) v45_l233)))
+(deftest t46_l239 (is ((fn [v] (== -10.0 v)) v45_l232)))
 
 
 (def
- v48_l245
+ v48_l244
  (let
   [ct
    (cx/complex-tensor
@@ -282,11 +282,11 @@
   (double (re-view 0))))
 
 
-(deftest t49_l251 (is ((fn [v] (== -10.0 v)) v48_l245)))
+(deftest t49_l250 (is ((fn [v] (== -10.0 v)) v48_l244)))
 
 
 (def
- v51_l261
+ v51_l260
  (let
   [x
    (tensor/->tensor [1 2 3] {:datatype :float64})
@@ -297,11 +297,11 @@
   (vec lazy-sum)))
 
 
-(deftest t52_l266 (is ((fn [v] (= [11.0 22.0 33.0] v)) v51_l261)))
+(deftest t52_l265 (is ((fn [v] (= [11.0 22.0 33.0] v)) v51_l260)))
 
 
 (def
- v54_l271
+ v54_l270
  (let
   [x
    (tensor/->tensor [1 2 3] {:datatype :float64})
@@ -316,11 +316,11 @@
   (vec lazy-sum)))
 
 
-(deftest t55_l278 (is ((fn [v] (= [110.0 22.0 33.0] v)) v54_l271)))
+(deftest t55_l277 (is ((fn [v] (= [110.0 22.0 33.0] v)) v54_l270)))
 
 
 (def
- v57_l283
+ v57_l282
  (let
   [x
    (tensor/->tensor [1 2 3] {:datatype :float64})
@@ -332,11 +332,11 @@
   (vec lazy-sum)))
 
 
-(deftest t58_l289 (is ((fn [v] (= [110.0 22.0 33.0] v)) v57_l283)))
+(deftest t58_l288 (is ((fn [v] (= [110.0 22.0 33.0] v)) v57_l282)))
 
 
 (def
- v60_l296
+ v60_l295
  (let
   [ca
    (cx/complex-tensor
@@ -351,14 +351,14 @@
 
 
 (deftest
- t61_l304
+ t61_l303
  (is
   ((fn [{:keys [re im]}] (and (= [11.0 22.0] re) (= [33.0 44.0] im)))
-   v60_l296)))
+   v60_l295)))
 
 
 (def
- v63_l311
+ v63_l310
  (let
   [ca
    (cx/complex-tensor
@@ -375,11 +375,11 @@
   (vec (dtype/->reader (cx/re lazy-sum)))))
 
 
-(deftest t64_l320 (is ((fn [v] (= [110.0 22.0] v)) v63_l311)))
+(deftest t64_l319 (is ((fn [v] (= [110.0 22.0] v)) v63_l310)))
 
 
 (def
- v66_l324
+ v66_l323
  (let
   [ca
    (cx/complex-tensor
@@ -393,11 +393,11 @@
   (vec (dtype/->reader (cx/re lazy-sum)))))
 
 
-(deftest t67_l332 (is ((fn [v] (= [110.0 22.0] v)) v66_l324)))
+(deftest t67_l331 (is ((fn [v] (= [110.0 22.0] v)) v66_l323)))
 
 
 (def
- v69_l339
+ v69_l338
  (let
   [original (la/matrix [[1 2] [3 4]]) cloned (dtype/clone original)]
   (identical?
@@ -405,11 +405,11 @@
    (dtype/->double-array cloned))))
 
 
-(deftest t70_l344 (is (false? v69_l339)))
+(deftest t70_l343 (is (false? v69_l338)))
 
 
 (def
- v72_l348
+ v72_l347
  (let
   [original
    (la/matrix [[1 2] [3 4]])
@@ -424,16 +424,16 @@
 
 
 (deftest
- t73_l355
+ t73_l354
  (is
   ((fn
     [{:keys [original-00 cloned-00]}]
     (and (== -999.0 original-00) (== 1.0 cloned-00)))
-   v72_l348)))
+   v72_l347)))
 
 
 (def
- v75_l362
+ v75_l361
  (let
   [original (la/matrix [[1 2] [3 4]]) cloned (dtype/clone original)]
   (tensor/mset! original 0 0 -999.0)
@@ -442,16 +442,16 @@
 
 
 (deftest
- t76_l368
+ t76_l367
  (is
   ((fn
     [{:keys [original-00 cloned-00]}]
     (and (== -999.0 original-00) (== 1.0 cloned-00)))
-   v75_l362)))
+   v75_l361)))
 
 
 (def
- v78_l378
+ v78_l377
  (let
   [ct-orig
    (cx/complex-tensor
@@ -466,16 +466,16 @@
 
 
 (deftest
- t79_l386
+ t79_l385
  (is
   ((fn
     [{:keys [orig-re clone-re]}]
     (and (== -1.0 orig-re) (== 1.0 clone-re)))
-   v78_l378)))
+   v78_l377)))
 
 
 (def
- v81_l393
+ v81_l392
  (let
   [ct-orig
    (cx/complex-tensor
@@ -487,16 +487,16 @@
 
 
 (deftest
- t82_l400
+ t82_l399
  (is
   ((fn
     [{:keys [orig-re clone-re]}]
     (and (== -1.0 orig-re) (== 1.0 clone-re)))
-   v81_l393)))
+   v81_l392)))
 
 
 (def
- v84_l411
+ v84_l410
  (let
   [p
    (cx/complex-tensor
@@ -511,11 +511,11 @@
   (some? (dtype/as-array-buffer (cx/->tensor materialized-pq)))))
 
 
-(deftest t85_l419 (is (true? v84_l411)))
+(deftest t85_l418 (is (true? v84_l410)))
 
 
 (def
- v87_l423
+ v87_l422
  (let
   [p
    (cx/complex-tensor
@@ -536,16 +536,16 @@
 
 
 (deftest
- t88_l434
+ t88_l433
  (is
   ((fn
     [{:keys [lazy-re materialized-re]}]
     (and (= [1009.0 22.0] lazy-re) (= [11.0 22.0] materialized-re)))
-   v87_l423)))
+   v87_l422)))
 
 
 (def
- v90_l441
+ v90_l440
  (let
   [p
    (cx/complex-tensor
@@ -563,16 +563,16 @@
 
 
 (deftest
- t91_l451
+ t91_l450
  (is
   ((fn
     [{:keys [lazy-re materialized-re]}]
     (and (= [1009.0 22.0] lazy-re) (= [11.0 22.0] materialized-re)))
-   v90_l441)))
+   v90_l440)))
 
 
 (def
- v93_l462
+ v93_l461
  (let
   [big
    (la/matrix [[1 2 3] [4 5 6] [7 8 9]])
@@ -586,16 +586,16 @@
 
 
 (deftest
- t94_l469
+ t94_l468
  (is
   ((fn
     [{:keys [big-00 sub-00]}]
     (and (== -1.0 big-00) (== 1.0 sub-00)))
-   v93_l462)))
+   v93_l461)))
 
 
 (def
- v96_l476
+ v96_l475
  (let
   [big
    (la/matrix [[1 2 3] [4 5 6] [7 8 9]])
@@ -606,27 +606,27 @@
 
 
 (deftest
- t97_l482
+ t97_l481
  (is
   ((fn
     [{:keys [big-00 sub-00]}]
     (and (== -1.0 big-00) (== 1.0 sub-00)))
-   v96_l476)))
+   v96_l475)))
 
 
 (def
- v99_l493
+ v99_l492
  (let
   [arr (double-array [1 2 3]) col (la/column arr)]
   (aset arr 0 99.0)
   (tensor/mget col 0 0)))
 
 
-(deftest t100_l498 (is ((fn [v] (== 99.0 v)) v99_l493)))
+(deftest t100_l497 (is ((fn [v] (== 99.0 v)) v99_l492)))
 
 
 (def
- v102_l503
+ v102_l502
  (let
   [a
    (tensor/->tensor [1 2 3] {:datatype :float64})
@@ -640,7 +640,7 @@
 
 
 (deftest
- t103_l510
+ t103_l509
  (is
   ((fn
     [{:keys [shape contiguous? values]}]
@@ -648,11 +648,11 @@
      (= [3 1] shape)
      (not contiguous?)
      (= [11.0 22.0 33.0] values)))
-   v102_l503)))
+   v102_l502)))
 
 
 (def
- v105_l519
+ v105_l518
  (let
   [col
    (la/column
@@ -665,78 +665,78 @@
 
 
 (deftest
- t106_l524
+ t106_l523
  (is
   ((fn
     [r]
     (and (== 2.0 (tensor/mget r 0 0)) (== 3.0 (tensor/mget r 1 0))))
-   v105_l519)))
+   v105_l518)))
 
 
 (def
- v108_l532
+ v108_l531
  (let [A (la/matrix [[1 2] [3 4]]) B (la/matrix A)] (identical? A B)))
 
 
-(deftest t109_l536 (is (true? v108_l532)))
+(deftest t109_l535 (is (true? v108_l531)))
 
 
 (def
- v111_l541
+ v111_l540
  (let
   [A (la/matrix [[1 2] [3 4]])]
   (identical? A (la/matrix [[1 2] [3 4]]))))
 
 
-(deftest t112_l544 (is (false? v111_l541)))
+(deftest t112_l543 (is (false? v111_l540)))
 
 
 (def
- v114_l552
+ v114_l551
  (let
   [E (la/matrix [[1 2] [3 4]]) Et (la/transpose E)]
   (tensor/mset! E 0 1 99.0)
   (tensor/mget Et 1 0)))
 
 
-(deftest t115_l557 (is ((fn [v] (== 99.0 v)) v114_l552)))
+(deftest t115_l556 (is ((fn [v] (== 99.0 v)) v114_l551)))
 
 
 (def
- v117_l561
+ v117_l560
  (let
   [E (la/matrix [[1 2] [3 4]]) Et (la/transpose E)]
   (tensor/mset! Et 0 0 -1.0)
   (tensor/mget E 0 0)))
 
 
-(deftest t118_l566 (is ((fn [v] (== -1.0 v)) v117_l561)))
+(deftest t118_l565 (is ((fn [v] (== -1.0 v)) v117_l560)))
 
 
 (def
- v120_l571
+ v120_l570
  (let
   [E (la/matrix [[1 2] [3 4]]) Et (dtype/clone (la/transpose E))]
   (tensor/mset! E 0 0 -1.0)
   (tensor/mget Et 0 0)))
 
 
-(deftest t121_l576 (is ((fn [v] (== 1.0 v)) v120_l571)))
+(deftest t121_l575 (is ((fn [v] (== 1.0 v)) v120_l570)))
 
 
 (def
- v123_l584
+ v123_l583
  (let
   [E (la/matrix [[1 2] [3 4]]) P (la/mmul E E)]
   (tensor/mset! E 0 0 -1.0)
   (tensor/mget P 0 0)))
 
 
-(deftest t124_l589 (is ((fn [v] (== 7.0 v)) v123_l584)))
+(deftest t124_l588 (is ((fn [v] (== 7.0 v)) v123_l583)))
 
 
 (def
- v126_l599
+ v126_l598
  (let
   [rng
    (java.util.Random. 42)
@@ -748,11 +748,11 @@
   (la/close? t t)))
 
 
-(deftest t127_l603 (is (false? v126_l599)))
+(deftest t127_l602 (is (false? v126_l598)))
 
 
 (def
- v129_l608
+ v129_l607
  (let
   [rng
    (java.util.Random. 42)
@@ -765,11 +765,11 @@
   (la/close? t t)))
 
 
-(deftest t130_l613 (is (true? v129_l608)))
+(deftest t130_l612 (is (true? v129_l607)))
 
 
 (def
- v132_l623
+ v132_l622
  (let
   [make-random-tensor
    (fn
@@ -784,11 +784,11 @@
   (la/close? (make-random-tensor) (make-random-tensor))))
 
 
-(deftest t133_l630 (is (false? v132_l623)))
+(deftest t133_l629 (is (false? v132_l622)))
 
 
 (def
- v135_l639
+ v135_l638
  (let
   [make-random-tensor
    (fn
@@ -802,4 +802,4 @@
   (la/close? (make-random-tensor) (make-random-tensor))))
 
 
-(deftest t136_l647 (is (true? v135_l639)))
+(deftest t136_l646 (is (true? v135_l638)))

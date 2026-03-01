@@ -19,7 +19,7 @@
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]))
 
-;; ## Forward FFT
+;; ## Forward [FFT](https://en.wikipedia.org/wiki/Fast_Fourier_transform)
 ;;
 ;; A real signal produces a complex spectrum.
 
@@ -40,7 +40,7 @@
 
 (kind/test-last [(fn [v] (< v 1e-10))])
 
-;; ## Parseval's theorem
+;; ## [Parseval's theorem](https://en.wikipedia.org/wiki/Parseval%27s_theorem)
 ;;
 ;; Energy in time domain equals energy in frequency domain
 ;; (up to a scale factor of $N$):
@@ -74,7 +74,7 @@
 
 (kind/test-last [true?])
 
-;; ## Convolution theorem
+;; ## [Convolution theorem](https://en.wikipedia.org/wiki/Convolution_theorem)
 ;;
 ;; Pointwise multiplication in frequency domain corresponds to
 ;; circular convolution in time domain:
@@ -138,7 +138,7 @@
 
 ;; ## Other transforms
 ;;
-;; DCT, DST, and DHT are also available, returning real tensors.
+;; [DCT](https://en.wikipedia.org/wiki/Discrete_cosine_transform), [DST](https://en.wikipedia.org/wiki/Discrete_sine_transform), and [DHT](https://en.wikipedia.org/wiki/Discrete_Hartley_transform) are also available, returning real tensors.
 
 (let [signal [1.0 2.0 3.0 4.0]
       dct (bfft/dct-forward signal)

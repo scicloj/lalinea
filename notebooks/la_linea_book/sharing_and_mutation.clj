@@ -1,7 +1,7 @@
 ;; # Sharing and Mutation
 ;;
 ;; dtype-next and La Linea follow a **functional, immutable-by-convention**
-;; philosophy. Operations return lazy views and zero-copy wrappers
+;; philosophy. Operations return lazy views and [zero-copy](https://en.wikipedia.org/wiki/Zero-copy) wrappers
 ;; rather than defensive copies. This is efficient — but it means
 ;; that multiple objects can share the same backing `double[]`.
 ;;
@@ -129,7 +129,6 @@
   (.get dm 1 1))
 
 (kind/test-last [(fn [v] (== 99.0 v))])
-
 
 ;; ## Extracting the backing double[]
 
@@ -517,7 +516,7 @@
 ;; other decompositions copy when they need to:
 
 (let [col (la/column (dfn/+ (tensor/->tensor [1 0] {:datatype :float64})
-                             (tensor/->tensor [0 1] {:datatype :float64})))
+                            (tensor/->tensor [0 1] {:datatype :float64})))
       A (la/matrix [[2 0] [0 3]])]
   (la/mmul A col))
 

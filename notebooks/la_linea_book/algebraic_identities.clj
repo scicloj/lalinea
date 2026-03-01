@@ -359,7 +359,7 @@
 
 ;; ---
 ;;
-;; ## QR decomposition
+;; ## [QR decomposition](https://en.wikipedia.org/wiki/QR_decomposition)
 ;;
 ;; Every matrix $A$ can be written as $A = QR$ where $Q$ is
 ;; orthogonal ($Q^T Q = I$) and $R$ is upper triangular.
@@ -429,7 +429,7 @@
 
 ;; ---
 ;;
-;; ## SVD (Singular Value Decomposition)
+;; ## [SVD](https://en.wikipedia.org/wiki/Singular_value_decomposition) (Singular Value Decomposition)
 ;;
 ;; Any matrix $A$ can be written as $A = U \Sigma V^T$ where
 ;; $U$ and $V$ are orthogonal and $\Sigma$ is diagonal with
@@ -468,7 +468,7 @@
 
 (kind/test-last [true?])
 
-;; ### Frobenius norm from singular values: $\|A\|_F = \sqrt{\sum \sigma_i^2}$
+;; ### [Frobenius norm](https://en.wikipedia.org/wiki/Matrix_norm#Frobenius_norm) from singular values: $\|A\|_F = \sqrt{\sum \sigma_i^2}$
 
 (let [{:keys [S]} (la/svd A)
       sv-norm (Math/sqrt (dfn/sum (dfn/* S S)))]
@@ -478,7 +478,7 @@
 
 ;; ---
 ;;
-;; ## Cholesky decomposition
+;; ## [Cholesky decomposition](https://en.wikipedia.org/wiki/Cholesky_decomposition)
 ;;
 ;; A symmetric positive definite (SPD) matrix $M$ can be written
 ;; as $M = L L^T$ where $L$ is lower triangular. This is the

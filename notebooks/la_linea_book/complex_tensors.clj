@@ -135,7 +135,7 @@
 (kind/test-last [(fn [v] (and (< (Math/abs (- (first v) 5.0)) 1e-10)
                               (< (Math/abs (- (second v) 1.0)) 1e-10)))])
 
-;; ## Hermitian inner product
+;; ## [Hermitian inner product](https://en.wikipedia.org/wiki/Inner_product_space#Hermitian_inner_product)
 ;;
 ;; $\langle a, b \rangle_H = \sum_i a_i \cdot \overline{b_i}$
 

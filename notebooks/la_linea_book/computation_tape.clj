@@ -277,7 +277,7 @@
 
 ;; ## Mermaid visualization
 
-;; `tape/mermaid` renders the DAG as a Mermaid flowchart.
+;; `tape/mermaid` renders the DAG as a [Mermaid](https://mermaid.js.org/) flowchart.
 ;; Memory status annotations:
 ;;
 ;; - `~` lazy

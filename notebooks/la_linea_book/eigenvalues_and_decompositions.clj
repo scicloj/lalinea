@@ -1,7 +1,7 @@
 ;; # Eigenvalues and Decompositions
 ;;
 ;; Some vectors survive a matrix transformation with only a change
-;; in scale — these **eigenvectors** and their **eigenvalues** reveal
+;; in scale — these **[eigenvectors](https://en.wikipedia.org/wiki/Eigenvalues_and_eigenvectors)** and their **eigenvalues** reveal
 ;; the natural axes of a linear map. This chapter builds from
 ;; eigenvalues through diagonalisation, the spectral theorem, the SVD,
 ;; and positive definite matrices to a capstone example tying
@@ -253,7 +253,7 @@ D-result
 (kind/test-last
  [(fn [d] (< d 1e-10))])
 
-;; ### The spectral theorem
+;; ### The [spectral theorem](https://en.wikipedia.org/wiki/Spectral_theorem)
 ;;
 ;; Every real symmetric matrix $A$ can be written:
 ;;
@@ -284,7 +284,7 @@ D-result
 
 ;; ---
 ;;
-;; ## The SVD
+;; ## The [SVD](https://en.wikipedia.org/wiki/Singular_value_decomposition)
 ;;
 ;; ### Beyond square matrices
 ;;
@@ -390,7 +390,7 @@ sigmas
 
 (kind/test-last [true?])
 
-;; ### Cholesky decomposition
+;; ### [Cholesky decomposition](https://en.wikipedia.org/wiki/Cholesky_decomposition)
 ;;
 ;; Positive definite matrices have a special factorisation:
 ;; $M = L L^T$ where $L$ is lower triangular. This is the

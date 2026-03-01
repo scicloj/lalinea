@@ -1,7 +1,7 @@
 ;; # Least Squares and Curve Fitting
 ;;
 ;; Given noisy data, how do we find the "best" curve that fits it?
-;; **Least squares** minimises the sum of squared residuals.
+;; **[Least squares](https://en.wikipedia.org/wiki/Least_squares)** minimises the sum of squared residuals.
 ;; The solution is a linear algebra problem.
 ;;
 ;; This notebook derives the **normal equations**, solves them with
@@ -76,7 +76,7 @@ A-linear
 
 (def y-col (la/column y-linear))
 
-;; ## The normal equations
+;; ## The [normal equations](https://en.wikipedia.org/wiki/Ordinary_least_squares#Normal_equations)
 ;;
 ;; The least-squares solution satisfies:
 ;;
@@ -135,7 +135,7 @@ rms-linear
 ;; For a polynomial of degree $d$, the basis functions are
 ;; $\phi_j(x) = x^j$, $j = 0, \ldots, d$.
 ;;
-;; The **Vandermonde matrix** has $A_{ij} = x_i^j$.
+;; The **[Vandermonde matrix](https://en.wikipedia.org/wiki/Vandermonde_matrix)** has $A_{ij} = x_i^j$.
 
 ;; Some data along $y = 1 - 2x + x^2$:
 
@@ -242,7 +242,7 @@ c-poly
 
 ;; ## SVD-based least squares
 ;;
-;; The **pseudoinverse** via SVD provides the most robust solution,
+;; The **[pseudoinverse](https://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_inverse)** via SVD provides the most robust solution,
 ;; especially when columns of $A$ are nearly linearly dependent.
 ;;
 ;; If $A = U \Sigma V^T$, the least-squares solution is
@@ -358,7 +358,7 @@ c-trig
       (plotly/layer-line)
       plotly/plot))
 
-;; ## Condition number and numerical stability
+;; ## [Condition number](https://en.wikipedia.org/wiki/Condition_number) and numerical stability
 ;;
 ;; The **condition number** $\kappa(A) = \sigma_{\max} / \sigma_{\min}$
 ;; measures how sensitive the solution is to perturbations in the data.

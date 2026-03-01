@@ -436,7 +436,7 @@
  (def
   la-rbf-preds
   (mapv
-   (fn* [p1__38604#] (la-rbf-predict la-rbf-model p1__38604#))
+   (fn* [p1__71225#] (la-rbf-predict la-rbf-model p1__71225#))
    rbf-test-pts)))
 
 
@@ -584,7 +584,7 @@
  (def
   la-kriging-preds
   (mapv
-   (fn* [p1__38605#] (la-kriging-predict la-kriging-model p1__38605#))
+   (fn* [p1__71226#] (la-kriging-predict la-kriging-model p1__71226#))
    kriging-test-pts)))
 
 
@@ -833,7 +833,7 @@
     (for
      [v (range -3 4)]
      (mapv
-      (fn* [p1__38606#] (Math/pow (double v) (double p1__38606#)))
+      (fn* [p1__71227#] (Math/pow (double v) (double p1__71227#)))
       (range 4)))
     (m/seq->double-double-array)
     (org.apache.commons.math3.linear.Array2DRowRealMatrix.)
@@ -1088,8 +1088,8 @@
       (Math/sqrt
        (reduce
         +
-        (map (fn* [p1__38607#] (* p1__38607# p1__38607#)) v)))]
-     (mapv (fn* [p1__38608#] (/ (double p1__38608#) norm)) v)))
+        (map (fn* [p1__71228#] (* p1__71228# p1__71228#)) v)))]
+     (mapv (fn* [p1__71229#] (/ (double p1__71229#) norm)) v)))
    fm-normed
    (normalize (vec fm-ince-c))
    la-normed

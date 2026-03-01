@@ -3,9 +3,9 @@
 ;; A vector space gives us addition and scaling, but nothing more.
 ;; There is no built-in notion of **length**, **angle**, or
 ;; **perpendicularity** — these require extra structure. An
-;; **inner product** provides exactly that, and this chapter
+;; **[inner product](https://en.wikipedia.org/wiki/Inner_product_space)** provides exactly that, and this chapter
 ;; develops the consequences: orthogonality, projections, and
-;; the Gram-Schmidt process that leads to the QR decomposition.
+;; the [Gram-Schmidt process](https://en.wikipedia.org/wiki/Gram%E2%80%93Schmidt_process) that leads to the [QR decomposition](https://en.wikipedia.org/wiki/QR_decomposition).
 
 (ns la-linea-book.inner-products-and-orthogonality
   (:require
@@ -202,7 +202,7 @@ cos-theta
 (kind/test-last
  [(fn [d] (< (Math/abs (- d 45.0)) 1e-10))])
 
-;; ### Orthogonal projection
+;; ### [Orthogonal projection](https://en.wikipedia.org/wiki/Projection_(linear_algebra))
 ;;
 ;; Given a subspace and a vector
 ;; $\mathbf{b}$, the **orthogonal projection** of $\mathbf{b}$

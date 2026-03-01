@@ -1,4 +1,4 @@
-;; # Automatic differentiation
+;; # [Automatic differentiation](https://en.wikipedia.org/wiki/Automatic_differentiation)
 
 ;; The computation tape records a DAG of operations. Reverse-mode
 ;; automatic differentiation walks this DAG backwards to compute
@@ -15,7 +15,7 @@
 
 ;; ## How it works
 
-;; Each `la/` operation has a VJP (vector-Jacobian product) rule that
+;; Each `la/` operation has a [VJP](https://en.wikipedia.org/wiki/Automatic_differentiation#Reverse_accumulation) (vector-Jacobian product) rule that
 ;; describes how gradients flow backwards through it. For example:
 ;;
 ;; | Operation | Gradient rule |
@@ -75,7 +75,7 @@
 
 ;; For ‖Ax − b‖² = sum(sq(Ax − b)), the gradient with respect to x
 ;; is 2Aᵀ(Ax − b). This connects automatic differentiation to the
-;; normal equations: setting the gradient to zero gives Aᵀ Ax = Aᵀ b.
+;; [normal equations](https://en.wikipedia.org/wiki/Ordinary_least_squares#Normal_equations): setting the gradient to zero gives Aᵀ Ax = Aᵀ b.
 
 (def A2 (la/matrix [[1 0]
                     [0 2]
