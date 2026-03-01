@@ -1,7 +1,7 @@
-;; # [Automatic differentiation](https://en.wikipedia.org/wiki/Automatic_differentiation)
+;; # Automatic Differentiation
 
-;; The computation tape records a DAG of operations. Reverse-mode
-;; automatic differentiation walks this DAG backwards to compute
+;; The computation tape records a DAG of operations. [Reverse-mode](https://en.wikipedia.org/wiki/Automatic_differentiation#Forward_and_reverse_accumulation)
+;; [automatic differentiation](https://en.wikipedia.org/wiki/Automatic_differentiation) walks this DAG backwards to compute
 ;; gradients — the derivative of a scalar output with respect to
 ;; each input tensor.
 
