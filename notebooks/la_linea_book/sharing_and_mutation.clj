@@ -48,6 +48,14 @@
          (== 99.0 t2-00)))])
 
 ;; Both tensors saw the mutation through the shared `double[]`.
+
+^:kindly/hide-code
+(kind/mermaid "graph TD
+  flat[\"flat = double-array\"] --> backing[\"backing array\n1 2 3 4 5 6\"]
+  t1[\"t1 = tensor 2x3\"] --> backing
+  t2[\"t2 = tensor 3x2\"] --> backing
+  style backing fill:#fff3cd,stroke:#856404")
+
 ;;
 ;; The idiomatic way — mutate through the tensor directly:
 

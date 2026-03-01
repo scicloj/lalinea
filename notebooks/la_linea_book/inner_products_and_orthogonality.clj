@@ -327,6 +327,16 @@ q2-gs
          (< (Math/abs (- (:q2-norm m) 1.0)) 1e-10)
          (< (Math/abs (:dot m)) 1e-10)))])
 
+;; The first two components of each vector, showing the
+;; original pair (gray/blue) and the orthogonalised pair
+;; (green/red):
+
+(vis/arrow-plot [{:label "a" :xy [1 1] :color "#999999"}
+                 {:label "b" :xy [1 0] :color "#2266cc"}
+                 {:label "q1" :xy [(/ 1 (Math/sqrt 2)) (/ 1 (Math/sqrt 2))] :color "#228833"}
+                 {:label "q2" :xy [(/ 1 (Math/sqrt 6)) (/ -1 (Math/sqrt 6))] :color "#cc4422"}]
+                {})
+
 ;; ### Connection to QR decomposition
 ;;
 ;; Gram-Schmidt on all columns of a matrix $A$ produces $A = QR$:

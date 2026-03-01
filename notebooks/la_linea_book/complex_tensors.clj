@@ -26,6 +26,10 @@
    [tech.v3.datatype :as dtype]
    ;; Element-wise array math:
    [tech.v3.datatype.functional :as dfn]
+   ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
+   [tablecloth.api :as tc]
+   ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
+   [scicloj.tableplot.v1.plotly :as plotly]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]))
 
@@ -117,6 +121,19 @@
 (kind/test-last [(fn [v] (and (= (:re v) [-16.0 -20.0])
                               (= (:im v) [22.0 40.0])))])
 
+;; Complex numbers live in the plane. Multiplying by $i$
+;; rotates 90° counterclockwise:
+
+(let [z-re 3.0 z-im 1.0
+      ;; z * i = (3+i)(0+i) = -1+3i
+      p-re -1.0 p-im 3.0]
+  (-> (tc/dataset {:re [z-re 0.0 p-re]
+                   :im [z-im 1.0 p-im]
+                   :label ["z = 3+i" "w = i" "z*w = -1+3i"]})
+      (plotly/base {:=x :re :=y :im :=color :label})
+      (plotly/layer-point {:=mark-size 12})
+      plotly/plot))
+
 ;; ### Conjugate
 
 (let [ct (cx/conj (cx/complex-tensor [1.0 2.0] [3.0 -4.0]))]
@@ -125,6 +142,15 @@
 
 (kind/test-last [(fn [v] (= (:im v) [-3.0 4.0]))])
 
+;; Conjugation reflects a point across the real axis:
+
+(let [z-re 2.0 z-im 3.0]
+  (-> (tc/dataset {:re [z-re z-re]
+                   :im [z-im (- z-im)]
+                   :label ["z = 2+3i" "conj(z) = 2-3i"]})
+      (plotly/base {:=x :re :=y :im :=color :label})
+      (plotly/layer-point {:=mark-size 12})
+      plotly/plot))
 ;; ### Magnitude
 
 (let [m (la/abs (cx/complex-tensor [3.0 0.0] [4.0 1.0]))]

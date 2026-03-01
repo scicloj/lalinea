@@ -53,6 +53,20 @@
               [0.3 0.4 0.3]
               [0.2 0.3 0.5]]))
 
+;; The transition structure as a directed graph:
+
+^:kindly/hide-code
+(kind/mermaid "graph LR
+  S[\"Sunny\"] -->|0.7| S
+  S -->|0.2| C[\"Cloudy\"]
+  S -->|0.1| R[\"Rainy\"]
+  C -->|0.3| S
+  C -->|0.4| C
+  C -->|0.3| R
+  R -->|0.2| S
+  R -->|0.3| C
+  R -->|0.5| R")
+
 ;; Each row sums to 1:
 
 (la/mmul P (la/column (repeat 3 1.0)))
@@ -191,6 +205,19 @@ stationary-eigen
 ;; - Page 2 → 0
 ;; - Page 3 → 0, 2
 ;; - Page 4 → 0, 1, 2, 3
+
+^:kindly/hide-code
+(kind/mermaid "graph LR
+  P0[\"Page 0\"] --> P1[\"Page 1\"]
+  P0 --> P2[\"Page 2\"]
+  P1 --> P2
+  P2 --> P0
+  P3[\"Page 3\"] --> P0
+  P3 --> P2
+  P4[\"Page 4\"] --> P0
+  P4 --> P1
+  P4 --> P2
+  P4 --> P3")
 
 ;; Build the hyperlink matrix $H$ (row-stochastic):
 

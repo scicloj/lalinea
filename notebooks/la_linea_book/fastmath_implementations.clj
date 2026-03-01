@@ -165,6 +165,20 @@ la-normal-result
 
 (kind/test-last [true?])
 
+;; Predicted vs actual — the tighter the diagonal, the
+;; better the fit:
+
+(let [pred (fn [{:keys [intercept beta]} xs]
+             (mapv (fn [row]
+                     (+ (double intercept)
+                        (reduce + (map * (map double beta) (map double row)))))
+                   xs))]
+  (-> (tc/dataset {:actual ols-ys
+                   :predicted (pred la-result ols-xs)})
+      (plotly/base {:=x :actual :=y :predicted})
+      (plotly/layer-point {:=mark-size 4})
+      plotly/plot))
+
 ;; ### Performance
 ;;
 ;; Note: fastmath `lm` computes diagnostics (R², residuals,
@@ -254,6 +268,16 @@ la-normal-result
         (map vector fm-gp-preds la-gp-preds))
 
 (kind/test-last [true?])
+
+;; The GP fits the noisy sine wave closely:
+
+(-> (tc/dataset (concat
+                 (map (fn [x y] {:x x :y y :type "data"}) gp-xs gp-ys)
+                 (map (fn [x p] {:x x :y p :type "GP prediction"}) gp-xs la-gp-preds)))
+    (plotly/base {:=x :x :=y :y :=color :type})
+    (plotly/layer-point {:=mark-size 5})
+    (plotly/layer-line)
+    plotly/plot)
 
 ;; ### Performance
 

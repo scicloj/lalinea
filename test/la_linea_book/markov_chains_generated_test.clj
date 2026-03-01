@@ -18,23 +18,29 @@
  (def P (la/matrix [[0.7 0.2 0.1] [0.3 0.4 0.3] [0.2 0.3 0.5]])))
 
 
-(def v5_l58 (la/mmul P (la/column (repeat 3 1.0))))
+(def
+ v5_l58
+ (kind/mermaid
+  "graph LR\n  S[\"Sunny\"] -->|0.7| S\n  S -->|0.2| C[\"Cloudy\"]\n  S -->|0.1| R[\"Rainy\"]\n  C -->|0.3| S\n  C -->|0.4| C\n  C -->|0.3| R\n  R -->|0.2| S\n  R -->|0.3| C\n  R -->|0.5| R"))
+
+
+(def v7_l72 (la/mmul P (la/column (repeat 3 1.0))))
 
 
 (deftest
- t6_l60
+ t8_l74
  (is
   ((fn
     [sums]
     (< (la/norm (la/sub sums (la/column (repeat 3 1.0)))) 1.0E-10))
-   v5_l58)))
+   v7_l72)))
 
 
-(def v8_l74 (def initial-state (la/row [1.0 0.0 0.0])))
+(def v10_l88 (def initial-state (la/row [1.0 0.0 0.0])))
 
 
 (def
- v9_l76
+ v11_l90
  (def
   walk-history
   (let
@@ -51,7 +57,7 @@
 
 
 (def
- v11_l89
+ v13_l103
  (->
   (tc/dataset
    (mapcat
@@ -67,14 +73,14 @@
 
 
 (def
- v13_l100
+ v15_l114
  (let
   [last-state (last walk-history)]
   [(:sunny last-state) (:cloudy last-state) (:rainy last-state)]))
 
 
 (deftest
- t14_l105
+ t16_l119
  (is
   ((fn
     [v]
@@ -88,14 +94,14 @@
         (Math/abs (- (v 1) (:cloudy prev)))
         (Math/abs (- (v 2) (:rainy prev))))
        1.0E-6))))
-   v13_l100)))
+   v15_l114)))
 
 
-(def v16_l123 (def eigen-result (la/eigen (la/transpose P))))
+(def v18_l137 (def eigen-result (la/eigen (la/transpose P))))
 
 
 (def
- v18_l127
+ v20_l141
  (def
   stationary-eigen
   (let
@@ -117,22 +123,22 @@
    (vec (dfn/* col (/ 1.0 total))))))
 
 
-(def v19_l137 stationary-eigen)
+(def v21_l151 stationary-eigen)
 
 
 (deftest
- t20_l139
+ t22_l153
  (is
   ((fn
     [v]
     (and
      (< (Math/abs (- (dfn/sum (double-array v)) 1.0)) 1.0E-10)
      (every? pos? v)))
-   v19_l137)))
+   v21_l151)))
 
 
 (def
- v22_l151
+ v24_l165
  (def
   power-iteration-history
   (let
@@ -156,7 +162,7 @@
 
 
 (def
- v24_l167
+ v26_l181
  (->
   (tc/dataset power-iteration-history)
   (plotly/base {:=x :iteration, :=y :change})
@@ -164,14 +170,20 @@
   plotly/plot))
 
 
-(def v26_l174 (:change (last power-iteration-history)))
+(def v28_l188 (:change (last power-iteration-history)))
 
 
-(deftest t27_l176 (is ((fn [c] (< c 1.0E-10)) v26_l174)))
+(deftest t29_l190 (is ((fn [c] (< c 1.0E-10)) v28_l188)))
 
 
 (def
- v29_l197
+ v31_l209
+ (kind/mermaid
+  "graph LR\n  P0[\"Page 0\"] --> P1[\"Page 1\"]\n  P0 --> P2[\"Page 2\"]\n  P1 --> P2\n  P2 --> P0\n  P3[\"Page 3\"] --> P0\n  P3 --> P2\n  P4[\"Page 4\"] --> P0\n  P4 --> P1\n  P4 --> P2\n  P4 --> P3"))
+
+
+(def
+ v33_l224
  (def
   H
   (la/matrix
@@ -182,14 +194,14 @@
     [1/4 1/4 1/4 1/4 0]])))
 
 
-(def v31_l208 (def damping 0.85))
+(def v35_l235 (def damping 0.85))
 
 
-(def v32_l210 (def n-pages 5))
+(def v36_l237 (def n-pages 5))
 
 
 (def
- v33_l212
+ v37_l239
  (def
   google-matrix
   (la/add
@@ -199,11 +211,11 @@
    (la/scale H damping))))
 
 
-(def v34_l216 google-matrix)
+(def v38_l243 google-matrix)
 
 
 (deftest
- t35_l218
+ t39_l245
  (is
   ((fn
     [m]
@@ -212,11 +224,11 @@
      (<
       (la/norm (la/sub row-sums (la/column (repeat 5 1.0))))
       1.0E-10)))
-   v34_l216)))
+   v38_l243)))
 
 
 (def
- v37_l224
+ v41_l251
  (def
   pagerank
   (let
@@ -235,7 +247,7 @@
 
 
 (def
- v39_l236
+ v43_l263
  (->
   (tc/dataset
    {:page ["Page 0" "Page 1" "Page 2" "Page 3" "Page 4"],
@@ -245,15 +257,15 @@
   plotly/plot))
 
 
-(def v41_l244 (dfn/sum pagerank))
+(def v45_l271 (dfn/sum pagerank))
 
 
 (deftest
- t42_l246
- (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v41_l244)))
+ t46_l273
+ (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v45_l271)))
 
 
-(def v44_l250 (argops/argmax pagerank))
+(def v48_l277 (argops/argmax pagerank))
 
 
-(deftest t45_l252 (is ((fn [idx] (contains? #{0 2} idx)) v44_l250)))
+(deftest t49_l279 (is ((fn [idx] (contains? #{0 2} idx)) v48_l277)))

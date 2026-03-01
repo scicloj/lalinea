@@ -6,104 +6,106 @@
   [tech.v3.tensor :as tensor]
   [tech.v3.datatype :as dtype]
   [tech.v3.datatype.functional :as dfn]
+  [tablecloth.api :as tc]
+  [scicloj.tableplot.v1.plotly :as plotly]
   [scicloj.kindly.v4.kind :as kind]
   [clojure.test :refer [deftest is]]))
 
 
-(def v3_l36 (cx/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0]))
+(def v3_l40 (cx/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0]))
 
 
-(deftest t4_l38 (is ((fn [v] (= [3] (cx/complex-shape v))) v3_l36)))
+(deftest t4_l42 (is ((fn [v] (= [3] (cx/complex-shape v))) v3_l40)))
 
 
 (def
- v5_l40
+ v5_l44
  (let
   [ct (cx/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0])]
   {:re (vec (cx/re ct)), :im (vec (cx/im ct))}))
 
 
 (deftest
- t6_l44
+ t6_l48
  (is
   ((fn [v] (and (= (:re v) [1.0 2.0 3.0]) (= (:im v) [4.0 5.0 6.0])))
-   v5_l40)))
+   v5_l44)))
 
 
-(def v8_l49 (cx/complex-tensor (tensor/->tensor [[1.0 2.0] [3.0 4.0]])))
+(def v8_l53 (cx/complex-tensor (tensor/->tensor [[1.0 2.0] [3.0 4.0]])))
 
 
 (deftest
- t9_l51
+ t9_l55
  (is
   ((fn
     [v]
     (and (= [2] (cx/complex-shape v)) (= [1.0 3.0] (vec (cx/re v)))))
-   v8_l49)))
+   v8_l53)))
 
 
-(def v11_l56 (cx/complex-tensor-real [5.0 6.0 7.0]))
+(def v11_l60 (cx/complex-tensor-real [5.0 6.0 7.0]))
 
 
 (deftest
- t12_l58
- (is ((fn [v] (= [0.0 0.0 0.0] (vec (cx/im v)))) v11_l56)))
+ t12_l62
+ (is ((fn [v] (= [0.0 0.0 0.0] (vec (cx/im v)))) v11_l60)))
 
 
-(def v14_l62 (cx/complex 3.0 4.0))
+(def v14_l66 (cx/complex 3.0 4.0))
 
 
-(deftest t15_l64 (is ((fn [v] (cx/scalar? v)) v14_l62)))
+(deftest t15_l68 (is ((fn [v] (cx/scalar? v)) v14_l66)))
 
 
 (def
- v16_l66
+ v16_l70
  [(cx/re (cx/complex 3.0 4.0)) (cx/im (cx/complex 3.0 4.0))])
 
 
-(deftest t17_l68 (is (= v16_l66 [3.0 4.0])))
+(deftest t17_l72 (is (= v16_l70 [3.0 4.0])))
 
 
 (def
- v19_l72
+ v19_l76
  (cx/complex-tensor [[1.0 2.0] [3.0 4.0]] [[5.0 6.0] [7.0 8.0]]))
 
 
-(deftest t20_l75 (is ((fn [v] (= [2 2] (cx/complex-shape v))) v19_l72)))
+(deftest t20_l79 (is ((fn [v] (= [2 2] (cx/complex-shape v))) v19_l76)))
 
 
 (def
- v22_l83
+ v22_l87
  (let
   [ct (cx/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0])]
   [(cx/re (ct 0)) (cx/im (ct 0))]))
 
 
-(deftest t23_l86 (is (= v22_l83 [1.0 4.0])))
+(deftest t23_l90 (is (= v22_l87 [1.0 4.0])))
 
 
 (def
- v25_l90
+ v25_l94
  (let
   [ct (cx/complex-tensor [[1.0 2.0] [3.0 4.0]] [[5.0 6.0] [7.0 8.0]])]
   (vec (cx/re (ct 0)))))
 
 
-(deftest t26_l94 (is (= v25_l90 [1.0 2.0])))
+(deftest t26_l98 (is (= v25_l94 [1.0 2.0])))
 
 
 (def
- v28_l98
+ v28_l102
  (let
   [ct (cx/complex-tensor [[1.0 2.0] [3.0 4.0]] [[5.0 6.0] [7.0 8.0]])]
   [(cx/re ((ct 1) 1)) (cx/im ((ct 1) 1))]))
 
 
-(deftest t29_l102 (is (= v28_l98 [4.0 8.0])))
+(deftest t29_l106 (is (= v28_l102 [4.0 8.0])))
 
 
 (def
- v31_l110
+ v31_l114
  (let
   [a
    (cx/complex-tensor [1.0 2.0] [3.0 4.0])
@@ -113,102 +115,130 @@
 
 
 (deftest
- t33_l117
+ t33_l121
  (is
   ((fn [v] (and (= (:re v) [-16.0 -20.0]) (= (:im v) [22.0 40.0])))
-   v31_l110)))
+   v31_l114)))
 
 
 (def
- v35_l122
+ v35_l127
+ (let
+  [z-re 3.0 z-im 1.0 p-re -1.0 p-im 3.0]
+  (->
+   (tc/dataset
+    {:re [z-re 0.0 p-re],
+     :im [z-im 1.0 p-im],
+     :label ["z = 3+i" "w = i" "z*w = -1+3i"]})
+   (plotly/base {:=x :re, :=y :im, :=color :label})
+   (plotly/layer-point {:=mark-size 12})
+   plotly/plot)))
+
+
+(def
+ v37_l139
  (let
   [ct (cx/conj (cx/complex-tensor [1.0 2.0] [3.0 -4.0]))]
   {:re (vec (cx/re ct)), :im (vec (cx/im ct))}))
 
 
-(deftest t36_l126 (is ((fn [v] (= (:im v) [-3.0 4.0])) v35_l122)))
+(deftest t38_l143 (is ((fn [v] (= (:im v) [-3.0 4.0])) v37_l139)))
 
 
 (def
- v38_l130
+ v40_l147
+ (let
+  [z-re 2.0 z-im 3.0]
+  (->
+   (tc/dataset
+    {:re [z-re z-re],
+     :im [z-im (- z-im)],
+     :label ["z = 2+3i" "conj(z) = 2-3i"]})
+   (plotly/base {:=x :re, :=y :im, :=color :label})
+   (plotly/layer-point {:=mark-size 12})
+   plotly/plot)))
+
+
+(def
+ v42_l156
  (let
   [m (la/abs (cx/complex-tensor [3.0 0.0] [4.0 1.0]))]
   [(double (m 0)) (double (m 1))]))
 
 
 (deftest
- t40_l135
+ t44_l161
  (is
   ((fn
     [v]
     (and
      (< (Math/abs (- (first v) 5.0)) 1.0E-10)
      (< (Math/abs (- (second v) 1.0)) 1.0E-10)))
-   v38_l130)))
+   v42_l156)))
 
 
 (def
- v42_l142
+ v46_l168
  (let
   [a (cx/complex-tensor [3.0 1.0] [4.0 2.0]) d (la/dot a a)]
   {:norm-sq (double (cx/re d)), :im-part (double (cx/im d))}))
 
 
 (deftest
- t44_l148
+ t48_l174
  (is
   ((fn
     [v]
     (and
      (< (Math/abs (- (:norm-sq v) 30.0)) 1.0E-10)
      (< (Math/abs (:im-part v)) 1.0E-10)))
-   v42_l142)))
+   v46_l168)))
 
 
 (def
- v46_l158
+ v50_l184
  (la/mmul
   (cx/complex-tensor [[1.0 0.0] [0.0 1.0]] [[0.0 0.0] [0.0 0.0]])
   (cx/complex-tensor [[0.0 1.0] [1.0 0.0]] [[0.0 0.0] [0.0 0.0]])))
 
 
 (deftest
- t47_l163
- (is ((fn [ct] (= [2 2] (cx/complex-shape ct))) v46_l158)))
+ t51_l189
+ (is ((fn [ct] (= [2 2] (cx/complex-shape ct))) v50_l184)))
 
 
 (def
- v49_l167
+ v53_l193
  (la/transpose
   (cx/complex-tensor [[1.0 2.0] [3.0 4.0]] [[5.0 6.0] [7.0 8.0]])))
 
 
 (deftest
- t50_l170
+ t54_l196
  (is
   ((fn [ct] (let [r (cx/re ct)] (= 3.0 (tensor/mget r 0 1))))
-   v49_l167)))
+   v53_l193)))
 
 
 (def
- v52_l175
+ v56_l201
  (la/det
   (cx/complex-tensor [[1.0 3.0] [5.0 7.0]] [[2.0 4.0] [6.0 8.0]])))
 
 
 (deftest
- t54_l180
+ t58_l206
  (is
   ((fn
     [d]
     (and
      (< (Math/abs (cx/re d)) 1.0E-10)
      (< (Math/abs (- (cx/im d) -16.0)) 1.0E-10)))
-   v52_l175)))
+   v56_l201)))
 
 
 (def
- v56_l185
+ v60_l211
  (let
   [A
    (cx/complex-tensor [[1.0 2.0] [3.0 4.0]] [[0.5 1.0] [1.5 2.5]])
@@ -231,4 +261,4 @@
     1.0E-10))))
 
 
-(deftest t57_l195 (is (true? v56_l185)))
+(deftest t61_l221 (is (true? v60_l211)))

@@ -16,6 +16,10 @@
    [scicloj.la-linea.transform :as bfft]
    ;; Element-wise array math:
    [tech.v3.datatype.functional :as dfn]
+   ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
+   [tablecloth.api :as tc]
+   ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
+   [scicloj.tableplot.v1.plotly :as plotly]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]))
 
@@ -102,6 +106,37 @@
   (< (dfn/reduce-max (dfn/abs (dfn/- conv-result manual-conv))) 1e-10))
 
 (kind/test-last [true?])
+
+;; ## Visualising a spectrum
+;;
+;; A signal made of two sine waves — 3 Hz and 7 Hz:
+
+(def N-vis 64)
+
+(def signal-composed
+  (let [t (mapv #(/ (double %) N-vis) (range N-vis))]
+    (double-array (mapv (fn [ti] (+ (Math/sin (* 2 Math/PI 3 ti))
+                                    (* 0.5 (Math/sin (* 2 Math/PI 7 ti)))))
+                        t))))
+
+;; The time-domain waveform:
+
+(-> (tc/dataset {:t (mapv #(/ (double %) N-vis) (range N-vis))
+                 :amplitude (vec signal-composed)})
+    (plotly/base {:=x :t :=y :amplitude})
+    (plotly/layer-line)
+    plotly/plot)
+
+;; The magnitude spectrum reveals two peaks at frequencies
+;; 3 and 7:
+
+(let [spectrum (bfft/forward signal-composed)
+      mags (la/abs spectrum)]
+  (-> (tc/dataset {:frequency (range (/ N-vis 2))
+                   :magnitude (vec (take (/ N-vis 2) mags))})
+      (plotly/base {:=x :frequency :=y :magnitude})
+      (plotly/layer-bar)
+      plotly/plot))
 
 ;; ## Known transform pairs
 ;;

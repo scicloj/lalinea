@@ -51,6 +51,15 @@
                  {:label "Av₂=3v₂" :xy [3 3] :color "#cc4422" :dashed? true}]
                 {})
 
+;; A non-eigenvector $[0,1]^T$ changes direction under the
+;; same transformation — it maps to $[1,3]^T$:
+
+(vis/arrow-plot [{:label "u" :xy [0 1] :color "#999999"}
+                 {:label "Au" :xy [1 3] :color "#228833" :dashed? true}
+                 {:label "v2" :xy [1 1] :color "#cc4422"}
+                 {:label "Av2" :xy [3 3] :color "#cc4422" :dashed? true}]
+                {})
+
 ;; Consider:
 
 (def A-eig

@@ -233,40 +233,54 @@
    v77_l320)))
 
 
-(def v80_l340 (def A-qr (la/matrix [[1 1] [1 0] [0 1]])))
+(def
+ v80_l334
+ (vis/arrow-plot
+  [{:label "a", :xy [1 1], :color "#999999"}
+   {:label "b", :xy [1 0], :color "#2266cc"}
+   {:label "q1",
+    :xy [(/ 1 (Math/sqrt 2)) (/ 1 (Math/sqrt 2))],
+    :color "#228833"}
+   {:label "q2",
+    :xy [(/ 1 (Math/sqrt 6)) (/ -1 (Math/sqrt 6))],
+    :color "#cc4422"}]
+  {}))
 
 
-(def v81_l344 (def qr-result (la/qr A-qr)))
+(def v82_l350 (def A-qr (la/matrix [[1 1] [1 0] [0 1]])))
 
 
-(def v83_l348 (def ncols-qr (second (dtype/shape A-qr))))
+(def v83_l354 (def qr-result (la/qr A-qr)))
+
+
+(def v85_l358 (def ncols-qr (second (dtype/shape A-qr))))
 
 
 (def
- v84_l349
+ v86_l359
  (def Q-thin (la/submatrix (:Q qr-result) :all (range ncols-qr))))
 
 
 (def
- v85_l350
+ v87_l360
  (def R-thin (la/submatrix (:R qr-result) (range ncols-qr) :all)))
 
 
-(def v87_l354 Q-thin)
+(def v89_l364 Q-thin)
 
 
-(def v89_l358 R-thin)
+(def v91_l368 R-thin)
 
 
 (def
- v91_l362
+ v93_l372
  (la/norm (la/sub (la/mmul (la/transpose Q-thin) Q-thin) (la/eye 2))))
 
 
-(deftest t92_l364 (is ((fn [d] (< d 1.0E-10)) v91_l362)))
+(deftest t94_l374 (is ((fn [d] (< d 1.0E-10)) v93_l372)))
 
 
-(def v94_l369 (la/norm (la/sub (la/mmul Q-thin R-thin) A-qr)))
+(def v96_l379 (la/norm (la/sub (la/mmul Q-thin R-thin) A-qr)))
 
 
-(deftest t95_l371 (is ((fn [d] (< d 1.0E-10)) v94_l369)))
+(deftest t97_l381 (is ((fn [d] (< d 1.0E-10)) v96_l379)))
