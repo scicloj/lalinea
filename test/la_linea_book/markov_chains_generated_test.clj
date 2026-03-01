@@ -190,31 +190,48 @@
 
 
 (def
- v34_l220
- (kind/mermaid
-  "graph LR\n  P0[\"Page 0\"] --> P1[\"Page 1\"]\n  P0 --> P2[\"Page 2\"]\n  P1 --> P2\n  P2 --> P0\n  P3[\"Page 3\"] --> P0\n  P3 --> P2\n  P4[\"Page 4\"] --> P0\n  P4 --> P1\n  P4 --> P2\n  P4 --> P3"))
+ v34_l217
+ (def
+  course-names
+  ["Calculus"
+   "Linear Algebra"
+   "Statistics"
+   "Intro Programming"
+   "Data Structures"
+   "Machine Learning"
+   "Databases"
+   "AI"]))
+
+
+(def v35_l222 (def n-pages (count course-names)))
 
 
 (def
- v36_l235
+ v36_l224
+ (kind/mermaid
+  "graph LR\n  subgraph Math\n    Calc[\"Calculus\"]\n    LA[\"Linear Algebra\"]\n    Stats[\"Statistics\"]\n  end\n  subgraph CS\n    IP[\"Intro Programming\"]\n    DS[\"Data Structures\"]\n    DB[\"Databases\"]\n  end\n  ML[\"Machine Learning\"]\n  AI[\"AI\"]\n  Calc --> LA\n  LA --> Calc\n  LA --> Stats\n  Stats --> Calc\n  Stats --> LA\n  IP --> DS\n  DS --> IP\n  DS --> DB\n  ML --> LA\n  ML --> Stats\n  ML --> IP\n  ML --> AI\n  DB --> DS\n  DB --> IP\n  DB --> ML\n  AI --> ML\n  AI --> DS\n  AI --> Stats\n  AI --> LA"))
+
+
+(def
+ v38_l262
  (def
   H
   (la/matrix
-   [[0 1/2 1/2 0 0]
-    [0 0 1 0 0]
-    [1 0 0 0 0]
-    [1/2 0 1/2 0 0]
-    [1/4 1/4 1/4 1/4 0]])))
+   [[0 1 0 0 0 0 0 0]
+    [1/2 0 1/2 0 0 0 0 0]
+    [1/2 1/2 0 0 0 0 0 0]
+    [0 0 0 0 1 0 0 0]
+    [0 0 0 1/2 0 0 1/2 0]
+    [0 1/4 1/4 1/4 0 0 0 1/4]
+    [0 0 0 1/3 1/3 1/3 0 0]
+    [0 1/4 1/4 0 1/4 1/4 0 0]])))
 
 
-(def v38_l246 (def damping 0.85))
-
-
-(def v39_l248 (def n-pages 5))
+(def v40_l276 (def damping 0.85))
 
 
 (def
- v40_l250
+ v41_l278
  (def
   google-matrix
   (la/add
@@ -224,24 +241,22 @@
    (la/scale H damping))))
 
 
-(def v41_l254 google-matrix)
+(def v43_l285 (la/mmul google-matrix (la/column (repeat n-pages 1.0))))
 
 
 (deftest
- t42_l256
+ t44_l287
  (is
   ((fn
-    [m]
-    (let
-     [row-sums (la/mmul m (la/column (repeat 5 1.0)))]
-     (<
-      (la/norm (la/sub row-sums (la/column (repeat 5 1.0))))
-      1.0E-10)))
-   v41_l254)))
+    [sums]
+    (<
+     (la/norm (la/sub sums (la/column (repeat n-pages 1.0))))
+     1.0E-10))
+   v43_l285)))
 
 
 (def
- v44_l262
+ v46_l292
  (def
   pagerank
   (let
@@ -260,38 +275,23 @@
 
 
 (def
- v46_l274
+ v48_l305
  (->
-  (tc/dataset
-   {:page ["Page 0" "Page 1" "Page 2" "Page 3" "Page 4"],
-    :rank (dtype/->reader pagerank)})
-  (plotly/base {:=x :page, :=y :rank})
+  (tc/dataset {:course course-names, :rank (dtype/->reader pagerank)})
+  (plotly/base {:=x :course, :=y :rank})
   (plotly/layer-bar)
   plotly/plot))
 
 
-(def v48_l282 (dfn/sum pagerank))
+(def v50_l313 (dfn/sum pagerank))
 
 
 (deftest
- t49_l284
- (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v48_l282)))
+ t51_l315
+ (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v50_l313)))
 
 
-(def
- v51_l289
- (let
-  [avg (/ 1.0 n-pages) flat (tensor/select pagerank 0 :all)]
-  (and
-   (every? pos? flat)
-   (> (tensor/mget pagerank 0 0) avg)
-   (> (tensor/mget pagerank 0 2) avg))))
+(def v53_l320 (nth course-names (argops/argmax pagerank)))
 
 
-(deftest t52_l295 (is (true? v51_l289)))
-
-
-(def v54_l299 (argops/argmax pagerank))
-
-
-(deftest t55_l301 (is ((fn [idx] (contains? #{0 2} idx)) v54_l299)))
+(deftest t54_l322 (is ((fn [name] (= "Linear Algebra" name)) v53_l320)))

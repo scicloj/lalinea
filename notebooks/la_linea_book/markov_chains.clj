@@ -207,37 +207,67 @@ stationary-eigen
 ;; A random surfer follows links with probability $d$, and jumps
 ;; to a random page with probability $1-d$.
 ;;
-;; ### A small web graph
+;; ### A course catalog graph
 ;;
-;; Five pages with the following link structure:
-;;
-;; - Page 0 → 1, 2
-;; - Page 1 → 2
-;; - Page 2 → 0
-;; - Page 3 → 0, 2
-;; - Page 4 → 0, 1, 2, 3
+;; Imagine a university website where each course page links to
+;; its prerequisites and related courses. Eight courses form
+;; two clusters — a math track and a CS track — bridged by
+;; Machine Learning and AI.
+
+(def course-names
+  ["Calculus" "Linear Algebra" "Statistics"
+   "Intro Programming" "Data Structures"
+   "Machine Learning" "Databases" "AI"])
+
+(def n-pages (count course-names))
 
 ^:kindly/hide-code
 (kind/mermaid "graph LR
-  P0[\"Page 0\"] --> P1[\"Page 1\"]
-  P0 --> P2[\"Page 2\"]
-  P1 --> P2
-  P2 --> P0
-  P3[\"Page 3\"] --> P0
-  P3 --> P2
-  P4[\"Page 4\"] --> P0
-  P4 --> P1
-  P4 --> P2
-  P4 --> P3")
+  subgraph Math
+    Calc[\"Calculus\"]
+    LA[\"Linear Algebra\"]
+    Stats[\"Statistics\"]
+  end
+  subgraph CS
+    IP[\"Intro Programming\"]
+    DS[\"Data Structures\"]
+    DB[\"Databases\"]
+  end
+  ML[\"Machine Learning\"]
+  AI[\"AI\"]
+  Calc --> LA
+  LA --> Calc
+  LA --> Stats
+  Stats --> Calc
+  Stats --> LA
+  IP --> DS
+  DS --> IP
+  DS --> DB
+  ML --> LA
+  ML --> Stats
+  ML --> IP
+  ML --> AI
+  DB --> DS
+  DB --> IP
+  DB --> ML
+  AI --> ML
+  AI --> DS
+  AI --> Stats
+  AI --> LA")
 
-;; Build the hyperlink matrix $H$ (row-stochastic):
+;; Build the hyperlink matrix $H$ (row-stochastic).
+;; Each row sums to 1: the weight of each outbound link
+;; is $1 / \text{(number of outbound links)}$.
 
 (def H
-  (la/matrix [[0    1/2  1/2  0    0]
-              [0    0    1    0    0]
-              [1    0    0    0    0]
-              [1/2  0    1/2  0    0]
-              [1/4  1/4  1/4  1/4  0]]))
+  (la/matrix [[0    1    0    0    0    0    0    0]   ;; Calculus → LA
+              [1/2  0    1/2  0    0    0    0    0]   ;; LA → Calc, Stats
+              [1/2  1/2  0    0    0    0    0    0]   ;; Stats → Calc, LA
+              [0    0    0    0    1    0    0    0]   ;; IntroP → DS
+              [0    0    0    1/2  0    0    1/2  0]   ;; DS → IntroP, DB
+              [0    1/4  1/4  1/4  0    0    0    1/4]   ;; ML → LA, Stats, IntroP, AI
+              [0    0    0    1/3  1/3  1/3  0    0]   ;; DB → DS, IntroP, ML
+              [0    1/4  1/4  0    1/4  1/4  0    0]]));; AI → LA, Stats, DS, ML
 
 ;; The Google matrix with damping factor $d = 0.85$:
 ;;
@@ -245,17 +275,17 @@ stationary-eigen
 
 (def damping 0.85)
 
-(def n-pages 5)
-
 (def google-matrix
-  (la/add (la/scale (la/matrix (repeat n-pages (repeat n-pages 1.0))) (/ (- 1.0 damping) n-pages))
+  (la/add (la/scale (la/matrix (repeat n-pages (repeat n-pages 1.0)))
+                    (/ (- 1.0 damping) n-pages))
           (la/scale H damping)))
 
-google-matrix
+;; Verify that each row sums to 1:
+
+(la/mmul google-matrix (la/column (repeat n-pages 1.0)))
 
 (kind/test-last
- [(fn [m] (let [row-sums (la/mmul m (la/column (repeat 5 1.0)))]
-            (< (la/norm (la/sub row-sums (la/column (repeat 5 1.0)))) 1e-10)))])
+ [(fn [sums] (< (la/norm (la/sub sums (la/column (repeat n-pages 1.0)))) 1e-10))])
 
 ;; Find PageRank via power iteration:
 
@@ -269,11 +299,12 @@ google-matrix
               new-pi (la/scale new-pi (/ 1.0 (dfn/sum new-pi)))]
           (recur new-pi (inc k)))))))
 
-;; Pages 0 and 2 receive the most inbound links:
+;; Foundational courses rank highest — they are referenced across
+;; many syllabi:
 
-(-> (tc/dataset {:page ["Page 0" "Page 1" "Page 2" "Page 3" "Page 4"]
+(-> (tc/dataset {:course course-names
                  :rank (dtype/->reader pagerank)})
-    (plotly/base {:=x :page :=y :rank})
+    (plotly/base {:=x :course :=y :rank})
     (plotly/layer-bar)
     plotly/plot)
 
@@ -283,19 +314,9 @@ google-matrix
 
 (kind/test-last [(fn [s] (< (Math/abs (- s 1.0)) 1e-10))])
 
-;; All PageRank values are positive and the top-ranked pages
-;; have above-average rank:
+;; Linear Algebra receives the most inbound links (from Calculus,
+;; Statistics, Machine Learning, and AI) and ranks highest:
 
-(let [avg (/ 1.0 n-pages)
-      flat (tensor/select pagerank 0 :all)]
-  (and (every? pos? flat)
-       (> (tensor/mget pagerank 0 0) avg)
-       (> (tensor/mget pagerank 0 2) avg)))
+(nth course-names (argops/argmax pagerank))
 
-(kind/test-last [true?])
-
-;; Pages 0 and 2 receive the most links and compete for the top rank:
-
-(argops/argmax pagerank)
-
-(kind/test-last [(fn [idx] (contains? #{0 2} idx))])
+(kind/test-last [(fn [name] (= "Linear Algebra" name))])
