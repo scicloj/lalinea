@@ -161,36 +161,44 @@ T-direct
 ;; from hot to cold until equilibrium.
 ;;
 ;; This is an **imperative** algorithm — each update reads the
-;; latest values from a mutable array, and the order of updates
-;; matters.
+;; latest values from a mutable buffer, and the order of updates
+;; matters. It is a natural case for in-place computation:
+;; the algorithm is inherently sequential and mutating, so
+;; allocating new tensors per step would waste memory and time.
+;; As discussed in the Sharing and Mutation chapter, we keep
+;; the mutation in narrow scope — wrapped in a function that
+;; returns an immutable result.
 
 ;; ### Iteration with history
 ;;
 ;; Starting from $\mathbf{T} = \mathbf{0}$, we iterate and
 ;; record the temperature profile and residual at each step.
+;; We clone snapshots into a history vector for the plots
+;; below — in production code we would skip the history
+;; and just iterate to convergence in place.
 ;;
 ;; Since $A$ is tridiagonal, we implement the simplified update
 ;; directly rather than the general Gauss-Seidel row sum.
 
 (def gs-result
-  (let [b-arr (dtype/->double-array b-heat)
-        x     (double-array n 0.0)
+  (let [b-buf (dtype/->reader b-heat)
+        x     (dtype/make-container :float64 n)
         iters 500]
     (loop [k 0, history []]
       (if (>= k iters)
-        {:x-final (dtype/make-container :float64 x)
+        {:x-final (dtype/clone x)
          :history history}
         (do
           (dotimes [i n]
-            (let [left  (if (pos? i) (aget x (dec i)) 0.0)
-                  right (if (< i (dec n)) (aget x (inc i)) 0.0)]
-              (aset x i (/ (+ left right (aget b-arr i)) 2.0))))
-          (let [x-col    (la/column (dtype/make-container :float64 x))
+            (let [left  (if (pos? i) (x (dec i)) 0.0)
+                  right (if (< i (dec n)) (x (inc i)) 0.0)]
+              (dtype/set-value! x i (/ (+ left right (b-buf i)) 2.0))))
+          (let [x-col    (la/column (dtype/clone x))
                 residual (la/norm (la/sub (la/mmul A-heat x-col) b-heat))]
             (recur (inc k)
                    (conj history {:iteration (inc k)
                                   :residual  residual
-                                  :profile   (dtype/make-container :float64 x)}))))))))
+                                  :profile   (dtype/clone x)}))))))))
 
 ;; ### Watching convergence
 ;;

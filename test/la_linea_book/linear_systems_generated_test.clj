@@ -111,33 +111,33 @@
 
 
 (def
- v30_l175
+ v30_l183
  (def
   gs-result
   (let
-   [b-arr
-    (dtype/->double-array b-heat)
+   [b-buf
+    (dtype/->reader b-heat)
     x
-    (double-array n 0.0)
+    (dtype/make-container :float64 n)
     iters
     500]
    (loop
     [k 0 history []]
     (if
      (>= k iters)
-     {:x-final (dtype/make-container :float64 x), :history history}
+     {:x-final (dtype/clone x), :history history}
      (do
       (dotimes
        [i n]
        (let
         [left
-         (if (pos? i) (aget x (dec i)) 0.0)
+         (if (pos? i) (x (dec i)) 0.0)
          right
-         (if (< i (dec n)) (aget x (inc i)) 0.0)]
-        (aset x i (/ (+ left right (aget b-arr i)) 2.0))))
+         (if (< i (dec n)) (x (inc i)) 0.0)]
+        (dtype/set-value! x i (/ (+ left right (b-buf i)) 2.0))))
       (let
        [x-col
-        (la/column (dtype/make-container :float64 x))
+        (la/column (dtype/clone x))
         residual
         (la/norm (la/sub (la/mmul A-heat x-col) b-heat))]
        (recur
@@ -146,11 +146,11 @@
          history
          {:iteration (inc k),
           :residual residual,
-          :profile (dtype/make-container :float64 x)})))))))))
+          :profile (dtype/clone x)})))))))))
 
 
 (def
- v32_l201
+ v32_l209
  (let
   [snapshots
    [1 2 5 10 50 200 500]
@@ -173,7 +173,7 @@
 
 
 (def
- v34_l217
+ v34_l225
  (->
   (tc/dataset (:history gs-result))
   (plotly/base {:=x :iteration, :=y :residual})
@@ -181,17 +181,17 @@
   plotly/plot))
 
 
-(def v36_l224 (-> gs-result :history last :residual))
+(def v36_l232 (-> gs-result :history last :residual))
 
 
-(deftest t37_l226 (is ((fn [r] (< r 0.001)) v36_l224)))
+(deftest t37_l234 (is ((fn [r] (< r 0.001)) v36_l232)))
 
 
 (def
- v39_l234
+ v39_l242
  (let
   [x-iter (la/column (:x-final gs-result))]
   (la/norm (la/sub x-iter T-direct))))
 
 
-(deftest t40_l237 (is ((fn [d] (< d 0.01)) v39_l234)))
+(deftest t40_l245 (is ((fn [d] (< d 0.01)) v39_l242)))
