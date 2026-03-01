@@ -44,6 +44,13 @@ row-major `double[]` memory layout, enabling **zero-copy** interop.
 - Mutations through either view are immediately visible in the other
 - All `dfn` element-wise operations work directly on matrices (they are tensors)
 
+### Computation tape
+
+- Record `la/` operations as a DAG with `tape/with-tape`
+- Inspect memory status: `:contiguous`, `:strided`, or `:lazy`
+- Detect shared backing arrays between tensors
+- Visualize computation graphs as Mermaid flowcharts
+
 ## Installation
 
 Add to your `deps.edn`:
@@ -57,7 +64,7 @@ Add to your `deps.edn`:
 The [La Linea book](https://scicloj.github.io/la-linea/) is a set of notebook-based chapters covering:
 
 - **Getting started** — quickstart
-- **Core concepts** — tensors & EJML interop, complex tensors, Fourier transforms, abstract linear algebra, sharing & mutation
+- **Core concepts** — tensors & EJML interop, complex tensors, Fourier transforms, abstract linear algebra, sharing & mutation, computation tape
 - **Applications** — linear systems, Markov chains & PageRank, image processing, fractals, decompositions in action, least squares, spectral graph theory
 - **Validation** — algebraic identities
 
@@ -69,6 +76,7 @@ Each chapter includes inline tests via `kind/test-last`.
 (require '[scicloj.la-linea.linalg :as la])      ; matrix construction, arithmetic, decompositions, solve
 (require '[scicloj.la-linea.complex :as cx])      ; complex tensor operations
 (require '[scicloj.la-linea.transform :as xf])    ; FFT / DCT / DST / DHT bridge
+(require '[scicloj.la-linea.tape :as tape])      ; computation DAG recording, memory inspection
 (require '[scicloj.la-linea.vis :as vis])         ; visualization helpers
 ```
 
@@ -87,7 +95,7 @@ The [book notebooks](https://scicloj.github.io/la-linea/) also use
 
 ```bash
 clojure -M:dev -m nrepl.cmdline   # start REPL
-./run_tests.sh                     # run tests (378 tests, 378 assertions)
+./run_tests.sh                     # run tests (403 tests, 403 assertions)
 clojure -T:build ci                # test + build JAR
 ```
 

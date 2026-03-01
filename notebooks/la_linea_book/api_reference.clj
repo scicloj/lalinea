@@ -5,6 +5,7 @@
 ;; - `scicloj.la-linea.linalg` — matrix construction, arithmetic, decompositions
 ;; - `scicloj.la-linea.complex` — complex tensors
 ;; - `scicloj.la-linea.transform` — FFT and real-valued transforms
+;; - `scicloj.la-linea.tape` — computation tape and memory inspection
 ;; - `scicloj.la-linea.vis` — visualization helpers
 
 ^{:kindly/hide-code true
@@ -14,6 +15,7 @@
    [scicloj.la-linea.linalg :as la]
    [scicloj.la-linea.complex :as cx]
    [scicloj.la-linea.transform :as bfft]
+   [scicloj.la-linea.tape :as tape]
    [scicloj.la-linea.vis :as vis]
    [tech.v3.tensor :as tensor]
    [tech.v3.datatype :as dtype]
@@ -474,6 +476,74 @@
   (la/close-scalar? (roundtrip 0) 1.0))
 
 (kind/test-last [true?])
+
+;; ## `scicloj.la-linea.tape`
+;;
+;; Computation DAG recording and memory inspection.
+
+(kind/doc #'tape/memory-status)
+
+(tape/memory-status (la/matrix [[1 2] [3 4]]))
+
+(kind/test-last [(fn [s] (= :contiguous s))])
+
+(tape/memory-status (la/transpose (la/matrix [[1 2] [3 4]])))
+
+(kind/test-last [(fn [s] (= :strided s))])
+
+(tape/memory-status (la/add (la/eye 2) (la/eye 2)))
+
+(kind/test-last [(fn [s] (= :lazy s))])
+
+(kind/doc #'tape/shares-memory?)
+
+(let [A (la/matrix [[1 2] [3 4]])]
+  (tape/shares-memory? A (la/transpose A)))
+
+(kind/test-last [true?])
+
+(tape/shares-memory? (la/eye 2) (la/eye 2))
+
+(kind/test-last [false?])
+
+(kind/doc #'tape/with-tape)
+
+(def tape-example
+  (tape/with-tape
+    (let [A (la/matrix [[1 2] [3 4]])
+          B (la/scale A 2.0)]
+      (la/mmul B (la/transpose A)))))
+
+(select-keys tape-example [:result :entries])
+
+(kind/test-last [(fn [m] (and (contains? m :result)
+                               (contains? m :entries)))])
+
+(kind/doc #'tape/summary)
+
+(tape/summary tape-example)
+
+(kind/test-last [(fn [s] (= 4 (:total s)))])
+
+(kind/doc #'tape/origin)
+
+(tape/origin tape-example (:result tape-example))
+
+(kind/test-last [(fn [dag] (= :la/mmul (:op dag)))])
+
+(kind/doc #'tape/mermaid)
+
+;; Returns a Mermaid flowchart string. Wrap with `kind/mermaid`
+;; for notebook rendering.
+
+(kind/mermaid (tape/mermaid tape-example (:result tape-example)))
+
+(kind/doc #'tape/detect-memory-status)
+
+;; Classifies a tape entry's output relative to its inputs:
+;; `:lazy`, `:shared`, or `:independent`.
+
+(mapv tape/detect-memory-status (:entries tape-example))
 
 ;; ## `scicloj.la-linea.vis`
 ;;
