@@ -344,3 +344,31 @@
      (= 2 (:row-space m))
      (= 1 (:null-space m))))
    v95_l461)))
+
+
+(def
+ v98_l474
+ (< (la/norm (la/mmul (la/transpose M) left-null-basis)) 1.0E-10))
+
+
+(deftest t99_l476 (is (true? v98_l474)))
+
+
+(def
+ v101_l480
+ (<
+  (la/norm (la/mmul (la/transpose col-space-basis) left-null-basis))
+  1.0E-10))
+
+
+(deftest t102_l482 (is (true? v101_l480)))
+
+
+(def
+ v104_l486
+ (<
+  (la/norm (la/mmul (la/transpose row-space-basis) null-basis))
+  1.0E-10))
+
+
+(deftest t105_l488 (is (true? v104_l486)))

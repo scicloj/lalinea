@@ -147,6 +147,14 @@
     plotly/plot)
 
 ;; ## Principal Component Analysis
+
+;; Error decreases monotonically as rank increases:
+
+(let [errors (mapv (fn [k] (la/norm (la/sub test-image (reconstruct-rank-k svd-result k))))
+                   [1 5 10 20 50])]
+  (every? (fn [[a b]] (> a b)) (partition 2 1 errors)))
+
+(kind/test-last [true?])
 ;;
 ;; [PCA](https://en.wikipedia.org/wiki/Principal_component_analysis)
 ;; finds the directions of maximum variance in data.
@@ -194,6 +202,12 @@ cov-matrix
 (kind/test-last
  [(fn [m] (= [2 2] (dtype/shape m)))])
 
+;; A covariance matrix is always symmetric:
+
+(la/close? cov-matrix (la/transpose cov-matrix))
+
+(kind/test-last [true?])
+
 (def pca-eigen (la/eigen cov-matrix))
 
 ;; Eigenvalues = variances along each principal axis:
@@ -205,7 +219,8 @@ cov-matrix
   (vec (reverse (vec arr))))
 
 (kind/test-last
- [(fn [evs] (> (first evs) (second evs)))])
+ [(fn [evs] (and (every? pos? evs)
+                 (> (first evs) (second evs))))])
 
 ;; ### Visualize principal axes
 ;;

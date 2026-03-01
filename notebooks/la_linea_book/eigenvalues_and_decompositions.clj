@@ -355,6 +355,11 @@ D-result
 
 sigmas
 
+(kind/test-last
+ [(fn [s] (and (= 2 (count s))
+               (every? pos? s)
+               (>= (first s) (second s))))])
+
 ;; Rank-1 approximation — keep only $\sigma_1$:
 
 (def A-rank1
@@ -414,6 +419,14 @@ sigmas
 (def chol-L (la/cholesky spd-mat))
 
 chol-L
+
+(kind/test-last
+ [(fn [L] (let [[r c] (dtype/shape L)]
+            (and (= r c)
+                 ;; upper triangle is zero (lower triangular)
+                 (every? (fn [i] (every? (fn [j] (< (Math/abs (tensor/mget L i j)) 1e-10))
+                                         (range (inc i) c)))
+                         (range r)))))])
 
 ;; Verify $L L^T = M$:
 
@@ -508,6 +521,9 @@ final-eigenvalues
 (def A-inv (la/invert A-final))
 
 A-inv
+
+(kind/test-last
+ [(fn [m] (= [3 3] (dtype/shape m)))])
 
 (la/close? (la/mmul A-final A-inv) (la/eye 3))
 

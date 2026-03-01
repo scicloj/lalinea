@@ -469,6 +469,24 @@ row-space-basis
                (= 2 (:row-space m))
                (= 1 (:null-space m))))])
 
+;; Verify each subspace: the left null space satisfies $M^T v = 0$:
+
+(< (la/norm (la/mmul (la/transpose M) left-null-basis)) 1e-10)
+
+(kind/test-last [true?])
+
+;; Column space and left null space are orthogonal complements:
+
+(< (la/norm (la/mmul (la/transpose col-space-basis) left-null-basis)) 1e-10)
+
+(kind/test-last [true?])
+
+;; Row space and null space are orthogonal complements:
+
+(< (la/norm (la/mmul (la/transpose row-space-basis) null-basis)) 1e-10)
+
+(kind/test-last [true?])
+
 ;; rank = 2, nullity = 1, and the dimensions add up:
 ;;
 ;; - In $\mathbb{R}^3$ (output): col space (2) + left null (1) = 3

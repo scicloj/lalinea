@@ -186,15 +186,19 @@
          (cx/complex-tensor [[0.0 1.0] [1.0 0.0]]
                             [[0.0 0.0] [0.0 0.0]]))
 
-(kind/test-last [(fn [ct] (= [2 2] (cx/complex-shape ct)))])
+(kind/test-last [(fn [ct] (and (= [2 2] (cx/complex-shape ct))
+                               (= (cx/re ct) [[0.0 1.0] [1.0 0.0]])
+                               (= (cx/im ct) [[0.0 0.0] [0.0 0.0]])))])
 
 ;; Conjugate transpose (Hermitian adjoint):
 
 (la/transpose (cx/complex-tensor [[1.0 2.0] [3.0 4.0]]
                                  [[5.0 6.0] [7.0 8.0]]))
 
-(kind/test-last [(fn [ct] (let [r (cx/re ct)]
-                            (= 3.0 (tensor/mget r 0 1))))])
+;; Re is transposed; Im is negated and transposed:
+
+(kind/test-last [(fn [ct] (and (= (cx/re ct) [[1.0 3.0] [2.0 4.0]])
+                               (= (cx/im ct) [[-5.0 -7.0] [-6.0 -8.0]])))])
 
 ;; Determinant:
 

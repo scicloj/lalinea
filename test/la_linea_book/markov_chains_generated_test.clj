@@ -136,7 +136,22 @@
 
 
 (def
- v24_l165
+ v24_l160
+ (every?
+  (fn
+   [[eigen walk]]
+   (< (Math/abs (- (double eigen) (double walk))) 1.0E-4))
+  (map
+   vector
+   stationary-eigen
+   (let [s (last walk-history)] [(:sunny s) (:cloudy s) (:rainy s)]))))
+
+
+(deftest t25_l166 (is (true? v24_l160)))
+
+
+(def
+ v27_l176
  (def
   power-iteration-history
   (let
@@ -160,7 +175,7 @@
 
 
 (def
- v26_l181
+ v29_l192
  (->
   (tc/dataset power-iteration-history)
   (plotly/base {:=x :iteration, :=y :change})
@@ -168,20 +183,20 @@
   plotly/plot))
 
 
-(def v28_l188 (:change (last power-iteration-history)))
+(def v31_l199 (:change (last power-iteration-history)))
 
 
-(deftest t29_l190 (is ((fn [c] (< c 1.0E-10)) v28_l188)))
+(deftest t32_l201 (is ((fn [c] (< c 1.0E-10)) v31_l199)))
 
 
 (def
- v31_l209
+ v34_l220
  (kind/mermaid
   "graph LR\n  P0[\"Page 0\"] --> P1[\"Page 1\"]\n  P0 --> P2[\"Page 2\"]\n  P1 --> P2\n  P2 --> P0\n  P3[\"Page 3\"] --> P0\n  P3 --> P2\n  P4[\"Page 4\"] --> P0\n  P4 --> P1\n  P4 --> P2\n  P4 --> P3"))
 
 
 (def
- v33_l224
+ v36_l235
  (def
   H
   (la/matrix
@@ -192,14 +207,14 @@
     [1/4 1/4 1/4 1/4 0]])))
 
 
-(def v35_l235 (def damping 0.85))
+(def v38_l246 (def damping 0.85))
 
 
-(def v36_l237 (def n-pages 5))
+(def v39_l248 (def n-pages 5))
 
 
 (def
- v37_l239
+ v40_l250
  (def
   google-matrix
   (la/add
@@ -209,11 +224,11 @@
    (la/scale H damping))))
 
 
-(def v38_l243 google-matrix)
+(def v41_l254 google-matrix)
 
 
 (deftest
- t39_l245
+ t42_l256
  (is
   ((fn
     [m]
@@ -222,11 +237,11 @@
      (<
       (la/norm (la/sub row-sums (la/column (repeat 5 1.0))))
       1.0E-10)))
-   v38_l243)))
+   v41_l254)))
 
 
 (def
- v41_l251
+ v44_l262
  (def
   pagerank
   (let
@@ -245,7 +260,7 @@
 
 
 (def
- v43_l263
+ v46_l274
  (->
   (tc/dataset
    {:page ["Page 0" "Page 1" "Page 2" "Page 3" "Page 4"],
@@ -255,15 +270,28 @@
   plotly/plot))
 
 
-(def v45_l271 (dfn/sum pagerank))
+(def v48_l282 (dfn/sum pagerank))
 
 
 (deftest
- t46_l273
- (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v45_l271)))
+ t49_l284
+ (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v48_l282)))
 
 
-(def v48_l277 (argops/argmax pagerank))
+(def
+ v51_l289
+ (let
+  [avg (/ 1.0 n-pages) flat (tensor/select pagerank 0 :all)]
+  (and
+   (every? pos? flat)
+   (> (tensor/mget pagerank 0 0) avg)
+   (> (tensor/mget pagerank 0 2) avg))))
 
 
-(deftest t49_l279 (is ((fn [idx] (contains? #{0 2} idx)) v48_l277)))
+(deftest t52_l295 (is (true? v51_l289)))
+
+
+(def v54_l299 (argops/argmax pagerank))
+
+
+(deftest t55_l301 (is ((fn [idx] (contains? #{0 2} idx)) v54_l299)))

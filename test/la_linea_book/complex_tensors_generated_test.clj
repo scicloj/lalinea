@@ -200,41 +200,52 @@
 
 (deftest
  t51_l189
- (is ((fn [ct] (= [2 2] (cx/complex-shape ct))) v50_l184)))
+ (is
+  ((fn
+    [ct]
+    (and
+     (= [2 2] (cx/complex-shape ct))
+     (= (cx/re ct) [[0.0 1.0] [1.0 0.0]])
+     (= (cx/im ct) [[0.0 0.0] [0.0 0.0]])))
+   v50_l184)))
 
 
 (def
- v53_l193
+ v53_l195
  (la/transpose
   (cx/complex-tensor [[1.0 2.0] [3.0 4.0]] [[5.0 6.0] [7.0 8.0]])))
 
 
 (deftest
- t54_l196
+ t55_l200
  (is
-  ((fn [ct] (let [r (cx/re ct)] (= 3.0 (tensor/mget r 0 1))))
-   v53_l193)))
+  ((fn
+    [ct]
+    (and
+     (= (cx/re ct) [[1.0 3.0] [2.0 4.0]])
+     (= (cx/im ct) [[-5.0 -7.0] [-6.0 -8.0]])))
+   v53_l195)))
 
 
 (def
- v56_l201
+ v57_l205
  (la/det
   (cx/complex-tensor [[1.0 3.0] [5.0 7.0]] [[2.0 4.0] [6.0 8.0]])))
 
 
 (deftest
- t58_l206
+ t59_l210
  (is
   ((fn
     [d]
     (and
      (< (Math/abs (cx/re d)) 1.0E-10)
      (< (Math/abs (- (cx/im d) -16.0)) 1.0E-10)))
-   v56_l201)))
+   v57_l205)))
 
 
 (def
- v60_l211
+ v61_l215
  (let
   [A
    (cx/complex-tensor [[1.0 2.0] [3.0 4.0]] [[0.5 1.0] [1.5 2.5]])
@@ -251,4 +262,4 @@
    (< (dfn/reduce-max (dfn/abs im-part)) 1.0E-10))))
 
 
-(deftest t61_l220 (is (true? v60_l211)))
+(deftest t62_l224 (is (true? v61_l215)))

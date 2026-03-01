@@ -184,6 +184,13 @@ fiedler-entries
 (kind/test-last
  [(fn [v] (= 6 (count v)))])
 
+;; The Fiedler vector is orthogonal to the all-ones vector
+;; (zero mean):
+
+(< (Math/abs (reduce + fiedler-entries)) 1e-10)
+
+(kind/test-last [true?])
+
 ;; Vertices with negative entries belong to one cluster,
 ;; vertices with positive entries belong to the other.
 
@@ -447,6 +454,19 @@ comm-eigenvalues
     plotly/plot)
 
 ;; Vertices from the same community cluster tightly in spectral space,
+
+;; Vertices within the same community are closer to each other
+;; than to vertices in other communities:
+
+(let [xs (vec (:x embed-data))
+      ys (vec (:y embed-data))
+      dist (fn [i j] (Math/sqrt (+ (let [d (- (xs i) (xs j))] (* d d))
+                                   (let [d (- (ys i) (ys j))] (* d d)))))
+      within-A (dist 0 1)
+      across-AB (apply min (for [a [0 1 2] b [3 4 5]] (dist a b)))]
+  (< within-A across-AB))
+
+(kind/test-last [true?])
 ;; even though we only used the raw Laplacian eigenvectors.
 
 ;; ## [Cheeger's inequality](https://en.wikipedia.org/wiki/Cheeger%27s_inequality)

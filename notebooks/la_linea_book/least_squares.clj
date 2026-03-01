@@ -375,7 +375,7 @@ c-trig
 condition-number
 
 (kind/test-last
- [(fn [v] (> v 1.0))])
+ [(fn [v] (and (> v 1.0) (Double/isFinite v)))])
 
 ;; For comparison, a higher-degree Vandermonde matrix on a wider
 ;; interval has a much larger condition number:

@@ -472,7 +472,9 @@
 (def v75_l375 condition-number)
 
 
-(deftest t76_l377 (is ((fn [v] (> v 1.0)) v75_l375)))
+(deftest
+ t76_l377
+ (is ((fn [v] (and (> v 1.0) (Double/isFinite v))) v75_l375)))
 
 
 (def

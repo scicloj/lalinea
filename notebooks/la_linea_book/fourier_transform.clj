@@ -138,6 +138,17 @@
       (plotly/layer-bar)
       plotly/plot))
 
+;; The two largest magnitude bins are at frequencies 3 and 7:
+
+(let [spectrum (bfft/forward signal-composed)
+      mags (la/abs spectrum)
+      half-mags (vec (take (/ N-vis 2) mags))
+      peak-idx (sort-by (fn [i] (- (double (nth half-mags i))))
+                        (range (count half-mags)))]
+  (= [3 7] (vec (sort (take 2 peak-idx)))))
+
+(kind/test-last [true?])
+
 ;; ## Known transform pairs
 ;;
 ;; The DFT of a constant signal $x_n = c$ is $\hat{x}_0 = Nc$

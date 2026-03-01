@@ -154,6 +154,17 @@ stationary-eigen
  [(fn [v] (and (< (Math/abs (- (dfn/sum v) 1.0)) 1e-10)
                (every? pos? v)))])
 
+;; The stationary distribution from eigendecomposition should
+;; agree with the random walk convergence:
+
+(every? (fn [[eigen walk]]
+          (< (Math/abs (- (double eigen) (double walk))) 1e-4))
+        (map vector stationary-eigen
+             (let [s (last walk-history)]
+               [(:sunny s) (:cloudy s) (:rainy s)])))
+
+(kind/test-last [true?])
+
 ;; ## Power iteration
 ;;
 ;; Power iteration is an **imperative** algorithm:
@@ -271,6 +282,17 @@ google-matrix
 (dfn/sum pagerank)
 
 (kind/test-last [(fn [s] (< (Math/abs (- s 1.0)) 1e-10))])
+
+;; All PageRank values are positive and the top-ranked pages
+;; have above-average rank:
+
+(let [avg (/ 1.0 n-pages)
+      flat (tensor/select pagerank 0 :all)]
+  (and (every? pos? flat)
+       (> (tensor/mget pagerank 0 0) avg)
+       (> (tensor/mget pagerank 0 2) avg)))
+
+(kind/test-last [true?])
 
 ;; Pages 0 and 2 receive the most links and compete for the top rank:
 

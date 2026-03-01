@@ -139,7 +139,7 @@
   (let
    [t
     (mapv
-     (fn* [p1__76672#] (/ (double p1__76672#) N-vis))
+     (fn* [p1__80447#] (/ (double p1__80447#) N-vis))
      (range N-vis))]
    (mapv
     (fn
@@ -156,7 +156,7 @@
   (tc/dataset
    {:t
     (mapv
-     (fn* [p1__76673#] (/ (double p1__76673#) N-vis))
+     (fn* [p1__80448#] (/ (double p1__80448#) N-vis))
      (range N-vis)),
     :amplitude (vec signal-composed)})
   (plotly/base {:=x :t, :=y :amplitude})
@@ -178,7 +178,26 @@
 
 
 (def
- v26_l146
+ v26_l143
+ (let
+  [spectrum
+   (bfft/forward signal-composed)
+   mags
+   (la/abs spectrum)
+   half-mags
+   (vec (take (/ N-vis 2) mags))
+   peak-idx
+   (sort-by
+    (fn [i] (- (double (nth half-mags i))))
+    (range (count half-mags)))]
+  (= [3 7] (vec (sort (take 2 peak-idx))))))
+
+
+(deftest t27_l150 (is (true? v26_l143)))
+
+
+(def
+ v29_l157
  (let
   [spectrum (bfft/forward [3.0 3.0 3.0 3.0])]
   {:dc (cx/re (spectrum 0)),
@@ -189,18 +208,18 @@
 
 
 (deftest
- t27_l150
+ t30_l161
  (is
   ((fn
     [v]
     (and
      (< (Math/abs (- (double (:dc v)) 12.0)) 1.0E-10)
-     (every? (fn* [p1__76674#] (< p1__76674# 1.0E-10)) (:others v))))
-   v26_l146)))
+     (every? (fn* [p1__80449#] (< p1__80449# 1.0E-10)) (:others v))))
+   v29_l157)))
 
 
 (def
- v29_l155
+ v32_l166
  (let
   [spectrum (bfft/forward [1.0 -1.0 1.0 -1.0])]
   {:dc (double (la/abs (spectrum 0))),
@@ -208,18 +227,18 @@
 
 
 (deftest
- t30_l159
+ t33_l170
  (is
   ((fn
     [v]
     (and
      (< (:dc v) 1.0E-10)
      (< (Math/abs (- (:nyquist v) 4.0)) 1.0E-10)))
-   v29_l155)))
+   v32_l166)))
 
 
 (def
- v32_l166
+ v35_l177
  (let
   [signal
    (cx/complex-tensor [1.0 0.0] [0.0 1.0])
@@ -236,11 +255,11 @@
     1.0E-10))))
 
 
-(deftest t33_l172 (is (true? v32_l166)))
+(deftest t36_l183 (is (true? v35_l177)))
 
 
 (def
- v35_l178
+ v38_l189
  (let
   [signal
    [1.0 2.0 3.0 4.0]
@@ -251,4 +270,4 @@
   (< (dfn/reduce-max (dfn/abs (dfn/- recovered signal))) 1.0E-10)))
 
 
-(deftest t36_l183 (is (true? v35_l178)))
+(deftest t39_l194 (is (true? v38_l189)))
