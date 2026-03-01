@@ -3,7 +3,8 @@
                   "complex_tensors"
                   "fourier_transform"
                   "sharing_and_mutation"
-                  "computation_tape"]
+                  "computation_tape"
+                  "autodiff"]
  "Abstract Linear Algebra" ["vectors_and_spaces"
                             "maps_and_structure"
                             "inner_products_and_orthogonality"
