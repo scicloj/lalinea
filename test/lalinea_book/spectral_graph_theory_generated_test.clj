@@ -15,14 +15,7 @@
 
 
 (def
- v3_l39
- (def
-  laplacian
-  (fn [adj] (la/sub (la/diag (la/reduce-axis adj dfn/sum 1)) adj))))
-
-
-(def
- v5_l52
+ v3_l46
  (def
   adj
   (la/matrix
@@ -34,33 +27,38 @@
     [0 0 0 1 1 0]])))
 
 
-(def v7_l63 (def six-pos [[0 1] [0 -1] [1.5 0] [3.5 0] [5 1] [5 -1]]))
+(def v5_l57 (def six-pos [[0 1] [0 -1] [1.5 0] [3.5 0] [5 1] [5 -1]]))
 
 
-(def v8_l66 (def six-edges [[0 1] [0 2] [1 2] [2 3] [3 4] [3 5] [4 5]]))
+(def v6_l60 (def six-edges [[0 1] [0 2] [1 2] [2 3] [3 4] [3 5] [4 5]]))
 
 
 (def
- v9_l69
+ v7_l63
  (vis/graph-plot six-pos six-edges {:edge-highlight #{[2 3]}}))
 
 
-(def v11_l74 (la/reduce-axis adj dfn/sum 1))
+(def v9_l68 (la/reduce-axis adj dfn/sum 1))
+
+
+(deftest t10_l70 (is ((fn [v] (= v [2.0 2.0 3.0 3.0 2.0 2.0])) v9_l68)))
+
+
+(def
+ v12_l86
+ (def
+  laplacian
+  (fn [adj] (la/sub (la/diag (la/reduce-axis adj dfn/sum 1)) adj))))
+
+
+(def v13_l90 (def L (laplacian adj)))
+
+
+(def v14_l92 L)
 
 
 (deftest
- t12_l76
- (is ((fn [v] (= v [2.0 2.0 3.0 3.0 2.0 2.0])) v11_l74)))
-
-
-(def v14_l92 (def L (laplacian adj)))
-
-
-(def v15_l94 L)
-
-
-(deftest
- t16_l96
+ t15_l94
  (is
   ((fn
     [m]
@@ -68,42 +66,42 @@
      (= [6 6] (dtype/shape m))
      (= 2.0 (tensor/mget m 0 0))
      (= -1.0 (tensor/mget m 0 1))))
-   v15_l94)))
+   v14_l92)))
 
 
-(def v18_l111 (dfn/reduce-max (dfn/abs (la/reduce-axis L dfn/sum 1))))
+(def v17_l109 (dfn/reduce-max (dfn/abs (la/reduce-axis L dfn/sum 1))))
 
 
-(deftest t19_l113 (is ((fn [v] (< v 1.0E-10)) v18_l111)))
+(deftest t18_l111 (is ((fn [v] (< v 1.0E-10)) v17_l109)))
 
 
-(def v21_l128 (def eig (la/eigen L)))
+(def v20_l126 (def eig (la/eigen L)))
 
 
-(def v22_l130 (def eigenvalues (la/real-eigenvalues (laplacian adj))))
+(def v21_l128 (def eigenvalues (la/real-eigenvalues (laplacian adj))))
 
 
-(def v23_l132 eigenvalues)
+(def v22_l130 eigenvalues)
 
 
 (deftest
- t24_l134
+ t23_l132
  (is
   ((fn [v] (and (< (abs (first v)) 1.0E-10) (= 6 (count v))))
-   v23_l132)))
+   v22_l130)))
 
 
-(def v26_l147 (def fiedler-value (second eigenvalues)))
+(def v25_l145 (def fiedler-value (second eigenvalues)))
 
 
-(def v27_l149 fiedler-value)
+(def v26_l147 fiedler-value)
 
 
-(deftest t28_l151 (is ((fn [v] (and (pos? v) (< v 2.0))) v27_l149)))
+(deftest t27_l149 (is ((fn [v] (and (pos? v) (< v 2.0))) v26_l147)))
 
 
 (def
- v30_l164
+ v29_l162
  (def
   sorted-eig-indices
   (let
@@ -114,39 +112,39 @@
 
 
 (def
- v31_l168
+ v30_l166
  (def
   fiedler-eigvec
   (nth (:eigenvectors eig) (second sorted-eig-indices))))
 
 
-(def v33_l173 (def fiedler-entries (la/flatten fiedler-eigvec)))
+(def v32_l171 (def fiedler-entries (la/flatten fiedler-eigvec)))
 
 
-(def v34_l176 fiedler-entries)
+(def v33_l174 fiedler-entries)
 
 
-(deftest t35_l178 (is ((fn [v] (= 6 (count v))) v34_l176)))
+(deftest t34_l176 (is ((fn [v] (= 6 (count v))) v33_l174)))
 
 
-(def v37_l184 (< (abs (la/sum fiedler-entries)) 1.0E-10))
+(def v36_l182 (< (abs (la/sum fiedler-entries)) 1.0E-10))
 
 
-(deftest t38_l186 (is (true? v37_l184)))
+(deftest t37_l184 (is (true? v36_l182)))
 
 
 (def
- v40_l191
+ v39_l189
  (def
   cluster-assignment
   (mapv (fn [x] (if (neg? x) :A :B)) fiedler-entries)))
 
 
-(def v41_l194 cluster-assignment)
+(def v40_l192 cluster-assignment)
 
 
 (deftest
- t42_l196
+ t41_l194
  (is
   ((fn
     [v]
@@ -154,11 +152,11 @@
      (apply = (subvec v 0 3))
      (apply = (subvec v 3 6))
      (not= (v 0) (v 3))))
-   v41_l194)))
+   v40_l192)))
 
 
 (def
- v44_l206
+ v43_l204
  (vis/graph-plot
   six-pos
   six-edges
@@ -167,7 +165,7 @@
 
 
 (def
- v46_l214
+ v45_l212
  (->
   (tc/dataset
    {:vertex (range 6),
@@ -179,7 +177,7 @@
 
 
 (def
- v48_l228
+ v47_l226
  (def
   adj-disconnected
   (la/matrix
@@ -192,7 +190,7 @@
 
 
 (def
- v49_l236
+ v48_l234
  (vis/graph-plot
   six-pos
   [[0 1] [0 2] [1 2] [3 4] [3 5] [4 5]]
@@ -201,17 +199,17 @@
 
 
 (def
- v50_l241
+ v49_l239
  (def
   disc-eigenvalues
   (la/real-eigenvalues (laplacian adj-disconnected))))
 
 
-(def v51_l244 disc-eigenvalues)
+(def v50_l242 disc-eigenvalues)
 
 
 (deftest
- t52_l246
+ t51_l244
  (is
   ((fn
     [v]
@@ -219,14 +217,14 @@
      (< (abs (first v)) 1.0E-10)
      (< (abs (second v)) 1.0E-10)
      (> (nth v 2) 0.1)))
-   v51_l244)))
+   v50_l242)))
 
 
-(def v54_l260 (def kn 5))
+(def v53_l258 (def kn 5))
 
 
 (def
- v55_l262
+ v54_l260
  (def
   K5-adj
   (tensor/compute-tensor
@@ -236,7 +234,7 @@
 
 
 (def
- v56_l267
+ v55_l265
  (vis/graph-plot
   [[0.0 1.0]
    [-0.951 0.309]
@@ -248,29 +246,29 @@
 
 
 (def
- v57_l271
+ v56_l269
  (def K5-eigenvalues (la/real-eigenvalues (laplacian K5-adj))))
 
 
-(def v58_l274 K5-eigenvalues)
+(def v57_l272 K5-eigenvalues)
 
 
 (deftest
- t59_l276
+ t58_l274
  (is
   ((fn
     [v]
     (and
      (< (abs (first v)) 1.0E-10)
      (every? (fn [x] (< (abs (- x 5.0)) 1.0E-10)) (rest v))))
-   v58_l274)))
+   v57_l272)))
 
 
-(def v61_l293 (def cn 8))
+(def v60_l291 (def cn 8))
 
 
 (def
- v62_l295
+ v61_l293
  (def
   cycle-adj
   (tensor/compute-tensor
@@ -285,7 +283,7 @@
 
 
 (def
- v63_l302
+ v62_l300
  (vis/graph-plot
   [[0.0 1.0]
    [-0.707 0.707]
@@ -300,12 +298,12 @@
 
 
 (def
- v64_l306
+ v63_l304
  (def cycle-eigenvalues (la/real-eigenvalues (laplacian cycle-adj))))
 
 
 (def
- v65_l309
+ v64_l307
  (def
   cycle-theoretical
   (sort
@@ -315,28 +313,28 @@
     (- 2.0 (* 2.0 (math/cos (/ (* 2.0 math/PI idx) cn))))))))
 
 
-(def v67_l315 cycle-eigenvalues)
+(def v66_l313 cycle-eigenvalues)
 
 
-(def v69_l319 cycle-theoretical)
+(def v68_l317 cycle-theoretical)
 
 
 (def
- v71_l323
+ v70_l321
  (<
   (dfn/reduce-max
    (dfn/abs (dfn/- cycle-eigenvalues cycle-theoretical)))
   1.0E-10))
 
 
-(deftest t72_l327 (is (true? v71_l323)))
+(deftest t71_l325 (is (true? v70_l321)))
 
 
-(def v74_l335 (def pn 6))
+(def v73_l333 (def pn 6))
 
 
 (def
- v75_l337
+ v74_l335
  (def
   path-adj
   (tensor/compute-tensor
@@ -346,7 +344,7 @@
 
 
 (def
- v76_l342
+ v75_l340
  (vis/graph-plot
   [[0 0] [1 0] [2 0] [3 0] [4 0] [5 0]]
   [[0 1] [1 2] [2 3] [3 4] [4 5]]
@@ -354,15 +352,15 @@
 
 
 (def
- v77_l346
+ v76_l344
  (def path-eigenvalues (la/real-eigenvalues (laplacian path-adj))))
 
 
-(def v78_l349 path-eigenvalues)
+(def v77_l347 path-eigenvalues)
 
 
 (def
- v79_l351
+ v78_l349
  (def
   path-theoretical
   (sort
@@ -372,21 +370,21 @@
     (- 2.0 (* 2.0 (math/cos (/ (* math/PI idx) pn))))))))
 
 
-(def v80_l355 path-theoretical)
+(def v79_l353 path-theoretical)
 
 
 (def
- v81_l357
+ v80_l355
  (<
   (dfn/reduce-max (dfn/abs (dfn/- path-eigenvalues path-theoretical)))
   1.0E-10))
 
 
-(deftest t82_l361 (is (true? v81_l357)))
+(deftest t81_l359 (is (true? v80_l355)))
 
 
 (def
- v84_l371
+ v83_l369
  (def
   community-adj
   (la/matrix
@@ -402,7 +400,7 @@
 
 
 (def
- v85_l386
+ v84_l384
  (vis/graph-plot
   [[0 0.8]
    [0 -0.8]
@@ -428,19 +426,19 @@
    :width 400}))
 
 
-(def v86_l400 (def comm-eig (la/eigen (laplacian community-adj))))
+(def v85_l398 (def comm-eig (la/eigen (laplacian community-adj))))
 
 
 (def
- v88_l404
+ v87_l402
  (def comm-eigenvalues (la/real-eigenvalues (laplacian community-adj))))
 
 
-(def v89_l406 comm-eigenvalues)
+(def v88_l404 comm-eigenvalues)
 
 
 (deftest
- t90_l408
+ t89_l406
  (is
   ((fn
     [v]
@@ -449,11 +447,11 @@
      (< (abs (first v)) 1.0E-10)
      (< (nth v 2) 1.0)
      (> (nth v 3) (* 2.0 (nth v 2)))))
-   v89_l406)))
+   v88_l404)))
 
 
 (def
- v91_l415
+ v90_l413
  (->
   (tc/dataset
    {:index (range (count comm-eigenvalues)),
@@ -464,7 +462,7 @@
 
 
 (def
- v93_l427
+ v92_l425
  (def
   sorted-comm-indices
   (let
@@ -475,7 +473,7 @@
 
 
 (def
- v95_l434
+ v94_l432
  (def
   embed-data
   (let
@@ -490,13 +488,13 @@
      :community
      (mapv
       (fn*
-       [p1__82718#]
-       (cond (<= p1__82718# 2) "A" (<= p1__82718# 5) "B" :else "C"))
+       [p1__81616#]
+       (cond (<= p1__81616# 2) "A" (<= p1__81616# 5) "B" :else "C"))
       (range 9))}))))
 
 
 (def
- v96_l445
+ v95_l443
  (->
   embed-data
   (plotly/base {:=x :x, :=y :y, :=color :community})
@@ -505,7 +503,7 @@
 
 
 (def
- v98_l455
+ v97_l453
  (let
   [xs
    (:x embed-data)
@@ -525,17 +523,17 @@
   (< within-A across-AB)))
 
 
-(deftest t99_l463 (is (true? v98_l455)))
+(deftest t98_l461 (is (true? v97_l453)))
 
 
-(def v101_l480 (def conductance (/ 1.0 3.0)))
+(def v100_l478 (def conductance (/ 1.0 3.0)))
 
 
 (def
- v102_l482
+ v101_l480
  (and
   (<= (/ fiedler-value 2.0) conductance)
   (<= conductance (math/sqrt (* 2.0 fiedler-value)))))
 
 
-(deftest t103_l485 (is (true? v102_l482)))
+(deftest t102_l483 (is (true? v101_l480)))

@@ -20,7 +20,7 @@
 ;; VJP rules
 ;; ---------------------------------------------------------------------------
 
-(defn- ensure-bare
+(defn- ensure-tensor
   "Unwrap RealTensor to bare tensor; pass through everything else."
   [x]
   (if (rt/real-tensor? x) (rt/->tensor x) x))
@@ -63,7 +63,10 @@
                      [(la/scale (la/mmul inv-t (la/mmul g inv-t)) -1.0)]))
    :la/norm      (fn [g [a] out]
                    ;; d/dA ||A||_F = A / ||A||_F
-                   [(la/scale a (/ (double g) (double out)))])})
+                   [(la/scale a (/ (double g) (double out)))])
+   :la/dot       (fn [g [u v] _out]
+                   [(dfn/* (double g) v)
+                    (dfn/* (double g) u)])})
 
 ;; ---------------------------------------------------------------------------
 ;; Gradient accumulation
@@ -73,7 +76,7 @@
   "Accumulate gradient: existing + new. If existing is nil, returns new.
    Materializes lazy tensors to avoid deep nesting."
   [existing new-grad]
-  (let [new-grad (ensure-bare new-grad)]
+  (let [new-grad (ensure-tensor new-grad)]
     (if (nil? existing)
       (if (tensor/tensor? new-grad)
         (dtype/clone new-grad)
@@ -122,9 +125,9 @@
               g (.get adjoints entry-id)]
           (when (some? g)
             (when-let [rule (get vjp-rules (:op entry))]
-              (let [input-tensors (mapv ensure-bare (:input-tensors entry))
+              (let [input-tensors (mapv ensure-tensor (:input-tensors entry))
                     input-refs (:inputs entry)
-                    input-grads (rule (ensure-bare g) input-tensors (ensure-bare (:output entry)))]
+                    input-grads (rule (ensure-tensor g) input-tensors (ensure-tensor (:output entry)))]
                 (dotimes [i (count input-refs)]
                   (when-let [ig (nth input-grads i nil)]
                     (when-let [ref-id (:id (nth input-refs i))]

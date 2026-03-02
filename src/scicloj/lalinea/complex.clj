@@ -294,14 +294,14 @@
 
 (defn abs
   "Element-wise complex magnitude: sqrt(re² + im²).
-   Returns a real tensor (or double for scalar)."
+   Returns a RealTensor (or double for scalar)."
   [^ComplexTensor ct]
   (let [r (re ct) i (im ct)
         result (if (number? r)
                  (dfn/sqrt (dfn/+ (dfn/* r r) (dfn/* i i)))
                  (let [r (tensor/ensure-tensor r)
                        i (tensor/ensure-tensor i)]
-                   (dfn/sqrt (dfn/+ (dfn/* r r) (dfn/* i i)))))]
+                   (@@->rt-fn (dfn/sqrt (dfn/+ (dfn/* r r) (dfn/* i i))))))]
     (tape-record! :cx/abs [ct] result)))
 
 (defn dot

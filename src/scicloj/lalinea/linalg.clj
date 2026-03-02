@@ -69,7 +69,8 @@
 (defn ones
   "Matrix of ones, size r × c."
   [r c]
-  (->rt (tensor/compute-tensor [r c] (fn [& _] 1.0) :float64)))
+  (tape/record! :la/ones [r c]
+                (->rt (tensor/compute-tensor [r c] (fn [& _] 1.0) :float64))))
 
 (defn diag
   "Diagonal operations:
@@ -84,7 +85,7 @@
                     (let [n (long (apply min (dtype/shape a)))]
                       (->rt (dtype/clone
                              (dtype/make-reader :float64 n
-                               (double (tensor/mget a idx idx))))))
+                                                (double (tensor/mget a idx idx))))))
                     ;; Create diagonal matrix from values
                     (let [v (dtype/->reader (dtype/make-container :float64 a))
                           n (count v)]
@@ -197,19 +198,20 @@
    Uses exponentiation by squaring — $O(\\log k)$ multiplications.
    Returns the identity for k=0."
   [a k]
-  (let [k (long k)]
-    (cond
-      (neg? k) (throw (ex-info "mpow requires non-negative k" {:k k}))
-      (zero? k) (eye (first (dtype/shape a)))
-      (== k 1) a
-      :else (loop [base a result nil k k]
-              (let [result (if (odd? k)
-                             (if result (mmul result base) base)
-                             result)
-                    k (quot k 2)]
-                (if (zero? k)
-                  result
-                  (recur (mmul base base) result k)))))))
+  (tape/record! :la/mpow [a k]
+                (let [k (long k)]
+                  (cond
+                    (neg? k) (throw (ex-info "mpow requires non-negative k" {:k k}))
+                    (zero? k) (eye (first (dtype/shape a)))
+                    (== k 1) a
+                    :else (loop [base a result nil k k]
+                            (let [result (if (odd? k)
+                                           (if result (mmul result base) base)
+                                           result)
+                                  k (quot k 2)]
+                              (if (zero? k)
+                                result
+                                (recur (mmul base base) result k))))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Transpose
@@ -299,16 +301,18 @@
 (defn prod
   "Product of all elements. Returns a double."
   [a]
-  (let [a (ensure-tensor a)]
-    (reduce * (dtype/->reader a :float64))))
+  (tape/record! :la/prod [a]
+                (let [a (ensure-tensor a)]
+                  (reduce * (dtype/->reader a :float64)))))
 
 (defn compute-matrix
   "Build an `[r c]` matrix from a function of row and column indices.
    `f` takes two longs (row, col) and returns a double."
   [r c f]
-  (->rt (tensor/compute-tensor [(long r) (long c)]
-                                (fn [i j] (double (f i j)))
-                                :float64)))
+  (tape/record! :la/compute-matrix [r c f]
+                (->rt (tensor/compute-tensor [(long r) (long c)]
+                                             (fn [i j] (double (f i j)))
+                                             :float64))))
 
 (defn reduce-axis
   "Reduce a tensor along an axis.
@@ -333,29 +337,31 @@
    Column vectors `[n 1]` become `[n]`, matrices `[r c]` become `[r*c]`.
    For ComplexTensors, flattens the logical dimensions (trailing 2 preserved)."
   [a]
-  (let [a (ensure-tensor a)]
-    (if (cx/complex? a)
-      (let [raw (cx/->tensor a)
-            n (apply * (cx/complex-shape a))]
-        (cx/wrap-tensor (tensor/reshape raw [n 2])))
-      (let [n (dtype/ecount a)]
-        (->rt (tensor/reshape a [n]))))))
+  (tape/record! :la/flatten [a]
+                (let [a (ensure-tensor a)]
+                  (if (cx/complex? a)
+                    (let [raw (cx/->tensor a)
+                          n (apply * (cx/complex-shape a))]
+                      (cx/wrap-tensor (tensor/reshape raw [n 2])))
+                    (let [n (dtype/ecount a)]
+                      (->rt (tensor/reshape a [n])))))))
 
 (defn hstack
   "Assemble a matrix by placing column vectors side by side.
    Each element should be a column vector `[n 1]` or a 1D tensor `[n]`.
    Returns an `[n k]` matrix where k is the number of columns."
   [cols]
-  (let [ts (mapv ensure-tensor cols)
-        n (long (first (dtype/shape (first ts))))
-        k (count ts)
-        buf (dtype/make-container :float64 (* n k))
-        out (tensor/reshape buf [n k])]
-    (dotimes [j k]
-      (let [reader (dtype/->reader (nth ts j) :float64)]
-        (dotimes [i n]
-          (tensor/mset! out i j (double (reader i))))))
-    (->rt out)))
+  (tape/record! :la/hstack [cols]
+                (let [ts (mapv ensure-tensor cols)
+                      n (long (first (dtype/shape (first ts))))
+                      k (count ts)
+                      buf (dtype/make-container :float64 (* n k))
+                      out (tensor/reshape buf [n k])]
+                  (dotimes [j k]
+                    (let [reader (dtype/->reader (nth ts j) :float64)]
+                      (dotimes [i n]
+                        (tensor/mset! out i j (double (reader i))))))
+                  (->rt out))))
 
 ;; ---------------------------------------------------------------------------
 ;; Scalar properties
@@ -399,10 +405,11 @@
   "Inner product. For real vectors: Σ u_i v_i (returns double).
    For complex vectors: Hermitian ⟨u,v⟩ = Σ u_i conj(v_i) (returns scalar ComplexTensor)."
   [u v]
-  (let [u (ensure-tensor u) v (ensure-tensor v)]
-    (if (cx/complex? u)
-      (cx/dot-conj u v)
-      (double (dfn/sum (dfn/* u v))))))
+  (tape/record! :la/dot [u v]
+                (let [u (ensure-tensor u) v (ensure-tensor v)]
+                  (if (cx/complex? u)
+                    (cx/dot-conj u v)
+                    (double (dfn/sum (dfn/* u v)))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Approximate equality
