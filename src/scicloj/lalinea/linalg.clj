@@ -6,7 +6,7 @@
    computation, with zero-copy conversion.
 
    For complex matrices, functions accept and return ComplexTensors."
-  (:refer-clojure :exclude [abs])
+  (:refer-clojure :exclude [abs flatten])
   (:require [scicloj.lalinea.impl.tensor :as bt]
             [scicloj.lalinea.impl.real-tensor :as rt]
             [scicloj.lalinea.complex :as cx]
@@ -301,6 +301,35 @@
                     (cx/wrap-tensor
                      (tensor/reduce-axis (cx/->tensor a) reduce-fn (int axis)))
                     (->rt (tensor/reduce-axis a reduce-fn (int axis)))))))
+
+(defn flatten
+  "Reshape a tensor to 1D, preserving element order.
+   Column vectors `[n 1]` become `[n]`, matrices `[r c]` become `[r*c]`.
+   For ComplexTensors, flattens the logical dimensions (trailing 2 preserved)."
+  [a]
+  (let [a (ensure-tensor a)]
+    (if (cx/complex? a)
+      (let [raw (cx/->tensor a)
+            n (apply * (cx/complex-shape a))]
+        (cx/wrap-tensor (tensor/reshape raw [n 2])))
+      (let [n (dtype/ecount a)]
+        (->rt (tensor/reshape a [n]))))))
+
+(defn hstack
+  "Assemble a matrix by placing column vectors side by side.
+   Each element should be a column vector `[n 1]` or a 1D tensor `[n]`.
+   Returns an `[n k]` matrix where k is the number of columns."
+  [cols]
+  (let [ts (mapv ensure-tensor cols)
+        n (long (first (dtype/shape (first ts))))
+        k (count ts)
+        buf (dtype/make-container :float64 (* n k))
+        out (tensor/reshape buf [n k])]
+    (dotimes [j k]
+      (let [reader (dtype/->reader (nth ts j) :float64)]
+        (dotimes [i n]
+          (tensor/mset! out i j (double (reader i))))))
+    (->rt out)))
 
 ;; ---------------------------------------------------------------------------
 ;; Scalar properties

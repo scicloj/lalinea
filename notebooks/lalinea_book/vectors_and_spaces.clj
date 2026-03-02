@@ -231,9 +231,9 @@
 ;; plane — let us check by plotting many combinations
 ;; $\alpha \mathbf{u} + \beta \mathbf{v}$:
 
-(let [coeffs (vec (for [a (range -2.0 2.1 0.5)
-                        b (range -2.0 2.1 0.5)]
-                    [a b]))
+(let [coeffs (for [a (range -2.0 2.1 0.5)
+                   b (range -2.0 2.1 0.5)]
+               [a b])
       n (count coeffs)
       points (dtype/clone
               (tensor/compute-tensor [n 2]
@@ -258,9 +258,9 @@
 
 (let [s1 (la/column [1 2])
       s2 (la/column [2 4])
-      coeffs (vec (for [a (range -2.0 2.1 0.5)
-                        b (range -2.0 2.1 0.5)]
-                    [a b]))
+      coeffs (for [a (range -2.0 2.1 0.5)
+                   b (range -2.0 2.1 0.5)]
+               [a b])
       n (count coeffs)
       points (dtype/clone
               (tensor/compute-tensor [n 2]

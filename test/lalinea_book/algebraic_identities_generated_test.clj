@@ -456,7 +456,7 @@
    AtA-eigs
    (la/real-eigenvalues (la/mmul (la/transpose A) A))
    sv-squared
-   (sort > (map (fn* [p1__74707#] (* p1__74707# p1__74707#)) S))]
+   (sort > (map (fn* [p1__66231#] (* p1__66231# p1__66231#)) S))]
   (every?
    identity
    (map

@@ -45,7 +45,7 @@
  (vis/graph-plot six-pos six-edges {:edge-highlight #{[2 3]}}))
 
 
-(def v11_l74 (vec (la/reduce-axis adj dfn/sum 1)))
+(def v11_l74 (la/reduce-axis adj dfn/sum 1))
 
 
 (deftest
@@ -120,9 +120,7 @@
   (nth (:eigenvectors eig) (second sorted-eig-indices))))
 
 
-(def
- v33_l172
- (def fiedler-entries (vec (dtype/->reader fiedler-eigvec))))
+(def v33_l172 (def fiedler-entries (la/flatten fiedler-eigvec)))
 
 
 (def v34_l175 fiedler-entries)
@@ -492,8 +490,8 @@
      :community
      (mapv
       (fn*
-       [p1__25091#]
-       (cond (<= p1__25091# 2) "A" (<= p1__25091# 5) "B" :else "C"))
+       [p1__66067#]
+       (cond (<= p1__66067# 2) "A" (<= p1__66067# 5) "B" :else "C"))
       (range 9))}))))
 
 
@@ -510,9 +508,9 @@
  v98_l454
  (let
   [xs
-   (vec (:x embed-data))
+   (:x embed-data)
    ys
-   (vec (:y embed-data))
+   (:y embed-data)
    dist
    (fn
     [i j]

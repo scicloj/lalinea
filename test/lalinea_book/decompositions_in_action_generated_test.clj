@@ -248,28 +248,18 @@
 (def v42_l212 (def pca-eigen (la/eigen cov-matrix)))
 
 
-(def
- v44_l216
- (let
-  [eigenvalues
-   (:eigenvalues pca-eigen)
-   reals
-   (cx/re eigenvalues)
-   arr
-   (dtype/->double-array reals)]
-  (java.util.Arrays/sort arr)
-  (vec (reverse (vec arr)))))
+(def v44_l216 (reverse (la/real-eigenvalues cov-matrix)))
 
 
 (deftest
- t45_l222
+ t45_l218
  (is
   ((fn [evs] (and (every? pos? evs) (> (first evs) (second evs))))
    v44_l216)))
 
 
 (def
- v47_l232
+ v47_l228
  (let
   [{:keys [eigenvalues eigenvectors]}
    pca-eigen
@@ -313,11 +303,11 @@
    plotly/plot)))
 
 
-(deftest t48_l255 (is ((fn [_] true) v47_l232)))
+(deftest t48_l251 (is ((fn [_] true) v47_l228)))
 
 
 (def
- v50_l262
+ v50_l258
  (let
   [{:keys [eigenvalues eigenvectors]}
    pca-eigen
@@ -338,23 +328,23 @@
   explained))
 
 
-(deftest t52_l275 (is ((fn [v] (> v 0.8)) v50_l262)))
+(deftest t52_l271 (is ((fn [v] (> v 0.8)) v50_l258)))
 
 
-(def v54_l288 (def test-matrix (la/matrix [[4 1 0] [1 3 1] [0 1 2]])))
+(def v54_l284 (def test-matrix (la/matrix [[4 1 0] [1 3 1] [0 1 2]])))
 
 
-(def v56_l295 (def true-eigenvalues (la/real-eigenvalues test-matrix)))
+(def v56_l291 (def true-eigenvalues (la/real-eigenvalues test-matrix)))
 
 
-(def v57_l298 true-eigenvalues)
+(def v57_l294 true-eigenvalues)
 
 
-(deftest t58_l300 (is ((fn [evs] (= 3 (count evs))) v57_l298)))
+(deftest t58_l296 (is ((fn [evs] (= 3 (count evs))) v57_l294)))
 
 
 (def
- v60_l305
+ v60_l301
  (def
   qr-history
   (loop
@@ -391,7 +381,7 @@
 
 
 (def
- v62_l335
+ v62_l331
  (->
   (tc/dataset qr-history)
   (plotly/base {:=x :iteration, :=y :off-diagonal})
@@ -399,14 +389,14 @@
   plotly/plot))
 
 
-(def v63_l340 (:off-diagonal (last qr-history)))
+(def v63_l336 (:off-diagonal (last qr-history)))
 
 
-(deftest t64_l342 (is ((fn [v] (< v 1.0E-6)) v63_l340)))
+(deftest t64_l338 (is ((fn [v] (< v 1.0E-6)) v63_l336)))
 
 
 (def
- v66_l347
+ v66_l343
  (let
   [final
    (last qr-history)
@@ -420,11 +410,11 @@
     true-eigenvalues))))
 
 
-(deftest t67_l353 (is (true? v66_l347)))
+(deftest t67_l349 (is (true? v66_l343)))
 
 
 (def
- v69_l357
+ v69_l353
  (->
   (tc/dataset
    (mapcat
@@ -439,4 +429,4 @@
   plotly/plot))
 
 
-(deftest t70_l366 (is ((fn [_] true) v69_l357)))
+(deftest t70_l362 (is ((fn [_] true) v69_l353)))

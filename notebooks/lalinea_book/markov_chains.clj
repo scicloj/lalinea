@@ -144,9 +144,8 @@
         idx (first (sort-by (fn [i] (abs (- (double (reals i)) 1.0)))
                             (range (count eigenvectors))))
         ev (nth eigenvectors idx)
-        col (tensor/select ev :all 0)
-        total (dfn/sum col)]
-    (vec (dfn/* col (/ 1.0 total)))))
+        total (dfn/sum (la/flatten ev))]
+    (la/flatten (la/scale ev (/ 1.0 total)))))
 
 stationary-eigen
 

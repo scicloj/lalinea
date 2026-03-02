@@ -116,25 +116,23 @@
       (range (count eigenvectors))))
     ev
     (nth eigenvectors idx)
-    col
-    (tensor/select ev :all 0)
     total
-    (dfn/sum col)]
-   (vec (dfn/* col (/ 1.0 total))))))
+    (dfn/sum (la/flatten ev))]
+   (la/flatten (la/scale ev (/ 1.0 total))))))
 
 
-(def v21_l151 stationary-eigen)
+(def v21_l150 stationary-eigen)
 
 
 (deftest
- t22_l153
+ t22_l152
  (is
   ((fn [v] (and (< (abs (- (dfn/sum v) 1.0)) 1.0E-10) (every? pos? v)))
-   v21_l151)))
+   v21_l150)))
 
 
 (def
- v24_l160
+ v24_l159
  (every?
   (fn [[eigen walk]] (< (abs (- (double eigen) (double walk))) 1.0E-4))
   (map
@@ -143,11 +141,11 @@
    (let [s (last walk-history)] [(:sunny s) (:cloudy s) (:rainy s)]))))
 
 
-(deftest t25_l166 (is (true? v24_l160)))
+(deftest t25_l165 (is (true? v24_l159)))
 
 
 (def
- v27_l176
+ v27_l175
  (def
   power-iteration-history
   (let
@@ -171,7 +169,7 @@
 
 
 (def
- v29_l192
+ v29_l191
  (->
   (tc/dataset power-iteration-history)
   (plotly/base {:=x :iteration, :=y :change})
@@ -179,14 +177,14 @@
   plotly/plot))
 
 
-(def v31_l199 (:change (last power-iteration-history)))
+(def v31_l198 (:change (last power-iteration-history)))
 
 
-(deftest t32_l201 (is ((fn [c] (< c 1.0E-10)) v31_l199)))
+(deftest t32_l200 (is ((fn [c] (< c 1.0E-10)) v31_l198)))
 
 
 (def
- v34_l217
+ v34_l216
  (def
   course-names
   ["Calculus"
@@ -199,17 +197,17 @@
    "AI"]))
 
 
-(def v35_l222 (def n-pages (count course-names)))
+(def v35_l221 (def n-pages (count course-names)))
 
 
 (def
- v36_l224
+ v36_l223
  (kind/mermaid
   "graph LR\n  subgraph Math\n    Calc[\"Calculus\"]\n    LA[\"Linear Algebra\"]\n    Stats[\"Statistics\"]\n  end\n  subgraph CS\n    IP[\"Intro Programming\"]\n    DS[\"Data Structures\"]\n    DB[\"Databases\"]\n  end\n  ML[\"Machine Learning\"]\n  AI[\"AI\"]\n  Calc --> LA\n  LA --> Calc\n  LA --> Stats\n  Stats --> Calc\n  Stats --> LA\n  IP --> DS\n  DS --> IP\n  DS --> DB\n  ML --> LA\n  ML --> Stats\n  ML --> IP\n  ML --> AI\n  DB --> DS\n  DB --> IP\n  DB --> ML\n  AI --> ML\n  AI --> DS\n  AI --> Stats\n  AI --> LA"))
 
 
 (def
- v38_l262
+ v38_l261
  (def
   H
   (la/matrix
@@ -223,11 +221,11 @@
     [0 1/4 1/4 0 1/4 1/4 0 0]])))
 
 
-(def v40_l276 (def damping 0.85))
+(def v40_l275 (def damping 0.85))
 
 
 (def
- v41_l278
+ v41_l277
  (def
   google-matrix
   (la/add
@@ -237,22 +235,22 @@
    (la/scale H damping))))
 
 
-(def v43_l285 (la/mmul google-matrix (la/column (repeat n-pages 1.0))))
+(def v43_l284 (la/mmul google-matrix (la/column (repeat n-pages 1.0))))
 
 
 (deftest
- t44_l287
+ t44_l286
  (is
   ((fn
     [sums]
     (<
      (la/norm (la/sub sums (la/column (repeat n-pages 1.0))))
      1.0E-10))
-   v43_l285)))
+   v43_l284)))
 
 
 (def
- v46_l292
+ v46_l291
  (def
   pagerank
   (let
@@ -271,7 +269,7 @@
 
 
 (def
- v48_l305
+ v48_l304
  (->
   (tc/dataset {:course course-names, :rank (dtype/->reader pagerank)})
   (plotly/base {:=x :course, :=y :rank})
@@ -279,13 +277,13 @@
   plotly/plot))
 
 
-(def v50_l313 (dfn/sum pagerank))
+(def v50_l312 (dfn/sum pagerank))
 
 
-(deftest t51_l315 (is ((fn [s] (< (abs (- s 1.0)) 1.0E-10)) v50_l313)))
+(deftest t51_l314 (is ((fn [s] (< (abs (- s 1.0)) 1.0E-10)) v50_l312)))
 
 
-(def v53_l320 (nth course-names (argops/argmax pagerank)))
+(def v53_l319 (nth course-names (argops/argmax pagerank)))
 
 
-(deftest t54_l322 (is ((fn [name] (= "Linear Algebra" name)) v53_l320)))
+(deftest t54_l321 (is ((fn [name] (= "Linear Algebra" name)) v53_l319)))

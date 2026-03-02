@@ -142,7 +142,7 @@
 ;; Round-trip:
 
 (let [signal [1.0 2.0 3.0 4.0]
-      recovered (vec (ft/inverse-real (ft/forward signal)))]
+      recovered (ft/inverse-real (ft/forward signal))]
   recovered)
 
 (kind/test-last [(fn [v] (every? #(< (abs %) 1e-10)

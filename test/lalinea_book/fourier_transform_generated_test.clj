@@ -140,7 +140,7 @@
   (let
    [t
     (mapv
-     (fn* [p1__72431#] (/ (double p1__72431#) N-vis))
+     (fn* [p1__63958#] (/ (double p1__63958#) N-vis))
      (range N-vis))]
    (mapv
     (fn
@@ -157,9 +157,9 @@
   (tc/dataset
    {:t
     (mapv
-     (fn* [p1__72432#] (/ (double p1__72432#) N-vis))
+     (fn* [p1__63959#] (/ (double p1__63959#) N-vis))
      (range N-vis)),
-    :amplitude (vec signal-composed)})
+    :amplitude signal-composed})
   (plotly/base {:=x :t, :=y :amplitude})
   (plotly/layer-line)
   plotly/plot))
@@ -172,7 +172,7 @@
   (->
    (tc/dataset
     {:frequency (range (/ N-vis 2)),
-     :magnitude (vec (take (/ N-vis 2) mags))})
+     :magnitude (take (/ N-vis 2) mags)})
    (plotly/base {:=x :frequency, :=y :magnitude})
    (plotly/layer-bar)
    plotly/plot)))
@@ -185,13 +185,11 @@
    (ft/forward signal-composed)
    mags
    (la/abs spectrum)
-   half-mags
-   (vec (take (/ N-vis 2) mags))
+   half-n
+   (/ N-vis 2)
    peak-idx
-   (sort-by
-    (fn [i] (- (double (nth half-mags i))))
-    (range (count half-mags)))]
-  (= [3 7] (vec (sort (take 2 peak-idx))))))
+   (sort-by (fn [i] (- (double (mags i)))) (range half-n))]
+  (= [3 7] (sort (take 2 peak-idx)))))
 
 
 (deftest t27_l151 (is (true? v26_l144)))
@@ -215,7 +213,7 @@
     [v]
     (and
      (< (abs (- (double (:dc v)) 12.0)) 1.0E-10)
-     (every? (fn* [p1__72433#] (< p1__72433# 1.0E-10)) (:others v))))
+     (every? (fn* [p1__63960#] (< p1__63960# 1.0E-10)) (:others v))))
    v29_l158)))
 
 

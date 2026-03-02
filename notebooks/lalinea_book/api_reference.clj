@@ -125,6 +125,18 @@
                               (la/close-scalar? (v 0) 6.0)
                               (la/close-scalar? (v 1) 15.0)))])
 
+(kind/doc #'la/flatten)
+
+(la/flatten (la/column [1 2 3]))
+
+(kind/test-last [(fn [v] (= [1.0 2.0 3.0] v))])
+
+(kind/doc #'la/hstack)
+
+(la/hstack [(la/column [1 2]) (la/column [3 4])])
+
+(kind/test-last [(fn [m] (= [[1.0 3.0] [2.0 4.0]] m))])
+
 (kind/doc #'la/mmul)
 
 (la/mmul (la/matrix [[1 2] [3 4]])
@@ -450,7 +462,7 @@
 (kind/doc #'cx/->double-array)
 
 (let [ct (cx/complex-tensor [1.0 2.0] [3.0 4.0])]
-  (vec (cx/->double-array ct)))
+  (seq (cx/->double-array ct)))
 
 (kind/test-last [= [1.0 3.0 2.0 4.0]])
 
@@ -852,7 +864,7 @@
 
 (kind/doc #'elem/clip)
 
-(vec (dtype/->reader (elem/clip (la/column [-2 0.5 3]) -1 1)))
+(la/flatten (elem/clip (la/column [-2 0.5 3]) -1 1))
 
 (kind/test-last [(fn [v] (= [-1.0 0.5 1.0] v))])
 

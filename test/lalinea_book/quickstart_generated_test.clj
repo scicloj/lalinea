@@ -152,7 +152,7 @@
   [signal
    [1.0 2.0 3.0 4.0]
    recovered
-   (vec (ft/inverse-real (ft/forward signal)))]
+   (ft/inverse-real (ft/forward signal))]
   recovered))
 
 
@@ -162,7 +162,7 @@
   ((fn
     [v]
     (every?
-     (fn* [p1__22062#] (< (abs p1__22062#) 1.0E-10))
+     (fn* [p1__25027#] (< (abs p1__25027#) 1.0E-10))
      (map - v [1.0 2.0 3.0 4.0])))
    v48_l144)))
 

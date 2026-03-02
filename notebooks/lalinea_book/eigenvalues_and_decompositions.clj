@@ -159,18 +159,11 @@
 
 (def eig-diag (la/eigen A-diag))
 
-(def P-diag
+(def P-cols
   (let [evecs (:eigenvectors eig-diag)
         sorted-idx (sort-by (fn [i] (cx/re ((:eigenvalues eig-diag) i)))
                             (range 2))]
-    (la/matrix (mapv (fn [j]
-                       (vec (dtype/->reader (nth evecs (nth sorted-idx j)))))
-                     (range 2)))))
-
-;; The columns of $P$ are the eigenvectors. Transpose to get
-;; them as columns:
-
-(def P-cols (la/transpose P-diag))
+    (la/hstack (mapv #(nth evecs %) sorted-idx))))
 
 ;; The similarity transform yields a diagonal matrix:
 
@@ -251,11 +244,9 @@ D-result
 ;; and check $Q^T Q = I$:
 
 (def Q-eig
-  (let [evecs (:eigenvectors eig-S)]
-    (la/matrix (mapv (fn [i] (vec (dtype/->reader (nth evecs i))))
-                     (range 3)))))
+  (la/hstack (:eigenvectors eig-S)))
 
-(def QtQ (la/mmul Q-eig (la/transpose Q-eig)))
+(def QtQ (la/mmul (la/transpose Q-eig) Q-eig))
 
 (la/norm (la/sub QtQ (la/eye 3)))
 

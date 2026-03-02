@@ -71,7 +71,7 @@
 
 ;; The **degree** of each vertex — how many neighbours it has:
 
-(vec (la/reduce-axis adj dfn/sum 1))
+(la/reduce-axis adj dfn/sum 1)
 
 (kind/test-last
  [(fn [v] (= v [2.0 2.0 3.0 3.0 2.0 2.0]))])
@@ -170,7 +170,7 @@ fiedler-value
 ;; The Fiedler vector entries:
 
 (def fiedler-entries
-  (vec (dtype/->reader fiedler-eigvec)))
+  (la/flatten fiedler-eigvec))
 
 fiedler-entries
 
@@ -451,8 +451,8 @@ comm-eigenvalues
 ;; Vertices within the same community are closer to each other
 ;; than to vertices in other communities:
 
-(let [xs (vec (:x embed-data))
-      ys (vec (:y embed-data))
+(let [xs (:x embed-data)
+      ys (:y embed-data)
       dist (fn [i j] (math/sqrt (+ (let [d (- (xs i) (xs j))] (* d d))
                                    (let [d (- (ys i) (ys j))] (* d d)))))
       within-A (dist 0 1)

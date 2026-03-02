@@ -165,7 +165,7 @@
       row0 (tensor/select M 0 :all)
       arr (dtype/->double-array row0)]
   {:length (alength arr)
-   :values (vec arr)
+   :values (seq arr)
    :shares-memory? (identical? arr (dtype/->double-array M))})
 
 (kind/test-last
@@ -181,7 +181,7 @@
       b (la/matrix [[10 20] [30 40]])
       lazy-sum (dfn/+ a b)
       arr (dtype/->double-array lazy-sum)]
-  {:values (vec arr)
+  {:values (seq arr)
    :has-array-buffer? (some? (dtype/as-array-buffer lazy-sum))})
 
 (kind/test-last
@@ -268,7 +268,7 @@
 (let [x (tensor/->tensor [1 2 3] {:datatype :float64})
       y (tensor/->tensor [10 20 30] {:datatype :float64})
       lazy-sum (dfn/+ x y)]
-  (vec lazy-sum))
+  (seq lazy-sum))
 
 (kind/test-last [(fn [v] (= [11.0 22.0 33.0] v))])
 
@@ -280,7 +280,7 @@
       lazy-sum (dfn/+ x y)
       arr (dtype/->double-array x)
       _ (aset arr 0 100.0)]
-  (vec lazy-sum))
+  (seq lazy-sum))
 
 (kind/test-last [(fn [v] (= [110.0 22.0 33.0] v))])
 
@@ -291,7 +291,7 @@
       y (tensor/->tensor [10 20 30] {:datatype :float64})
       lazy-sum (dfn/+ x y)]
   (tensor/mset! x 0 100.0)
-  (vec lazy-sum))
+  (seq lazy-sum))
 
 (kind/test-last [(fn [v] (= [110.0 22.0 33.0] v))])
 
@@ -305,8 +305,8 @@
       cb (cx/complex-tensor
           (tensor/->tensor [[10 30] [20 40]] {:datatype :float64}))
       lazy-sum (cx/add ca cb)]
-  {:re (vec (dtype/->reader (cx/re lazy-sum)))
-   :im (vec (dtype/->reader (cx/im lazy-sum)))})
+  {:re (seq (cx/re lazy-sum))
+   :im (seq (cx/im lazy-sum))})
 
 (kind/test-last
  [(fn [{:keys [re im]}]
@@ -322,7 +322,7 @@
       lazy-sum (cx/add ca cb)
       arr (dtype/->double-array (cx/->tensor ca))
       _ (aset arr 0 100.0)]
-  (vec (dtype/->reader (cx/re lazy-sum))))
+  (seq (cx/re lazy-sum)))
 
 (kind/test-last [(fn [v] (= [110.0 22.0] v))])
 
@@ -334,7 +334,7 @@
           (tensor/->tensor [[10 30] [20 40]] {:datatype :float64}))
       lazy-sum (cx/add ca cb)]
   (tensor/mset! (cx/->tensor ca) 0 0 100.0)
-  (vec (dtype/->reader (cx/re lazy-sum))))
+  (seq (cx/re lazy-sum)))
 
 (kind/test-last [(fn [v] (= [110.0 22.0] v))])
 
@@ -435,8 +435,8 @@
       materialized-pq (dtype/clone lazy-pq)
       arr (dtype/->double-array (cx/->tensor p))
       _ (aset arr 0 999.0)]
-  {:lazy-re (vec (dtype/->reader (cx/re lazy-pq)))
-   :materialized-re (vec (dtype/->reader (cx/re materialized-pq)))})
+  {:lazy-re (seq (cx/re lazy-pq))
+   :materialized-re (seq (cx/re materialized-pq))})
 
 (kind/test-last
  [(fn [{:keys [lazy-re materialized-re]}]
@@ -452,8 +452,8 @@
       lazy-pq (cx/add p q)
       materialized-pq (dtype/clone lazy-pq)]
   (tensor/mset! (cx/->tensor p) 0 0 999.0)
-  {:lazy-re (vec (dtype/->reader (cx/re lazy-pq)))
-   :materialized-re (vec (dtype/->reader (cx/re materialized-pq)))})
+  {:lazy-re (seq (cx/re lazy-pq))
+   :materialized-re (seq (cx/re materialized-pq))})
 
 (kind/test-last
  [(fn [{:keys [lazy-re materialized-re]}]
@@ -512,7 +512,7 @@
       col (la/column (dfn/+ a b))]
   {:shape (dtype/shape col)
    :contiguous? (some? (dtype/as-array-buffer col))
-   :values (vec (dtype/->reader col))})
+   :values (seq (la/flatten col))})
 
 (kind/test-last
  [(fn [{:keys [shape contiguous? values]}]

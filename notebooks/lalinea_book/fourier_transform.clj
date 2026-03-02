@@ -123,7 +123,7 @@
 ;; The time-domain waveform:
 
 (-> (tc/dataset {:t (mapv #(/ (double %) N-vis) (range N-vis))
-                 :amplitude (vec signal-composed)})
+                 :amplitude signal-composed})
     (plotly/base {:=x :t :=y :amplitude})
     (plotly/layer-line)
     plotly/plot)
@@ -134,7 +134,7 @@
 (let [spectrum (ft/forward signal-composed)
       mags (la/abs spectrum)]
   (-> (tc/dataset {:frequency (range (/ N-vis 2))
-                   :magnitude (vec (take (/ N-vis 2) mags))})
+                   :magnitude (take (/ N-vis 2) mags)})
       (plotly/base {:=x :frequency :=y :magnitude})
       (plotly/layer-bar)
       plotly/plot))
@@ -143,10 +143,10 @@
 
 (let [spectrum (ft/forward signal-composed)
       mags (la/abs spectrum)
-      half-mags (vec (take (/ N-vis 2) mags))
-      peak-idx (sort-by (fn [i] (- (double (nth half-mags i))))
-                        (range (count half-mags)))]
-  (= [3 7] (vec (sort (take 2 peak-idx)))))
+      half-n (/ N-vis 2)
+      peak-idx (sort-by (fn [i] (- (double (mags i))))
+                        (range half-n))]
+  (= [3 7] (sort (take 2 peak-idx))))
 
 (kind/test-last [true?])
 

@@ -7,7 +7,7 @@
             [tech.v3.datatype.protocols :as dtype-proto]
             [tech.v3.tensor :as tensor]
             [ham-fisted.defprotocol :as hamf])
-  (:import [clojure.lang IHashEq RT ArityException]
+  (:import [clojure.lang IHashEq IPersistentCollection Sequential RT ArityException]
            [tech.v3.datatype.protocols
             PElemwiseDatatype PECount PShape PClone PToReader]))
 
@@ -33,9 +33,6 @@
   IHashEq
   (hasheq [_] (.hasheq ^IHashEq tensor))
 
-  clojure.lang.Counted
-  (count [_] (long (first (dtype/shape tensor))))
-
   clojure.lang.Indexed
   (nth [_ i] (tensor i))
   (nth [_ i not-found]
@@ -59,10 +56,19 @@
   (iterator [this]
     (.iterator ^Iterable (or (.seq this) ())))
 
+  IPersistentCollection
+  (count [_] (long (first (dtype/shape tensor))))
+  (cons [_ o] (.cons ^IPersistentCollection tensor o))
+  (empty [_] (.empty ^IPersistentCollection tensor))
+  (equiv [_ other]
+    (if (instance? RealTensor other)
+      (.equiv ^IHashEq tensor (.-tensor ^RealTensor other))
+      (.equiv ^IPersistentCollection tensor other)))
+
+  Sequential
+
   Object
-  (equals [_ other]
-    (and (instance? RealTensor other)
-         (.equiv ^IHashEq tensor (.-tensor ^RealTensor other))))
+  (equals [this other] (.equiv ^IPersistentCollection this other))
   (hashCode [_] (.hashCode tensor))
   (toString [_] (str tensor)))
 
@@ -77,9 +83,10 @@
   (.-tensor rt))
 
 (defn ->real-tensor
-  "Wrap a dtype-next tensor in a RealTensor."
+  "Wrap a dtype-next tensor in a RealTensor.
+   Returns t unchanged if already a RealTensor."
   [t]
-  (->RealTensor t))
+  (if (instance? RealTensor t) t (->RealTensor t)))
 
 ;; hamf protocol extensions — deftype body implements the Java interfaces,
 ;; but ham-fisted dispatch also needs explicit extension for these protocols.

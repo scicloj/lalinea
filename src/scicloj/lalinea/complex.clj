@@ -41,6 +41,8 @@
 ;; ComplexTensor deftype
 ;; ---------------------------------------------------------------------------
 
+(def ^:private ->rt-fn (delay (requiring-resolve 'scicloj.lalinea.impl.real-tensor/->real-tensor)))
+
 (declare ->ComplexTensor)
 
 (deftype ComplexTensor [tensor]
@@ -64,11 +66,11 @@
   (re [_]
     (if (= 1 (count (dtype/shape tensor)))
       (double (tensor 0))
-      (select-part tensor 0)))
+      (@@->rt-fn (select-part tensor 0))))
   (im [_]
     (if (= 1 (count (dtype/shape tensor)))
       (double (tensor 1))
-      (select-part tensor 1)))
+      (@@->rt-fn (select-part tensor 1))))
 
   clojure.lang.Counted
   (count [_]

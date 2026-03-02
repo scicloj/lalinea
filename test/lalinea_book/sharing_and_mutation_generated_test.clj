@@ -162,7 +162,7 @@
    arr
    (dtype/->double-array row0)]
   {:length (alength arr),
-   :values (vec arr),
+   :values (seq arr),
    :shares-memory? (identical? arr (dtype/->double-array M))}))
 
 
@@ -186,7 +186,7 @@
    (dfn/+ a b)
    arr
    (dtype/->double-array lazy-sum)]
-  {:values (vec arr),
+  {:values (seq arr),
    :has-array-buffer? (some? (dtype/as-array-buffer lazy-sum))}))
 
 
@@ -300,7 +300,7 @@
    (tensor/->tensor [10 20 30] {:datatype :float64})
    lazy-sum
    (dfn/+ x y)]
-  (vec lazy-sum)))
+  (seq lazy-sum)))
 
 
 (deftest t54_l273 (is ((fn [v] (= [11.0 22.0 33.0] v)) v53_l268)))
@@ -319,7 +319,7 @@
    (dtype/->double-array x)
    _
    (aset arr 0 100.0)]
-  (vec lazy-sum)))
+  (seq lazy-sum)))
 
 
 (deftest t57_l285 (is ((fn [v] (= [110.0 22.0 33.0] v)) v56_l278)))
@@ -335,7 +335,7 @@
    lazy-sum
    (dfn/+ x y)]
   (tensor/mset! x 0 100.0)
-  (vec lazy-sum)))
+  (seq lazy-sum)))
 
 
 (deftest t60_l296 (is ((fn [v] (= [110.0 22.0 33.0] v)) v59_l290)))
@@ -352,8 +352,7 @@
     (tensor/->tensor [[10 30] [20 40]] {:datatype :float64}))
    lazy-sum
    (cx/add ca cb)]
-  {:re (vec (dtype/->reader (cx/re lazy-sum))),
-   :im (vec (dtype/->reader (cx/im lazy-sum)))}))
+  {:re (seq (cx/re lazy-sum)), :im (seq (cx/im lazy-sum))}))
 
 
 (deftest
@@ -378,7 +377,7 @@
    (dtype/->double-array (cx/->tensor ca))
    _
    (aset arr 0 100.0)]
-  (vec (dtype/->reader (cx/re lazy-sum)))))
+  (seq (cx/re lazy-sum))))
 
 
 (deftest t66_l327 (is ((fn [v] (= [110.0 22.0] v)) v65_l318)))
@@ -396,7 +395,7 @@
    lazy-sum
    (cx/add ca cb)]
   (tensor/mset! (cx/->tensor ca) 0 0 100.0)
-  (vec (dtype/->reader (cx/re lazy-sum)))))
+  (seq (cx/re lazy-sum))))
 
 
 (deftest t69_l339 (is ((fn [v] (= [110.0 22.0] v)) v68_l331)))
@@ -537,8 +536,8 @@
    (dtype/->double-array (cx/->tensor p))
    _
    (aset arr 0 999.0)]
-  {:lazy-re (vec (dtype/->reader (cx/re lazy-pq))),
-   :materialized-re (vec (dtype/->reader (cx/re materialized-pq)))}))
+  {:lazy-re (seq (cx/re lazy-pq)),
+   :materialized-re (seq (cx/re materialized-pq))}))
 
 
 (deftest
@@ -564,8 +563,8 @@
    materialized-pq
    (dtype/clone lazy-pq)]
   (tensor/mset! (cx/->tensor p) 0 0 999.0)
-  {:lazy-re (vec (dtype/->reader (cx/re lazy-pq))),
-   :materialized-re (vec (dtype/->reader (cx/re materialized-pq)))}))
+  {:lazy-re (seq (cx/re lazy-pq)),
+   :materialized-re (seq (cx/re materialized-pq))}))
 
 
 (deftest
@@ -642,7 +641,7 @@
    (la/column (dfn/+ a b))]
   {:shape (dtype/shape col),
    :contiguous? (some? (dtype/as-array-buffer col)),
-   :values (vec (dtype/->reader col))}))
+   :values (seq (la/flatten col))}))
 
 
 (deftest

@@ -213,11 +213,7 @@ cov-matrix
 
 ;; Eigenvalues = variances along each principal axis:
 
-(let [eigenvalues (:eigenvalues pca-eigen)
-      reals (cx/re eigenvalues)
-      arr (dtype/->double-array reals)]
-  (java.util.Arrays/sort arr)
-  (vec (reverse (vec arr))))
+(reverse (la/real-eigenvalues cov-matrix))
 
 (kind/test-last
  [(fn [evs] (and (every? pos? evs)

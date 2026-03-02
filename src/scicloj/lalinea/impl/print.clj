@@ -4,7 +4,8 @@
    Requiring this namespace installs print-method implementations
    that produce `#la/R` and `#la/C` tagged literals, enabling
    round-trip through `pr-str` / `read-string` for small tensors."
-  (:require [tech.v3.datatype :as dtype]
+  (:require [scicloj.kindly-advice.v1.api :as kindly-advice]
+            [tech.v3.datatype :as dtype]
             [tech.v3.tensor :as tensor]
             [scicloj.lalinea.impl.real-tensor :as rt]
             [scicloj.lalinea.complex :as cx])
@@ -179,3 +180,13 @@
 (defmethod print-method ComplexTensor
   [^ComplexTensor ct ^java.io.Writer w]
   (print-complex-tensor ct w))
+
+;; ---------------------------------------------------------------------------
+;; Kindly advisor — tell Clay to use pprint (print-method) for La Linea types
+;; ---------------------------------------------------------------------------
+
+(kindly-advice/add-advisor!
+ (fn [{:keys [value]}]
+   (when (or (instance? RealTensor value)
+             (instance? ComplexTensor value))
+     {:kind :kind/pprint})))

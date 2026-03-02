@@ -181,7 +181,7 @@
  v52_l234
  (let
   [coeffs
-   (vec (for [a (range -2.0 2.1 0.5) b (range -2.0 2.1 0.5)] [a b]))
+   (for [a (range -2.0 2.1 0.5) b (range -2.0 2.1 0.5)] [a b])
    n
    (count coeffs)
    points
@@ -213,7 +213,7 @@
    s2
    (la/column [2 4])
    coeffs
-   (vec (for [a (range -2.0 2.1 0.5) b (range -2.0 2.1 0.5)] [a b]))
+   (for [a (range -2.0 2.1 0.5) b (range -2.0 2.1 0.5)] [a b])
    n
    (count coeffs)
    points
