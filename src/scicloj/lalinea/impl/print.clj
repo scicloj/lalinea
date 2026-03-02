@@ -34,17 +34,41 @@
   "Print a RealTensor in #la/R [:float64 [shape] data] format."
   [^RealTensor rt ^java.io.Writer w]
   (let [t (rt/->tensor rt)
-        shape (vec (dtype/shape t))]
-    (if (not= 2 (count shape))
-      ;; Non-2D: fall back to basic str
-      (.write w (str "#la/R [:float64 " (pr-str shape) " " (pr-str (str t)) "]"))
+        shape (vec (dtype/shape t))
+        ndims (count shape)]
+    (.write w "#la/R [:float64 ")
+    (.write w (pr-str shape))
+    (cond
+      ;; Scalar []: single value
+      (zero? ndims)
+      (do
+        (.write w " ")
+        (.write w (str (double (tensor/mget t))))
+        (.write w "]"))
+
+      ;; Vector [n]
+      (= 1 ndims)
+      (let [n (long (first shape))]
+        (if (truncated? shape)
+          (let [max-n (min n (long *print-threshold*))]
+            (.write w "\n       [")
+            (dotimes [k max-n]
+              (when (pos? k) (.write w " "))
+              (.write w (str (double (tensor/mget t k)))))
+            (when (< max-n n)
+              (.write w " ..."))
+            (.write w "]]"))
+          (do
+            (.write w "\n       ")
+            (.write w (pr-str (vec (dtype/->reader t :float64))))
+            (.write w "]"))))
+
+      ;; Matrix [r c]
+      :else
       (let [[r c] shape]
         (if (truncated? shape)
-          ;; Truncated: include ... marker
           (let [max-r (min (long r) *print-threshold*)
                 max-c (min (long c) *print-threshold*)]
-            (.write w "#la/R [:float64 ")
-            (.write w (pr-str shape))
             (.write w "\n       [")
             (dotimes [i max-r]
               (when (pos? i) (.write w "\n        "))
@@ -58,10 +82,7 @@
             (when (< max-r (long r))
               (.write w "\n        ..."))
             (.write w "]]"))
-          ;; Full: readable format
           (do
-            (.write w "#la/R [:float64 ")
-            (.write w (pr-str shape))
             (.write w "\n       ")
             (.write w (pr-str (mapv #(tensor-row-vec t %) (range r))))
             (.write w "]")))))))
