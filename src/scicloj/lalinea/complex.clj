@@ -252,7 +252,14 @@
     (when (pos? (.count this))
       (map #(.nth this %) (range (.count this)))))
 
+  clojure.lang.IHashEq
+  (hasheq [_] (.hasheq ^clojure.lang.IHashEq tensor))
+
   Object
+  (equals [_ other]
+    (and (instance? ComplexTensor other)
+         (.equiv ^clojure.lang.IHashEq tensor (.-tensor ^ComplexTensor other))))
+  (hashCode [_] (.hashCode tensor))
   (toString [_]
     (let [complex-shape (vec (butlast (dtype/shape tensor)))]
       (format "#ComplexTensor<float64>%s%s%s"

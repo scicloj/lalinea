@@ -10,6 +10,7 @@
    and linalg."
   (:require [scicloj.lalinea.linalg :as la]
             [scicloj.lalinea.tape :as tape]
+            [scicloj.lalinea.impl.real-tensor :as rt]
             [tech.v3.datatype :as dtype]
             [tech.v3.datatype.functional :as dfn]
             [tech.v3.tensor :as tensor])
@@ -18,6 +19,11 @@
 ;; ---------------------------------------------------------------------------
 ;; VJP rules
 ;; ---------------------------------------------------------------------------
+
+(defn- ensure-bare
+  "Unwrap RealTensor to bare tensor; pass through everything else."
+  [x]
+  (if (rt/real-tensor? x) (rt/->tensor x) x))
 
 (def ^:private vjp-rules
   "VJP rules: op keyword -> fn of [adjoint, inputs, output] -> vector of
@@ -67,11 +73,12 @@
   "Accumulate gradient: existing + new. If existing is nil, returns new.
    Materializes lazy tensors to avoid deep nesting."
   [existing new-grad]
-  (if (nil? existing)
-    (if (tensor/tensor? new-grad)
-      (dtype/clone new-grad)
-      new-grad)
-    (dtype/clone (tensor/reshape (dfn/+ existing new-grad) (dtype/shape existing)))))
+  (let [new-grad (ensure-bare new-grad)]
+    (if (nil? existing)
+      (if (tensor/tensor? new-grad)
+        (dtype/clone new-grad)
+        new-grad)
+      (dtype/clone (tensor/reshape (dfn/+ existing new-grad) (dtype/shape existing))))))
 
 ;; ---------------------------------------------------------------------------
 ;; grad
@@ -115,9 +122,9 @@
               g (.get adjoints entry-id)]
           (when (some? g)
             (when-let [rule (get vjp-rules (:op entry))]
-              (let [input-tensors (:input-tensors entry)
+              (let [input-tensors (mapv ensure-bare (:input-tensors entry))
                     input-refs (:inputs entry)
-                    input-grads (rule g input-tensors (:output entry))]
+                    input-grads (rule (ensure-bare g) input-tensors (ensure-bare (:output entry)))]
                 (dotimes [i (count input-refs)]
                   (when-let [ig (nth input-grads i nil)]
                     (when-let [ref-id (:id (nth input-refs i))]

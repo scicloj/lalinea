@@ -129,7 +129,7 @@
 (dissoc tape-result :registry)
 
 (kind/test-last
- [(fn [tr] (and (tensor/tensor? (:result tr))
+ [(fn [tr] (and (la/real-tensor? (:result tr))
                 (= 6 (count (:entries tr)))))])
 
 ;; The result is a map with `:result` (the computed value) and

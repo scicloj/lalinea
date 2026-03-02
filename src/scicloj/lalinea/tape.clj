@@ -12,6 +12,7 @@
   (:require [tech.v3.datatype :as dtype]
             [tech.v3.tensor :as tensor]
             [scicloj.lalinea.complex :as cx]
+            [scicloj.lalinea.impl.real-tensor :as rt]
             [scicloj.kindly.v4.kind :as kind])
   (:import [java.util IdentityHashMap]))
 
@@ -40,7 +41,9 @@
    strided views (via .buffer → as-array-buffer).
    Returns nil for lazy tensors."
   [t]
-  (let [t (if (cx/complex? t) (cx/->tensor t) t)]
+  (let [t (cond (cx/complex? t) (cx/->tensor t)
+                (rt/real-tensor? t) (rt/->tensor t)
+                :else t)]
     (if-let [ab (dtype/as-array-buffer t)]
       (.ary-data ab)
       (when (tensor/tensor? t)
@@ -58,7 +61,9 @@
 
    Works on both real tensors and ComplexTensors."
   [t]
-  (let [raw (if (cx/complex? t) (cx/->tensor t) t)]
+  (let [raw (cond (cx/complex? t) (cx/->tensor t)
+                  (rt/real-tensor? t) (rt/->tensor t)
+                  :else t)]
     (cond
       (dtype/as-array-buffer raw) :contiguous
       (backing-array raw)         :strided
@@ -91,6 +96,7 @@
 (defn- tensor-shape [x]
   (cond
     (cx/complex? x) (cx/complex-shape x)
+    (rt/real-tensor? x) (vec (dtype/shape x))
     (tensor/tensor? x) (vec (dtype/shape x))
     (map? x) :map
     :else nil))
@@ -102,7 +108,7 @@
   [^IdentityHashMap registry ^clojure.lang.Atom counter input]
   (if-let [id (.get registry input)]
     {:id id}
-    (if (or (tensor/tensor? input) (cx/complex? input))
+    (if (or (tensor/tensor? input) (cx/complex? input) (rt/real-tensor? input))
       (let [id (str "x" (swap! counter inc))]
         (.put registry input id)
         {:id id :external true})
