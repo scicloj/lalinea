@@ -160,3 +160,87 @@
 (tensor/mget (la/scale (la/matrix [[1 2] [3 4]]) 2.0) 1 1)
 
 (kind/test-last [= 8.0])
+
+;; ## Convenience wrappers
+
+;; Common SVD-based analyses are available as one-liners:
+
+(la/rank (la/matrix [[1 2] [2 4]]))
+
+(kind/test-last [= 1])
+
+(la/condition-number (la/matrix [[2 1] [1 3]]))
+
+(kind/test-last [(fn [v] (> v 1.0))])
+
+;; Pseudoinverse:
+
+(la/close? (la/mmul (la/matrix [[2 1] [1 3]])
+                    (la/pinv (la/matrix [[2 1] [1 3]])))
+           (la/eye 2))
+
+(kind/test-last [true?])
+
+;; Matrix power:
+
+(la/mpow (la/matrix [[1 1] [0 1]]) 5)
+
+(kind/test-last [(fn [m] (la/close? m (la/matrix [[1 5] [0 1]])))])
+
+;; ## Tagged literals
+;;
+;; Requiring `scicloj.la-linea.print` installs `#la/m` and `#la/v`
+;; tagged literals for round-trip printing:
+
+(require '[scicloj.la-linea.print])
+
+(pr-str (la/matrix [[1 2] [3 4]]))
+
+(kind/test-last [= "#la/m [[1.0 2.0] [3.0 4.0]]"])
+
+(pr-str (la/column [5 6 7]))
+
+(kind/test-last [= "#la/v [5.0 6.0 7.0]"])
+
+;; ## Element-wise functions
+;;
+;; `scicloj.la-linea.elementwise` provides tape-aware wrappers
+;; around `dfn/` with complex dispatch:
+
+(require '[scicloj.la-linea.elementwise :as elem])
+
+(elem/exp (la/column [0.0 1.0 2.0]))
+
+(kind/test-last [(fn [v] (la/close? v (la/column [1.0 (Math/exp 1.0) (Math/exp 2.0)])))])
+
+(elem/clip (la/column [-2 0.5 3]) -1 1)
+
+(kind/test-last [(fn [v] (la/close? v (la/column [-1 0.5 1])))])
+
+;; ## Computation tape
+;;
+;; Record operations as a DAG:
+
+(require '[scicloj.la-linea.tape :as tape])
+
+(let [{:keys [entries]} (tape/with-tape
+                          (la/mmul (la/matrix [[1 2] [3 4]])
+                                   (la/column [1 0])))]
+  (mapv :op entries))
+
+(kind/test-last [(fn [ops] (= [:la/matrix :la/column :la/mmul] ops))])
+
+;; ## Automatic differentiation
+;;
+;; Reverse-mode autodiff computes gradients via VJP rules:
+
+(require '[scicloj.la-linea.grad :as grad])
+
+(let [A (la/matrix [[1 2] [3 4]])
+      tape-result (tape/with-tape
+                    (la/sum (la/sq (la/sub (la/mmul A A)
+                                           (la/matrix [[1 0] [0 1]])))))
+      grads (grad/grad tape-result (:result tape-result))]
+  (tensor/mget (.get grads A) 0 0))
+
+(kind/test-last [(fn [v] (number? v))])

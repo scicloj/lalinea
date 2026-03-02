@@ -163,7 +163,7 @@
   ((fn
     [v]
     (every?
-     (fn* [p1__22806#] (< (Math/abs p1__22806#) 1.0E-10))
+     (fn* [p1__186193#] (< (Math/abs p1__186193#) 1.0E-10))
      (map - v [1.0 2.0 3.0 4.0])))
    v48_l143)))
 
@@ -180,3 +180,109 @@
 
 
 (deftest t55_l162 (is (= v54_l160 8.0)))
+
+
+(def v57_l168 (la/rank (la/matrix [[1 2] [2 4]])))
+
+
+(deftest t58_l170 (is (= v57_l168 1)))
+
+
+(def v59_l172 (la/condition-number (la/matrix [[2 1] [1 3]])))
+
+
+(deftest t60_l174 (is ((fn [v] (> v 1.0)) v59_l172)))
+
+
+(def
+ v62_l178
+ (la/close?
+  (la/mmul
+   (la/matrix [[2 1] [1 3]])
+   (la/pinv (la/matrix [[2 1] [1 3]])))
+  (la/eye 2)))
+
+
+(deftest t63_l182 (is (true? v62_l178)))
+
+
+(def v65_l186 (la/mpow (la/matrix [[1 1] [0 1]]) 5))
+
+
+(deftest
+ t66_l188
+ (is ((fn [m] (la/close? m (la/matrix [[1 5] [0 1]]))) v65_l186)))
+
+
+(def v68_l195 (require '[scicloj.la-linea.print]))
+
+
+(def v69_l197 (pr-str (la/matrix [[1 2] [3 4]])))
+
+
+(deftest t70_l199 (is (= v69_l197 "#la/m [[1.0 2.0] [3.0 4.0]]")))
+
+
+(def v71_l201 (pr-str (la/column [5 6 7])))
+
+
+(deftest t72_l203 (is (= v71_l201 "#la/v [5.0 6.0 7.0]")))
+
+
+(def v74_l210 (require '[scicloj.la-linea.elementwise :as elem]))
+
+
+(def v75_l212 (elem/exp (la/column [0.0 1.0 2.0])))
+
+
+(deftest
+ t76_l214
+ (is
+  ((fn
+    [v]
+    (la/close? v (la/column [1.0 (Math/exp 1.0) (Math/exp 2.0)])))
+   v75_l212)))
+
+
+(def v77_l216 (elem/clip (la/column [-2 0.5 3]) -1 1))
+
+
+(deftest
+ t78_l218
+ (is ((fn [v] (la/close? v (la/column [-1 0.5 1]))) v77_l216)))
+
+
+(def v80_l224 (require '[scicloj.la-linea.tape :as tape]))
+
+
+(def
+ v81_l226
+ (let
+  [{:keys [entries]}
+   (tape/with-tape
+    (la/mmul (la/matrix [[1 2] [3 4]]) (la/column [1 0])))]
+  (mapv :op entries)))
+
+
+(deftest
+ t82_l231
+ (is ((fn [ops] (= [:la/matrix :la/column :la/mmul] ops)) v81_l226)))
+
+
+(def v84_l237 (require '[scicloj.la-linea.grad :as grad]))
+
+
+(def
+ v85_l239
+ (let
+  [A
+   (la/matrix [[1 2] [3 4]])
+   tape-result
+   (tape/with-tape
+    (la/sum (la/sq (la/sub (la/mmul A A) (la/matrix [[1 0] [0 1]])))))
+   grads
+   (grad/grad tape-result (:result tape-result))]
+  (tensor/mget (.get grads A) 0 0)))
+
+
+(deftest t86_l246 (is ((fn [v] (number? v)) v85_l239)))
