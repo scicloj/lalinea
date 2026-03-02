@@ -208,6 +208,14 @@
   ^doubles [^ComplexTensor ct]
   (dtype/->double-array (.-tensor ct)))
 
+(defn wrap-tensor
+  "Wrap a raw interleaved [... 2] tensor as a ComplexTensor.
+   Inverse of `->tensor`."
+  [t]
+  (let [s (dtype/shape t)]
+    (assert (= 2 (last s)) "Last dimension must be 2 for complex interleaved layout")
+    (ComplexTensor. t)))
+
 (defn complex-shape
   "The complex shape (underlying shape without trailing 2)."
   [^ComplexTensor ct]

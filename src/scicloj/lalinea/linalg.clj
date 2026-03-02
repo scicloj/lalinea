@@ -568,8 +568,92 @@
   (rt/real-tensor? x))
 
 ;; ---------------------------------------------------------------------------
-;; Tagged literal readers
+;; Lifting external functions
 ;; ---------------------------------------------------------------------------
+
+(defn- var->op-key
+  "Extract a namespaced keyword from a Var's metadata."
+  [v]
+  (let [m (meta v)]
+    (keyword (str (:ns m)) (str (:name m)))))
+
+(defn- unwrap-arg
+  "Unwrap RealTensor or ComplexTensor to bare tensor."
+  [x]
+  (cond (rt/real-tensor? x) (rt/->tensor x)
+        (cx/complex? x)     (cx/->tensor x)
+        :else               x))
+
+(defn- rewrap-result
+  "Re-wrap a result based on the dominant input type."
+  [result orig-args ref-shape]
+  (if-not (or (tensor/tensor? result) (dtype/reader? result))
+    result
+    (let [had-real?    (some rt/real-tensor? orig-args)
+          had-complex? (and (some cx/complex? orig-args) (not had-real?))
+          rshape       (dtype/shape result)]
+      (cond
+        (and had-complex? (= 2 (last rshape)))
+        (cx/wrap-tensor result)
+
+        :else
+        (let [r (if (and ref-shape
+                         (not= (vec rshape) (vec ref-shape))
+                         (= (dtype/ecount result) (apply * ref-shape)))
+                  (tensor/reshape result ref-shape)
+                  result)]
+          (->rt r))))))
+
+(defn- ref-shape-from-args
+  "Find the shape of the first tensor-like argument."
+  [args]
+  (some (fn [a]
+          (cond (rt/real-tensor? a) (vec (dtype/shape (rt/->tensor a)))
+                (cx/complex? a)     (vec (dtype/shape (cx/->tensor a)))
+                :else               nil))
+        args))
+
+(defn- apply-lifted
+  "Core logic shared by lift and lifted."
+  [f op args]
+  (let [ref-sh (ref-shape-from-args args)]
+    (if (and op tape/*tape* (not tape/*inside-record*))
+      (let [raw (binding [tape/*inside-record* true]
+                  (apply f (mapv unwrap-arg args)))
+            result (rewrap-result raw args ref-sh)]
+        (tape/do-record! op (vec args) result))
+      (rewrap-result (apply f (mapv unwrap-arg args)) args ref-sh))))
+
+(defn lift
+  "Apply an external function to La Linea tensors (one-shot).
+
+   Unwraps RealTensor/ComplexTensor arguments, applies f, and re-wraps
+   the result. Preserves tensor shape.
+
+   Pass a Var for tape recording:
+     (la/lift #'dfn/sqrt A)   ;; tape-recorded
+     (la/lift dfn/sqrt A)     ;; not recorded"
+  [f-or-var & args]
+  (let [v?  (var? f-or-var)
+        f   (if v? @f-or-var f-or-var)
+        op  (when v? (var->op-key f-or-var))]
+    (apply-lifted f op args)))
+
+(defn lifted
+  "Return a lifted version of an external function (curried).
+
+   The returned function unwraps La Linea types, applies f, and
+   re-wraps the result.
+
+   Pass a Var for tape recording:
+     (def my-sqrt (la/lifted #'dfn/sqrt))   ;; tape-aware
+     (def my-sqrt (la/lifted dfn/sqrt))     ;; not recorded"
+  [f-or-var]
+  (let [v?  (var? f-or-var)
+        f   (if v? @f-or-var f-or-var)
+        op  (when v? (var->op-key f-or-var))]
+    (fn [& args]
+      (apply-lifted f op args))))
 
 ;; ---------------------------------------------------------------------------
 ;; Tagged literal readers
