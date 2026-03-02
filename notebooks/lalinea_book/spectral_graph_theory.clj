@@ -151,8 +151,9 @@ fiedler-value
 (kind/test-last
  [(fn [v] (and (pos? v) (< v 2.0)))])
 
-;; The Fiedler value is small (close to 0), reflecting the fact
-;; that our graph has a bottleneck: a single bridge edge at vertex 2–3.
+;; The Fiedler value is much closer to $0$ than to $n = 6$
+;; (the value for the [complete graph](https://en.wikipedia.org/wiki/Complete_graph) $K_n$),
+;; reflecting the bottleneck at the single bridge edge 2–3.
 
 ;; ## The [Fiedler vector](https://en.wikipedia.org/wiki/Algebraic_connectivity)
 ;;
