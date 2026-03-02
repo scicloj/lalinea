@@ -17,10 +17,28 @@
    Tensors larger than this print in truncated format (not readable)."
   20)
 
+(def ^:dynamic *number-format*
+  "Format string for printing numbers. Default: 4 significant digits.
+   Uses Java's String.format syntax — `G` chooses fixed or scientific
+   notation automatically."
+  "%.4G")
+
+(defn- format-num
+  "Format a number for display using `*number-format*`."
+  ^String [x]
+  (format *number-format* (double x)))
+
 (defn- truncated?
   "True if any dimension exceeds the print threshold."
   [shape]
   (some #(> (long %) *print-threshold*) shape))
+
+(defn- right-pad
+  "Write `s` right-aligned in a field of width `w`."
+  [^java.io.Writer writer ^String s ^long w]
+  (let [pad (- w (.length s))]
+    (dotimes [_ pad] (.write writer " "))
+    (.write writer s)))
 
 ;; ---------------------------------------------------------------------------
 ;; #la/R — RealTensor printing
@@ -40,7 +58,7 @@
       (zero? ndims)
       (do
         (.write w " ")
-        (.write w (str (double (rdr 0))))
+        (.write w (format-num (rdr 0)))
         (.write w "]"))
 
       ;; Vector [n]
@@ -50,7 +68,7 @@
         (.write w " [")
         (dotimes [k max-n]
           (when (pos? k) (.write w " "))
-          (.write w (str (double (rdr k)))))
+          (.write w (format-num (rdr k))))
         (when (< max-n n)
           (.write w " ..."))
         (.write w "]]"))
@@ -60,14 +78,31 @@
       (let [[r c] shape
             max-r (if (truncated? shape) (min (long r) (long *print-threshold*)) (long r))
             max-c (if (truncated? shape) (min (long c) (long *print-threshold*)) (long c))
-            c     (long c)]
+            c     (long c)
+            ;; Format all visible elements to strings
+            strs  (object-array (* max-r max-c))
+            _     (dotimes [i max-r]
+                    (dotimes [j max-c]
+                      (aset strs (+ (* i max-c) j)
+                            (format-num (rdr (+ (* i c) j))))))
+            ;; Compute max width per column
+            col-widths (int-array max-c)]
+        (dotimes [j max-c]
+          (let [mw (loop [i (int 0) mw (int 0)]
+                     (if (< i max-r)
+                       (let [s ^String (aget strs (+ (* i max-c) j))]
+                         (recur (unchecked-inc-int i)
+                                (Math/max (int mw) (int (.length s)))))
+                       mw))]
+            (aset col-widths j mw)))
         (.write w "\n       [")
         (dotimes [i max-r]
           (when (pos? i) (.write w "\n        "))
           (.write w "[")
           (dotimes [j max-c]
             (when (pos? j) (.write w " "))
-            (.write w (str (double (rdr (+ (* i c) j))))))
+            (right-pad w ^String (aget strs (+ (* i max-c) j))
+                       (aget col-widths j)))
           (when (< max-c c)
             (.write w " ..."))
           (.write w "]"))
@@ -84,13 +119,13 @@
 ;; ---------------------------------------------------------------------------
 
 (defn- format-complex-tokens
-  "Format a single complex number as '3.0 + 4.0 i' or '1.0 - 2.0 i'."
-  [re im]
+  "Format a single complex number as '3.000 + 4.000 i' or '1.000 - 2.000 i'."
+  ^String [re im]
   (let [re (double re)
         im (double im)]
     (if (neg? im)
-      (str re " - " (Math/abs im) " i")
-      (str re " + " im " i"))))
+      (str (format-num re) " - " (format-num (Math/abs im)) " i")
+      (str (format-num re) " + " (format-num im) " i"))))
 
 (defn- print-complex-tensor
   "Print a ComplexTensor in #la/C [:float64 [shape] data] format."
@@ -127,15 +162,32 @@
       (let [[r c] cshape
             max-r (if (truncated? cshape) (min (long r) (long *print-threshold*)) (long r))
             max-c (if (truncated? cshape) (min (long c) (long *print-threshold*)) (long c))
-            stride (* (long c) 2)]
+            stride (* (long c) 2)
+            ;; Format all visible elements to strings
+            strs  (object-array (* max-r max-c))
+            _     (dotimes [i max-r]
+                    (dotimes [j max-c]
+                      (let [base (+ (* i stride) (* j 2))]
+                        (aset strs (+ (* i max-c) j)
+                              (format-complex-tokens (rdr base) (rdr (inc base)))))))
+            ;; Compute max width per column
+            col-widths (int-array max-c)]
+        (dotimes [j max-c]
+          (let [mw (loop [i (int 0) mw (int 0)]
+                     (if (< i max-r)
+                       (let [s ^String (aget strs (+ (* i max-c) j))]
+                         (recur (unchecked-inc-int i)
+                                (Math/max (int mw) (int (.length s)))))
+                       mw))]
+            (aset col-widths j mw)))
         (.write w "\n       [")
         (dotimes [i max-r]
           (when (pos? i) (.write w "\n        "))
           (.write w "[")
           (dotimes [j max-c]
             (when (pos? j) (.write w "  "))
-            (let [base (+ (* i stride) (* j 2))]
-              (.write w (format-complex-tokens (rdr base) (rdr (inc base))))))
+            (right-pad w ^String (aget strs (+ (* i max-c) j))
+                       (aget col-widths j)))
           (when (< max-c (long c))
             (.write w "  ..."))
           (.write w "]"))
