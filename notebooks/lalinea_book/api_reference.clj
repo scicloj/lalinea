@@ -333,6 +333,28 @@
 
 (kind/test-last [(fn [v] (= [3 1] (dtype/shape v)))])
 
+(kind/doc #'la/real-tensor?)
+
+(la/real-tensor? (la/matrix [[1 2] [3 4]]))
+
+(kind/test-last [true?])
+
+(la/real-tensor? [1 2 3])
+
+(kind/test-last [false?])
+
+(kind/doc #'la/->real-tensor)
+
+(la/->real-tensor (tensor/->tensor [[1 2] [3 4]]))
+
+(kind/test-last [(fn [rt] (la/real-tensor? rt))])
+
+(kind/doc #'la/->tensor)
+
+(la/->tensor (la/matrix [[1 2] [3 4]]))
+
+(kind/test-last [(fn [t] (not (la/real-tensor? t)))])
+
 ;; ## `scicloj.lalinea.complex`
 ;;
 ;; A ComplexTensor wraps a dtype-next tensor whose last dimension
