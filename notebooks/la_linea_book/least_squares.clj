@@ -281,6 +281,13 @@ S-svd
 (kind/test-last
  [(fn [v] (< v 1e-8))])
 
+;; The `la/pinv` convenience wrapper computes the pseudoinverse
+;; in one call:
+
+(la/close? c-svd (la/mmul (la/pinv A-poly) (la/column y-poly)))
+
+(kind/test-last [true?])
+
 ;; All three methods — normal equations, QR, and SVD — agree.
 
 ;; ## Trigonometric fitting
@@ -366,11 +373,7 @@ c-trig
 
 ;; The Vandermonde matrix for our polynomial fit:
 
-(def poly-svd (la/svd A-poly))
-
-(def condition-number
-  (let [sv (:S poly-svd)]
-    (/  (dfn/reduce-max sv) (dfn/reduce-min sv))))
+(def condition-number (la/condition-number A-poly))
 
 condition-number
 
@@ -383,9 +386,7 @@ condition-number
 (def A-high
   (vandermonde (dtype/make-reader :float64 30 (* 1.0 idx)) 8))
 
-(def high-sv (:S (la/svd A-high)))
-
-(/  (dfn/reduce-max high-sv) (dfn/reduce-min high-sv))
+(la/condition-number A-high)
 
 (kind/test-last
  [(fn [v] (> v 1e6))])

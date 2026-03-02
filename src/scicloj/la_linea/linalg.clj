@@ -46,6 +46,11 @@
   (tape/record! :la/zeros [r c]
                 (bt/zeros r c)))
 
+(defn ones
+  "Matrix of ones, size r × c."
+  [r c]
+  (tensor/compute-tensor [r c] (fn [& _] 1.0) :float64))
+
 (defn diag
   "Create a diagonal matrix from a sequence of diagonal values."
   [values]
@@ -152,6 +157,20 @@
                         dc (ejml/dmul da db)]
                     (bt/dmat->tensor dc)))))
 
+(defn mpow
+  "Matrix power A^k for non-negative integer k.
+   Returns the identity for k=0."
+  [a k]
+  (let [k (long k)]
+    (cond
+      (neg? k) (throw (ex-info "mpow requires non-negative k" {:k k}))
+      (zero? k) (eye (first (dtype/shape a)))
+      (== k 1) a
+      :else (loop [result a i 1]
+              (if (>= i k)
+                result
+                (recur (mmul result a) (inc i)))))))
+
 ;; ---------------------------------------------------------------------------
 ;; Transpose
 ;; ---------------------------------------------------------------------------
@@ -250,17 +269,19 @@
   "Matrix determinant. Returns a double for real matrices, a scalar
    ComplexTensor for complex matrices."
   [a]
-  (if (cx/complex? a)
-    (let [[re im] (ejml/zdet (ejml/ct->zmat a))]
-      (cx/complex re im))
-    (ejml/ddet (bt/tensor->dmat a))))
+  (tape/record! :la/det [a]
+                (if (cx/complex? a)
+                  (let [[re im] (ejml/zdet (ejml/ct->zmat a))]
+                    (cx/complex re im))
+                  (ejml/ddet (bt/tensor->dmat a)))))
 
 (defn norm
   "Frobenius norm."
-  ^double [a]
-  (if (cx/complex? a)
-    (ejml/znorm-f (ejml/ct->zmat a))
-    (Math/sqrt (double (dfn/sum (dfn/* a a))))))
+  [a]
+  (tape/record! :la/norm [a]
+                (if (cx/complex? a)
+                  (ejml/znorm-f (ejml/ct->zmat a))
+                  (Math/sqrt (double (dfn/sum (dfn/* a a)))))))
 
 (defn dot
   "Inner product. For real vectors: Σ u_i v_i (returns double).
@@ -401,3 +422,98 @@
                     (ejml/zmat->ct L))
                   (when-let [L (ejml/dcholesky (bt/tensor->dmat a))]
                     (bt/dmat->tensor L)))))
+
+;; ---------------------------------------------------------------------------
+;; SVD-based convenience wrappers (real-only)
+;; ---------------------------------------------------------------------------
+
+(defn- sorted-svd
+  "SVD with singular values sorted in descending order.
+   EJML does not guarantee sort order, so we sort and
+   permute U/Vt columns/rows accordingly."
+  [a]
+  (when-let [{:keys [U S Vt]} (svd a)]
+    (let [n (count S)
+          order (vec (sort-by (fn [i] (- (double (S i)))) (range n)))]
+      (if (= order (vec (range n)))
+        {:U U :S S :Vt Vt}
+        {:U  (submatrix U :all order)
+         :S  (tensor/ensure-tensor (dtype/make-container :float64 (mapv #(S %) order)))
+         :Vt (submatrix Vt order :all)}))))
+
+(defn rank
+  "Matrix rank: number of singular values above `tol` (default 1e-10)."
+  ([a] (rank a 1e-10))
+  ([a tol]
+   (let [sv (:S (sorted-svd a))]
+     (long (dfn/sum (dfn/> sv (double tol)))))))
+
+(defn condition-number
+  "Condition number κ(A) = σ_max / σ_min from the SVD."
+  [a]
+  (let [sv (:S (sorted-svd a))]
+    (/ (double (first sv))
+       (double (sv (dec (count sv)))))))
+
+(defn pinv
+  "Moore-Penrose pseudoinverse via SVD: V Σ⁻¹ Uᵀ.
+   Singular values below `tol` (default 1e-10) are treated as zero."
+  ([a] (pinv a 1e-10))
+  ([a tol]
+   (let [{:keys [U S Vt]} (sorted-svd a)
+         r (long (dfn/sum (dfn/> S (double tol))))
+         U-thin (submatrix U :all (range r))
+         Vt-thin (submatrix Vt (range r) :all)
+         S-inv (diag (mapv #(/ 1.0 (double %)) (take r S)))]
+     (mmul (transpose Vt-thin) (mmul S-inv (transpose U-thin))))))
+
+(defn lstsq
+  "Least-squares solve: minimise ‖Ax − b‖₂.
+   Returns a map with :x (solution), :residuals (‖Ax−b‖²),
+   and :rank (effective rank of A).
+   Uses the pseudoinverse via SVD."
+  ([a b] (lstsq a b 1e-10))
+  ([a b tol]
+   (let [x (mmul (pinv a tol) b)
+         residual (sub (mmul a x) b)
+         r (rank a tol)]
+     {:x x
+      :residuals (double (dfn/sum (dfn/* residual residual)))
+      :rank r})))
+
+(defn null-space
+  "Null space basis: columns of V corresponding to singular values ≈ 0.
+   Returns a matrix whose columns span Null(A), or nil if the null
+   space is trivial (full column rank).
+   Singular values below `tol` (default 1e-10) are treated as zero."
+  ([a] (null-space a 1e-10))
+  ([a tol]
+   (let [{:keys [S Vt]} (sorted-svd a)
+         n (second (dtype/shape a))
+         r (long (dfn/sum (dfn/> S (double tol))))]
+     (when (< r (long n))
+       (transpose (submatrix Vt (range r n) :all))))))
+
+(defn col-space
+  "Column space basis: first r columns of U from the SVD,
+   where r is the number of singular values above `tol` (default 1e-10).
+   Returns a matrix whose columns span Col(A)."
+  ([a] (col-space a 1e-10))
+  ([a tol]
+   (let [{:keys [U S]} (sorted-svd a)
+         r (long (dfn/sum (dfn/> S (double tol))))]
+     (submatrix U :all (range r)))))
+
+;; ---------------------------------------------------------------------------
+;; Tagged literal readers
+;; ---------------------------------------------------------------------------
+
+(defn read-matrix
+  "Reader function for `#la/m` tagged literal."
+  [form]
+  (matrix form))
+
+(defn read-column
+  "Reader function for `#la/v` tagged literal."
+  [form]
+  (column form))

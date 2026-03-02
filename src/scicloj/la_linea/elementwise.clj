@@ -247,3 +247,74 @@
                 (if (cx/complex? a)
                   (unsupported-complex! :elem/max)
                   (tensor/reshape (dfn/max a b) (dtype/shape a)))))
+
+;; ---------------------------------------------------------------------------
+;; Inverse trigonometric (real only)
+;; ---------------------------------------------------------------------------
+
+(defn asin
+  "Element-wise arcsine. Real only."
+  [a]
+  (tape/record! :elem/asin [a]
+                (if (cx/complex? a)
+                  (unsupported-complex! :elem/asin)
+                  (dfn/asin a))))
+
+(defn acos
+  "Element-wise arccosine. Real only."
+  [a]
+  (tape/record! :elem/acos [a]
+                (if (cx/complex? a)
+                  (unsupported-complex! :elem/acos)
+                  (dfn/acos a))))
+
+(defn atan
+  "Element-wise arctangent. Real only."
+  [a]
+  (tape/record! :elem/atan [a]
+                (if (cx/complex? a)
+                  (unsupported-complex! :elem/atan)
+                  (dfn/atan a))))
+
+;; ---------------------------------------------------------------------------
+;; Additional exponential/logarithmic (real only)
+;; ---------------------------------------------------------------------------
+
+(defn log1p
+  "Element-wise log(1 + x), accurate for small x. Real only."
+  [a]
+  (tape/record! :elem/log1p [a]
+                (if (cx/complex? a)
+                  (unsupported-complex! :elem/log1p)
+                  (dfn/log1p a))))
+
+(defn expm1
+  "Element-wise exp(x) - 1, accurate for small x. Real only."
+  [a]
+  (tape/record! :elem/expm1 [a]
+                (if (cx/complex? a)
+                  (unsupported-complex! :elem/expm1)
+                  (dfn/expm1 a))))
+
+;; ---------------------------------------------------------------------------
+;; Additional rounding/clipping (real only)
+;; ---------------------------------------------------------------------------
+
+(defn round
+  "Element-wise rounding to nearest integer. Real only."
+  [a]
+  (tape/record! :elem/round [a]
+                (if (cx/complex? a)
+                  (unsupported-complex! :elem/round)
+                  (dfn/rint a))))
+
+(defn clip
+  "Element-wise clipping to [lo, hi]. Real only."
+  [a lo hi]
+  (tape/record! :elem/clip [a lo hi]
+                (if (cx/complex? a)
+                  (unsupported-complex! :elem/clip)
+                  (let [lo (double lo)
+                        hi (double hi)]
+                    (tensor/reshape (dfn/min (dfn/max a lo) hi)
+                                    (dtype/shape a))))))

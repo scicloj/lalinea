@@ -138,3 +138,62 @@
 
 
 (deftest t46_l150 (is (true? v45_l148)))
+
+
+(def
+ v48_l161
+ (let
+  [A
+   (la/matrix [[2 1] [1 3]])
+   tape-result
+   (tape/with-tape (la/det A))
+   grads
+   (grad/grad tape-result (:result tape-result))
+   grad-A
+   (.get grads A)
+   expected
+   (la/scale (la/transpose (la/invert A)) (la/det A))]
+  (la/close? grad-A expected)))
+
+
+(deftest t49_l169 (is (true? v48_l161)))
+
+
+(def
+ v51_l177
+ (let
+  [A
+   (la/matrix [[2 1] [1 3]])
+   tape-result
+   (tape/with-tape (la/trace (la/invert A)))
+   grads
+   (grad/grad tape-result (:result tape-result))
+   grad-A
+   (.get grads A)
+   inv-t
+   (la/transpose (la/invert A))
+   expected
+   (la/scale (la/mmul inv-t inv-t) -1.0)]
+  (la/close? grad-A expected)))
+
+
+(deftest t52_l185 (is (true? v51_l177)))
+
+
+(def
+ v54_l191
+ (let
+  [A
+   (la/matrix [[3 0] [0 4]])
+   tape-result
+   (tape/with-tape (la/norm A))
+   grads
+   (grad/grad tape-result (:result tape-result))
+   grad-A
+   (.get grads A)
+   expected
+   (la/scale A (/ 1.0 (la/norm A)))]
+  (la/close? grad-A expected)))
+
+
+(deftest t55_l198 (is (true? v54_l191)))

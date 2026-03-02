@@ -46,7 +46,18 @@
                        (tensor/compute-tensor
                         shape
                         (fn [& _] (double g))
-                        :float64))]))})
+                        :float64))]))
+   :la/det       (fn [g [a] out]
+                   ;; d/dA det(A) = det(A) * A^{-T}
+                   [(la/scale (la/transpose (la/invert a))
+                              (* (double g) (double out)))])
+   :la/invert    (fn [g [_a] out]
+                   ;; d/dA A^{-1} = -A^{-T} g A^{-T}
+                   (let [inv-t (la/transpose out)]
+                     [(la/scale (la/mmul inv-t (la/mmul g inv-t)) -1.0)]))
+   :la/norm      (fn [g [a] out]
+                   ;; d/dA ||A||_F = A / ||A||_F
+                   [(la/scale a (/ (double g) (double out)))])})
 
 ;; ---------------------------------------------------------------------------
 ;; Gradient accumulation

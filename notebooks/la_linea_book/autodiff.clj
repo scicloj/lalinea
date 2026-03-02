@@ -149,9 +149,57 @@ expected-grad-A
 
 (kind/test-last [true?])
 
+;; ## Gradients of det, invert, and norm
+;;
+;; The determinant, inverse, and Frobenius norm all have known
+;; VJP rules. Let's verify them.
+
+;; ### Determinant
+;;
+;; $\frac{\partial}{\partial A} \det(A) = \det(A) \cdot A^{-T}$
+
+(let [A (la/matrix [[2 1] [1 3]])
+      tape-result (tape/with-tape (la/det A))
+      grads (grad/grad tape-result (:result tape-result))
+      grad-A (.get grads A)
+      expected (la/scale (la/transpose (la/invert A))
+                         (la/det A))]
+  (la/close? grad-A expected))
+
+(kind/test-last [true?])
+
+;; ### Inverse
+;;
+;; For a composite $f(A) = \text{tr}(A^{-1})$:
+;;
+;; $\frac{\partial f}{\partial A} = -(A^{-T})^2$
+
+(let [A (la/matrix [[2 1] [1 3]])
+      tape-result (tape/with-tape (la/trace (la/invert A)))
+      grads (grad/grad tape-result (:result tape-result))
+      grad-A (.get grads A)
+      inv-t (la/transpose (la/invert A))
+      expected (la/scale (la/mmul inv-t inv-t) -1.0)]
+  (la/close? grad-A expected))
+
+(kind/test-last [true?])
+
+;; ### Frobenius norm
+;;
+;; $\frac{\partial}{\partial A} \|A\|_F = \frac{A}{\|A\|_F}$
+
+(let [A (la/matrix [[3 0] [0 4]])
+      tape-result (tape/with-tape (la/norm A))
+      grads (grad/grad tape-result (:result tape-result))
+      grad-A (.get grads A)
+      expected (la/scale A (/ 1.0 (la/norm A)))]
+  (la/close? grad-A expected))
+
+(kind/test-last [true?])
+
 ;; ## Supported operations
 
-;; The current autodiff PoC supports these operations:
+;; The autodiff system supports these operations:
 ;;
 ;; - `la/add`, `la/sub` — addition and subtraction
 ;; - `la/scale` — scalar multiplication
@@ -161,7 +209,10 @@ expected-grad-A
 ;; - `la/trace` — matrix trace
 ;; - `la/sq` — element-wise square
 ;; - `la/sum` — sum of all elements
+;; - `la/det` — matrix determinant
+;; - `la/invert` — matrix inverse
+;; - `la/norm` — Frobenius norm
 ;;
-;; Operations without VJP rules (like `la/svd`, `la/eigen`, `la/det`)
+;; Operations without VJP rules (like `la/svd`, `la/eigen`)
 ;; are ignored during the backward pass. Their inputs will not receive
 ;; gradients.

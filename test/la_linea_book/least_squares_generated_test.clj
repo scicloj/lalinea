@@ -321,14 +321,22 @@
 
 
 (def
- v63_l294
+ v63_l287
+ (la/close? c-svd (la/mmul (la/pinv A-poly) (la/column y-poly))))
+
+
+(deftest t64_l289 (is (true? v63_l287)))
+
+
+(def
+ v66_l301
  (def
   x-trig
   (dtype/make-reader :float64 40 (* (/ (* 2.0 Math/PI) 40.0) idx))))
 
 
 (def
- v64_l298
+ v67_l305
  (def
   noise-trig
   (tensor/->tensor
@@ -377,7 +385,7 @@
 
 
 (def
- v65_l306
+ v68_l313
  (def
   y-trig
   (dfn/+
@@ -388,7 +396,7 @@
 
 
 (def
- v66_l312
+ v69_l319
  (def
   A-trig
   (let
@@ -408,7 +416,7 @@
 
 
 (def
- v67_l324
+ v70_l331
  (def
   c-trig
   (la/solve
@@ -416,11 +424,11 @@
    (la/mmul (la/transpose A-trig) (la/column y-trig)))))
 
 
-(def v68_l328 c-trig)
+(def v71_l335 c-trig)
 
 
 (deftest
- t69_l330
+ t72_l337
  (is
   ((fn
     [c]
@@ -429,11 +437,11 @@
      (< (Math/abs (- (tensor/mget c 1 0) 2.0)) 0.3)
      (< (Math/abs (- (tensor/mget c 2 0) -1.5)) 0.3)
      (< (Math/abs (- (tensor/mget c 3 0) 0.5)) 0.3)))
-   v68_l328)))
+   v71_l335)))
 
 
 (def
- v71_l342
+ v74_l349
  (let
   [x-fit
    (dtype/make-reader :float64 200 (* (/ (* 2.0 Math/PI) 200.0) idx))
@@ -459,35 +467,25 @@
    plotly/plot)))
 
 
-(def v73_l369 (def poly-svd (la/svd A-poly)))
+(def v76_l376 (def condition-number (la/condition-number A-poly)))
 
 
-(def
- v74_l371
- (def
-  condition-number
-  (let [sv (:S poly-svd)] (/ (dfn/reduce-max sv) (dfn/reduce-min sv)))))
-
-
-(def v75_l375 condition-number)
+(def v77_l378 condition-number)
 
 
 (deftest
- t76_l377
- (is ((fn [v] (and (> v 1.0) (Double/isFinite v))) v75_l375)))
+ t78_l380
+ (is ((fn [v] (and (> v 1.0) (Double/isFinite v))) v77_l378)))
 
 
 (def
- v78_l383
+ v80_l386
  (def
   A-high
   (vandermonde (dtype/make-reader :float64 30 (* 1.0 idx)) 8)))
 
 
-(def v79_l386 (def high-sv (:S (la/svd A-high))))
+(def v81_l389 (la/condition-number A-high))
 
 
-(def v80_l388 (/ (dfn/reduce-max high-sv) (dfn/reduce-min high-sv)))
-
-
-(deftest t81_l390 (is ((fn [v] (> v 1000000.0)) v80_l388)))
+(deftest t82_l391 (is ((fn [v] (> v 1000000.0)) v81_l389)))

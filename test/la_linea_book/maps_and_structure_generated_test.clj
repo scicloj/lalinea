@@ -203,7 +203,7 @@
 (deftest t57_l314 (is ((fn [v] (= 3 (count v))) v56_l312)))
 
 
-(def v58_l317 (def rank-M (long (dfn/sum (dfn/> sv-M 1.0E-10)))))
+(def v58_l317 (def rank-M (la/rank M)))
 
 
 (def v59_l319 rank-M)
@@ -212,7 +212,7 @@
 (deftest t60_l321 (is ((fn [r] (= r 2)) v59_l319)))
 
 
-(def v62_l332 (def nullity-M (long (dfn/sum (dfn/<= sv-M 1.0E-10)))))
+(def v62_l332 (def nullity-M (- (second (dtype/shape M)) rank-M)))
 
 
 (def v63_l334 nullity-M)
@@ -227,106 +227,74 @@
 (deftest t67_l351 (is (true? v66_l348)))
 
 
-(def v69_l356 (def svd-M (la/svd M)))
+(def v69_l356 (def null-basis (la/null-space M)))
+
+
+(def v70_l358 null-basis)
+
+
+(def v72_l362 (la/norm (la/mmul M null-basis)))
+
+
+(deftest t73_l364 (is ((fn [d] (< d 1.0E-10)) v72_l362)))
+
+
+(def v75_l378 (def A-full (la/matrix [[2 1] [1 3]])))
+
+
+(def v76_l380 (la/rank A-full))
+
+
+(deftest t77_l382 (is ((fn [r] (= r 2)) v76_l380)))
+
+
+(def v79_l387 (la/solve A-full (la/column [5 7])))
+
+
+(deftest t80_l389 (is ((fn [x] (some? x)) v79_l387)))
+
+
+(def v82_l394 (la/solve M (la/column [1 2 3])))
+
+
+(deftest t83_l396 (is (nil? v82_l394)))
+
+
+(def v85_l422 (def col-space-basis (la/col-space M)))
+
+
+(def v86_l424 col-space-basis)
+
+
+(def v88_l428 (def svd-M (la/svd M)))
 
 
 (def
- v70_l358
- (def
-  null-basis
-  (let
-   [sv
-    (:S svd-M)
-    Vt
-    (:Vt svd-M)
-    null-idx
-    (vec (keep-indexed (fn [i s] (when (< s 1.0E-10) i)) sv))]
-   (la/submatrix (la/transpose Vt) :all null-idx))))
-
-
-(def v71_l364 null-basis)
-
-
-(def v73_l368 (la/norm (la/mmul M null-basis)))
-
-
-(deftest t74_l370 (is ((fn [d] (< d 1.0E-10)) v73_l368)))
-
-
-(def v76_l384 (def A-full (la/matrix [[2 1] [1 3]])))
-
-
-(def v77_l386 (long (dfn/sum (dfn/> (:S (la/svd A-full)) 1.0E-10))))
-
-
-(deftest t78_l388 (is ((fn [r] (= r 2)) v77_l386)))
-
-
-(def v80_l393 (la/solve A-full (la/column [5 7])))
-
-
-(deftest t81_l395 (is ((fn [x] (some? x)) v80_l393)))
-
-
-(def v83_l400 (la/solve M (la/column [1 2 3])))
-
-
-(deftest t84_l402 (is (nil? v83_l400)))
-
-
-(def
- v86_l428
- (def
-  col-space-basis
-  (let
-   [sv
-    (:S svd-M)
-    U
-    (:U svd-M)
-    col-idx
-    (vec (keep-indexed (fn [i s] (when (> s 1.0E-10) i)) sv))]
-   (la/submatrix U :all col-idx))))
-
-
-(def v87_l434 col-space-basis)
-
-
-(def
- v89_l438
+ v89_l430
  (def
   left-null-basis
   (let
-   [sv
-    (:S svd-M)
-    U
-    (:U svd-M)
-    null-idx
-    (vec (keep-indexed (fn [i s] (when (< s 1.0E-10) i)) sv))]
-   (la/submatrix U :all null-idx))))
+   [r (la/rank M) U (:U svd-M)]
+   (la/submatrix U :all (range r (first (dtype/shape M)))))))
 
 
-(def v90_l444 left-null-basis)
+(def v90_l435 left-null-basis)
 
 
 (def
- v92_l449
+ v92_l440
  (def
   row-space-basis
   (let
-   [sv
-    (:S svd-M)
-    Vt
-    (:Vt svd-M)
-    row-idx
-    (vec (keep-indexed (fn [i s] (when (> s 1.0E-10) i)) sv))]
-   (la/submatrix (la/transpose Vt) :all row-idx))))
+   [r (la/rank M) Vt (:Vt svd-M)]
+   (la/transpose (la/submatrix Vt (range r) :all)))))
 
 
-(def v93_l455 row-space-basis)
+(def v93_l445 row-space-basis)
 
 
 (def
- v95_l461
+ v95_l451
  {:col-space (second (dtype/shape col-space-basis)),
   :left-null (second (dtype/shape left-null-basis)),
   :row-space (second (dtype/shape row-space-basis)),
@@ -334,7 +302,7 @@
 
 
 (deftest
- t96_l466
+ t96_l456
  (is
   ((fn
     [m]
@@ -343,32 +311,32 @@
      (= 1 (:left-null m))
      (= 2 (:row-space m))
      (= 1 (:null-space m))))
-   v95_l461)))
+   v95_l451)))
 
 
 (def
- v98_l474
+ v98_l464
  (< (la/norm (la/mmul (la/transpose M) left-null-basis)) 1.0E-10))
 
 
-(deftest t99_l476 (is (true? v98_l474)))
+(deftest t99_l466 (is (true? v98_l464)))
 
 
 (def
- v101_l480
+ v101_l470
  (<
   (la/norm (la/mmul (la/transpose col-space-basis) left-null-basis))
   1.0E-10))
 
 
-(deftest t102_l482 (is (true? v101_l480)))
+(deftest t102_l472 (is (true? v101_l470)))
 
 
 (def
- v104_l486
+ v104_l476
  (<
   (la/norm (la/mmul (la/transpose row-space-basis) null-basis))
   1.0E-10))
 
 
-(deftest t105_l488 (is (true? v104_l486)))
+(deftest t105_l478 (is (true? v104_l476)))

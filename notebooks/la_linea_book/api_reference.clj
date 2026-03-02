@@ -267,6 +267,71 @@
 
 (kind/test-last [true?])
 
+(kind/doc #'la/ones)
+
+(la/ones 2 3)
+
+(kind/test-last [(fn [m] (= [2 3] (dtype/shape m)))])
+
+(kind/doc #'la/mpow)
+
+(la/mpow (la/matrix [[1 1] [0 1]]) 5)
+
+(kind/test-last [(fn [m] (la/close? m (la/matrix [[1 5] [0 1]])))])
+
+(kind/doc #'la/rank)
+
+(la/rank (la/matrix [[1 2] [2 4]]))
+
+(kind/test-last [(fn [r] (= 1 r))])
+
+(kind/doc #'la/condition-number)
+
+(la/condition-number (la/matrix [[2 1] [1 3]]))
+
+(kind/test-last [(fn [v] (> v 1.0))])
+
+(kind/doc #'la/pinv)
+
+(let [A (la/matrix [[2 1] [1 3]])]
+  (la/close? (la/mmul A (la/pinv A)) (la/eye 2)))
+
+(kind/test-last [true?])
+
+(kind/doc #'la/lstsq)
+
+(let [{:keys [x rank]} (la/lstsq (la/matrix [[1 1] [1 2] [1 3]])
+                                 (la/column [1 2 3]))]
+  {:rank rank :close? (la/close? x (la/column [0 1]))})
+
+(kind/test-last [(fn [m] (and (= 2 (:rank m)) (:close? m)))])
+
+(kind/doc #'la/null-space)
+
+(let [ns (la/null-space (la/matrix [[1 2] [2 4]]))]
+  (la/close? (la/mmul (la/matrix [[1 2] [2 4]]) ns)
+             (la/zeros 2 1)))
+
+(kind/test-last [true?])
+
+(kind/doc #'la/col-space)
+
+(second (dtype/shape (la/col-space (la/matrix [[1 2] [2 4]]))))
+
+(kind/test-last [(fn [r] (= 1 r))])
+
+(kind/doc #'la/read-matrix)
+
+(la/read-matrix [[1 2] [3 4]])
+
+(kind/test-last [(fn [m] (= [2 2] (dtype/shape m)))])
+
+(kind/doc #'la/read-column)
+
+(la/read-column [5 6 7])
+
+(kind/test-last [(fn [v] (= [3 1] (dtype/shape v)))])
+
 ;; ## `scicloj.la-linea.complex`
 ;;
 ;; A ComplexTensor wraps a dtype-next tensor whose last dimension
@@ -691,6 +756,48 @@
 (tensor/mget (elem/max (la/column [3]) (la/column [5])) 0 0)
 
 (kind/test-last [(fn [v] (== 5.0 v))])
+
+(kind/doc #'elem/asin)
+
+(tensor/mget (elem/asin (la/column [0.5])) 0 0)
+
+(kind/test-last [(fn [v] (la/close-scalar? v (Math/asin 0.5)))])
+
+(kind/doc #'elem/acos)
+
+(tensor/mget (elem/acos (la/column [0.5])) 0 0)
+
+(kind/test-last [(fn [v] (la/close-scalar? v (Math/acos 0.5)))])
+
+(kind/doc #'elem/atan)
+
+(tensor/mget (elem/atan (la/column [1.0])) 0 0)
+
+(kind/test-last [(fn [v] (la/close-scalar? v (Math/atan 1.0)))])
+
+(kind/doc #'elem/log1p)
+
+(tensor/mget (elem/log1p (la/column [0.0])) 0 0)
+
+(kind/test-last [(fn [v] (la/close-scalar? v 0.0))])
+
+(kind/doc #'elem/expm1)
+
+(tensor/mget (elem/expm1 (la/column [0.0])) 0 0)
+
+(kind/test-last [(fn [v] (la/close-scalar? v 0.0))])
+
+(kind/doc #'elem/round)
+
+(tensor/mget (elem/round (la/column [2.7])) 0 0)
+
+(kind/test-last [(fn [v] (== 3.0 v))])
+
+(kind/doc #'elem/clip)
+
+(vec (dtype/->reader (elem/clip (la/column [-2 0.5 3]) -1 1)))
+
+(kind/test-last [(fn [v] (= [-1.0 0.5 1.0] v))])
 
 ;; ## `scicloj.la-linea.grad`
 ;;

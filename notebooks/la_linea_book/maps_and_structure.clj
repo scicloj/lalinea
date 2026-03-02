@@ -314,7 +314,7 @@ sv-M
 (kind/test-last
  [(fn [v] (= 3 (count v)))])
 
-(def rank-M (long (dfn/sum (dfn/> sv-M 1e-10))))
+(def rank-M (la/rank M))
 
 rank-M
 
@@ -329,7 +329,7 @@ rank-M
 ;; The **nullity** is the dimension of the null space —
 ;; the number of independent directions collapsed to zero.
 
-(def nullity-M (long (dfn/sum (dfn/<= sv-M 1e-10))))
+(def nullity-M (- (second (dtype/shape M)) rank-M))
 
 nullity-M
 
@@ -353,13 +353,7 @@ nullity-M
 ;; We can extract the null space from the SVD. The columns
 ;; of $V$ corresponding to zero singular values span it:
 
-(def svd-M (la/svd M))
-
-(def null-basis
-  (let [sv (:S svd-M)
-        Vt (:Vt svd-M)
-        null-idx (vec (keep-indexed (fn [i s] (when (< s 1e-10) i)) sv))]
-    (la/submatrix (la/transpose Vt) :all null-idx)))
+(def null-basis (la/null-space M))
 
 null-basis
 
@@ -383,7 +377,7 @@ null-basis
 
 (def A-full (la/matrix [[2 1] [1 3]]))
 
-(long (dfn/sum (dfn/> (:S (la/svd A-full)) 1e-10)))
+(la/rank A-full)
 
 (kind/test-last
  [(fn [r] (= r 2))])
@@ -425,21 +419,18 @@ null-basis
 ;; **Column space** — the columns of $U$ corresponding to
 ;; non-zero singular values:
 
-(def col-space-basis
-  (let [sv (:S svd-M)
-        U (:U svd-M)
-        col-idx (vec (keep-indexed (fn [i s] (when (> s 1e-10) i)) sv))]
-    (la/submatrix U :all col-idx)))
+(def col-space-basis (la/col-space M))
 
 col-space-basis
 
 ;; **Left null space** — the remaining columns of $U$:
 
+(def svd-M (la/svd M))
+
 (def left-null-basis
-  (let [sv (:S svd-M)
-        U (:U svd-M)
-        null-idx (vec (keep-indexed (fn [i s] (when (< s 1e-10) i)) sv))]
-    (la/submatrix U :all null-idx)))
+  (let [r (la/rank M)
+        U (:U svd-M)]
+    (la/submatrix U :all (range r (first (dtype/shape M))))))
 
 left-null-basis
 
@@ -447,10 +438,9 @@ left-null-basis
 ;; non-zero singular values:
 
 (def row-space-basis
-  (let [sv (:S svd-M)
-        Vt (:Vt svd-M)
-        row-idx (vec (keep-indexed (fn [i s] (when (> s 1e-10) i)) sv))]
-    (la/submatrix (la/transpose Vt) :all row-idx)))
+  (let [r (la/rank M)
+        Vt (:Vt svd-M)]
+    (la/transpose (la/submatrix Vt (range r) :all))))
 
 row-space-basis
 
