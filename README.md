@@ -45,8 +45,8 @@ row-major `double[]` memory layout, enabling **zero-copy** interop.
 
 ### Tagged literals
 
-- `#la/R [:float64 [2 2] [[1.0 2.0] [3.0 4.0]]]` — real tensors
-- `#la/C [:float64 [2 2] [[1.0 2.0] [3.0 4.0]]]` — complex tensors
+- `#la/R [:float64 [2 2] [[1.000 2.000] [3.000 4.000]]]` — real tensors
+- `#la/C [:float64 [2 2] [[1.000 + 5.000 i  2.000 + 6.000 i] [3.000 + 7.000 i  4.000 + 8.000 i]]]` — complex tensors
 - Round-trip through `pr-str` / `read-string`
 
 ### Fourier transforms
