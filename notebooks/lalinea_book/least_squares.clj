@@ -30,7 +30,7 @@
 ;;
 ;; We observe $m$ data points $(x_i, y_i)$ and want to fit a model
 ;; $y = c_0 \phi_0(x) + c_1 \phi_1(x) + \cdots + c_{n-1} \phi_{n-1}(x)$
-;; where $\phi_j$ are known basis functions and $c_j$ are unknown coefficients.
+;; where $\phi_j$ are known [basis functions](https://en.wikipedia.org/wiki/Basis_function) and $c_j$ are unknown coefficients.
 ;;
 ;; Stacking all observations into a matrix equation:
 ;;

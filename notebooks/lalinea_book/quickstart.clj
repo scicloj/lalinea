@@ -1,6 +1,6 @@
 ;; # Quickstart
 ;;
-;; A minimal introduction to **La Linea** — linear algebra with tensor
+;; A minimal introduction to **La Linea** — [linear algebra](https://en.wikipedia.org/wiki/Linear_algebra) with tensor
 ;; abstractions. Matrices are dtype-next tensors, backed by
 ;; [EJML](https://ejml.org/) for computation and shared via zero-copy
 ;; interop.
@@ -26,7 +26,7 @@
 ;; ## Creating matrices
 ;;
 ;; Matrices are dtype-next tensors of shape $[r, c]$, backed by
-;; a flat `double[]` in row-major order.
+;; a flat `double[]` in [row-major order](https://en.wikipedia.org/wiki/Row-_and_column-major_order).
 
 (la/matrix [[1 2 3]
             [4 5 6]])
@@ -95,7 +95,7 @@
 
 ;; ## Decompositions
 ;;
-;; Eigendecomposition of a symmetric matrix:
+;; [Eigendecomposition](https://en.wikipedia.org/wiki/Eigendecomposition_of_a_matrix) of a symmetric matrix:
 
 (la/real-eigenvalues (la/matrix [[2 1] [1 2]]))
 
@@ -104,7 +104,7 @@
 (kind/test-last [(fn [evs] (and (< (abs (- (first evs) 1.0)) 1e-10)
                                 (< (abs (- (second evs) 3.0)) 1e-10)))])
 
-;; SVD:
+;; [SVD](https://en.wikipedia.org/wiki/Singular_value_decomposition):
 
 (:S (la/svd (la/matrix [[1 2] [3 4]])))
 

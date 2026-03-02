@@ -74,7 +74,7 @@
 
 ;; `la/eigen` returns eigenvalues as a **ComplexTensor**, because
 ;; eigenvalues of a real matrix can be complex — the roots of the
-;; characteristic polynomial may leave $\mathbb{R}$.  For this
+;; [characteristic polynomial](https://en.wikipedia.org/wiki/Characteristic_polynomial) may leave $\mathbb{R}$.  For this
 ;; matrix they happen to be real.  When we know all eigenvalues
 ;; are real (e.g., for symmetric matrices), `la/real-eigenvalues`
 ;; is a convenience that extracts the real parts and returns them
@@ -126,7 +126,7 @@
 
 ;; ---
 ;;
-;; ## Change of basis and diagonalisation
+;; ## [Change of basis](https://en.wikipedia.org/wiki/Change_of_basis) and [diagonalisation](https://en.wikipedia.org/wiki/Diagonalizable_matrix)
 ;;
 ;; ### The idea
 ;;
@@ -208,7 +208,7 @@ D-result
 ;;
 ;; ### Symmetric matrices
 ;;
-;; A matrix $A$ is **symmetric** if $A = A^T$. Symmetric matrices
+;; A matrix $A$ is **[symmetric](https://en.wikipedia.org/wiki/Symmetric_matrix)** if $A = A^T$. Symmetric matrices
 ;; are everywhere in applications:
 ;;
 ;; - Covariance matrices in statistics
@@ -371,7 +371,7 @@ sigmas
 ;;
 ;; ### Definition
 ;;
-;; A symmetric matrix $M$ is **positive definite** (PD) if,
+;; A symmetric matrix $M$ is **[positive definite](https://en.wikipedia.org/wiki/Definite_matrix)** (PD) if,
 ;; for every non-zero vector $\mathbf{x}$: $\mathbf{x}^T M \mathbf{x} > 0$.
 ;;
 ;; Think of it as a bowl shape — the quadratic form always

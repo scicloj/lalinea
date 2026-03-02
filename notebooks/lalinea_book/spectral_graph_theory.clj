@@ -9,7 +9,7 @@
 ;; This notebook uses linear algebra to move from the
 ;; **adjacency matrix** (which edges exist?) through the
 ;; **Laplacian matrix** (a discrete analogue of the Laplacian
-;; operator from calculus) to **spectral clustering** (which vertices
+;; operator from calculus) to **[spectral clustering](https://en.wikipedia.org/wiki/Spectral_clustering)** (which vertices
 ;; belong together?).
 
 (ns lalinea-book.spectral-graph-theory
@@ -154,7 +154,7 @@ fiedler-value
 ;; The Fiedler value is small (close to 0), reflecting the fact
 ;; that our graph has a bottleneck: a single bridge edge at vertex 2–3.
 
-;; ## The Fiedler vector
+;; ## The [Fiedler vector](https://en.wikipedia.org/wiki/Algebraic_connectivity)
 ;;
 ;; The eigenvector corresponding to $\lambda_2$ is the **Fiedler vector**.
 ;; Its sign pattern partitions the vertices into two groups, giving
@@ -282,7 +282,7 @@ K5-eigenvalues
 ;; The high algebraic connectivity ($\lambda_2 = 5$) reflects
 ;; maximal connectivity.
 
-;; ## The cycle graph
+;; ## The [cycle graph](https://en.wikipedia.org/wiki/Cycle_graph)
 ;;
 ;; $C_n$ connects each vertex to its two neighbours in a ring.
 ;; Its Laplacian eigenvalues have a known formula:

@@ -193,7 +193,7 @@
                                      :float64)]
     (dtype/clone (la/sub data-tensor means))))
 
-;; ### Compute covariance matrix and eigendecompose
+;; ### Compute [covariance matrix](https://en.wikipedia.org/wiki/Covariance_matrix) and eigendecompose
 
 (def cov-matrix
   (la/scale (la/mmul (la/transpose X) X) (/ 1.0 (dec n-points))))

@@ -261,7 +261,7 @@
 ;;   has a solution. It is the span of $A$'s columns — the
 ;;   set of outputs the map can produce.
 ;;
-;; - The **null space** (or **kernel**) $\text{Null}(A)$: the set
+;; - The **null space** (or **[kernel](https://en.wikipedia.org/wiki/Kernel_(linear_algebra))**) $\text{Null}(A)$: the set
 ;;   of all vectors $\mathbf{x}$ with $A\mathbf{x} = \mathbf{0}$.
 ;;   These are the inputs that the map annihilates.
 ;;

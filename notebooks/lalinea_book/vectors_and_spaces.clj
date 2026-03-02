@@ -65,7 +65,7 @@
 
 ;; ### Scalar multiplication
 ;;
-;; Multiplying a vector by a number (a **scalar**) scales every entry.
+;; Multiplying a vector by a number (a **[scalar](https://en.wikipedia.org/wiki/Scalar_(mathematics))**) scales every entry.
 ;; Geometrically, it stretches (or shrinks, or reverses) the arrow.
 
 (la/scale u 2.0)
@@ -222,7 +222,7 @@
 
 ;; ### Span
 ;;
-;; The **span** of a set of vectors is the collection of all
+;; The **[span](https://en.wikipedia.org/wiki/Linear_span)** of a set of vectors is the collection of all
 ;; their linear combinations — every point you can reach by
 ;; adding and scaling them.
 ;;
@@ -403,7 +403,7 @@
 ;; ### Dimension
 ;;
 ;; **Every basis for a given vector space has the same number
-;; of vectors.** This number is the **dimension**.
+;; of vectors.** This number is the **[dimension](https://en.wikipedia.org/wiki/Dimension_(vector_space))**.
 ;;
 ;; - $\mathbb{R}^2$ has dimension 2 (every basis has 2 vectors)
 ;; - $\mathbb{R}^3$ has dimension 3

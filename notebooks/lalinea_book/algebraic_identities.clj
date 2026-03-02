@@ -150,7 +150,7 @@
 
 ;; ---
 ;;
-;; ## Transpose
+;; ## [Transpose](https://en.wikipedia.org/wiki/Transpose)
 ;;
 ;; The transpose $A^T$ flips rows and columns. It interacts with
 ;; other operations in predictable ways.
@@ -190,7 +190,7 @@
 
 ;; ---
 ;;
-;; ## Trace
+;; ## [Trace](https://en.wikipedia.org/wiki/Trace_(linear_algebra))
 ;;
 ;; The trace $\operatorname{tr}(A)$ is the sum of diagonal entries.
 ;; It is the simplest matrix invariant — unchanged under similarity
@@ -233,7 +233,7 @@
 
 ;; ---
 ;;
-;; ## Determinant
+;; ## [Determinant](https://en.wikipedia.org/wiki/Determinant)
 ;;
 ;; The determinant $\det(A)$ measures how $A$ scales volume.
 ;; It encodes invertibility: $\det(A) = 0$ iff $A$ is singular.
@@ -277,7 +277,7 @@
 
 ;; ---
 ;;
-;; ## Inverse
+;; ## [Inverse](https://en.wikipedia.org/wiki/Invertible_matrix)
 ;;
 ;; A matrix $A$ is invertible when there exists $A^{-1}$ such that
 ;; $AA^{-1} = A^{-1}A = I$. The inverse encodes the ability to
@@ -394,7 +394,7 @@
 
 ;; ---
 ;;
-;; ## Eigendecomposition
+;; ## [Eigendecomposition](https://en.wikipedia.org/wiki/Eigendecomposition_of_a_matrix)
 ;;
 ;; For a matrix $A$ with eigenvalue $\lambda$ and eigenvector $v$:
 ;; $Av = \lambda v$.
@@ -500,7 +500,7 @@
 
 ;; ---
 ;;
-;; ## Linear solve
+;; ## [Linear solve](https://en.wikipedia.org/wiki/System_of_linear_equations)
 ;;
 ;; Solving $Ax = b$ is the central computation of linear algebra.
 ;;
@@ -559,7 +559,7 @@
 
 (kind/test-last [true?])
 
-;; ### Cauchy-Schwarz: $|\langle a, b \rangle_H|^2 \leq \langle a, a \rangle_H \cdot \langle b, b \rangle_H$
+;; ### [Cauchy-Schwarz](https://en.wikipedia.org/wiki/Cauchy%E2%80%93Schwarz_inequality): $|\langle a, b \rangle_H|^2 \leq \langle a, a \rangle_H \cdot \langle b, b \rangle_H$
 
 (let [d-ab (la/dot ca cb)
       re-ab (double (cx/re d-ab))

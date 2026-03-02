@@ -165,13 +165,13 @@
 (kind/test-last
  [(fn [d] (< (abs d) 1e-10))])
 
-;; A set of vectors is **orthonormal** if they are all unit
+;; A set of vectors is **[orthonormal](https://en.wikipedia.org/wiki/Orthonormal_basis)** if they are all unit
 ;; length and mutually orthogonal. The standard basis is the
 ;; canonical example.
 ;;
 ;; Recall from the previous chapter that the four fundamental
 ;; subspaces of a matrix are complementary. With the standard
-;; inner product, they are in fact **orthogonal complements** —
+;; inner product, they are in fact **[orthogonal complements](https://en.wikipedia.org/wiki/Orthogonal_complement)** —
 ;; every vector in one subspace is orthogonal to every vector
 ;; in the other.
 

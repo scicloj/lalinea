@@ -4,7 +4,7 @@
 ;; [dtype-next](https://github.com/cnuernber/dtype-next) tensors
 ;; and uses [EJML](https://ejml.org/) for the heavy numerical work.
 ;; This chapter introduces both libraries and shows how they
-;; fit together through zero-copy interop.
+;; fit together through [zero-copy](https://en.wikipedia.org/wiki/Zero-copy) interop.
 
 (ns lalinea-book.tensors-and-ejml
   (:require
@@ -32,7 +32,7 @@
 ;; and functional transformations.
 ;;
 ;; A [tensor](https://cnuernber.github.io/dtype-next/tech.v3.tensor.html)
-;; is a **multi-dimensional view** over a buffer. Reshaping or slicing
+;; is a **multi-dimensional view** ([tensor](https://en.wikipedia.org/wiki/Tensor_(machine_learning))) over a buffer. Reshaping or slicing
 ;; a tensor creates a new view without copying data — the same backing
 ;; storage is simply indexed differently.
 

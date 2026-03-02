@@ -276,7 +276,7 @@
 ;; - `:by-op` — one of each operation
 ;; - `:by-memory` — which operations read through, share memory, or are independent
 
-;; ## Origin DAG
+;; ## Origin [DAG](https://en.wikipedia.org/wiki/Directed_acyclic_graph)
 
 ;; `tape/origin` walks the tape backwards from a value
 ;; to reconstruct its computation DAG.

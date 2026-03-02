@@ -4,8 +4,8 @@
 ;; a memoryless random process described by a **transition matrix**
 ;; — a matrix whose rows sum to 1. Multiplying a state vector by
 ;; the transition matrix advances the chain one step. After many
-;; steps, the distribution converges to a **stationary distribution**
-;; that we can find via eigendecomposition or power iteration.
+;; steps, the distribution converges to a **[stationary distribution](https://en.wikipedia.org/wiki/Stationary_distribution)**
+;; that we can find via eigendecomposition or [power iteration](https://en.wikipedia.org/wiki/Power_iteration).
 ;;
 ;; This chapter uses matrix multiply to simulate random walks,
 ;; eigendecomposition to find stationary distributions analytically,

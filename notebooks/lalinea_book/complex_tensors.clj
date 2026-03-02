@@ -1,7 +1,7 @@
 ;; # Complex Tensors
 ;;
 ;; **ComplexTensor** wraps a dtype-next tensor whose last dimension
-;; is 2 — interleaved real/imaginary pairs. The `re` and `im`
+;; is 2 — interleaved [complex number](https://en.wikipedia.org/wiki/Complex_number) pairs (real/imaginary). The `re` and `im`
 ;; functions always slice the last axis, returning **zero-copy**
 ;; tensor views.
 ;;
