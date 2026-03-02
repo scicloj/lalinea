@@ -105,10 +105,9 @@ Each chapter includes inline tests via
 (require '[scicloj.lalinea.linalg :as la])         ; matrix construction, arithmetic, decompositions, solve
 (require '[scicloj.lalinea.complex :as cx])         ; complex tensor operations
 (require '[scicloj.lalinea.elementwise :as elem])   ; tape-aware element-wise functions
-(require '[scicloj.lalinea.transform :as xf])       ; FFT / DCT / DST / DHT bridge
+(require '[scicloj.lalinea.transform :as ft])        ; FFT / DCT / DST / DHT bridge
 (require '[scicloj.lalinea.tape :as tape])          ; computation DAG recording, memory inspection
 (require '[scicloj.lalinea.grad :as grad])          ; reverse-mode automatic differentiation
-(require '[scicloj.lalinea.impl.print])                  ; tagged-literal printing (#la/R, #la/C)
 (require '[scicloj.lalinea.vis :as vis])            ; visualization helpers
 ```
 
