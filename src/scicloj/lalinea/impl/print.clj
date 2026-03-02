@@ -47,7 +47,7 @@
       (= 1 ndims)
       (let [n     (long (first shape))
             max-n (if (truncated? shape) (min n (long *print-threshold*)) n)]
-        (.write w "\n       [")
+        (.write w " [")
         (dotimes [k max-n]
           (when (pos? k) (.write w " "))
           (.write w (str (double (rdr k)))))
@@ -113,7 +113,7 @@
       (= 1 ndims)
       (let [n     (long (first cshape))
             max-n (if (truncated? cshape) (min n (long *print-threshold*)) n)]
-        (.write w "\n       [")
+        (.write w " [")
         (dotimes [k max-n]
           (when (pos? k) (.write w "  "))
           (let [base (* k 2)]
