@@ -91,9 +91,9 @@
   (let [states (iterate (fn [s] (la/mmul s P)) initial-state)]
     (mapv (fn [k s]
             {:step k
-             :sunny (tensor/mget s 0 0)
-             :cloudy (tensor/mget s 0 1)
-             :rainy (tensor/mget s 0 2)})
+             :sunny (s 0 0)
+             :cloudy (s 0 1)
+             :rainy (s 0 2)})
           (range 20)
           (take 20 states))))
 

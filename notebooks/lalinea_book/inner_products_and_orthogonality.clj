@@ -125,7 +125,7 @@
 
 ;; Weighted length ($\sqrt{\mathbf{u}^T W \mathbf{u}}$):
 
-(math/sqrt (tensor/mget (la/mmul (la/transpose u-ip) (la/mmul W-ip u-ip)) 0 0))
+(math/sqrt ((la/mmul (la/transpose u-ip) (la/mmul W-ip u-ip)) 0 0))
 
 (kind/test-last
  [(fn [d] (la/close-scalar? d (math/sqrt 3.0)))])

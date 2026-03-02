@@ -37,18 +37,18 @@
 
 (la/eye 3)
 
-(kind/test-last [(fn [m] (= 1.0 (tensor/mget m 1 1)))])
+(kind/test-last [(fn [m] (= 1.0 (m 1 1)))])
 
 (la/zeros 2 3)
 
-(kind/test-last [(fn [m] (= 0.0 (tensor/mget m 0 0)))])
+(kind/test-last [(fn [m] (= 0.0 (m 0 0)))])
 
 ;; Diagonal matrices:
 
 (la/diag [1 2 3])
 
 (kind/test-last [(fn [m] (and (= [3 3] (dtype/shape m))
-                              (= 2.0 (tensor/mget m 1 1))))])
+                              (= 2.0 (m 1 1))))])
 
 ;; ## Matrix arithmetic
 ;;
@@ -59,11 +59,11 @@
 
 ;; $AB = \begin{pmatrix} 19 & 22 \\ 43 & 50 \end{pmatrix}$
 
-(kind/test-last [(fn [m] (= 19.0 (tensor/mget m 0 0)))])
+(kind/test-last [(fn [m] (= 19.0 (m 0 0)))])
 
 (la/transpose (la/matrix [[1 2] [3 4]]))
 
-(kind/test-last [(fn [m] (= 3.0 (tensor/mget m 0 1)))])
+(kind/test-last [(fn [m] (= 3.0 (m 0 1)))])
 
 ;; ## Scalar properties
 
@@ -90,8 +90,8 @@
 
 ;; $x = \begin{pmatrix} 1 \\ 3 \end{pmatrix}$
 
-(kind/test-last [(fn [x] (and (< (abs (- (tensor/mget x 0 0) 1.0)) 1e-10)
-                              (< (abs (- (tensor/mget x 1 0) 3.0)) 1e-10)))])
+(kind/test-last [(fn [x] (and (< (abs (- (x 0 0) 1.0)) 1e-10)
+                              (< (abs (- (x 1 0) 3.0)) 1e-10)))])
 
 ;; ## Decompositions
 ;;
@@ -157,7 +157,7 @@
 
 ;; Element-wise operations preserve tensor structure:
 
-(tensor/mget (la/scale (la/matrix [[1 2] [3 4]]) 2.0) 1 1)
+((la/scale (la/matrix [[1 2] [3 4]]) 2.0) 1 1)
 
 (kind/test-last [= 8.0])
 
@@ -239,6 +239,6 @@
                     (la/sum (la/sq (la/sub (la/mmul A A)
                                            (la/matrix [[1 0] [0 1]])))))
       grads (grad/grad tape-result (:result tape-result))]
-  (tensor/mget (.get grads A) 0 0))
+  ((.get grads A) 0 0))
 
 (kind/test-last [(fn [v] (number? v))])

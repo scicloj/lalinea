@@ -38,8 +38,8 @@
       t1 (tensor/reshape (tensor/ensure-tensor flat) [2 3])
       t2 (tensor/reshape (tensor/ensure-tensor flat) [3 2])
       _ (aset flat 0 99.0)
-      result {:t1-00 (tensor/mget t1 0 0)
-              :t2-00 (tensor/mget t2 0 0)}]
+      result {:t1-00 (t1 0 0)
+              :t2-00 (t2 0 0)}]
   result)
 
 (kind/test-last
@@ -63,8 +63,8 @@
       t1 (tensor/reshape (tensor/ensure-tensor flat) [2 3])
       t2 (tensor/reshape (tensor/ensure-tensor flat) [3 2])]
   (tensor/mset! t1 0 0 99.0)
-  {:t1-00 (tensor/mget t1 0 0)
-   :t2-00 (tensor/mget t2 0 0)})
+  {:t1-00 (t1 0 0)
+   :t2-00 (t2 0 0)})
 
 (kind/test-last
  [(fn [{:keys [t1-00 t2-00]}]
@@ -81,7 +81,7 @@
       row0 (tensor/select A 0 :all)
       arr (dtype/->double-array A)
       _ (aset arr 0 999.0)
-      result {:A-00 (tensor/mget A 0 0)
+      result {:A-00 (A 0 0)
               :row0-0 (double (row0 0))}]
   result)
 
@@ -96,7 +96,7 @@
                           [40 50 60]] {:datatype :float64})
       row0 (tensor/select A 0 :all)]
   (tensor/mset! A 0 0 999.0)
-  {:A-00 (tensor/mget A 0 0)
+  {:A-00 (A 0 0)
    :row0-0 (double (row0 0))})
 
 (kind/test-last
@@ -121,7 +121,7 @@
 (let [M (la/matrix [[1 2] [3 4]])
       dm (la/tensor->dmat M)
       _ (.set dm 0 0 -1.0)]
-  {:M-00 (tensor/mget M 0 0)
+  {:M-00 (M 0 0)
    :dm-00 (.get dm 0 0)})
 
 (kind/test-last
@@ -153,7 +153,7 @@
 (let [M (la/matrix [[1 2] [3 4]])
       arr (dtype/->double-array M)]
   (aset arr 0 99.0)
-  (tensor/mget M 0 0))
+  (M 0 0))
 
 (kind/test-last [(fn [v] (== 99.0 v))])
 
@@ -356,8 +356,8 @@
       cloned (dtype/clone original)
       arr (dtype/->double-array original)
       _ (aset arr 0 -999.0)]
-  {:original-00 (tensor/mget original 0 0)
-   :cloned-00 (tensor/mget cloned 0 0)})
+  {:original-00 (original 0 0)
+   :cloned-00 (cloned 0 0)})
 
 (kind/test-last
  [(fn [{:keys [original-00 cloned-00]}]
@@ -369,8 +369,8 @@
 (let [original (la/matrix [[1 2] [3 4]])
       cloned (dtype/clone original)]
   (tensor/mset! original 0 0 -999.0)
-  {:original-00 (tensor/mget original 0 0)
-   :cloned-00 (tensor/mget cloned 0 0)})
+  {:original-00 (original 0 0)
+   :cloned-00 (cloned 0 0)})
 
 (kind/test-last
  [(fn [{:keys [original-00 cloned-00]}]
@@ -470,8 +470,8 @@
       sub (la/submatrix big (range 2) (range 2))
       arr (dtype/->double-array big)
       _ (aset arr 0 -1.0)]
-  {:big-00 (tensor/mget big 0 0)
-   :sub-00 (tensor/mget sub 0 0)})
+  {:big-00 (big 0 0)
+   :sub-00 (sub 0 0)})
 
 (kind/test-last
  [(fn [{:keys [big-00 sub-00]}]
@@ -483,8 +483,8 @@
 (let [big (la/matrix [[1 2 3] [4 5 6] [7 8 9]])
       sub (la/submatrix big (range 2) (range 2))]
   (tensor/mset! big 0 0 -1.0)
-  {:big-00 (tensor/mget big 0 0)
-   :sub-00 (tensor/mget sub 0 0)})
+  {:big-00 (big 0 0)
+   :sub-00 (sub 0 0)})
 
 (kind/test-last
  [(fn [{:keys [big-00 sub-00]}]
@@ -500,7 +500,7 @@
 (let [arr (double-array [1 2 3])
       col (la/column arr)]
   (aset arr 0 99.0)
-  (tensor/mget col 0 0))
+  (col 0 0))
 
 (kind/test-last [(fn [v] (== 99.0 v))])
 
@@ -528,8 +528,8 @@
       A (la/matrix [[2 0] [0 3]])]
   (la/mmul A col))
 
-(kind/test-last [(fn [r] (and (== 2.0 (tensor/mget r 0 0))
-                              (== 3.0 (tensor/mget r 1 0))))])
+(kind/test-last [(fn [r] (and (== 2.0 (r 0 0))
+                              (== 3.0 (r 1 0))))])
 
 ;; ## la/matrix passes through existing tensors
 
@@ -559,7 +559,7 @@
 (let [E (la/matrix [[1 2] [3 4]])
       Et (la/transpose E)]
   (tensor/mset! E 0 1 99.0)
-  (tensor/mget Et 1 0))
+  (Et 1 0))
 
 (kind/test-last [(fn [v] (== 99.0 v))])
 
@@ -568,7 +568,7 @@
 (let [E (la/matrix [[1 2] [3 4]])
       Et (la/transpose E)]
   (tensor/mset! Et 0 0 -1.0)
-  (tensor/mget E 0 0))
+  (E 0 0))
 
 (kind/test-last [(fn [v] (== -1.0 v))])
 
@@ -578,7 +578,7 @@
 (let [E (la/matrix [[1 2] [3 4]])
       Et (dtype/clone (la/transpose E))]
   (tensor/mset! E 0 0 -1.0)
-  (tensor/mget Et 0 0))
+  (Et 0 0))
 
 (kind/test-last [(fn [v] (== 1.0 v))])
 
@@ -591,7 +591,7 @@
 (let [E (la/matrix [[1 2] [3 4]])
       P (la/mmul E E)]
   (tensor/mset! E 0 0 -1.0)
-  (tensor/mget P 0 0))
+  (P 0 0))
 
 (kind/test-last [(fn [v] (== 7.0 v))])
 

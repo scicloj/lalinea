@@ -62,10 +62,7 @@
  (is
   ((fn
     [m]
-    (and
-     (= [6 6] (dtype/shape m))
-     (= 2.0 (tensor/mget m 0 0))
-     (= -1.0 (tensor/mget m 0 1))))
+    (and (= [6 6] (dtype/shape m)) (= 2.0 (m 0 0)) (= -1.0 (m 0 1))))
    v14_l92)))
 
 
@@ -488,8 +485,8 @@
      :community
      (mapv
       (fn*
-       [p1__81616#]
-       (cond (<= p1__81616# 2) "A" (<= p1__81616# 5) "B" :else "C"))
+       [p1__85489#]
+       (cond (<= p1__85489# 2) "A" (<= p1__85489# 5) "B" :else "C"))
       (range 9))}))))
 
 

@@ -25,7 +25,7 @@
   :float64))
 
 
-(deftest t7_l57 (is ((fn [t] (= 1.0 (tensor/mget t 1 1))) v6_l53)))
+(deftest t7_l57 (is ((fn [t] (= 1.0 (t 1 1))) v6_l53)))
 
 
 (def
@@ -59,14 +59,14 @@
   (dfn/+ a b)))
 
 
-(deftest t16_l87 (is ((fn [t] (= 44.0 (tensor/mget t 1 1))) v15_l83)))
+(deftest t16_l87 (is ((fn [t] (= 44.0 (t 1 1))) v15_l83)))
 
 
 (def
  v18_l91
  (let
   [x (tensor/->tensor [[1 4] [9 16]] {:datatype :float64})]
-  (tensor/mget (dfn/sqrt x) 1 0)))
+  ((dfn/sqrt x) 1 0)))
 
 
 (deftest t20_l96 (is (= v18_l91 3.0)))
@@ -93,7 +93,7 @@
  (let
   [t (la/matrix [[1.0 0.0] [0.0 1.0]]) dm (la/tensor->dmat t)]
   (.set dm 0 1 99.0)
-  (tensor/mget t 0 1)))
+  (t 0 1)))
 
 
 (deftest t26_l168 (is (= v25_l163 99.0)))
@@ -119,7 +119,7 @@
 (def v34_l200 (la/mmul (la/matrix [[1 2] [3 4]]) (la/eye 2)))
 
 
-(deftest t35_l203 (is ((fn [m] (= 1.0 (tensor/mget m 0 0))) v34_l200)))
+(deftest t35_l203 (is ((fn [m] (= 1.0 (m 0 0))) v34_l200)))
 
 
 (def v37_l207 (la/invert (la/matrix [[1 2] [3 4]])))

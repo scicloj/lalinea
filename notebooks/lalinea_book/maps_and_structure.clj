@@ -91,16 +91,16 @@
 (la/mmul R90 (la/column [1 0]))
 
 (kind/test-last
- [(fn [r] (and (< (abs (tensor/mget r 0 0)) 1e-10)
-               (< (abs (- (tensor/mget r 1 0) 1.0)) 1e-10)))])
+ [(fn [r] (and (< (abs (r 0 0)) 1e-10)
+               (< (abs (- (r 1 0) 1.0)) 1e-10)))])
 
 ;; And the y-axis to the negative x-axis:
 
 (la/mmul R90 (la/column [0 1]))
 
 (kind/test-last
- [(fn [r] (and (< (abs (- (tensor/mget r 0 0) -1.0)) 1e-10)
-               (< (abs (tensor/mget r 1 0)) 1e-10)))])
+ [(fn [r] (and (< (abs (- (r 0 0) -1.0)) 1e-10)
+               (< (abs (r 1 0)) 1e-10)))])
 
 ;; Visualising the effect on our vectors — each arrow
 ;; rotates 90° counter-clockwise:
@@ -169,9 +169,9 @@
 (la/mmul proj-xy (la/column [5 3 7]))
 
 (kind/test-last
- [(fn [r] (and (= 5.0 (tensor/mget r 0 0))
-               (= 3.0 (tensor/mget r 1 0))
-               (= 0.0 (tensor/mget r 2 0))))])
+ [(fn [r] (and (= 5.0 (r 0 0))
+               (= 3.0 (r 1 0))
+               (= 0.0 (r 2 0))))])
 
 ;; The $z$-component is gone and cannot be recovered.
 ;; The matrix is not invertible — its determinant is zero:

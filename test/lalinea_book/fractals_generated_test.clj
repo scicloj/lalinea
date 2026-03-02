@@ -35,8 +35,8 @@
  (let
   [g (complex-grid -2.0 1.0 -1.5 1.5 3 3) raw (cx/->tensor g)]
   {:shape (cx/complex-shape g),
-   :top-left-re (tensor/mget raw 0 0 0),
-   :bottom-right-im (tensor/mget raw 2 2 1)}))
+   :top-left-re (raw 0 0 0),
+   :bottom-right-im (raw 2 2 1)}))
 
 
 (deftest
@@ -77,7 +77,7 @@
         (dotimes
          [col w]
          (when
-          (< (tensor/mget abs-t r col) 2.0)
+          (< (abs-t r col) 2.0)
           (let
            [idx (+ (* r w) col)]
            (aset counts idx (inc (aget counts idx)))))))
@@ -199,7 +199,7 @@
         (dotimes
          [col w]
          (when
-          (< (tensor/mget abs-t r col) 2.0)
+          (< (abs-t r col) 2.0)
           (let
            [idx (+ (* r w) col)]
            (aset counts idx (inc (aget counts idx)))))))
@@ -310,8 +310,8 @@
    result
    (complex-div a b)]
   (and
-   (< (abs (- (tensor/mget (cx/re result) 0 0) 2.2)) 1.0E-10)
-   (< (abs (- (tensor/mget (cx/im result) 0 0) -0.4)) 1.0E-10))))
+   (< (abs (- ((cx/re result) 0 0) 2.2)) 1.0E-10)
+   (< (abs (- ((cx/im result) 0 0) -0.4)) 1.0E-10))))
 
 
 (deftest t37_l251 (is (true? v36_l245)))
@@ -356,9 +356,9 @@
           [idx
            (+ (* r w) c)
            zr
-           (tensor/mget (cx/->tensor z-final) r c 0)
+           ((cx/->tensor z-final) r c 0)
            zi
-           (tensor/mget (cx/->tensor z-final) r c 1)
+           ((cx/->tensor z-final) r c 1)
            best
            (reduce
             (fn

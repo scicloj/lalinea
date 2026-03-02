@@ -135,11 +135,11 @@ T-direct
 ;; The temperature decreases linearly — the left end is
 ;; close to 100° and the right end close to 0°:
 
-(tensor/mget T-direct 0 0)
+(T-direct 0 0)
 
 (kind/test-last [(fn [t] (> t 90.0))])
 
-(tensor/mget T-direct (dec n) 0)
+(T-direct (dec n) 0)
 
 (kind/test-last [(fn [t] (< t 10.0))])
 

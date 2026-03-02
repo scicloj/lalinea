@@ -52,8 +52,8 @@
 (let [g (complex-grid -2.0 1.0 -1.5 1.5 3 3)
       raw (cx/->tensor g)]
   {:shape (cx/complex-shape g)
-   :top-left-re (tensor/mget raw 0 0 0)
-   :bottom-right-im (tensor/mget raw 2 2 1)})
+   :top-left-re (raw 0 0 0)
+   :bottom-right-im (raw 2 2 1)})
 
 (kind/test-last
  [(fn [v] (and (= (:shape v) [3 3])
@@ -86,7 +86,7 @@
                 abs-t (la/abs z2)]
             (dotimes [r h]
               (dotimes [col w]
-                (when (< (tensor/mget abs-t r col) 2.0)
+                (when (< (abs-t r col) 2.0)
                   (let [idx (+ (* r w) col)]
                     (aset counts idx (inc (aget counts idx)))))))
             (recur z2 (inc k))))))))
@@ -158,7 +158,7 @@
                 abs-t (la/abs z2)]
             (dotimes [r h]
               (dotimes [col w]
-                (when (< (tensor/mget abs-t r col) 2.0)
+                (when (< (abs-t r col) 2.0)
                   (let [idx (+ (* r w) col)]
                     (aset counts idx (inc (aget counts idx)))))))
             (recur z2 (inc k))))))))
@@ -245,8 +245,8 @@
 (let [a (cx/complex-tensor (la/matrix [[3]]) (la/matrix [[4]]))
       b (cx/complex-tensor (la/matrix [[1]]) (la/matrix [[2]]))
       result (complex-div a b)]
-  (and (< (abs (- (tensor/mget (cx/re result) 0 0) 2.2)) 1e-10)
-       (< (abs (- (tensor/mget (cx/im result) 0 0) -0.4)) 1e-10)))
+  (and (< (abs (- ((cx/re result) 0 0) 2.2)) 1e-10)
+       (< (abs (- ((cx/im result) 0 0) -0.4)) 1e-10)))
 
 (kind/test-last [true?])
 
@@ -275,8 +275,8 @@
             (dotimes [r h]
               (dotimes [c w]
                 (let [idx (+ (* r w) c)
-                      zr (tensor/mget (cx/->tensor z-final) r c 0)
-                      zi (tensor/mget (cx/->tensor z-final) r c 1)
+                      zr ((cx/->tensor z-final) r c 0)
+                      zi ((cx/->tensor z-final) r c 1)
                       best (reduce (fn [best-i i]
                                      (let [root (nth roots i)
                                            dr (- zr (double (cx/re root)))

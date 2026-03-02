@@ -85,9 +85,7 @@
  (is
   ((fn
     [c]
-    (and
-     (< (abs (- (tensor/mget c 0 0) 2.0)) 0.5)
-     (< (abs (- (tensor/mget c 1 0) 3.0)) 0.5)))
+    (and (< (abs (- (c 0 0) 2.0)) 0.5) (< (abs (- (c 1 0) 3.0)) 0.5)))
    v14_l90)))
 
 
@@ -116,9 +114,9 @@
  v22_l116
  (let
   [c0
-   (tensor/mget c-linear 0 0)
+   (c-linear 0 0)
    c1
-   (tensor/mget c-linear 1 0)
+   (c-linear 1 0)
    x-fit
    (dtype/make-reader :float64 100 (* 0.019 idx))
    y-fit
@@ -220,9 +218,9 @@
   ((fn
     [c]
     (and
-     (< (abs (- (tensor/mget c 0 0) 1.0)) 1.0)
-     (< (abs (- (tensor/mget c 1 0) -2.0)) 1.0)
-     (< (abs (- (tensor/mget c 2 0) 1.0)) 1.0)))
+     (< (abs (- (c 0 0) 1.0)) 1.0)
+     (< (abs (- (c 1 0) -2.0)) 1.0)
+     (< (abs (- (c 2 0) 1.0)) 1.0)))
    v30_l167)))
 
 
@@ -230,11 +228,11 @@
  v33_l179
  (let
   [c0
-   (tensor/mget c-poly 0 0)
+   (c-poly 0 0)
    c1
-   (tensor/mget c-poly 1 0)
+   (c-poly 1 0)
    c2
-   (tensor/mget c-poly 2 0)
+   (c-poly 2 0)
    x-fit
    (dtype/make-reader :float64 100 (- (* 0.06 idx) 3.0))
    y-fit
@@ -438,10 +436,10 @@
   ((fn
     [c]
     (and
-     (< (abs (- (tensor/mget c 0 0) 3.0)) 0.3)
-     (< (abs (- (tensor/mget c 1 0) 2.0)) 0.3)
-     (< (abs (- (tensor/mget c 2 0) -1.5)) 0.3)
-     (< (abs (- (tensor/mget c 3 0) 0.5)) 0.3)))
+     (< (abs (- (c 0 0) 3.0)) 0.3)
+     (< (abs (- (c 1 0) 2.0)) 0.3)
+     (< (abs (- (c 2 0) -1.5)) 0.3)
+     (< (abs (- (c 3 0) 0.5)) 0.3)))
    v71_l329)))
 
 
@@ -452,16 +450,14 @@
    (dtype/make-reader :float64 200 (* (/ (* 2.0 math/PI) 200.0) idx))
    y-fit
    (dfn/+
-    (dfn/* (tensor/mget c-trig 0 0) 1.0)
+    (dfn/* (c-trig 0 0) 1.0)
     (dfn/+
-     (dfn/* (tensor/mget c-trig 1 0) (dfn/cos x-fit))
+     (dfn/* (c-trig 1 0) (dfn/cos x-fit))
      (dfn/+
-      (dfn/* (tensor/mget c-trig 2 0) (dfn/sin x-fit))
+      (dfn/* (c-trig 2 0) (dfn/sin x-fit))
       (dfn/+
-       (dfn/* (tensor/mget c-trig 3 0) (dfn/cos (dfn/* 2.0 x-fit)))
-       (dfn/*
-        (tensor/mget c-trig 4 0)
-        (dfn/sin (dfn/* 2.0 x-fit)))))))]
+       (dfn/* (c-trig 3 0) (dfn/cos (dfn/* 2.0 x-fit)))
+       (dfn/* (c-trig 4 0) (dfn/sin (dfn/* 2.0 x-fit)))))))]
   (->
    (tc/dataset {:x x-trig, :y y-trig, :type (repeat 40 "data")})
    (tc/concat

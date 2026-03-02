@@ -21,13 +21,13 @@
 (def v6_l38 (la/eye 3))
 
 
-(deftest t7_l40 (is ((fn [m] (= 1.0 (tensor/mget m 1 1))) v6_l38)))
+(deftest t7_l40 (is ((fn [m] (= 1.0 (m 1 1))) v6_l38)))
 
 
 (def v8_l42 (la/zeros 2 3))
 
 
-(deftest t9_l44 (is ((fn [m] (= 0.0 (tensor/mget m 0 0))) v8_l42)))
+(deftest t9_l44 (is ((fn [m] (= 0.0 (m 0 0))) v8_l42)))
 
 
 (def v11_l48 (la/diag [1 2 3]))
@@ -36,8 +36,7 @@
 (deftest
  t12_l50
  (is
-  ((fn [m] (and (= [3 3] (dtype/shape m)) (= 2.0 (tensor/mget m 1 1))))
-   v11_l48)))
+  ((fn [m] (and (= [3 3] (dtype/shape m)) (= 2.0 (m 1 1)))) v11_l48)))
 
 
 (def
@@ -45,13 +44,13 @@
  (la/mmul (la/matrix [[1 2] [3 4]]) (la/matrix [[5 6] [7 8]])))
 
 
-(deftest t16_l62 (is ((fn [m] (= 19.0 (tensor/mget m 0 0))) v14_l57)))
+(deftest t16_l62 (is ((fn [m] (= 19.0 (m 0 0))) v14_l57)))
 
 
 (def v17_l64 (la/transpose (la/matrix [[1 2] [3 4]])))
 
 
-(deftest t18_l66 (is ((fn [m] (= 3.0 (tensor/mget m 0 1))) v17_l64)))
+(deftest t18_l66 (is ((fn [m] (= 3.0 (m 0 1))) v17_l64)))
 
 
 (def v20_l70 (la/det (la/matrix [[1 2] [3 4]])))
@@ -85,8 +84,8 @@
   ((fn
     [x]
     (and
-     (< (abs (- (tensor/mget x 0 0) 1.0)) 1.0E-10)
-     (< (abs (- (tensor/mget x 1 0) 3.0)) 1.0E-10)))
+     (< (abs (- (x 0 0) 1.0)) 1.0E-10)
+     (< (abs (- (x 1 0) 3.0)) 1.0E-10)))
    v27_l88)))
 
 
@@ -169,9 +168,7 @@
 (deftest t52_l156 (is ((fn [v] (= v 10.0)) v51_l154)))
 
 
-(def
- v54_l160
- (tensor/mget (la/scale (la/matrix [[1 2] [3 4]]) 2.0) 1 1))
+(def v54_l160 ((la/scale (la/matrix [[1 2] [3 4]]) 2.0) 1 1))
 
 
 (deftest t55_l162 (is (= v54_l160 8.0)))
@@ -278,7 +275,7 @@
     (la/sum (la/sq (la/sub (la/mmul A A) (la/matrix [[1 0] [0 1]])))))
    grads
    (grad/grad tape-result (:result tape-result))]
-  (tensor/mget (.get grads A) 0 0)))
+  ((.get grads A) 0 0)))
 
 
 (deftest t85_l244 (is ((fn [v] (number? v)) v84_l237)))

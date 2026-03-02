@@ -30,11 +30,7 @@
 
 (deftest
  t9_l57
- (is
-  ((fn
-    [r]
-    (and (= 4.0 (tensor/mget r 0 0)) (= 3.0 (tensor/mget r 1 0))))
-   v8_l55)))
+ (is ((fn [r] (and (= 4.0 (r 0 0)) (= 3.0 (r 1 0)))) v8_l55)))
 
 
 (def
@@ -51,11 +47,7 @@
 
 (deftest
  t13_l73
- (is
-  ((fn
-    [r]
-    (and (= 6.0 (tensor/mget r 0 0)) (= 2.0 (tensor/mget r 1 0))))
-   v12_l71)))
+ (is ((fn [r] (and (= 6.0 (r 0 0)) (= 2.0 (r 1 0)))) v12_l71)))
 
 
 (def
@@ -71,11 +63,7 @@
 
 (deftest
  t17_l85
- (is
-  ((fn
-    [r]
-    (and (= -3.0 (tensor/mget r 0 0)) (= -1.0 (tensor/mget r 1 0))))
-   v16_l83)))
+ (is ((fn [r] (and (= -3.0 (r 0 0)) (= -1.0 (r 1 0)))) v16_l83)))
 
 
 (def
@@ -157,11 +145,7 @@
 
 (deftest
  t48_l209
- (is
-  ((fn
-    [r]
-    (and (= 5.0 (tensor/mget r 0 0)) (= 0.0 (tensor/mget r 1 0))))
-   v47_l207)))
+ (is ((fn [r] (and (= 5.0 (r 0 0)) (= 0.0 (r 1 0)))) v47_l207)))
 
 
 (def
@@ -190,9 +174,7 @@
      [n 2]
      (fn
       [i j]
-      (let
-       [[a b] (nth coeffs i)]
-       (+ (* a (tensor/mget u j 0)) (* b (tensor/mget v j 0)))))
+      (let [[a b] (nth coeffs i)] (+ (* a (u j 0)) (* b (v j 0)))))
      :float64))
    xs
    (tensor/select points :all 0)
@@ -222,9 +204,7 @@
      [n 2]
      (fn
       [i j]
-      (let
-       [[a b] (nth coeffs i)]
-       (+ (* a (tensor/mget s1 j 0)) (* b (tensor/mget s2 j 0)))))
+      (let [[a b] (nth coeffs i)] (+ (* a (s1 j 0)) (* b (s2 j 0)))))
      :float64))
    xs
    (tensor/select points :all 0)

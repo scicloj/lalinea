@@ -174,10 +174,10 @@ D-result
 
 (kind/test-last
  [(fn [d]
-    (and (< (abs (- (tensor/mget d 0 0) 2.0)) 1e-10)
-         (< (abs (tensor/mget d 0 1)) 1e-10)
-         (< (abs (tensor/mget d 1 0)) 1e-10)
-         (< (abs (- (tensor/mget d 1 1) 3.0)) 1e-10)))])
+    (and (< (abs (- (d 0 0) 2.0)) 1e-10)
+         (< (abs (d 0 1)) 1e-10)
+         (< (abs (d 1 0)) 1e-10)
+         (< (abs (- (d 1 1) 3.0)) 1e-10)))])
 
 ;; In the eigenvector basis, the map is just scaling along
 ;; each axis. This is the simplest possible form.
@@ -194,7 +194,7 @@ D-result
 (def A-diag-sq-via-eigen
   (let [Pinv (la/invert P-cols)
         D2 (la/diag (dtype/make-reader :float64 2
-                                       (let [lam (tensor/mget D-result idx idx)]
+                                       (let [lam (D-result idx idx)]
                                          (* lam lam))))]
     (la/mmul P-cols (la/mmul D2 Pinv))))
 
@@ -415,7 +415,7 @@ chol-L
  [(fn [L] (let [[r c] (dtype/shape L)]
             (and (= r c)
                  ;; upper triangle is zero (lower triangular)
-                 (every? (fn [i] (every? (fn [j] (< (abs (tensor/mget L i j)) 1e-10))
+                 (every? (fn [i] (every? (fn [j] (< (abs (L i j)) 1e-10))
                                          (range (inc i) c)))
                          (range r)))))])
 

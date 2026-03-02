@@ -360,11 +360,7 @@
  (let
   [{:keys [R]} (la/qr A)]
   (every?
-   (fn
-    [i]
-    (every?
-     (fn [j] (< (abs (tensor/mget R i j)) 1.0E-10))
-     (range 0 i)))
+   (fn [i] (every? (fn [j] (< (abs (R i j)) 1.0E-10)) (range 0 i)))
    (range 1 3))))
 
 

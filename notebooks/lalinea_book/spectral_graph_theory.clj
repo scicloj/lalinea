@@ -94,8 +94,8 @@ L
 (kind/test-last
  [(fn [m]
     (and (= [6 6] (dtype/shape m))
-         (= 2.0 (tensor/mget m 0 0))
-         (= -1.0 (tensor/mget m 0 1))))])
+         (= 2.0 (m 0 0))
+         (= -1.0 (m 0 1))))])
 
 ;; Key properties of $L$:
 ;;

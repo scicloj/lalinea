@@ -91,8 +91,8 @@ c-linear
 
 (kind/test-last
  [(fn [c]
-    (and (< (abs (- (tensor/mget c 0 0) 2.0)) 0.5)
-         (< (abs (- (tensor/mget c 1 0) 3.0)) 0.5)))])
+    (and (< (abs (- (c 0 0) 2.0)) 0.5)
+         (< (abs (- (c 1 0) 3.0)) 0.5)))])
 
 ;; The fitted coefficients are close to the true values
 ;; $c_0 \approx 2$, $c_1 \approx 3$.
@@ -113,8 +113,8 @@ rms-linear
 
 ;; Visualise the fit:
 
-(let [c0 (tensor/mget c-linear 0 0)
-      c1 (tensor/mget c-linear 1 0)
+(let [c0 (c-linear 0 0)
+      c1 (c-linear 1 0)
       x-fit (dtype/make-reader :float64 100 (* 0.019 idx))
       y-fit (dfn/+ c0 (dfn/* c1 x-fit))]
   (-> (tc/dataset {:x x-data
@@ -168,17 +168,17 @@ c-poly
 
 (kind/test-last
  [(fn [c]
-    (and (< (abs (- (tensor/mget c 0 0) 1.0)) 1.0)
-         (< (abs (- (tensor/mget c 1 0) -2.0)) 1.0)
-         (< (abs (- (tensor/mget c 2 0) 1.0)) 1.0)))])
+    (and (< (abs (- (c 0 0) 1.0)) 1.0)
+         (< (abs (- (c 1 0) -2.0)) 1.0)
+         (< (abs (- (c 2 0) 1.0)) 1.0)))])
 
 ;; The fitted coefficients recover the true polynomial $1 - 2x + x^2$.
 
 ;; Visualise:
 
-(let [c0 (tensor/mget c-poly 0 0)
-      c1 (tensor/mget c-poly 1 0)
-      c2 (tensor/mget c-poly 2 0)
+(let [c0 (c-poly 0 0)
+      c1 (c-poly 1 0)
+      c2 (c-poly 2 0)
       x-fit (dtype/make-reader :float64 100 (- (* 0.06 idx) 3.0))
       y-fit (dfn/+ c0 (dfn/+ (dfn/* c1 x-fit) (dfn/* c2 (dfn/* x-fit x-fit))))]
   (-> (tc/dataset {:x x-poly
@@ -313,14 +313,14 @@ S-svd
 
 (def A-trig
   (la/compute-matrix (count x-trig) 5
-    (fn [i j]
-      (let [xi (double (x-trig i))]
-        (case (int j)
-          0 1.0
-          1 (math/cos xi)
-          2 (math/sin xi)
-          3 (math/cos (* 2.0 xi))
-          4 (math/sin (* 2.0 xi)))))))
+                     (fn [i j]
+                       (let [xi (double (x-trig i))]
+                         (case (int j)
+                           0 1.0
+                           1 (math/cos xi)
+                           2 (math/sin xi)
+                           3 (math/cos (* 2.0 xi))
+                           4 (math/sin (* 2.0 xi)))))))
 
 (def c-trig
   (la/solve (la/mmul (la/transpose A-trig) A-trig)
@@ -330,10 +330,10 @@ c-trig
 
 (kind/test-last
  [(fn [c]
-    (and (< (abs (- (tensor/mget c 0 0) 3.0)) 0.3)
-         (< (abs (- (tensor/mget c 1 0) 2.0)) 0.3)
-         (< (abs (- (tensor/mget c 2 0) -1.5)) 0.3)
-         (< (abs (- (tensor/mget c 3 0) 0.5)) 0.3)))])
+    (and (< (abs (- (c 0 0) 3.0)) 0.3)
+         (< (abs (- (c 1 0) 2.0)) 0.3)
+         (< (abs (- (c 2 0) -1.5)) 0.3)
+         (< (abs (- (c 3 0) 0.5)) 0.3)))])
 
 ;; The recovered coefficients are close to the true values:
 ;; $a_0 \approx 3$, $a_1 \approx 2$, $b_1 \approx -1.5$, $a_2 \approx 0.5$.
@@ -342,11 +342,11 @@ c-trig
 
 (let [x-fit (dtype/make-reader :float64 200
                                (* (/ (* 2.0 math/PI) 200.0) idx))
-      y-fit (dfn/+ (dfn/* (tensor/mget c-trig 0 0) 1.0)
-                   (dfn/+ (dfn/* (tensor/mget c-trig 1 0) (dfn/cos x-fit))
-                          (dfn/+ (dfn/* (tensor/mget c-trig 2 0) (dfn/sin x-fit))
-                                 (dfn/+ (dfn/* (tensor/mget c-trig 3 0) (dfn/cos (dfn/* 2.0 x-fit)))
-                                        (dfn/* (tensor/mget c-trig 4 0) (dfn/sin (dfn/* 2.0 x-fit)))))))]
+      y-fit (dfn/+ (dfn/* (c-trig 0 0) 1.0)
+                   (dfn/+ (dfn/* (c-trig 1 0) (dfn/cos x-fit))
+                          (dfn/+ (dfn/* (c-trig 2 0) (dfn/sin x-fit))
+                                 (dfn/+ (dfn/* (c-trig 3 0) (dfn/cos (dfn/* 2.0 x-fit)))
+                                        (dfn/* (c-trig 4 0) (dfn/sin (dfn/* 2.0 x-fit)))))))]
   (-> (tc/dataset {:x x-trig
                    :y y-trig
                    :type (repeat 40 "data")})

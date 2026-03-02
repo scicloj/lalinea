@@ -55,8 +55,8 @@
 (la/add u v)
 
 (kind/test-last
- [(fn [r] (and (= 4.0 (tensor/mget r 0 0))
-               (= 3.0 (tensor/mget r 1 0))))])
+ [(fn [r] (and (= 4.0 (r 0 0))
+               (= 3.0 (r 1 0))))])
 
 (vis/arrow-plot [{:label "u" :xy [3 1] :color "#2266cc"}
                  {:label "v" :xy [1 2] :color "#cc4422" :from [3 1]}
@@ -71,8 +71,8 @@
 (la/scale u 2.0)
 
 (kind/test-last
- [(fn [r] (and (= 6.0 (tensor/mget r 0 0))
-               (= 2.0 (tensor/mget r 1 0))))])
+ [(fn [r] (and (= 6.0 (r 0 0))
+               (= 2.0 (r 1 0))))])
 
 (vis/arrow-plot [{:label "u" :xy [3 1] :color "#2266cc"}
                  {:label "2u" :xy [6 2] :color "#8844cc"}]
@@ -83,8 +83,8 @@
 (la/scale u -1.0)
 
 (kind/test-last
- [(fn [r] (and (= -3.0 (tensor/mget r 0 0))
-               (= -1.0 (tensor/mget r 1 0))))])
+ [(fn [r] (and (= -3.0 (r 0 0))
+               (= -1.0 (r 1 0))))])
 
 (vis/arrow-plot [{:label "u" :xy [3 1] :color "#2266cc"}
                  {:label "\u2212u" :xy [-3 -1] :color "#cc4422"}]
@@ -207,8 +207,8 @@
 (la/add (la/scale u 2.0) (la/scale v -1.0))
 
 (kind/test-last
- [(fn [r] (and (= 5.0 (tensor/mget r 0 0))
-               (= 0.0 (tensor/mget r 1 0))))])
+ [(fn [r] (and (= 5.0 (r 0 0))
+               (= 0.0 (r 1 0))))])
 
 ;; $2 \cdot [3,1]^T + (-1) \cdot [1,2]^T = [5,0]^T$.
 ;; We combined $\mathbf{u}$ and $\mathbf{v}$ to reach a new point.
@@ -239,8 +239,8 @@
               (tensor/compute-tensor [n 2]
                                      (fn [i j]
                                        (let [[a b] (nth coeffs i)]
-                                         (+ (* a (tensor/mget u j 0))
-                                            (* b (tensor/mget v j 0)))))
+                                         (+ (* a (u j 0))
+                                            (* b (v j 0)))))
                                      :float64))
       xs (tensor/select points :all 0)
       ys (tensor/select points :all 1)]
@@ -266,8 +266,8 @@
               (tensor/compute-tensor [n 2]
                                      (fn [i j]
                                        (let [[a b] (nth coeffs i)]
-                                         (+ (* a (tensor/mget s1 j 0))
-                                            (* b (tensor/mget s2 j 0)))))
+                                         (+ (* a (s1 j 0))
+                                            (* b (s2 j 0)))))
                                      :float64))
       xs (tensor/select points :all 0)
       ys (tensor/select points :all 1)]

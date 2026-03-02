@@ -41,8 +41,8 @@
 (la/eye 3)
 
 (kind/test-last [(fn [m] (and (= [3 3] (dtype/shape m))
-                              (== 1.0 (tensor/mget m 0 0))
-                              (== 0.0 (tensor/mget m 0 1))))])
+                              (== 1.0 (m 0 0))
+                              (== 0.0 (m 0 1))))])
 
 (kind/doc #'la/zeros)
 
@@ -55,8 +55,8 @@
 (la/diag [3 5 7])
 
 (kind/test-last [(fn [m] (and (= [3 3] (dtype/shape m))
-                              (== 5.0 (tensor/mget m 1 1))
-                              (== 0.0 (tensor/mget m 0 1))))])
+                              (== 5.0 (m 1 1))
+                              (== 0.0 (m 0 1))))])
 
 ;; Extract diagonal from a 2D matrix:
 
@@ -81,40 +81,40 @@
 (la/add (la/matrix [[1 2] [3 4]])
         (la/matrix [[10 20] [30 40]]))
 
-(kind/test-last [(fn [m] (== 11.0 (tensor/mget m 0 0)))])
+(kind/test-last [(fn [m] (== 11.0 (m 0 0)))])
 
 (kind/doc #'la/sub)
 
 (la/sub (la/matrix [[10 20] [30 40]])
         (la/matrix [[1 2] [3 4]]))
 
-(kind/test-last [(fn [m] (== 9.0 (tensor/mget m 0 0)))])
+(kind/test-last [(fn [m] (== 9.0 (m 0 0)))])
 
 (kind/doc #'la/scale)
 
 (la/scale (la/matrix [[1 2] [3 4]]) 3.0)
 
-(kind/test-last [(fn [m] (== 6.0 (tensor/mget m 0 1)))])
+(kind/test-last [(fn [m] (== 6.0 (m 0 1)))])
 
 (kind/doc #'la/mul)
 
 (la/mul (la/matrix [[2 3] [4 5]])
         (la/matrix [[10 20] [30 40]]))
 
-(kind/test-last [(fn [m] (and (== 20.0 (tensor/mget m 0 0))
-                              (== 60.0 (tensor/mget m 0 1))))])
+(kind/test-last [(fn [m] (and (== 20.0 (m 0 0))
+                              (== 60.0 (m 0 1))))])
 
 (kind/doc #'la/abs)
 
 (la/abs (la/matrix [[-3 2] [-1 4]]))
 
-(kind/test-last [(fn [m] (== 3.0 (tensor/mget m 0 0)))])
+(kind/test-last [(fn [m] (== 3.0 (m 0 0)))])
 
 (kind/doc #'la/sq)
 
 (la/sq (la/matrix [[2 3] [4 5]]))
 
-(kind/test-last [(fn [m] (== 4.0 (tensor/mget m 0 0)))])
+(kind/test-last [(fn [m] (== 4.0 (m 0 0)))])
 
 (kind/doc #'la/sum)
 
@@ -161,7 +161,7 @@
          (la/column [5 6]))
 
 (kind/test-last [(fn [m] (and (= [2 1] (dtype/shape m))
-                              (== 17.0 (tensor/mget m 0 0))))])
+                              (== 17.0 (m 0 0))))])
 
 (kind/doc #'la/transpose)
 
@@ -229,8 +229,8 @@
       b (la/column [5 7])]
   (la/solve A b))
 
-(kind/test-last [(fn [x] (and (la/close-scalar? (tensor/mget x 0 0) 1.6)
-                              (la/close-scalar? (tensor/mget x 1 0) 1.8)))])
+(kind/test-last [(fn [x] (and (la/close-scalar? (x 0 0) 1.6)
+                              (la/close-scalar? (x 1 0) 1.8)))])
 
 (kind/doc #'la/eigen)
 
@@ -388,8 +388,8 @@
 ;; One-shot bridge: unwrap, apply, re-wrap. Pass a Var for tape recording.
 (la/lift dfn/sqrt (la/matrix [[4 9] [16 25]]))
 
-(kind/test-last [(fn [m] (and (la/close-scalar? (tensor/mget m 0 0) 2.0)
-                              (la/close-scalar? (tensor/mget m 0 1) 3.0)))])
+(kind/test-last [(fn [m] (and (la/close-scalar? (m 0 0) 2.0)
+                              (la/close-scalar? (m 0 1) 3.0)))])
 
 (kind/doc #'la/lifted)
 
@@ -397,7 +397,7 @@
 (let [my-sqrt (la/lifted dfn/sqrt)]
   (my-sqrt (la/column [4 9 16])))
 
-(kind/test-last [(fn [v] (la/close-scalar? (tensor/mget v 0 0) 2.0))])
+(kind/test-last [(fn [v] (la/close-scalar? (v 0 0) 2.0))])
 
 ;; ## `scicloj.lalinea.complex`
 ;;
@@ -716,71 +716,71 @@
 
 (elem/sq (la/column [2 3 4]))
 
-(kind/test-last [(fn [v] (la/close-scalar? (tensor/mget v 0 0) 4.0))])
+(kind/test-last [(fn [v] (la/close-scalar? (v 0 0) 4.0))])
 
 (kind/doc #'elem/sqrt)
 
 (elem/sqrt (la/column [4 9 16]))
 
-(kind/test-last [(fn [v] (la/close-scalar? (tensor/mget v 0 0) 2.0))])
+(kind/test-last [(fn [v] (la/close-scalar? (v 0 0) 2.0))])
 
 (kind/doc #'elem/exp)
 
-(la/close-scalar? (tensor/mget (elem/exp (la/column [0])) 0 0) 1.0)
+(la/close-scalar? ((elem/exp (la/column [0])) 0 0) 1.0)
 
 (kind/test-last [true?])
 
 (kind/doc #'elem/log)
 
-(la/close-scalar? (tensor/mget (elem/log (la/column [math/E])) 0 0) 1.0)
+(la/close-scalar? ((elem/log (la/column [math/E])) 0 0) 1.0)
 
 (kind/test-last [true?])
 
 (kind/doc #'elem/log10)
 
-(la/close-scalar? (tensor/mget (elem/log10 (la/column [100])) 0 0) 2.0)
+(la/close-scalar? ((elem/log10 (la/column [100])) 0 0) 2.0)
 
 (kind/test-last [true?])
 
 (kind/doc #'elem/sin)
 
-(la/close-scalar? (tensor/mget (elem/sin (la/column [(/ math/PI 2)])) 0 0) 1.0)
+(la/close-scalar? ((elem/sin (la/column [(/ math/PI 2)])) 0 0) 1.0)
 
 (kind/test-last [true?])
 
 (kind/doc #'elem/cos)
 
-(la/close-scalar? (tensor/mget (elem/cos (la/column [0])) 0 0) 1.0)
+(la/close-scalar? ((elem/cos (la/column [0])) 0 0) 1.0)
 
 (kind/test-last [true?])
 
 (kind/doc #'elem/tan)
 
-(la/close-scalar? (tensor/mget (elem/tan (la/column [(/ math/PI 4)])) 0 0) 1.0)
+(la/close-scalar? ((elem/tan (la/column [(/ math/PI 4)])) 0 0) 1.0)
 
 (kind/test-last [true?])
 
 (kind/doc #'elem/sinh)
 
-(la/close-scalar? (tensor/mget (elem/sinh (la/column [0])) 0 0) 0.0)
+(la/close-scalar? ((elem/sinh (la/column [0])) 0 0) 0.0)
 
 (kind/test-last [true?])
 
 (kind/doc #'elem/cosh)
 
-(la/close-scalar? (tensor/mget (elem/cosh (la/column [0])) 0 0) 1.0)
+(la/close-scalar? ((elem/cosh (la/column [0])) 0 0) 1.0)
 
 (kind/test-last [true?])
 
 (kind/doc #'elem/tanh)
 
-(la/close-scalar? (tensor/mget (elem/tanh (la/column [0])) 0 0) 0.0)
+(la/close-scalar? ((elem/tanh (la/column [0])) 0 0) 0.0)
 
 (kind/test-last [true?])
 
 (kind/doc #'elem/abs)
 
-(tensor/mget (elem/abs (la/column [-5])) 0 0)
+((elem/abs (la/column [-5])) 0 0)
 
 (kind/test-last [(fn [v] (== 5.0 v))])
 
@@ -798,73 +798,73 @@
 
 (kind/doc #'elem/pow)
 
-(tensor/mget (elem/pow (la/column [2]) 3) 0 0)
+((elem/pow (la/column [2]) 3) 0 0)
 
 (kind/test-last [(fn [v] (== 8.0 v))])
 
 (kind/doc #'elem/cbrt)
 
-(la/close-scalar? (tensor/mget (elem/cbrt (la/column [27])) 0 0) 3.0)
+(la/close-scalar? ((elem/cbrt (la/column [27])) 0 0) 3.0)
 
 (kind/test-last [true?])
 
 (kind/doc #'elem/floor)
 
-(tensor/mget (elem/floor (la/column [2.7])) 0 0)
+((elem/floor (la/column [2.7])) 0 0)
 
 (kind/test-last [(fn [v] (== 2.0 v))])
 
 (kind/doc #'elem/ceil)
 
-(tensor/mget (elem/ceil (la/column [2.3])) 0 0)
+((elem/ceil (la/column [2.3])) 0 0)
 
 (kind/test-last [(fn [v] (== 3.0 v))])
 
 (kind/doc #'elem/min)
 
-(tensor/mget (elem/min (la/column [3]) (la/column [5])) 0 0)
+((elem/min (la/column [3]) (la/column [5])) 0 0)
 
 (kind/test-last [(fn [v] (== 3.0 v))])
 
 (kind/doc #'elem/max)
 
-(tensor/mget (elem/max (la/column [3]) (la/column [5])) 0 0)
+((elem/max (la/column [3]) (la/column [5])) 0 0)
 
 (kind/test-last [(fn [v] (== 5.0 v))])
 
 (kind/doc #'elem/asin)
 
-(tensor/mget (elem/asin (la/column [0.5])) 0 0)
+((elem/asin (la/column [0.5])) 0 0)
 
 (kind/test-last [(fn [v] (la/close-scalar? v (math/asin 0.5)))])
 
 (kind/doc #'elem/acos)
 
-(tensor/mget (elem/acos (la/column [0.5])) 0 0)
+((elem/acos (la/column [0.5])) 0 0)
 
 (kind/test-last [(fn [v] (la/close-scalar? v (math/acos 0.5)))])
 
 (kind/doc #'elem/atan)
 
-(tensor/mget (elem/atan (la/column [1.0])) 0 0)
+((elem/atan (la/column [1.0])) 0 0)
 
 (kind/test-last [(fn [v] (la/close-scalar? v (math/atan 1.0)))])
 
 (kind/doc #'elem/log1p)
 
-(tensor/mget (elem/log1p (la/column [0.0])) 0 0)
+((elem/log1p (la/column [0.0])) 0 0)
 
 (kind/test-last [(fn [v] (la/close-scalar? v 0.0))])
 
 (kind/doc #'elem/expm1)
 
-(tensor/mget (elem/expm1 (la/column [0.0])) 0 0)
+((elem/expm1 (la/column [0.0])) 0 0)
 
 (kind/test-last [(fn [v] (la/close-scalar? v 0.0))])
 
 (kind/doc #'elem/round)
 
-(tensor/mget (elem/round (la/column [2.7])) 0 0)
+((elem/round (la/column [2.7])) 0 0)
 
 (kind/test-last [(fn [v] (== 3.0 v))])
 

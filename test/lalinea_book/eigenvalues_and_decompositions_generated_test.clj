@@ -104,7 +104,7 @@
     sorted-idx
     (sort-by (fn [i] (cx/re ((:eigenvalues eig-diag) i))) (range 2))]
    (la/hstack
-    (mapv (fn* [p1__80782#] (nth evecs p1__80782#)) sorted-idx)))))
+    (mapv (fn* [p1__84655#] (nth evecs p1__84655#)) sorted-idx)))))
 
 
 (def
@@ -121,10 +121,10 @@
   ((fn
     [d]
     (and
-     (< (abs (- (tensor/mget d 0 0) 2.0)) 1.0E-10)
-     (< (abs (tensor/mget d 0 1)) 1.0E-10)
-     (< (abs (tensor/mget d 1 0)) 1.0E-10)
-     (< (abs (- (tensor/mget d 1 1) 3.0)) 1.0E-10)))
+     (< (abs (- (d 0 0) 2.0)) 1.0E-10)
+     (< (abs (d 0 1)) 1.0E-10)
+     (< (abs (d 1 0)) 1.0E-10)
+     (< (abs (- (d 1 1) 3.0)) 1.0E-10)))
    v29_l173)))
 
 
@@ -143,7 +143,7 @@
      (dtype/make-reader
       :float64
       2
-      (let [lam (tensor/mget D-result idx idx)] (* lam lam))))]
+      (let [lam (D-result idx idx)] (* lam lam))))]
    (la/mmul P-cols (la/mmul D2 Pinv)))))
 
 
@@ -246,7 +246,7 @@
 (def
  v69_l394
  (every?
-  (fn* [p1__80783#] (>= p1__80783# -1.0E-10))
+  (fn* [p1__84656#] (>= p1__84656# -1.0E-10))
   (cx/re (:eigenvalues (la/eigen ATA)))))
 
 
@@ -276,9 +276,7 @@
       (every?
        (fn
         [i]
-        (every?
-         (fn [j] (< (abs (tensor/mget L i j)) 1.0E-10))
-         (range (inc i) c)))
+        (every? (fn [j] (< (abs (L i j)) 1.0E-10)) (range (inc i) c)))
        (range r)))))
    v74_l412)))
 

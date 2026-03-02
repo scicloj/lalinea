@@ -37,10 +37,7 @@
  (is
   ((fn
     [m]
-    (and
-     (= [3 3] (dtype/shape m))
-     (== 1.0 (tensor/mget m 0 0))
-     (== 0.0 (tensor/mget m 0 1))))
+    (and (= [3 3] (dtype/shape m)) (== 1.0 (m 0 0)) (== 0.0 (m 0 1))))
    v7_l41)))
 
 
@@ -64,10 +61,7 @@
  (is
   ((fn
     [m]
-    (and
-     (= [3 3] (dtype/shape m))
-     (== 5.0 (tensor/mget m 1 1))
-     (== 0.0 (tensor/mget m 0 1))))
+    (and (= [3 3] (dtype/shape m)) (== 5.0 (m 1 1)) (== 0.0 (m 0 1))))
    v13_l55)))
 
 
@@ -103,7 +97,7 @@
  (la/add (la/matrix [[1 2] [3 4]]) (la/matrix [[10 20] [30 40]])))
 
 
-(deftest t26_l84 (is ((fn [m] (== 11.0 (tensor/mget m 0 0))) v25_l81)))
+(deftest t26_l84 (is ((fn [m] (== 11.0 (m 0 0))) v25_l81)))
 
 
 (def v27_l86 (kind/doc #'la/sub))
@@ -114,7 +108,7 @@
  (la/sub (la/matrix [[10 20] [30 40]]) (la/matrix [[1 2] [3 4]])))
 
 
-(deftest t29_l91 (is ((fn [m] (== 9.0 (tensor/mget m 0 0))) v28_l88)))
+(deftest t29_l91 (is ((fn [m] (== 9.0 (m 0 0))) v28_l88)))
 
 
 (def v30_l93 (kind/doc #'la/scale))
@@ -123,7 +117,7 @@
 (def v31_l95 (la/scale (la/matrix [[1 2] [3 4]]) 3.0))
 
 
-(deftest t32_l97 (is ((fn [m] (== 6.0 (tensor/mget m 0 1))) v31_l95)))
+(deftest t32_l97 (is ((fn [m] (== 6.0 (m 0 1))) v31_l95)))
 
 
 (def v33_l99 (kind/doc #'la/mul))
@@ -136,11 +130,7 @@
 
 (deftest
  t35_l104
- (is
-  ((fn
-    [m]
-    (and (== 20.0 (tensor/mget m 0 0)) (== 60.0 (tensor/mget m 0 1))))
-   v34_l101)))
+ (is ((fn [m] (and (== 20.0 (m 0 0)) (== 60.0 (m 0 1)))) v34_l101)))
 
 
 (def v36_l107 (kind/doc #'la/abs))
@@ -149,7 +139,7 @@
 (def v37_l109 (la/abs (la/matrix [[-3 2] [-1 4]])))
 
 
-(deftest t38_l111 (is ((fn [m] (== 3.0 (tensor/mget m 0 0))) v37_l109)))
+(deftest t38_l111 (is ((fn [m] (== 3.0 (m 0 0))) v37_l109)))
 
 
 (def v39_l113 (kind/doc #'la/sq))
@@ -158,7 +148,7 @@
 (def v40_l115 (la/sq (la/matrix [[2 3] [4 5]])))
 
 
-(deftest t41_l117 (is ((fn [m] (== 4.0 (tensor/mget m 0 0))) v40_l115)))
+(deftest t41_l117 (is ((fn [m] (== 4.0 (m 0 0))) v40_l115)))
 
 
 (def v42_l119 (kind/doc #'la/sum))
@@ -233,9 +223,7 @@
 (deftest
  t63_l163
  (is
-  ((fn
-    [m]
-    (and (= [2 1] (dtype/shape m)) (== 17.0 (tensor/mget m 0 0))))
+  ((fn [m] (and (= [2 1] (dtype/shape m)) (== 17.0 (m 0 0))))
    v62_l160)))
 
 
@@ -344,8 +332,8 @@
   ((fn
     [x]
     (and
-     (la/close-scalar? (tensor/mget x 0 0) 1.6)
-     (la/close-scalar? (tensor/mget x 1 0) 1.8)))
+     (la/close-scalar? (x 0 0) 1.6)
+     (la/close-scalar? (x 1 0) 1.8)))
    v95_l228)))
 
 
@@ -623,8 +611,8 @@
   ((fn
     [m]
     (and
-     (la/close-scalar? (tensor/mget m 0 0) 2.0)
-     (la/close-scalar? (tensor/mget m 0 1) 3.0)))
+     (la/close-scalar? (m 0 0) 2.0)
+     (la/close-scalar? (m 0 1) 3.0)))
    v161_l389)))
 
 
@@ -638,7 +626,7 @@
 
 (deftest
  t166_l400
- (is ((fn [v] (la/close-scalar? (tensor/mget v 0 0) 2.0)) v165_l397)))
+ (is ((fn [v] (la/close-scalar? (v 0 0) 2.0)) v165_l397)))
 
 
 (def v168_l407 (kind/doc #'cx/complex-tensor))
@@ -1162,7 +1150,7 @@
 
 (deftest
  t299_l719
- (is ((fn [v] (la/close-scalar? (tensor/mget v 0 0) 4.0)) v298_l717)))
+ (is ((fn [v] (la/close-scalar? (v 0 0) 4.0)) v298_l717)))
 
 
 (def v300_l721 (kind/doc #'elem/sqrt))
@@ -1173,15 +1161,13 @@
 
 (deftest
  t302_l725
- (is ((fn [v] (la/close-scalar? (tensor/mget v 0 0) 2.0)) v301_l723)))
+ (is ((fn [v] (la/close-scalar? (v 0 0) 2.0)) v301_l723)))
 
 
 (def v303_l727 (kind/doc #'elem/exp))
 
 
-(def
- v304_l729
- (la/close-scalar? (tensor/mget (elem/exp (la/column [0])) 0 0) 1.0))
+(def v304_l729 (la/close-scalar? ((elem/exp (la/column [0])) 0 0) 1.0))
 
 
 (deftest t305_l731 (is (true? v304_l729)))
@@ -1192,9 +1178,7 @@
 
 (def
  v307_l735
- (la/close-scalar?
-  (tensor/mget (elem/log (la/column [math/E])) 0 0)
-  1.0))
+ (la/close-scalar? ((elem/log (la/column [math/E])) 0 0) 1.0))
 
 
 (deftest t308_l737 (is (true? v307_l735)))
@@ -1205,9 +1189,7 @@
 
 (def
  v310_l741
- (la/close-scalar?
-  (tensor/mget (elem/log10 (la/column [100])) 0 0)
-  2.0))
+ (la/close-scalar? ((elem/log10 (la/column [100])) 0 0) 2.0))
 
 
 (deftest t311_l743 (is (true? v310_l741)))
@@ -1218,9 +1200,7 @@
 
 (def
  v313_l747
- (la/close-scalar?
-  (tensor/mget (elem/sin (la/column [(/ math/PI 2)])) 0 0)
-  1.0))
+ (la/close-scalar? ((elem/sin (la/column [(/ math/PI 2)])) 0 0) 1.0))
 
 
 (deftest t314_l749 (is (true? v313_l747)))
@@ -1229,9 +1209,7 @@
 (def v315_l751 (kind/doc #'elem/cos))
 
 
-(def
- v316_l753
- (la/close-scalar? (tensor/mget (elem/cos (la/column [0])) 0 0) 1.0))
+(def v316_l753 (la/close-scalar? ((elem/cos (la/column [0])) 0 0) 1.0))
 
 
 (deftest t317_l755 (is (true? v316_l753)))
@@ -1242,9 +1220,7 @@
 
 (def
  v319_l759
- (la/close-scalar?
-  (tensor/mget (elem/tan (la/column [(/ math/PI 4)])) 0 0)
-  1.0))
+ (la/close-scalar? ((elem/tan (la/column [(/ math/PI 4)])) 0 0) 1.0))
 
 
 (deftest t320_l761 (is (true? v319_l759)))
@@ -1253,9 +1229,7 @@
 (def v321_l763 (kind/doc #'elem/sinh))
 
 
-(def
- v322_l765
- (la/close-scalar? (tensor/mget (elem/sinh (la/column [0])) 0 0) 0.0))
+(def v322_l765 (la/close-scalar? ((elem/sinh (la/column [0])) 0 0) 0.0))
 
 
 (deftest t323_l767 (is (true? v322_l765)))
@@ -1264,9 +1238,7 @@
 (def v324_l769 (kind/doc #'elem/cosh))
 
 
-(def
- v325_l771
- (la/close-scalar? (tensor/mget (elem/cosh (la/column [0])) 0 0) 1.0))
+(def v325_l771 (la/close-scalar? ((elem/cosh (la/column [0])) 0 0) 1.0))
 
 
 (deftest t326_l773 (is (true? v325_l771)))
@@ -1275,9 +1247,7 @@
 (def v327_l775 (kind/doc #'elem/tanh))
 
 
-(def
- v328_l777
- (la/close-scalar? (tensor/mget (elem/tanh (la/column [0])) 0 0) 0.0))
+(def v328_l777 (la/close-scalar? ((elem/tanh (la/column [0])) 0 0) 0.0))
 
 
 (deftest t329_l779 (is (true? v328_l777)))
@@ -1286,7 +1256,7 @@
 (def v330_l781 (kind/doc #'elem/abs))
 
 
-(def v331_l783 (tensor/mget (elem/abs (la/column [-5])) 0 0))
+(def v331_l783 ((elem/abs (la/column [-5])) 0 0))
 
 
 (deftest t332_l785 (is ((fn [v] (== 5.0 v)) v331_l783)))
@@ -1313,7 +1283,7 @@
 (def v339_l799 (kind/doc #'elem/pow))
 
 
-(def v340_l801 (tensor/mget (elem/pow (la/column [2]) 3) 0 0))
+(def v340_l801 ((elem/pow (la/column [2]) 3) 0 0))
 
 
 (deftest t341_l803 (is ((fn [v] (== 8.0 v)) v340_l801)))
@@ -1324,7 +1294,7 @@
 
 (def
  v343_l807
- (la/close-scalar? (tensor/mget (elem/cbrt (la/column [27])) 0 0) 3.0))
+ (la/close-scalar? ((elem/cbrt (la/column [27])) 0 0) 3.0))
 
 
 (deftest t344_l809 (is (true? v343_l807)))
@@ -1333,7 +1303,7 @@
 (def v345_l811 (kind/doc #'elem/floor))
 
 
-(def v346_l813 (tensor/mget (elem/floor (la/column [2.7])) 0 0))
+(def v346_l813 ((elem/floor (la/column [2.7])) 0 0))
 
 
 (deftest t347_l815 (is ((fn [v] (== 2.0 v)) v346_l813)))
@@ -1342,7 +1312,7 @@
 (def v348_l817 (kind/doc #'elem/ceil))
 
 
-(def v349_l819 (tensor/mget (elem/ceil (la/column [2.3])) 0 0))
+(def v349_l819 ((elem/ceil (la/column [2.3])) 0 0))
 
 
 (deftest t350_l821 (is ((fn [v] (== 3.0 v)) v349_l819)))
@@ -1351,9 +1321,7 @@
 (def v351_l823 (kind/doc #'elem/min))
 
 
-(def
- v352_l825
- (tensor/mget (elem/min (la/column [3]) (la/column [5])) 0 0))
+(def v352_l825 ((elem/min (la/column [3]) (la/column [5])) 0 0))
 
 
 (deftest t353_l827 (is ((fn [v] (== 3.0 v)) v352_l825)))
@@ -1362,9 +1330,7 @@
 (def v354_l829 (kind/doc #'elem/max))
 
 
-(def
- v355_l831
- (tensor/mget (elem/max (la/column [3]) (la/column [5])) 0 0))
+(def v355_l831 ((elem/max (la/column [3]) (la/column [5])) 0 0))
 
 
 (deftest t356_l833 (is ((fn [v] (== 5.0 v)) v355_l831)))
@@ -1373,7 +1339,7 @@
 (def v357_l835 (kind/doc #'elem/asin))
 
 
-(def v358_l837 (tensor/mget (elem/asin (la/column [0.5])) 0 0))
+(def v358_l837 ((elem/asin (la/column [0.5])) 0 0))
 
 
 (deftest
@@ -1384,7 +1350,7 @@
 (def v360_l841 (kind/doc #'elem/acos))
 
 
-(def v361_l843 (tensor/mget (elem/acos (la/column [0.5])) 0 0))
+(def v361_l843 ((elem/acos (la/column [0.5])) 0 0))
 
 
 (deftest
@@ -1395,7 +1361,7 @@
 (def v363_l847 (kind/doc #'elem/atan))
 
 
-(def v364_l849 (tensor/mget (elem/atan (la/column [1.0])) 0 0))
+(def v364_l849 ((elem/atan (la/column [1.0])) 0 0))
 
 
 (deftest
@@ -1406,7 +1372,7 @@
 (def v366_l853 (kind/doc #'elem/log1p))
 
 
-(def v367_l855 (tensor/mget (elem/log1p (la/column [0.0])) 0 0))
+(def v367_l855 ((elem/log1p (la/column [0.0])) 0 0))
 
 
 (deftest t368_l857 (is ((fn [v] (la/close-scalar? v 0.0)) v367_l855)))
@@ -1415,7 +1381,7 @@
 (def v369_l859 (kind/doc #'elem/expm1))
 
 
-(def v370_l861 (tensor/mget (elem/expm1 (la/column [0.0])) 0 0))
+(def v370_l861 ((elem/expm1 (la/column [0.0])) 0 0))
 
 
 (deftest t371_l863 (is ((fn [v] (la/close-scalar? v 0.0)) v370_l861)))
@@ -1424,7 +1390,7 @@
 (def v372_l865 (kind/doc #'elem/round))
 
 
-(def v373_l867 (tensor/mget (elem/round (la/column [2.7])) 0 0))
+(def v373_l867 ((elem/round (la/column [2.7])) 0 0))
 
 
 (deftest t374_l869 (is ((fn [v] (== 3.0 v)) v373_l867)))

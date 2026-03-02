@@ -100,7 +100,7 @@
  v18_l99
  (let
   [ch (tensor/select gradient :all :all 0)]
-  [(int (tensor/mget ch 0 0)) (int (tensor/mget ch 199 0))]))
+  [(int (ch 0 0)) (int (ch 199 0))]))
 
 
 (deftest
@@ -116,9 +116,7 @@
    [[h w _c] (dtype/shape gradient)]
    (tensor/compute-tensor
     [h w 3]
-    (fn
-     [r c ch]
-     (int (tensor/mget gradient r c (case (int ch) 0 2 2 0 ch))))
+    (fn [r c ch] (int (gradient r c (case (int ch) 0 2 2 0 ch))))
     :uint8))))
 
 
@@ -180,7 +178,7 @@
       [r c _ch]
       (let
        [idx (+ (* r w) c)]
-       (int (max 0 (min 255 (tensor/mget gray-flat idx 0))))))
+       (int (max 0 (min 255 (gray-flat idx 0))))))
      :uint8)))))
 
 

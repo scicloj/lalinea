@@ -106,13 +106,13 @@
   plotly/plot))
 
 
-(def v25_l138 (tensor/mget T-direct 0 0))
+(def v25_l138 (T-direct 0 0))
 
 
 (deftest t26_l140 (is ((fn [t] (> t 90.0)) v25_l138)))
 
 
-(def v27_l142 (tensor/mget T-direct (dec n) 0))
+(def v27_l142 (T-direct (dec n) 0))
 
 
 (deftest t28_l144 (is ((fn [t] (< t 10.0)) v27_l142)))

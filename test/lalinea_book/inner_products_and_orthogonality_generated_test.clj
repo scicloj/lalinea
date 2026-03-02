@@ -73,8 +73,7 @@
 
 (def
  v28_l128
- (math/sqrt
-  (tensor/mget (la/mmul (la/transpose u-ip) (la/mmul W-ip u-ip)) 0 0)))
+ (math/sqrt ((la/mmul (la/transpose u-ip) (la/mmul W-ip u-ip)) 0 0)))
 
 
 (deftest

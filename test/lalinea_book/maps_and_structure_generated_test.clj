@@ -30,9 +30,7 @@
  (is
   ((fn
     [r]
-    (and
-     (< (abs (tensor/mget r 0 0)) 1.0E-10)
-     (< (abs (- (tensor/mget r 1 0) 1.0)) 1.0E-10)))
+    (and (< (abs (r 0 0)) 1.0E-10) (< (abs (- (r 1 0) 1.0)) 1.0E-10)))
    v8_l91)))
 
 
@@ -44,9 +42,7 @@
  (is
   ((fn
     [r]
-    (and
-     (< (abs (- (tensor/mget r 0 0) -1.0)) 1.0E-10)
-     (< (abs (tensor/mget r 1 0)) 1.0E-10)))
+    (and (< (abs (- (r 0 0) -1.0)) 1.0E-10) (< (abs (r 1 0)) 1.0E-10)))
    v11_l99)))
 
 
@@ -118,12 +114,7 @@
 (deftest
  t29_l171
  (is
-  ((fn
-    [r]
-    (and
-     (= 5.0 (tensor/mget r 0 0))
-     (= 3.0 (tensor/mget r 1 0))
-     (= 0.0 (tensor/mget r 2 0))))
+  ((fn [r] (and (= 5.0 (r 0 0)) (= 3.0 (r 1 0)) (= 0.0 (r 2 0))))
    v28_l169)))
 
 

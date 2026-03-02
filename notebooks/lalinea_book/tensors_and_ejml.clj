@@ -54,7 +54,7 @@
                        (fn [i j] (if (== i j) 1.0 0.0))
                        :float64)
 
-(kind/test-last [(fn [t] (= 1.0 (tensor/mget t 1 1)))])
+(kind/test-last [(fn [t] (= 1.0 (t 1 1)))])
 
 ;; ### Indexing and mutation
 
@@ -65,7 +65,7 @@
 
 (kind/test-last [(fn [v] (= [20.0 30.0] v))])
 
-;; `tensor/mget` does the same, and `tensor/mset!` mutates in place:
+;; For mutation, use `tensor/mset!`:
 
 (let [t (tensor/->tensor [[1 2] [3 4]] {:datatype :float64})]
   (tensor/mset! t 0 1 99.0)
@@ -84,12 +84,12 @@
       b (tensor/->tensor [[10 20] [30 40]] {:datatype :float64})]
   (dfn/+ a b))
 
-(kind/test-last [(fn [t] (= 44.0 (tensor/mget t 1 1)))])
+(kind/test-last [(fn [t] (= 44.0 (t 1 1)))])
 
 ;; Chaining is free — no intermediate copies:
 
 (let [x (tensor/->tensor [[1 4] [9 16]] {:datatype :float64})]
-  (tensor/mget (dfn/sqrt x) 1 0))
+  ((dfn/sqrt x) 1 0))
 
 ;; $\sqrt{9} = 3$
 
@@ -163,7 +163,7 @@
 (let [t (la/matrix [[1.0 0.0] [0.0 1.0]])
       dm (la/tensor->dmat t)]
   (.set ^DMatrixRMaj dm 0 1 99.0)
-  (tensor/mget t 0 1))
+  (t 0 1))
 
 (kind/test-last [= 99.0])
 
@@ -200,7 +200,7 @@
 (la/mmul (la/matrix [[1 2] [3 4]])
          (la/eye 2))
 
-(kind/test-last [(fn [m] (= 1.0 (tensor/mget m 0 0)))])
+(kind/test-last [(fn [m] (= 1.0 (m 0 0)))])
 
 ;; ### Inverse
 

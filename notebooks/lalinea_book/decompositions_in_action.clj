@@ -65,7 +65,7 @@
 
 (let [t (tensor/compute-tensor [img-size img-size 3]
                                (fn [r c _ch]
-                                 (int (max 0 (min 255 (tensor/mget test-image r c)))))
+                                 (int (max 0 (min 255 (test-image r c)))))
                                :uint8)]
   (bufimg/tensor->image t))
 
@@ -232,11 +232,11 @@ cov-matrix
       ev1 (nth eigenvectors (first sorted-idx))
       lam2 (double (reals (second sorted-idx)))
       ev2 (nth eigenvectors (second sorted-idx))
-      pc1-x (* (math/sqrt lam1) (tensor/mget ev1 0 0))
-      pc1-y (* (math/sqrt lam1) (tensor/mget ev1 1 0))
-      pc2-x (* (math/sqrt lam2) (tensor/mget ev2 0 0))
-      pc2-y (* (math/sqrt lam2) (tensor/mget ev2 1 0))
-      pts (mapv (fn [i] {:x (tensor/mget X i 0) :y (tensor/mget X i 1) :type "data"})
+      pc1-x (* (math/sqrt lam1) (ev1 0 0))
+      pc1-y (* (math/sqrt lam1) (ev1 1 0))
+      pc2-x (* (math/sqrt lam2) (ev2 0 0))
+      pc2-y (* (math/sqrt lam2) (ev2 1 0))
+      pts (mapv (fn [i] {:x (X i 0) :y (X i 1) :type "data"})
                 (range n-points))
       pc1-pts [{:x 0.0 :y 0.0 :type "PC1"}
                {:x pc1-x :y pc1-y :type "PC1"}]
@@ -310,12 +310,12 @@ true-eigenvalues
             diag (sort (la/diag A-next))
             ;; Off-diagonal magnitude
             off-diag (math/sqrt
-                      (+ (let [v (tensor/mget A-next 0 1)] (* v v))
-                         (let [v (tensor/mget A-next 1 0)] (* v v))
-                         (let [v (tensor/mget A-next 0 2)] (* v v))
-                         (let [v (tensor/mget A-next 2 0)] (* v v))
-                         (let [v (tensor/mget A-next 1 2)] (* v v))
-                         (let [v (tensor/mget A-next 2 1)] (* v v))))]
+                      (+ (let [v (A-next 0 1)] (* v v))
+                         (let [v (A-next 1 0)] (* v v))
+                         (let [v (A-next 0 2)] (* v v))
+                         (let [v (A-next 2 0)] (* v v))
+                         (let [v (A-next 1 2)] (* v v))
+                         (let [v (A-next 2 1)] (* v v))))]
         (recur A-next (inc k)
                (conj history {:iteration (inc k)
                               :off-diagonal off-diag
@@ -341,7 +341,7 @@ true-eigenvalues
 (let [final (last qr-history)
       computed (sort [(:eig-1 final) (:eig-2 final) (:eig-3 final)])]
   (la/close? (la/->real-tensor computed)
-            (la/->real-tensor true-eigenvalues) 1e-4))
+             (la/->real-tensor true-eigenvalues) 1e-4))
 
 (kind/test-last [true?])
 
