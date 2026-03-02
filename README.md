@@ -96,7 +96,8 @@ The [La Linea book](https://scicloj.github.io/lalinea/) is a set of notebook-bas
 - **Validation** — algebraic identities
 - **Reference** — API reference
 
-Each chapter includes inline tests via `kind/test-last`.
+Each chapter includes inline tests via
+[Clay's test generation](https://scicloj.github.io/clay/clay_book.test_generation.html).
 
 ## API
 
