@@ -156,11 +156,10 @@ stationary-eigen
 ;; The stationary distribution from eigendecomposition should
 ;; agree with the random walk convergence:
 
-(every? (fn [[eigen walk]]
-          (< (abs (- (double eigen) (double walk))) 1e-4))
-        (map vector stationary-eigen
-             (let [s (last walk-history)]
-               [(:sunny s) (:cloudy s) (:rainy s)])))
+(let [s (last walk-history)]
+  (la/close? stationary-eigen
+             (la/->real-tensor [(:sunny s) (:cloudy s) (:rainy s)])
+             1e-4))
 
 (kind/test-last [true?])
 

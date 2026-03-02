@@ -7,11 +7,19 @@
             [tech.v3.datatype.protocols :as dtype-proto]
             [tech.v3.tensor :as tensor]
             [ham-fisted.defprotocol :as hamf])
-  (:import [clojure.lang IHashEq IPersistentCollection Sequential RT ArityException]
+  (:import [clojure.lang IHashEq IPersistentCollection Sequential RT ArityException Util]
            [tech.v3.datatype.protocols
             PElemwiseDatatype PECount PShape PClone PToReader]))
 
 (declare ->RealTensor)
+
+(defn- tensor-nth
+  "Index into a tensor along the first axis.
+   For 1D tensors returns a scalar; for 2D+ returns a sub-tensor."
+  [t i]
+  (if (== 1 (count (dtype/shape t)))
+    (t i)
+    (tensor/select t (int i))))
 
 (deftype RealTensor [tensor]
   PElemwiseDatatype
@@ -34,10 +42,10 @@
   (hasheq [_] (.hasheq ^IHashEq tensor))
 
   clojure.lang.Indexed
-  (nth [_ i] (tensor i))
+  (nth [_ i] (tensor-nth tensor i))
   (nth [_ i not-found]
     (if (and (>= i 0) (< i (long (first (dtype/shape tensor)))))
-      (tensor i) not-found))
+      (tensor-nth tensor i) not-found))
 
   clojure.lang.IFn
   (invoke [_ i] (tensor (int i)))
@@ -60,10 +68,27 @@
   (count [_] (long (first (dtype/shape tensor))))
   (cons [_ o] (.cons ^IPersistentCollection tensor o))
   (empty [_] (.empty ^IPersistentCollection tensor))
-  (equiv [_ other]
-    (if (instance? RealTensor other)
-      (.equiv ^IHashEq tensor (.-tensor ^RealTensor other))
-      (.equiv ^IPersistentCollection tensor other)))
+  (equiv [this other]
+    (cond
+      ;; RealTensor-to-RealTensor: compare shapes + flat readers
+      (instance? RealTensor other)
+      (let [ot (.-tensor ^RealTensor other)]
+        (and (= (dtype/shape tensor) (dtype/shape ot))
+             (let [r1 (dtype/->reader tensor :float64)
+                   r2 (dtype/->reader ot :float64)
+                   n (long (clojure.core/count r1))]
+               (loop [i (long 0)]
+                 (if (< i n)
+                   (if (== (double (r1 i)) (double (r2 i)))
+                     (recur (unchecked-inc i))
+                     false)
+                   true)))))
+      ;; 1D: delegate to underlying tensor (works with vectors)
+      (== 1 (clojure.core/count (dtype/shape tensor)))
+      (.equiv ^IPersistentCollection tensor other)
+      ;; 2D+: decompose via seq to avoid dtype-next 2D equiv bug
+      :else
+      (Util/equiv (.seq this) other)))
 
   Sequential
 

@@ -120,7 +120,7 @@
 
 (kind/test-last [true?])
 
-(< (abs (- (la/det A-eig) (reduce * eig-reals))) 1e-10)
+(< (abs (- (la/det A-eig) (la/prod eig-reals))) 1e-10)
 
 (kind/test-last [true?])
 
@@ -482,7 +482,7 @@ final-eigenvalues
 ;; ### Determinant = product of eigenvalues
 
 (< (abs (- (la/det A-final)
-           (reduce * final-eigenvalues)))
+           (la/prod final-eigenvalues)))
    1e-10)
 
 (kind/test-last [true?])

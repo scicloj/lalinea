@@ -145,8 +145,7 @@
       recovered (ft/inverse-real (ft/forward signal))]
   recovered)
 
-(kind/test-last [(fn [v] (every? #(< (abs %) 1e-10)
-                                 (map - v [1.0 2.0 3.0 4.0])))])
+(kind/test-last [(fn [v] (la/close? v (la/->real-tensor [1.0 2.0 3.0 4.0])))])
 
 ;; ## Composing with dtype-next
 ;;

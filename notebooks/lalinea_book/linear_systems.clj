@@ -107,8 +107,8 @@ T-direct
 
 ;; The exact solution is linear: $T(x) = 100(1-x)$
 
-(let [xs (mapv (fn [i] (/ (double (inc i)) (double (inc n)))) (range n))
-      expected (la/column (mapv (fn [x] (* 100.0 (- 1.0 x))) xs))]
+(let [xs (dtype/make-reader :float64 n (/ (double (inc idx)) (double (inc n))))
+      expected (la/column (dtype/make-reader :float64 n (* 100.0 (- 1.0 (double (xs idx))))))]
   (la/close? T-direct expected))
 
 (kind/test-last [true?])
@@ -120,8 +120,9 @@ T-direct
 ;; ### Temperature profile
 
 (def x-interior
-  (mapv (fn [i] (/ (double (inc i)) (double (inc n))))
-        (range n)))
+  (la/->real-tensor
+   (tensor/->tensor
+    (dtype/make-reader :float64 n (/ (double (inc idx)) (double (inc n)))))))
 
 (-> (tc/dataset {:x x-interior
                  :T (dtype/->reader

@@ -307,9 +307,7 @@ true-eigenvalues
       (let [{:keys [Q R]} (la/qr A)
             A-next (la/mmul R Q)
             ;; Extract diagonal
-            diag (sort (mapv (fn [i]
-                               (tensor/mget A-next i i))
-                             (range 3)))
+            diag (sort (la/diag A-next))
             ;; Off-diagonal magnitude
             off-diag (math/sqrt
                       (+ (let [v (tensor/mget A-next 0 1)] (* v v))
@@ -342,9 +340,8 @@ true-eigenvalues
 
 (let [final (last qr-history)
       computed (sort [(:eig-1 final) (:eig-2 final) (:eig-3 final)])]
-  (every? identity
-          (map (fn [a b] (< (abs (- a b)) 1e-4))
-               computed true-eigenvalues)))
+  (la/close? (la/->real-tensor computed)
+            (la/->real-tensor true-eigenvalues) 1e-4))
 
 (kind/test-last [true?])
 

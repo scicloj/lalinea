@@ -139,12 +139,10 @@
 (let [angles (dfn/* (/ (* 2.0 math/PI) 40.0) (dtype/make-reader :float64 41 idx))
       circle-x (dfn/cos angles)
       circle-y (dfn/sin angles)
-      stretched (mapv (fn [cx cy]
-                        (let [out (la/mmul stretch-mat (la/column [cx cy]))]
-                          [(tensor/mget out 0 0) (tensor/mget out 1 0)]))
-                      circle-x circle-y)]
-  (-> (tc/dataset {:x (mapv first stretched)
-                   :y (mapv second stretched)
+      data-mat (la/hstack [(la/column circle-x) (la/column circle-y)])
+      stretched-mat (la/transpose (la/mmul stretch-mat (la/transpose data-mat)))]
+  (-> (tc/dataset {:x (tensor/select stretched-mat :all 0)
+                   :y (tensor/select stretched-mat :all 1)
                    :shape (repeat 41 "stretched")})
       (tc/concat (tc/dataset {:x circle-x
                               :y circle-y

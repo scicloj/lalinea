@@ -63,10 +63,8 @@
 ;; Build the design matrix $A$:
 
 (def A-linear
-  (let [m (count x-data)]
-    (la/matrix (mapv (fn [i]
-                       [1.0 (x-data i)])
-                     (range m)))))
+  (la/compute-matrix (count x-data) 2
+                     (fn [i j] (if (zero? j) 1.0 (double (x-data i))))))
 
 A-linear
 
@@ -157,12 +155,8 @@ rms-linear
 
 (def vandermonde
   (fn [xs degree]
-    (let [m (count xs)]
-      (la/matrix
-       (mapv (fn [i]
-               (mapv (fn [j] (math/pow (xs i) j))
-                     (range (inc degree))))
-             (range m))))))
+    (la/compute-matrix (count xs) (inc degree)
+                       (fn [i j] (math/pow (double (xs i)) (double j))))))
 
 (def A-poly (vandermonde x-poly 2))
 
@@ -318,16 +312,15 @@ S-svd
                        noise-trig))))
 
 (def A-trig
-  (let [m (count x-trig)]
-    (la/matrix
-     (mapv (fn [i]
-             (let [xi (x-trig i)]
-               [1.0
-                (math/cos xi)
-                (math/sin xi)
-                (math/cos (* 2.0 xi))
-                (math/sin (* 2.0 xi))]))
-           (range m)))))
+  (la/compute-matrix (count x-trig) 5
+    (fn [i j]
+      (let [xi (double (x-trig i))]
+        (case (int j)
+          0 1.0
+          1 (math/cos xi)
+          2 (math/sin xi)
+          3 (math/cos (* 2.0 xi))
+          4 (math/sin (* 2.0 xi)))))))
 
 (def c-trig
   (la/solve (la/mmul (la/transpose A-trig) A-trig)

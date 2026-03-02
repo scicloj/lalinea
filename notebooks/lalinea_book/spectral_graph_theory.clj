@@ -180,7 +180,7 @@ fiedler-entries
 ;; The Fiedler vector is orthogonal to the all-ones vector
 ;; (zero mean):
 
-(< (abs (reduce + fiedler-entries)) 1e-10)
+(< (abs (la/sum fiedler-entries)) 1e-10)
 
 (kind/test-last [true?])
 

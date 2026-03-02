@@ -358,7 +358,7 @@
       A-next
       (la/mmul R Q)
       diag
-      (sort (mapv (fn [i] (tensor/mget A-next i i)) (range 3)))
+      (sort (la/diag A-next))
       off-diag
       (math/sqrt
        (+
@@ -381,7 +381,7 @@
 
 
 (def
- v62_l331
+ v62_l329
  (->
   (tc/dataset qr-history)
   (plotly/base {:=x :iteration, :=y :off-diagonal})
@@ -389,32 +389,30 @@
   plotly/plot))
 
 
-(def v63_l336 (:off-diagonal (last qr-history)))
+(def v63_l334 (:off-diagonal (last qr-history)))
 
 
-(deftest t64_l338 (is ((fn [v] (< v 1.0E-6)) v63_l336)))
+(deftest t64_l336 (is ((fn [v] (< v 1.0E-6)) v63_l334)))
 
 
 (def
- v66_l343
+ v66_l341
  (let
   [final
    (last qr-history)
    computed
    (sort [(:eig-1 final) (:eig-2 final) (:eig-3 final)])]
-  (every?
-   identity
-   (map
-    (fn [a b] (< (abs (- a b)) 1.0E-4))
-    computed
-    true-eigenvalues))))
+  (la/close?
+   (la/->real-tensor computed)
+   (la/->real-tensor true-eigenvalues)
+   1.0E-4)))
 
 
-(deftest t67_l349 (is (true? v66_l343)))
+(deftest t67_l346 (is (true? v66_l341)))
 
 
 (def
- v69_l353
+ v69_l350
  (->
   (tc/dataset
    (mapcat
@@ -429,4 +427,4 @@
   plotly/plot))
 
 
-(deftest t70_l362 (is ((fn [_] true) v69_l353)))
+(deftest t70_l359 (is ((fn [_] true) v69_l350)))

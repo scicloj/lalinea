@@ -115,14 +115,16 @@
 (def N-vis 64)
 
 (def signal-composed
-  (let [t (mapv #(/ (double %) N-vis) (range N-vis))]
-    (mapv (fn [ti] (+ (math/sin (* 2 math/PI 3 ti))
-                      (* 0.5 (math/sin (* 2 math/PI 7 ti)))))
-          t)))
+  (la/->real-tensor
+   (dtype/clone
+    (dtype/make-reader :float64 N-vis
+      (let [ti (/ (double idx) N-vis)]
+        (+ (math/sin (* 2 math/PI 3 ti))
+           (* 0.5 (math/sin (* 2 math/PI 7 ti)))))))))
 
 ;; The time-domain waveform:
 
-(-> (tc/dataset {:t (mapv #(/ (double %) N-vis) (range N-vis))
+(-> (tc/dataset {:t (dtype/make-reader :float64 N-vis (/ (double idx) N-vis))
                  :amplitude signal-composed})
     (plotly/base {:=x :t :=y :amplitude})
     (plotly/layer-line)

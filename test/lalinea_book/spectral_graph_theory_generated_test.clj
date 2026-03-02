@@ -129,7 +129,7 @@
 (deftest t35_l177 (is ((fn [v] (= 6 (count v))) v34_l175)))
 
 
-(def v37_l183 (< (abs (reduce + fiedler-entries)) 1.0E-10))
+(def v37_l183 (< (abs (la/sum fiedler-entries)) 1.0E-10))
 
 
 (deftest t38_l185 (is (true? v37_l183)))
@@ -490,8 +490,8 @@
      :community
      (mapv
       (fn*
-       [p1__66428#]
-       (cond (<= p1__66428# 2) "A" (<= p1__66428# 5) "B" :else "C"))
+       [p1__66096#]
+       (cond (<= p1__66096# 2) "A" (<= p1__66096# 5) "B" :else "C"))
       (range 9))}))))
 
 

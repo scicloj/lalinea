@@ -137,28 +137,23 @@
  v20_l117
  (def
   signal-composed
-  (let
-   [t
-    (mapv
-     (fn* [p1__64319#] (/ (double p1__64319#) N-vis))
-     (range N-vis))]
-   (mapv
-    (fn
-     [ti]
-     (+
-      (math/sin (* 2 math/PI 3 ti))
-      (* 0.5 (math/sin (* 2 math/PI 7 ti)))))
-    t))))
+  (la/->real-tensor
+   (dtype/clone
+    (dtype/make-reader
+     :float64
+     N-vis
+     (let
+      [ti (/ (double idx) N-vis)]
+      (+
+       (math/sin (* 2 math/PI 3 ti))
+       (* 0.5 (math/sin (* 2 math/PI 7 ti))))))))))
 
 
 (def
- v22_l125
+ v22_l127
  (->
   (tc/dataset
-   {:t
-    (mapv
-     (fn* [p1__64320#] (/ (double p1__64320#) N-vis))
-     (range N-vis)),
+   {:t (dtype/make-reader :float64 N-vis (/ (double idx) N-vis)),
     :amplitude signal-composed})
   (plotly/base {:=x :t, :=y :amplitude})
   (plotly/layer-line)
@@ -166,7 +161,7 @@
 
 
 (def
- v24_l134
+ v24_l136
  (let
   [spectrum (ft/forward signal-composed) mags (la/abs spectrum)]
   (->
@@ -179,7 +174,7 @@
 
 
 (def
- v26_l144
+ v26_l146
  (let
   [spectrum
    (ft/forward signal-composed)
@@ -192,11 +187,11 @@
   (= [3 7] (sort (take 2 peak-idx)))))
 
 
-(deftest t27_l151 (is (true? v26_l144)))
+(deftest t27_l153 (is (true? v26_l146)))
 
 
 (def
- v29_l158
+ v29_l160
  (let
   [spectrum (ft/forward [3.0 3.0 3.0 3.0])]
   {:dc (cx/re (spectrum 0)),
@@ -207,18 +202,18 @@
 
 
 (deftest
- t30_l162
+ t30_l164
  (is
   ((fn
     [v]
     (and
      (< (abs (- (double (:dc v)) 12.0)) 1.0E-10)
-     (every? (fn* [p1__64321#] (< p1__64321# 1.0E-10)) (:others v))))
-   v29_l158)))
+     (every? (fn* [p1__64010#] (< p1__64010# 1.0E-10)) (:others v))))
+   v29_l160)))
 
 
 (def
- v32_l167
+ v32_l169
  (let
   [spectrum (ft/forward [1.0 -1.0 1.0 -1.0])]
   {:dc (double (la/abs (spectrum 0))),
@@ -226,16 +221,16 @@
 
 
 (deftest
- t33_l171
+ t33_l173
  (is
   ((fn
     [v]
     (and (< (:dc v) 1.0E-10) (< (abs (- (:nyquist v) 4.0)) 1.0E-10)))
-   v32_l167)))
+   v32_l169)))
 
 
 (def
- v35_l178
+ v35_l180
  (let
   [signal
    (cx/complex-tensor [1.0 0.0] [0.0 1.0])
@@ -252,11 +247,11 @@
     1.0E-10))))
 
 
-(deftest t36_l184 (is (true? v35_l178)))
+(deftest t36_l186 (is (true? v35_l180)))
 
 
 (def
- v38_l190
+ v38_l192
  (let
   [signal
    [1.0 2.0 3.0 4.0]
@@ -267,4 +262,4 @@
   (< (dfn/reduce-max (dfn/abs (dfn/- recovered signal))) 1.0E-10)))
 
 
-(deftest t39_l195 (is (true? v38_l190)))
+(deftest t39_l197 (is (true? v38_l192)))

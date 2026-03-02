@@ -53,22 +53,23 @@
  v7_l65
  (def
   A-linear
-  (let
-   [m (count x-data)]
-   (la/matrix (mapv (fn [i] [1.0 (x-data i)]) (range m))))))
+  (la/compute-matrix
+   (count x-data)
+   2
+   (fn [i j] (if (zero? j) 1.0 (double (x-data i)))))))
 
 
-(def v8_l71 A-linear)
+(def v8_l69 A-linear)
 
 
-(deftest t9_l73 (is ((fn [m] (= [20 2] (dtype/shape m))) v8_l71)))
+(deftest t9_l71 (is ((fn [m] (= [20 2] (dtype/shape m))) v8_l69)))
 
 
-(def v11_l78 (def y-col (la/column y-linear)))
+(def v11_l76 (def y-col (la/column y-linear)))
 
 
 (def
- v13_l88
+ v13_l86
  (def
   c-linear
   (la/solve
@@ -76,27 +77,27 @@
    (la/mmul (la/transpose A-linear) y-col))))
 
 
-(def v14_l92 c-linear)
+(def v14_l90 c-linear)
 
 
 (deftest
- t15_l94
+ t15_l92
  (is
   ((fn
     [c]
     (and
      (< (abs (- (tensor/mget c 0 0) 2.0)) 0.5)
      (< (abs (- (tensor/mget c 1 0) 3.0)) 0.5)))
-   v14_l92)))
+   v14_l90)))
 
 
 (def
- v17_l104
+ v17_l102
  (def residual-linear (la/sub (la/mmul A-linear c-linear) y-col)))
 
 
 (def
- v18_l107
+ v18_l105
  (def
   rms-linear
   (math/sqrt
@@ -105,14 +106,14 @@
     (count x-data)))))
 
 
-(def v19_l111 rms-linear)
+(def v19_l109 rms-linear)
 
 
-(deftest t20_l113 (is ((fn [v] (< v 0.5)) v19_l111)))
+(deftest t20_l111 (is ((fn [v] (< v 0.5)) v19_l109)))
 
 
 (def
- v22_l118
+ v22_l116
  (let
   [c0
    (tensor/mget c-linear 0 0)
@@ -134,12 +135,12 @@
 
 
 (def
- v24_l143
+ v24_l141
  (def x-poly (dtype/make-reader :float64 30 (- (* 0.2 idx) 3.0))))
 
 
 (def
- v25_l147
+ v25_l145
  (def
   noise-poly
   (tensor/->tensor
@@ -178,7 +179,7 @@
 
 
 (def
- v26_l154
+ v26_l152
  (def
   y-poly
   (dfn/+
@@ -187,24 +188,22 @@
 
 
 (def
- v27_l158
+ v27_l156
  (def
   vandermonde
   (fn
    [xs degree]
-   (let
-    [m (count xs)]
-    (la/matrix
-     (mapv
-      (fn [i] (mapv (fn [j] (math/pow (xs i) j)) (range (inc degree))))
-      (range m)))))))
+   (la/compute-matrix
+    (count xs)
+    (inc degree)
+    (fn [i j] (math/pow (double (xs i)) (double j)))))))
 
 
-(def v28_l167 (def A-poly (vandermonde x-poly 2)))
+(def v28_l161 (def A-poly (vandermonde x-poly 2)))
 
 
 (def
- v29_l169
+ v29_l163
  (def
   c-poly
   (la/solve
@@ -212,11 +211,11 @@
    (la/mmul (la/transpose A-poly) (la/column y-poly)))))
 
 
-(def v30_l173 c-poly)
+(def v30_l167 c-poly)
 
 
 (deftest
- t31_l175
+ t31_l169
  (is
   ((fn
     [c]
@@ -224,11 +223,11 @@
      (< (abs (- (tensor/mget c 0 0) 1.0)) 1.0)
      (< (abs (- (tensor/mget c 1 0) -2.0)) 1.0)
      (< (abs (- (tensor/mget c 2 0) 1.0)) 1.0)))
-   v30_l173)))
+   v30_l167)))
 
 
 (def
- v33_l185
+ v33_l179
  (let
   [c0
    (tensor/mget c-poly 0 0)
@@ -250,59 +249,59 @@
    plotly/plot)))
 
 
-(def v35_l212 (def qr-result (la/qr A-poly)))
+(def v35_l206 (def qr-result (la/qr A-poly)))
 
 
-(def v37_l217 (def ncols (second (dtype/shape A-poly))))
+(def v37_l211 (def ncols (second (dtype/shape A-poly))))
 
 
-(def v38_l219 (def Q1 (la/submatrix (:Q qr-result) :all (range ncols))))
+(def v38_l213 (def Q1 (la/submatrix (:Q qr-result) :all (range ncols))))
 
 
-(def v39_l220 (def R1 (la/submatrix (:R qr-result) (range ncols) :all)))
+(def v39_l214 (def R1 (la/submatrix (:R qr-result) (range ncols) :all)))
 
 
-(def v41_l224 (la/norm (la/sub (la/mmul Q1 R1) A-poly)))
+(def v41_l218 (la/norm (la/sub (la/mmul Q1 R1) A-poly)))
 
 
-(deftest t42_l226 (is ((fn [v] (< v 1.0E-10)) v41_l224)))
+(deftest t42_l220 (is ((fn [v] (< v 1.0E-10)) v41_l218)))
 
 
 (def
- v44_l231
+ v44_l225
  (def
   c-qr
   (la/solve R1 (la/mmul (la/transpose Q1) (la/column y-poly)))))
 
 
-(def v46_l236 (la/norm (la/sub c-qr c-poly)))
+(def v46_l230 (la/norm (la/sub c-qr c-poly)))
 
 
-(deftest t47_l238 (is ((fn [v] (< v 1.0E-10)) v46_l236)))
+(deftest t47_l232 (is ((fn [v] (< v 1.0E-10)) v46_l230)))
 
 
-(def v49_l252 (def svd-result (la/svd A-poly)))
+(def v49_l246 (def svd-result (la/svd A-poly)))
 
 
-(def v51_l257 (def S-svd (:S svd-result)))
+(def v51_l251 (def S-svd (:S svd-result)))
 
 
 (def
- v52_l258
+ v52_l252
  (def U-thin (la/submatrix (:U svd-result) :all (range (count S-svd)))))
 
 
-(def v53_l259 (def Vt-svd (:Vt svd-result)))
+(def v53_l253 (def Vt-svd (:Vt svd-result)))
 
 
-(def v55_l263 S-svd)
+(def v55_l257 S-svd)
 
 
-(deftest t56_l265 (is ((fn [v] (every? pos? v)) v55_l263)))
+(deftest t56_l259 (is ((fn [v] (every? pos? v)) v55_l257)))
 
 
 (def
- v58_l271
+ v58_l265
  (def
   c-svd
   (let
@@ -315,29 +314,29 @@
    (la/mmul (la/transpose Vt-svd) (la/mmul S-inv Ut-y)))))
 
 
-(def v60_l280 (la/norm (la/sub c-svd c-poly)))
+(def v60_l274 (la/norm (la/sub c-svd c-poly)))
 
 
-(deftest t61_l282 (is ((fn [v] (< v 1.0E-8)) v60_l280)))
+(deftest t61_l276 (is ((fn [v] (< v 1.0E-8)) v60_l274)))
 
 
 (def
- v63_l288
+ v63_l282
  (la/close? c-svd (la/mmul (la/pinv A-poly) (la/column y-poly))))
 
 
-(deftest t64_l290 (is (true? v63_l288)))
+(deftest t64_l284 (is (true? v63_l282)))
 
 
 (def
- v66_l302
+ v66_l296
  (def
   x-trig
   (dtype/make-reader :float64 40 (* (/ (* 2.0 math/PI) 40.0) idx))))
 
 
 (def
- v67_l306
+ v67_l300
  (def
   noise-trig
   (tensor/->tensor
@@ -386,7 +385,7 @@
 
 
 (def
- v68_l314
+ v68_l308
  (def
   y-trig
   (dfn/+
@@ -397,27 +396,32 @@
 
 
 (def
- v69_l320
+ v69_l314
  (def
   A-trig
-  (let
-   [m (count x-trig)]
-   (la/matrix
-    (mapv
-     (fn
-      [i]
-      (let
-       [xi (x-trig i)]
-       [1.0
-        (math/cos xi)
-        (math/sin xi)
-        (math/cos (* 2.0 xi))
-        (math/sin (* 2.0 xi))]))
-     (range m))))))
+  (la/compute-matrix
+   (count x-trig)
+   5
+   (fn
+    [i j]
+    (let
+     [xi (double (x-trig i))]
+     (case
+      (int j)
+      0
+      1.0
+      1
+      (math/cos xi)
+      2
+      (math/sin xi)
+      3
+      (math/cos (* 2.0 xi))
+      4
+      (math/sin (* 2.0 xi))))))))
 
 
 (def
- v70_l332
+ v70_l325
  (def
   c-trig
   (la/solve
@@ -425,11 +429,11 @@
    (la/mmul (la/transpose A-trig) (la/column y-trig)))))
 
 
-(def v71_l336 c-trig)
+(def v71_l329 c-trig)
 
 
 (deftest
- t72_l338
+ t72_l331
  (is
   ((fn
     [c]
@@ -438,11 +442,11 @@
      (< (abs (- (tensor/mget c 1 0) 2.0)) 0.3)
      (< (abs (- (tensor/mget c 2 0) -1.5)) 0.3)
      (< (abs (- (tensor/mget c 3 0) 0.5)) 0.3)))
-   v71_l336)))
+   v71_l329)))
 
 
 (def
- v74_l350
+ v74_l343
  (let
   [x-fit
    (dtype/make-reader :float64 200 (* (/ (* 2.0 math/PI) 200.0) idx))
@@ -468,25 +472,25 @@
    plotly/plot)))
 
 
-(def v76_l377 (def condition-number (la/condition-number A-poly)))
+(def v76_l370 (def condition-number (la/condition-number A-poly)))
 
 
-(def v77_l379 condition-number)
+(def v77_l372 condition-number)
 
 
 (deftest
- t78_l381
- (is ((fn [v] (and (> v 1.0) (Double/isFinite v))) v77_l379)))
+ t78_l374
+ (is ((fn [v] (and (> v 1.0) (Double/isFinite v))) v77_l372)))
 
 
 (def
- v80_l387
+ v80_l380
  (def
   A-high
   (vandermonde (dtype/make-reader :float64 30 (* 1.0 idx)) 8)))
 
 
-(def v81_l390 (la/condition-number A-high))
+(def v81_l383 (la/condition-number A-high))
 
 
-(deftest t82_l392 (is ((fn [v] (> v 1000000.0)) v81_l390)))
+(deftest t82_l385 (is ((fn [v] (> v 1000000.0)) v81_l383)))

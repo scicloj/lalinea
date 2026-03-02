@@ -72,14 +72,26 @@
   (->rt (tensor/compute-tensor [r c] (fn [& _] 1.0) :float64)))
 
 (defn diag
-  "Create a diagonal matrix from a sequence of diagonal values."
-  [values]
-  (tape/record! :la/diag [values]
-                (->rt (let [v (dtype/->reader (dtype/make-container :float64 values))
-                            n (count v)]
-                        (tensor/compute-tensor [n n]
-                                               (fn [i j] (if (== i j) (double (v i)) 0.0))
-                                               :float64)))))
+  "Diagonal operations:
+   - Given a 2D matrix: extract the main diagonal as a 1D tensor.
+   - Given a 1D sequence/tensor: create a diagonal matrix."
+  [a]
+  (tape/record! :la/diag [a]
+                (let [a (ensure-tensor a)
+                      ndims (count (dtype/shape a))]
+                  (if (= 2 ndims)
+                    ;; Extract diagonal from matrix
+                    (let [n (long (apply min (dtype/shape a)))]
+                      (->rt (dtype/clone
+                             (dtype/make-reader :float64 n
+                               (double (tensor/mget a idx idx))))))
+                    ;; Create diagonal matrix from values
+                    (let [v (dtype/->reader (dtype/make-container :float64 a))
+                          n (count v)]
+                      (->rt (tensor/compute-tensor
+                             [n n]
+                             (fn [i j] (if (== i j) (double (v i)) 0.0))
+                             :float64)))))))
 
 (defn column
   "Create a column vector (shape [n 1]) from a sequence."
@@ -283,6 +295,20 @@
                   (if (cx/complex? a)
                     (cx/sum a)
                     (double (dfn/sum a))))))
+
+(defn prod
+  "Product of all elements. Returns a double."
+  [a]
+  (let [a (ensure-tensor a)]
+    (reduce * (dtype/->reader a :float64))))
+
+(defn compute-matrix
+  "Build an `[r c]` matrix from a function of row and column indices.
+   `f` takes two longs (row, col) and returns a double."
+  [r c f]
+  (->rt (tensor/compute-tensor [(long r) (long c)]
+                                (fn [i j] (double (f i j)))
+                                :float64)))
 
 (defn reduce-axis
   "Reduce a tensor along an axis.

@@ -411,7 +411,7 @@
   [{:keys [eigenvalues]}
    (la/eigen A)
    eig-prod
-   (reduce * (cx/re eigenvalues))]
+   (la/prod (cx/re eigenvalues))]
   (la/close-scalar? (la/det A) eig-prod)))
 
 
@@ -456,56 +456,54 @@
    AtA-eigs
    (la/real-eigenvalues (la/mmul (la/transpose A) A))
    sv-squared
-   (sort > (map (fn* [p1__66592#] (* p1__66592# p1__66592#)) S))]
-  (every?
-   identity
-   (map
-    (fn [a b] (< (abs (- a b)) 1.0E-8))
-    sv-squared
-    (reverse AtA-eigs)))))
+   (sort > (la/sq S))]
+  (la/close?
+   (la/->real-tensor sv-squared)
+   (la/->real-tensor (reverse AtA-eigs))
+   1.0E-8)))
 
 
-(deftest t142_l470 (is (true? v141_l463)))
+(deftest t142_l469 (is (true? v141_l463)))
 
 
 (def
- v144_l474
+ v144_l473
  (let
   [{:keys [S]} (la/svd A) sv-norm (math/sqrt (dfn/sum (dfn/* S S)))]
   (la/close-scalar? (la/norm A) sv-norm)))
 
 
-(deftest t145_l478 (is (true? v144_l474)))
+(deftest t145_l477 (is (true? v144_l473)))
 
 
 (def
- v147_l490
+ v147_l489
  (let
   [M (la/add (la/mmul (la/transpose A) A) I3) L (la/cholesky M)]
   (la/close? (la/mmul L (la/transpose L)) M)))
 
 
-(deftest t148_l494 (is (true? v147_l490)))
+(deftest t148_l493 (is (true? v147_l489)))
 
 
-(def v150_l498 (nil? (la/cholesky (la/matrix [[1 2] [2 1]]))))
+(def v150_l497 (nil? (la/cholesky (la/matrix [[1 2] [2 1]]))))
 
 
-(deftest t151_l500 (is (true? v150_l498)))
+(deftest t151_l499 (is (true? v150_l497)))
 
 
 (def
- v153_l510
+ v153_l509
  (let
   [b (la/column [1 2 3]) x (la/solve A b)]
   (la/close? (la/mmul A x) b)))
 
 
-(deftest t154_l514 (is (true? v153_l510)))
+(deftest t154_l513 (is (true? v153_l509)))
 
 
 (def
- v156_l518
+ v156_l517
  (let
   [b
    (la/column [1 2 3])
@@ -516,43 +514,43 @@
   (la/close? x-solve x-inv)))
 
 
-(deftest t157_l523 (is (true? v156_l518)))
+(deftest t157_l522 (is (true? v156_l517)))
 
 
 (def
- v159_l532
+ v159_l531
  (def ca (cx/complex-tensor [1.0 -2.0 3.0] [4.0 5.0 -6.0])))
 
 
 (def
- v160_l533
+ v160_l532
  (def cb (cx/complex-tensor [-3.0 0.5 2.0] [1.0 -1.5 7.0])))
 
 
-(def v162_l537 (la/close? (la/mul ca cb) (la/mul cb ca)))
+(def v162_l536 (la/close? (la/mul ca cb) (la/mul cb ca)))
 
 
-(deftest t163_l539 (is (true? v162_l537)))
+(deftest t163_l538 (is (true? v162_l536)))
 
 
-(def v165_l543 (la/close? (cx/conj (cx/conj ca)) ca))
+(def v165_l542 (la/close? (cx/conj (cx/conj ca)) ca))
 
 
-(deftest t166_l545 (is (true? v165_l543)))
+(deftest t166_l544 (is (true? v165_l542)))
 
 
 (def
- v168_l549
+ v168_l548
  (la/close?
   (cx/conj (la/mul ca cb))
   (la/mul (cx/conj ca) (cx/conj cb))))
 
 
-(deftest t169_l552 (is (true? v168_l549)))
+(deftest t169_l551 (is (true? v168_l548)))
 
 
 (def
- v171_l556
+ v171_l555
  (<
   (dfn/reduce-max
    (dfn/abs
@@ -560,11 +558,11 @@
   1.0E-10))
 
 
-(deftest t172_l561 (is (true? v171_l556)))
+(deftest t172_l560 (is (true? v171_l555)))
 
 
 (def
- v174_l565
+ v174_l564
  (let
   [d-ab
    (la/dot ca cb)
@@ -579,11 +577,11 @@
   (<= (- (+ (* re-ab re-ab) (* im-ab im-ab)) 1.0E-10) (* re-aa re-bb))))
 
 
-(deftest t175_l573 (is (true? v174_l565)))
+(deftest t175_l572 (is (true? v174_l564)))
 
 
 (def
- v177_l584
+ v177_l583
  (let
   [CA
    (cx/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
@@ -597,11 +595,11 @@
    1.0E-10)))
 
 
-(deftest t178_l591 (is (true? v177_l584)))
+(deftest t178_l590 (is (true? v177_l583)))
 
 
 (def
- v180_l595
+ v180_l594
  (let
   [CA
    (cx/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
@@ -610,11 +608,11 @@
   (< (la/norm (la/sub AAdag (la/transpose AAdag))) 1.0E-10)))
 
 
-(deftest t181_l599 (is (true? v180_l595)))
+(deftest t181_l598 (is (true? v180_l594)))
 
 
 (def
- v183_l603
+ v183_l602
  (let
   [CA
    (cx/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
@@ -631,11 +629,11 @@
   (< (la/norm (la/sub det-AB product)) 1.0E-10)))
 
 
-(deftest t184_l611 (is (true? v183_l603)))
+(deftest t184_l610 (is (true? v183_l602)))
 
 
 (def
- v186_l615
+ v186_l614
  (let
   [CA
    (cx/complex-tensor [[2 1] [1 3]] [[1 0] [0 1]])
@@ -646,11 +644,11 @@
   (< (la/norm (la/sub (la/mmul CA Cx) Cb)) 1.0E-10)))
 
 
-(deftest t187_l620 (is (true? v186_l615)))
+(deftest t187_l619 (is (true? v186_l614)))
 
 
 (def
- v189_l624
+ v189_l623
  (let
   [CA
    (cx/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
@@ -659,4 +657,4 @@
   (< (la/norm (la/sub (la/mmul CA (la/invert CA)) CI)) 1.0E-10)))
 
 
-(deftest t190_l628 (is (true? v189_l624)))
+(deftest t190_l627 (is (true? v189_l623)))

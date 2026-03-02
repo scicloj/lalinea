@@ -58,6 +58,12 @@
                               (== 5.0 (tensor/mget m 1 1))
                               (== 0.0 (tensor/mget m 0 1))))])
 
+;; Extract diagonal from a 2D matrix:
+
+(la/diag (la/matrix [[1 2 3] [4 5 6] [7 8 9]]))
+
+(kind/test-last [(fn [v] (= [1.0 5.0 9.0] v))])
+
 (kind/doc #'la/column)
 
 (la/column [1 2 3])
@@ -115,6 +121,18 @@
 (la/sum (la/matrix [[1 2] [3 4]]))
 
 (kind/test-last [(fn [v] (== 10.0 v))])
+
+(kind/doc #'la/prod)
+
+(la/prod (la/->real-tensor [2 3 4]))
+
+(kind/test-last [(fn [v] (== 24.0 v))])
+
+(kind/doc #'la/compute-matrix)
+
+(la/compute-matrix 3 3 (fn [i j] (if (== i j) 1.0 0.0)))
+
+(kind/test-last [(fn [m] (= (la/eye 3) m))])
 
 (kind/doc #'la/reduce-axis)
 

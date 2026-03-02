@@ -82,7 +82,7 @@
 (deftest t19_l121 (is (true? v18_l119)))
 
 
-(def v20_l123 (< (abs (- (la/det A-eig) (reduce * eig-reals))) 1.0E-10))
+(def v20_l123 (< (abs (- (la/det A-eig) (la/prod eig-reals))) 1.0E-10))
 
 
 (deftest t21_l125 (is (true? v20_l123)))
@@ -104,7 +104,7 @@
     sorted-idx
     (sort-by (fn [i] (cx/re ((:eigenvalues eig-diag) i))) (range 2))]
    (la/hstack
-    (mapv (fn* [p1__65579#] (nth evecs p1__65579#)) sorted-idx)))))
+    (mapv (fn* [p1__65262#] (nth evecs p1__65262#)) sorted-idx)))))
 
 
 (def
@@ -246,7 +246,7 @@
 (def
  v69_l394
  (every?
-  (fn* [p1__65580#] (>= p1__65580# -1.0E-10))
+  (fn* [p1__65263#] (>= p1__65263# -1.0E-10))
   (cx/re (:eigenvalues (la/eigen ATA)))))
 
 
@@ -330,7 +330,7 @@
 
 (def
  v96_l484
- (< (abs (- (la/det A-final) (reduce * final-eigenvalues))) 1.0E-10))
+ (< (abs (- (la/det A-final) (la/prod final-eigenvalues))) 1.0E-10))
 
 
 (deftest t97_l488 (is (true? v96_l484)))
