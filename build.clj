@@ -2,7 +2,7 @@
   (:require [clojure.tools.build.api :as b]
             [deps-deploy.deps-deploy :as dd]))
 
-(def lib 'org.scicloj/la-linea)
+(def lib 'org.scicloj/lalinea)
 (def version "0.1.0")
 (def snapshot (str version "-SNAPSHOT"))
 (def class-dir "target/classes")
@@ -32,7 +32,7 @@
 
 (defn- pom-template [version]
   [[:description "linear algebra with tensor abstractions"]
-   [:url "https://github.com/scicloj/la-linea"]
+   [:url "https://github.com/scicloj/lalinea"]
    [:licenses
     [:license
      [:name "MIT License"]
@@ -41,9 +41,9 @@
     [:developer
      [:name "scicloj"]]]
    [:scm
-    [:url "https://github.com/scicloj/la-linea"]
-    [:connection "scm:git:https://github.com/scicloj/la-linea.git"]
-    [:developerConnection "scm:git:ssh:git@github.com:scicloj/la-linea.git"]
+    [:url "https://github.com/scicloj/lalinea"]
+    [:connection "scm:git:https://github.com/scicloj/lalinea.git"]
+    [:developerConnection "scm:git:ssh:git@github.com:scicloj/lalinea.git"]
     [:tag (str "v" version)]]])
 
 (defn ci

@@ -9,10 +9,10 @@ row-major `double[]` memory layout, enabling **zero-copy** interop.
 ## General info
 |||
 |-|-|
-|Website | [https://scicloj.github.io/la-linea/](https://scicloj.github.io/la-linea/)
-|Source |[![(GitHub repo)](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/scicloj/la-linea)|
-|Deps |[![Clojars Project](https://img.shields.io/clojars/v/org.scicloj/la-linea.svg)](https://clojars.org/org.scicloj/la-linea)|
-|License |[MIT](https://github.com/scicloj/la-linea/blob/main/LICENSE)|
+|Website | [https://scicloj.github.io/lalinea/](https://scicloj.github.io/lalinea/)
+|Source |[![(GitHub repo)](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/scicloj/lalinea)|
+|Deps |[![Clojars Project](https://img.shields.io/clojars/v/org.scicloj/lalinea.svg)](https://clojars.org/org.scicloj/lalinea)|
+|License |[MIT](https://github.com/scicloj/lalinea/blob/main/LICENSE)|
 |Status |🛠alpha🛠|
 
 ## Features
@@ -34,7 +34,7 @@ row-major `double[]` memory layout, enabling **zero-copy** interop.
 
 ### Element-wise operations
 
-- `scicloj.la-linea.elementwise` — 27 tape-aware functions with complex dispatch
+- `scicloj.lalinea.elementwise` — 27 tape-aware functions with complex dispatch
 - Powers: `sq`, `sqrt`, `pow`, `cbrt`
 - Exponential: `exp`, `log`, `log10`, `log1p`, `expm1`
 - Trigonometric: `sin`, `cos`, `tan`, `asin`, `acos`, `atan`
@@ -80,12 +80,12 @@ row-major `double[]` memory layout, enabling **zero-copy** interop.
 Add to your `deps.edn`:
 
 ```clojure
-{:deps {org.scicloj/la-linea {:mvn/version "0.1.0"}}}
+{:deps {org.scicloj/lalinea {:mvn/version "0.1.0"}}}
 ```
 
 ## Documentation
 
-The [La Linea book](https://scicloj.github.io/la-linea/) is a set of notebook-based chapters covering:
+The [La Linea book](https://scicloj.github.io/lalinea/) is a set of notebook-based chapters covering:
 
 - **Getting started** — quickstart
 - **Core concepts** — tensors & EJML interop, complex tensors, Fourier transforms, sharing & mutation, computation tape, automatic differentiation
@@ -99,14 +99,14 @@ Each chapter includes inline tests via `kind/test-last`.
 ## API
 
 ```clojure
-(require '[scicloj.la-linea.linalg :as la])         ; matrix construction, arithmetic, decompositions, solve
-(require '[scicloj.la-linea.complex :as cx])         ; complex tensor operations
-(require '[scicloj.la-linea.elementwise :as elem])   ; tape-aware element-wise functions
-(require '[scicloj.la-linea.transform :as xf])       ; FFT / DCT / DST / DHT bridge
-(require '[scicloj.la-linea.tape :as tape])          ; computation DAG recording, memory inspection
-(require '[scicloj.la-linea.grad :as grad])          ; reverse-mode automatic differentiation
-(require '[scicloj.la-linea.impl.print])                  ; tagged-literal printing (#la/m, #la/v)
-(require '[scicloj.la-linea.vis :as vis])            ; visualization helpers
+(require '[scicloj.lalinea.linalg :as la])         ; matrix construction, arithmetic, decompositions, solve
+(require '[scicloj.lalinea.complex :as cx])         ; complex tensor operations
+(require '[scicloj.lalinea.elementwise :as elem])   ; tape-aware element-wise functions
+(require '[scicloj.lalinea.transform :as xf])       ; FFT / DCT / DST / DHT bridge
+(require '[scicloj.lalinea.tape :as tape])          ; computation DAG recording, memory inspection
+(require '[scicloj.lalinea.grad :as grad])          ; reverse-mode automatic differentiation
+(require '[scicloj.lalinea.impl.print])                  ; tagged-literal printing (#la/m, #la/v)
+(require '[scicloj.lalinea.vis :as vis])            ; visualization helpers
 ```
 
 ## Built on
@@ -115,7 +115,7 @@ Each chapter includes inline tests via `kind/test-last`.
 - [EJML](https://ejml.org/) — efficient Java matrix library (real + complex)
 - [fastmath](https://github.com/generateme/fastmath) — transforms (FFT, DCT, DST, DHT)
 
-The [book notebooks](https://scicloj.github.io/la-linea/) also use
+The [book notebooks](https://scicloj.github.io/lalinea/) also use
 [tablecloth](https://github.com/scicloj/tablecloth),
 [tableplot](https://github.com/scicloj/tableplot), and
 [kindly](https://github.com/scicloj/kindly) (included in the `:dev` and `:test` aliases).

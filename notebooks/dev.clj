@@ -8,7 +8,7 @@
   "Convert chapters map to flat vector of source paths."
   [chapters]
   (into [] (mapcat (fn [[_part names]]
-                     (map #(format "la_linea_book/%s.clj" %) names)))
+                     (map #(format "lalinea_book/%s.clj" %) names)))
         chapters))
 
 (defn- chapters->parts
@@ -16,7 +16,7 @@
   [chapters]
   (mapv (fn [[part names]]
           {:part part
-           :chapters (mapv #(format "la_linea_book/%s.clj" %) names)})
+           :chapters (mapv #(format "lalinea_book/%s.clj" %) names)})
         chapters))
 
 (defn make-book!
@@ -43,4 +43,4 @@
 (comment
   (make-book!)
   (make-gfm!)
-  (make-gfm! "la_linea_book/quickstart.clj"))
+  (make-gfm! "lalinea_book/quickstart.clj"))

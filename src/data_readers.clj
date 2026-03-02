@@ -1,2 +1,2 @@
-{la/m scicloj.la-linea.linalg/read-matrix
- la/v scicloj.la-linea.linalg/read-column}
+{la/m scicloj.lalinea.linalg/read-matrix
+ la/v scicloj.lalinea.linalg/read-column}
