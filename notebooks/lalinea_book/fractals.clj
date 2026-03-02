@@ -7,10 +7,10 @@
 ;; escapes to infinity.
 ;;
 ;; This chapter computes fractals using **ComplexTensor** arithmetic.
-;; The iteration loop is imperative (each step depends on the
-;; previous), but within each step the computation is **vectorized**
-;; across the entire complex plane — `la/mul` and `la/add` operate on
-;; every grid point simultaneously.
+;; The iteration loop is imperative — each step mutates the grid
+;; in place. Within each step the computation is **pointwise**
+;; across the entire complex plane: a single `la/mul` or `la/add`
+;; call applies to every grid point.
 
 (ns lalinea-book.fractals
   (:require
@@ -221,9 +221,9 @@
 ;;
 ;; $$z_{n+1} = z - \frac{z^3 - 1}{3z^2}$$
 ;;
-;; Like Mandelbrot and Julia sets, the iteration is vectorized
-;; across the entire grid — `la/mul`, `la/sub`, and `la/scale`
-;; operate on every grid point simultaneously.
+;; Like Mandelbrot and Julia sets, the iteration is pointwise
+;; across the entire grid — a single `la/mul`, `la/sub`, or
+;; `la/scale` call applies to every grid point.
 
 ;; ### Complex division
 ;;
