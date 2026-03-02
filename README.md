@@ -45,8 +45,8 @@ row-major `double[]` memory layout, enabling **zero-copy** interop.
 
 ### Tagged literals
 
-- `#la/m [[1 2] [3 4]]` — read and print matrices
-- `#la/v [1 2 3]` — read and print column vectors
+- `#la/R [:float64 [2 2] [[1.0 2.0] [3.0 4.0]]]` — real tensors
+- `#la/C [:float64 [2 2] [[1.0 2.0] [3.0 4.0]]]` — complex tensors
 - Round-trip through `pr-str` / `read-string`
 
 ### Fourier transforms
@@ -105,7 +105,7 @@ Each chapter includes inline tests via `kind/test-last`.
 (require '[scicloj.lalinea.transform :as xf])       ; FFT / DCT / DST / DHT bridge
 (require '[scicloj.lalinea.tape :as tape])          ; computation DAG recording, memory inspection
 (require '[scicloj.lalinea.grad :as grad])          ; reverse-mode automatic differentiation
-(require '[scicloj.lalinea.impl.print])                  ; tagged-literal printing (#la/m, #la/v)
+(require '[scicloj.lalinea.impl.print])                  ; tagged-literal printing (#la/R, #la/C)
 (require '[scicloj.lalinea.vis :as vis])            ; visualization helpers
 ```
 
@@ -124,7 +124,7 @@ The [book notebooks](https://scicloj.github.io/lalinea/) also use
 
 ```bash
 clojure -M:dev -m nrepl.cmdline   # start REPL
-./run_tests.sh                     # run tests (511 tests, 511 assertions)
+./run_tests.sh                     # run tests (534 tests, 534 assertions)
 clojure -T:build ci                # test + build JAR
 ```
 

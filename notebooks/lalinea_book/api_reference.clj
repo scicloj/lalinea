@@ -361,18 +361,6 @@
 
 (kind/test-last [(fn [r] (= 1 r))])
 
-(kind/doc #'la/read-matrix)
-
-(la/read-matrix [[1 2] [3 4]])
-
-(kind/test-last [(fn [m] (= [2 2] (dtype/shape m)))])
-
-(kind/doc #'la/read-column)
-
-(la/read-column [5 6 7])
-
-(kind/test-last [(fn [v] (= [3 1] (dtype/shape v)))])
-
 (kind/doc #'la/real-tensor?)
 
 (la/real-tensor? (la/matrix [[1 2] [3 4]]))

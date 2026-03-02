@@ -746,12 +746,3 @@
     (throw (ex-info "Cannot read truncated #la/R literal" {:shape _shape})))
   (->rt (tensor/->tensor data {:datatype :float64})))
 
-(defn read-matrix
-  "Reader function for `#la/m` tagged literal (deprecated, use `#la/R`)."
-  [form]
-  (matrix form))
-
-(defn read-column
-  "Reader function for `#la/v` tagged literal (deprecated, use `#la/R`)."
-  [form]
-  (column form))

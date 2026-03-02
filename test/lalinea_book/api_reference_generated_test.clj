@@ -578,220 +578,202 @@
 (deftest t147_l362 (is ((fn [r] (= 1 r)) v146_l360)))
 
 
-(def v148_l364 (kind/doc #'la/read-matrix))
+(def v148_l364 (kind/doc #'la/real-tensor?))
 
 
-(def v149_l366 (la/read-matrix [[1 2] [3 4]]))
+(def v149_l366 (la/real-tensor? (la/matrix [[1 2] [3 4]])))
 
 
-(deftest t150_l368 (is ((fn [m] (= [2 2] (dtype/shape m))) v149_l366)))
+(deftest t150_l368 (is (true? v149_l366)))
 
 
-(def v151_l370 (kind/doc #'la/read-column))
+(def v151_l370 (la/real-tensor? [1 2 3]))
 
 
-(def v152_l372 (la/read-column [5 6 7]))
+(deftest t152_l372 (is (false? v151_l370)))
 
 
-(deftest t153_l374 (is ((fn [v] (= [3 1] (dtype/shape v))) v152_l372)))
+(def v153_l374 (kind/doc #'la/->real-tensor))
 
 
-(def v154_l376 (kind/doc #'la/real-tensor?))
+(def v154_l376 (la/->real-tensor (tensor/->tensor [[1 2] [3 4]])))
 
 
-(def v155_l378 (la/real-tensor? (la/matrix [[1 2] [3 4]])))
+(deftest t155_l378 (is ((fn [rt] (la/real-tensor? rt)) v154_l376)))
 
 
-(deftest t156_l380 (is (true? v155_l378)))
+(def v156_l380 (kind/doc #'la/->tensor))
 
 
-(def v157_l382 (la/real-tensor? [1 2 3]))
+(def v157_l382 (la/->tensor (la/matrix [[1 2] [3 4]])))
 
 
-(deftest t158_l384 (is (false? v157_l382)))
+(deftest t158_l384 (is ((fn [t] (not (la/real-tensor? t))) v157_l382)))
 
 
-(def v159_l386 (kind/doc #'la/->real-tensor))
+(def v159_l386 (kind/doc #'la/lift))
 
 
-(def v160_l388 (la/->real-tensor (tensor/->tensor [[1 2] [3 4]])))
-
-
-(deftest t161_l390 (is ((fn [rt] (la/real-tensor? rt)) v160_l388)))
-
-
-(def v162_l392 (kind/doc #'la/->tensor))
-
-
-(def v163_l394 (la/->tensor (la/matrix [[1 2] [3 4]])))
-
-
-(deftest t164_l396 (is ((fn [t] (not (la/real-tensor? t))) v163_l394)))
-
-
-(def v165_l398 (kind/doc #'la/lift))
-
-
-(def v167_l401 (la/lift dfn/sqrt (la/matrix [[4 9] [16 25]])))
+(def v161_l389 (la/lift dfn/sqrt (la/matrix [[4 9] [16 25]])))
 
 
 (deftest
- t168_l403
+ t162_l391
  (is
   ((fn
     [m]
     (and
      (la/close-scalar? (tensor/mget m 0 0) 2.0)
      (la/close-scalar? (tensor/mget m 0 1) 3.0)))
-   v167_l401)))
+   v161_l389)))
 
 
-(def v169_l406 (kind/doc #'la/lifted))
+(def v163_l394 (kind/doc #'la/lifted))
 
 
 (def
- v171_l409
+ v165_l397
  (let [my-sqrt (la/lifted dfn/sqrt)] (my-sqrt (la/column [4 9 16]))))
 
 
 (deftest
- t172_l412
- (is ((fn [v] (la/close-scalar? (tensor/mget v 0 0) 2.0)) v171_l409)))
+ t166_l400
+ (is ((fn [v] (la/close-scalar? (tensor/mget v 0 0) 2.0)) v165_l397)))
 
 
-(def v174_l419 (kind/doc #'cx/complex-tensor))
+(def v168_l407 (kind/doc #'cx/complex-tensor))
 
 
-(def v175_l421 (cx/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0]))
+(def v169_l409 (cx/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0]))
+
+
+(deftest
+ t170_l411
+ (is ((fn [ct] (= [3] (cx/complex-shape ct))) v169_l409)))
+
+
+(def v171_l413 (kind/doc #'cx/complex-tensor-real))
+
+
+(def v172_l415 (cx/complex-tensor-real [5.0 6.0 7.0]))
+
+
+(deftest t173_l417 (is ((fn [ct] (every? zero? (cx/im ct))) v172_l415)))
+
+
+(def v174_l419 (kind/doc #'cx/complex))
+
+
+(def v175_l421 (cx/complex 3.0 4.0))
 
 
 (deftest
  t176_l423
- (is ((fn [ct] (= [3] (cx/complex-shape ct))) v175_l421)))
-
-
-(def v177_l425 (kind/doc #'cx/complex-tensor-real))
-
-
-(def v178_l427 (cx/complex-tensor-real [5.0 6.0 7.0]))
-
-
-(deftest t179_l429 (is ((fn [ct] (every? zero? (cx/im ct))) v178_l427)))
-
-
-(def v180_l431 (kind/doc #'cx/complex))
-
-
-(def v181_l433 (cx/complex 3.0 4.0))
-
-
-(deftest
- t182_l435
  (is
   ((fn
     [ct]
     (and (cx/scalar? ct) (== 3.0 (cx/re ct)) (== 4.0 (cx/im ct))))
-   v181_l433)))
+   v175_l421)))
 
 
-(def v183_l439 (kind/doc #'cx/re))
+(def v177_l427 (kind/doc #'cx/re))
 
 
-(def v184_l441 (cx/re (cx/complex-tensor [1.0 2.0] [3.0 4.0])))
+(def v178_l429 (cx/re (cx/complex-tensor [1.0 2.0] [3.0 4.0])))
 
 
-(deftest t185_l443 (is (= v184_l441 [1.0 2.0])))
+(deftest t179_l431 (is (= v178_l429 [1.0 2.0])))
 
 
-(def v186_l445 (kind/doc #'cx/im))
+(def v180_l433 (kind/doc #'cx/im))
 
 
-(def v187_l447 (cx/im (cx/complex-tensor [1.0 2.0] [3.0 4.0])))
+(def v181_l435 (cx/im (cx/complex-tensor [1.0 2.0] [3.0 4.0])))
 
 
-(deftest t188_l449 (is (= v187_l447 [3.0 4.0])))
+(deftest t182_l437 (is (= v181_l435 [3.0 4.0])))
 
 
-(def v189_l451 (kind/doc #'cx/complex-shape))
+(def v183_l439 (kind/doc #'cx/complex-shape))
 
 
 (def
- v190_l453
+ v184_l441
  (cx/complex-shape
   (cx/complex-tensor [[1.0 2.0] [3.0 4.0]] [[5.0 6.0] [7.0 8.0]])))
 
 
-(deftest t191_l456 (is (= v190_l453 [2 2])))
+(deftest t185_l444 (is (= v184_l441 [2 2])))
 
 
-(def v192_l458 (kind/doc #'cx/scalar?))
+(def v186_l446 (kind/doc #'cx/scalar?))
 
 
-(def v193_l460 (cx/scalar? (cx/complex 3.0 4.0)))
+(def v187_l448 (cx/scalar? (cx/complex 3.0 4.0)))
 
 
-(deftest t194_l462 (is (true? v193_l460)))
+(deftest t188_l450 (is (true? v187_l448)))
 
 
-(def v195_l464 (kind/doc #'cx/complex?))
+(def v189_l452 (kind/doc #'cx/complex?))
 
 
-(def v196_l466 (cx/complex? (cx/complex 3.0 4.0)))
+(def v190_l454 (cx/complex? (cx/complex 3.0 4.0)))
 
 
-(deftest t197_l468 (is (true? v196_l466)))
+(deftest t191_l456 (is (true? v190_l454)))
 
 
-(def v198_l470 (cx/complex? (la/eye 2)))
+(def v192_l458 (cx/complex? (la/eye 2)))
 
 
-(deftest t199_l472 (is (false? v198_l470)))
+(deftest t193_l460 (is (false? v192_l458)))
 
 
-(def v200_l474 (kind/doc #'cx/->tensor))
+(def v194_l462 (kind/doc #'cx/->tensor))
 
 
 (def
- v201_l476
+ v195_l464
  (dtype/shape (cx/->tensor (cx/complex-tensor [1.0 2.0] [3.0 4.0]))))
 
 
-(deftest t202_l478 (is (= v201_l476 [2 2])))
+(deftest t196_l466 (is (= v195_l464 [2 2])))
 
 
-(def v203_l480 (kind/doc #'cx/->double-array))
+(def v197_l468 (kind/doc #'cx/->double-array))
 
 
 (def
- v204_l482
+ v198_l470
  (let
   [ct (cx/complex-tensor [1.0 2.0] [3.0 4.0])]
   (seq (cx/->double-array ct))))
 
 
-(deftest t205_l485 (is (= v204_l482 [1.0 3.0 2.0 4.0])))
+(deftest t199_l473 (is (= v198_l470 [1.0 3.0 2.0 4.0])))
 
 
-(def v206_l487 (kind/doc #'cx/wrap-tensor))
+(def v200_l475 (kind/doc #'cx/wrap-tensor))
 
 
 (def
- v207_l489
+ v201_l477
  (let
   [raw (tensor/->tensor [[1.0 2.0] [3.0 4.0]]) ct (cx/wrap-tensor raw)]
   [(cx/complex? ct) (cx/complex-shape ct)]))
 
 
 (deftest
- t208_l493
- (is ((fn [[c? shape]] (and c? (= [2] shape))) v207_l489)))
+ t202_l481
+ (is ((fn [[c? shape]] (and c? (= [2] shape))) v201_l477)))
 
 
-(def v209_l495 (kind/doc #'cx/add))
+(def v203_l483 (kind/doc #'cx/add))
 
 
 (def
- v210_l497
+ v204_l485
  (let
   [a
    (cx/complex-tensor [1.0 2.0] [3.0 4.0])
@@ -800,14 +782,14 @@
   (cx/re (cx/add a b))))
 
 
-(deftest t211_l501 (is (= v210_l497 [11.0 22.0])))
+(deftest t205_l489 (is (= v204_l485 [11.0 22.0])))
 
 
-(def v212_l503 (kind/doc #'cx/sub))
+(def v206_l491 (kind/doc #'cx/sub))
 
 
 (def
- v213_l505
+ v207_l493
  (let
   [a
    (cx/complex-tensor [10.0 20.0] [30.0 40.0])
@@ -816,27 +798,27 @@
   (cx/re (cx/sub a b))))
 
 
-(deftest t214_l509 (is (= v213_l505 [9.0 18.0])))
+(deftest t208_l497 (is (= v207_l493 [9.0 18.0])))
 
 
-(def v215_l511 (kind/doc #'cx/scale))
+(def v209_l499 (kind/doc #'cx/scale))
 
 
 (def
- v216_l513
+ v210_l501
  (let
   [ct (cx/scale (cx/complex-tensor [1.0 2.0] [3.0 4.0]) 2.0)]
   [(cx/re ct) (cx/im ct)]))
 
 
-(deftest t217_l516 (is (= v216_l513 [[2.0 4.0] [6.0 8.0]])))
+(deftest t211_l504 (is (= v210_l501 [[2.0 4.0] [6.0 8.0]])))
 
 
-(def v218_l518 (kind/doc #'cx/mul))
+(def v212_l506 (kind/doc #'cx/mul))
 
 
 (def
- v220_l521
+ v214_l509
  (let
   [a
    (cx/complex-tensor [1.0] [3.0])
@@ -847,40 +829,40 @@
   [(cx/re (c 0)) (cx/im (c 0))]))
 
 
-(deftest t221_l526 (is (= v220_l521 [-10.0 10.0])))
+(deftest t215_l514 (is (= v214_l509 [-10.0 10.0])))
 
 
-(def v222_l528 (kind/doc #'cx/conj))
+(def v216_l516 (kind/doc #'cx/conj))
 
 
 (def
- v223_l530
+ v217_l518
  (let
   [ct (cx/conj (cx/complex-tensor [1.0 2.0] [3.0 -4.0]))]
   (cx/im ct)))
 
 
-(deftest t224_l533 (is (= v223_l530 [-3.0 4.0])))
+(deftest t218_l521 (is (= v217_l518 [-3.0 4.0])))
 
 
-(def v225_l535 (kind/doc #'cx/abs))
+(def v219_l523 (kind/doc #'cx/abs))
 
 
 (def
- v227_l538
+ v221_l526
  (let
   [m (cx/abs (cx/complex-tensor [3.0] [4.0]))]
   (la/close-scalar? (double (m 0)) 5.0)))
 
 
-(deftest t228_l541 (is (true? v227_l538)))
+(deftest t222_l529 (is (true? v221_l526)))
 
 
-(def v229_l543 (kind/doc #'cx/dot))
+(def v223_l531 (kind/doc #'cx/dot))
 
 
 (def
- v230_l545
+ v224_l533
  (let
   [a
    (cx/complex-tensor [1.0 0.0] [0.0 1.0])
@@ -891,53 +873,53 @@
   (la/close-scalar? (cx/im result) 2.0)))
 
 
-(deftest t231_l550 (is (true? v230_l545)))
+(deftest t225_l538 (is (true? v224_l533)))
 
 
-(def v232_l552 (kind/doc #'cx/dot-conj))
+(def v226_l540 (kind/doc #'cx/dot-conj))
 
 
 (def
- v234_l555
+ v228_l543
  (let
   [a (cx/complex-tensor [3.0 1.0] [4.0 2.0]) result (cx/dot-conj a a)]
   (la/close-scalar? (cx/re result) 30.0)))
 
 
-(deftest t235_l559 (is (true? v234_l555)))
+(deftest t229_l547 (is (true? v228_l543)))
 
 
-(def v236_l561 (kind/doc #'cx/sum))
+(def v230_l549 (kind/doc #'cx/sum))
 
 
 (def
- v237_l563
+ v231_l551
  (let
   [ct (cx/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0]) s (cx/sum ct)]
   [(cx/re s) (cx/im s)]))
 
 
-(deftest t238_l567 (is (= v237_l563 [6.0 15.0])))
+(deftest t232_l555 (is (= v231_l551 [6.0 15.0])))
 
 
-(def v240_l574 (kind/doc #'ft/forward))
+(def v234_l562 (kind/doc #'ft/forward))
 
 
 (def
- v241_l576
+ v235_l564
  (let
   [signal [1.0 0.0 0.0 0.0] spectrum (ft/forward signal)]
   (cx/complex-shape spectrum)))
 
 
-(deftest t242_l580 (is (= v241_l576 [4])))
+(deftest t236_l568 (is (= v235_l564 [4])))
 
 
-(def v243_l582 (kind/doc #'ft/inverse))
+(def v237_l570 (kind/doc #'ft/inverse))
 
 
 (def
- v244_l584
+ v238_l572
  (let
   [spectrum
    (ft/forward [1.0 2.0 3.0 4.0])
@@ -946,14 +928,14 @@
   (la/close-scalar? (cx/re (roundtrip 0)) 1.0)))
 
 
-(deftest t245_l588 (is (true? v244_l584)))
+(deftest t239_l576 (is (true? v238_l572)))
 
 
-(def v246_l590 (kind/doc #'ft/inverse-real))
+(def v240_l578 (kind/doc #'ft/inverse-real))
 
 
 (def
- v247_l592
+ v241_l580
  (let
   [signal
    [1.0 2.0 3.0 4.0]
@@ -962,14 +944,14 @@
   (la/close-scalar? (roundtrip 0) 1.0)))
 
 
-(deftest t248_l596 (is (true? v247_l592)))
+(deftest t242_l584 (is (true? v241_l580)))
 
 
-(def v249_l598 (kind/doc #'ft/forward-complex))
+(def v243_l586 (kind/doc #'ft/forward-complex))
 
 
 (def
- v250_l600
+ v244_l588
  (let
   [ct
    (cx/complex-tensor-real [1.0 0.0 0.0 0.0])
@@ -978,23 +960,23 @@
   (cx/complex-shape spectrum)))
 
 
-(deftest t251_l604 (is (= v250_l600 [4])))
+(deftest t245_l592 (is (= v244_l588 [4])))
 
 
-(def v252_l606 (kind/doc #'ft/dct-forward))
+(def v246_l594 (kind/doc #'ft/dct-forward))
 
 
-(def v253_l608 (ft/dct-forward [1.0 2.0 3.0 4.0]))
+(def v247_l596 (ft/dct-forward [1.0 2.0 3.0 4.0]))
 
 
-(deftest t254_l610 (is ((fn [v] (= 4 (count v))) v253_l608)))
+(deftest t248_l598 (is ((fn [v] (= 4 (count v))) v247_l596)))
 
 
-(def v255_l612 (kind/doc #'ft/dct-inverse))
+(def v249_l600 (kind/doc #'ft/dct-inverse))
 
 
 (def
- v256_l614
+ v250_l602
  (let
   [signal
    [1.0 2.0 3.0 4.0]
@@ -1003,23 +985,23 @@
   (la/close-scalar? (roundtrip 0) 1.0)))
 
 
-(deftest t257_l618 (is (true? v256_l614)))
+(deftest t251_l606 (is (true? v250_l602)))
 
 
-(def v258_l620 (kind/doc #'ft/dst-forward))
+(def v252_l608 (kind/doc #'ft/dst-forward))
 
 
-(def v259_l622 (ft/dst-forward [1.0 2.0 3.0 4.0]))
+(def v253_l610 (ft/dst-forward [1.0 2.0 3.0 4.0]))
 
 
-(deftest t260_l624 (is ((fn [v] (= 4 (count v))) v259_l622)))
+(deftest t254_l612 (is ((fn [v] (= 4 (count v))) v253_l610)))
 
 
-(def v261_l626 (kind/doc #'ft/dst-inverse))
+(def v255_l614 (kind/doc #'ft/dst-inverse))
 
 
 (def
- v262_l628
+ v256_l616
  (let
   [signal
    [1.0 2.0 3.0 4.0]
@@ -1028,23 +1010,23 @@
   (la/close-scalar? (roundtrip 0) 1.0)))
 
 
-(deftest t263_l632 (is (true? v262_l628)))
+(deftest t257_l620 (is (true? v256_l616)))
 
 
-(def v264_l634 (kind/doc #'ft/dht-forward))
+(def v258_l622 (kind/doc #'ft/dht-forward))
 
 
-(def v265_l636 (ft/dht-forward [1.0 2.0 3.0 4.0]))
+(def v259_l624 (ft/dht-forward [1.0 2.0 3.0 4.0]))
 
 
-(deftest t266_l638 (is ((fn [v] (= 4 (count v))) v265_l636)))
+(deftest t260_l626 (is ((fn [v] (= 4 (count v))) v259_l624)))
 
 
-(def v267_l640 (kind/doc #'ft/dht-inverse))
+(def v261_l628 (kind/doc #'ft/dht-inverse))
 
 
 (def
- v268_l642
+ v262_l630
  (let
   [signal
    [1.0 2.0 3.0 4.0]
@@ -1053,70 +1035,70 @@
   (la/close-scalar? (roundtrip 0) 1.0)))
 
 
-(deftest t269_l646 (is (true? v268_l642)))
+(deftest t263_l634 (is (true? v262_l630)))
 
 
-(def v271_l652 (kind/doc #'tape/memory-status))
+(def v265_l640 (kind/doc #'tape/memory-status))
 
 
-(def v272_l654 (tape/memory-status (la/matrix [[1 2] [3 4]])))
+(def v266_l642 (tape/memory-status (la/matrix [[1 2] [3 4]])))
 
 
-(deftest t273_l656 (is ((fn [s] (= :contiguous s)) v272_l654)))
+(deftest t267_l644 (is ((fn [s] (= :contiguous s)) v266_l642)))
 
 
 (def
- v274_l658
+ v268_l646
  (tape/memory-status (la/transpose (la/matrix [[1 2] [3 4]]))))
 
 
-(deftest t275_l660 (is ((fn [s] (= :strided s)) v274_l658)))
+(deftest t269_l648 (is ((fn [s] (= :strided s)) v268_l646)))
 
 
-(def v276_l662 (tape/memory-status (la/add (la/eye 2) (la/eye 2))))
+(def v270_l650 (tape/memory-status (la/add (la/eye 2) (la/eye 2))))
 
 
-(deftest t277_l664 (is ((fn [s] (= :lazy s)) v276_l662)))
+(deftest t271_l652 (is ((fn [s] (= :lazy s)) v270_l650)))
 
 
-(def v278_l666 (kind/doc #'tape/memory-relation))
+(def v272_l654 (kind/doc #'tape/memory-relation))
 
 
 (def
- v279_l668
+ v273_l656
  (let
   [A (la/matrix [[1 2] [3 4]])]
   (tape/memory-relation A (la/transpose A))))
 
 
-(deftest t280_l671 (is ((fn [r] (= :shared r)) v279_l668)))
+(deftest t274_l659 (is ((fn [r] (= :shared r)) v273_l656)))
 
 
 (def
- v281_l673
+ v275_l661
  (tape/memory-relation
   (la/matrix [[1 0] [0 1]])
   (la/matrix [[5 6] [7 8]])))
 
 
-(deftest t282_l675 (is ((fn [r] (= :independent r)) v281_l673)))
+(deftest t276_l663 (is ((fn [r] (= :independent r)) v275_l661)))
 
 
 (def
- v283_l677
+ v277_l665
  (tape/memory-relation
   (la/matrix [[1 2] [3 4]])
   (la/add (la/eye 2) (la/eye 2))))
 
 
-(deftest t284_l679 (is ((fn [r] (= :unknown-lazy r)) v283_l677)))
+(deftest t278_l667 (is ((fn [r] (= :unknown-lazy r)) v277_l665)))
 
 
-(def v285_l681 (kind/doc #'tape/with-tape))
+(def v279_l669 (kind/doc #'tape/with-tape))
 
 
 (def
- v286_l683
+ v280_l671
  (def
   tape-example
   (tape/with-tape
@@ -1125,343 +1107,343 @@
     (la/mmul B (la/transpose A))))))
 
 
-(def v287_l689 (select-keys tape-example [:result :entries]))
+(def v281_l677 (select-keys tape-example [:result :entries]))
 
 
 (deftest
- t288_l691
+ t282_l679
  (is
   ((fn [m] (and (contains? m :result) (contains? m :entries)))
-   v287_l689)))
+   v281_l677)))
 
 
-(def v289_l694 (kind/doc #'tape/summary))
+(def v283_l682 (kind/doc #'tape/summary))
 
 
-(def v290_l696 (tape/summary tape-example))
+(def v284_l684 (tape/summary tape-example))
 
 
-(deftest t291_l698 (is ((fn [s] (= 4 (:total s))) v290_l696)))
+(deftest t285_l686 (is ((fn [s] (= 4 (:total s))) v284_l684)))
 
 
-(def v292_l700 (kind/doc #'tape/origin))
+(def v286_l688 (kind/doc #'tape/origin))
 
 
-(def v293_l702 (tape/origin tape-example (:result tape-example)))
+(def v287_l690 (tape/origin tape-example (:result tape-example)))
 
 
-(deftest t294_l704 (is ((fn [dag] (= :la/mmul (:op dag))) v293_l702)))
+(deftest t288_l692 (is ((fn [dag] (= :la/mmul (:op dag))) v287_l690)))
 
 
-(def v295_l706 (kind/doc #'tape/mermaid))
+(def v289_l694 (kind/doc #'tape/mermaid))
 
 
-(def v297_l710 (tape/mermaid tape-example (:result tape-example)))
+(def v291_l698 (tape/mermaid tape-example (:result tape-example)))
 
 
-(def v298_l712 (kind/doc #'tape/detect-memory-status))
+(def v292_l700 (kind/doc #'tape/detect-memory-status))
 
 
-(def v300_l717 (mapv tape/detect-memory-status (:entries tape-example)))
+(def v294_l705 (mapv tape/detect-memory-status (:entries tape-example)))
 
 
 (deftest
- t301_l719
+ t295_l707
  (is
   ((fn [v] (every? #{:independent :reads-through :shared} v))
-   v300_l717)))
+   v294_l705)))
 
 
-(def v303_l727 (kind/doc #'elem/sq))
+(def v297_l715 (kind/doc #'elem/sq))
 
 
-(def v304_l729 (elem/sq (la/column [2 3 4])))
-
-
-(deftest
- t305_l731
- (is ((fn [v] (la/close-scalar? (tensor/mget v 0 0) 4.0)) v304_l729)))
-
-
-(def v306_l733 (kind/doc #'elem/sqrt))
-
-
-(def v307_l735 (elem/sqrt (la/column [4 9 16])))
+(def v298_l717 (elem/sq (la/column [2 3 4])))
 
 
 (deftest
- t308_l737
- (is ((fn [v] (la/close-scalar? (tensor/mget v 0 0) 2.0)) v307_l735)))
+ t299_l719
+ (is ((fn [v] (la/close-scalar? (tensor/mget v 0 0) 4.0)) v298_l717)))
 
 
-(def v309_l739 (kind/doc #'elem/exp))
+(def v300_l721 (kind/doc #'elem/sqrt))
+
+
+(def v301_l723 (elem/sqrt (la/column [4 9 16])))
+
+
+(deftest
+ t302_l725
+ (is ((fn [v] (la/close-scalar? (tensor/mget v 0 0) 2.0)) v301_l723)))
+
+
+(def v303_l727 (kind/doc #'elem/exp))
+
+
+(def
+ v304_l729
+ (la/close-scalar? (tensor/mget (elem/exp (la/column [0])) 0 0) 1.0))
+
+
+(deftest t305_l731 (is (true? v304_l729)))
+
+
+(def v306_l733 (kind/doc #'elem/log))
+
+
+(def
+ v307_l735
+ (la/close-scalar?
+  (tensor/mget (elem/log (la/column [math/E])) 0 0)
+  1.0))
+
+
+(deftest t308_l737 (is (true? v307_l735)))
+
+
+(def v309_l739 (kind/doc #'elem/log10))
 
 
 (def
  v310_l741
- (la/close-scalar? (tensor/mget (elem/exp (la/column [0])) 0 0) 1.0))
+ (la/close-scalar?
+  (tensor/mget (elem/log10 (la/column [100])) 0 0)
+  2.0))
 
 
 (deftest t311_l743 (is (true? v310_l741)))
 
 
-(def v312_l745 (kind/doc #'elem/log))
+(def v312_l745 (kind/doc #'elem/sin))
 
 
 (def
  v313_l747
  (la/close-scalar?
-  (tensor/mget (elem/log (la/column [math/E])) 0 0)
+  (tensor/mget (elem/sin (la/column [(/ math/PI 2)])) 0 0)
   1.0))
 
 
 (deftest t314_l749 (is (true? v313_l747)))
 
 
-(def v315_l751 (kind/doc #'elem/log10))
+(def v315_l751 (kind/doc #'elem/cos))
 
 
 (def
  v316_l753
- (la/close-scalar?
-  (tensor/mget (elem/log10 (la/column [100])) 0 0)
-  2.0))
+ (la/close-scalar? (tensor/mget (elem/cos (la/column [0])) 0 0) 1.0))
 
 
 (deftest t317_l755 (is (true? v316_l753)))
 
 
-(def v318_l757 (kind/doc #'elem/sin))
+(def v318_l757 (kind/doc #'elem/tan))
 
 
 (def
  v319_l759
  (la/close-scalar?
-  (tensor/mget (elem/sin (la/column [(/ math/PI 2)])) 0 0)
+  (tensor/mget (elem/tan (la/column [(/ math/PI 4)])) 0 0)
   1.0))
 
 
 (deftest t320_l761 (is (true? v319_l759)))
 
 
-(def v321_l763 (kind/doc #'elem/cos))
+(def v321_l763 (kind/doc #'elem/sinh))
 
 
 (def
  v322_l765
- (la/close-scalar? (tensor/mget (elem/cos (la/column [0])) 0 0) 1.0))
+ (la/close-scalar? (tensor/mget (elem/sinh (la/column [0])) 0 0) 0.0))
 
 
 (deftest t323_l767 (is (true? v322_l765)))
 
 
-(def v324_l769 (kind/doc #'elem/tan))
+(def v324_l769 (kind/doc #'elem/cosh))
 
 
 (def
  v325_l771
- (la/close-scalar?
-  (tensor/mget (elem/tan (la/column [(/ math/PI 4)])) 0 0)
-  1.0))
+ (la/close-scalar? (tensor/mget (elem/cosh (la/column [0])) 0 0) 1.0))
 
 
 (deftest t326_l773 (is (true? v325_l771)))
 
 
-(def v327_l775 (kind/doc #'elem/sinh))
+(def v327_l775 (kind/doc #'elem/tanh))
 
 
 (def
  v328_l777
- (la/close-scalar? (tensor/mget (elem/sinh (la/column [0])) 0 0) 0.0))
+ (la/close-scalar? (tensor/mget (elem/tanh (la/column [0])) 0 0) 0.0))
 
 
 (deftest t329_l779 (is (true? v328_l777)))
 
 
-(def v330_l781 (kind/doc #'elem/cosh))
+(def v330_l781 (kind/doc #'elem/abs))
+
+
+(def v331_l783 (tensor/mget (elem/abs (la/column [-5])) 0 0))
+
+
+(deftest t332_l785 (is ((fn [v] (== 5.0 v)) v331_l783)))
+
+
+(def v333_l787 (kind/doc #'elem/sum))
+
+
+(def v334_l789 (elem/sum (la/column [1 2 3 4])))
+
+
+(deftest t335_l791 (is ((fn [v] (== 10.0 v)) v334_l789)))
+
+
+(def v336_l793 (kind/doc #'elem/mean))
+
+
+(def v337_l795 (elem/mean (la/column [2 4 6])))
+
+
+(deftest t338_l797 (is ((fn [v] (== 4.0 v)) v337_l795)))
+
+
+(def v339_l799 (kind/doc #'elem/pow))
+
+
+(def v340_l801 (tensor/mget (elem/pow (la/column [2]) 3) 0 0))
+
+
+(deftest t341_l803 (is ((fn [v] (== 8.0 v)) v340_l801)))
+
+
+(def v342_l805 (kind/doc #'elem/cbrt))
 
 
 (def
- v331_l783
- (la/close-scalar? (tensor/mget (elem/cosh (la/column [0])) 0 0) 1.0))
-
-
-(deftest t332_l785 (is (true? v331_l783)))
-
-
-(def v333_l787 (kind/doc #'elem/tanh))
-
-
-(def
- v334_l789
- (la/close-scalar? (tensor/mget (elem/tanh (la/column [0])) 0 0) 0.0))
-
-
-(deftest t335_l791 (is (true? v334_l789)))
-
-
-(def v336_l793 (kind/doc #'elem/abs))
-
-
-(def v337_l795 (tensor/mget (elem/abs (la/column [-5])) 0 0))
-
-
-(deftest t338_l797 (is ((fn [v] (== 5.0 v)) v337_l795)))
-
-
-(def v339_l799 (kind/doc #'elem/sum))
-
-
-(def v340_l801 (elem/sum (la/column [1 2 3 4])))
-
-
-(deftest t341_l803 (is ((fn [v] (== 10.0 v)) v340_l801)))
-
-
-(def v342_l805 (kind/doc #'elem/mean))
-
-
-(def v343_l807 (elem/mean (la/column [2 4 6])))
-
-
-(deftest t344_l809 (is ((fn [v] (== 4.0 v)) v343_l807)))
-
-
-(def v345_l811 (kind/doc #'elem/pow))
-
-
-(def v346_l813 (tensor/mget (elem/pow (la/column [2]) 3) 0 0))
-
-
-(deftest t347_l815 (is ((fn [v] (== 8.0 v)) v346_l813)))
-
-
-(def v348_l817 (kind/doc #'elem/cbrt))
-
-
-(def
- v349_l819
+ v343_l807
  (la/close-scalar? (tensor/mget (elem/cbrt (la/column [27])) 0 0) 3.0))
 
 
-(deftest t350_l821 (is (true? v349_l819)))
+(deftest t344_l809 (is (true? v343_l807)))
 
 
-(def v351_l823 (kind/doc #'elem/floor))
+(def v345_l811 (kind/doc #'elem/floor))
 
 
-(def v352_l825 (tensor/mget (elem/floor (la/column [2.7])) 0 0))
+(def v346_l813 (tensor/mget (elem/floor (la/column [2.7])) 0 0))
 
 
-(deftest t353_l827 (is ((fn [v] (== 2.0 v)) v352_l825)))
+(deftest t347_l815 (is ((fn [v] (== 2.0 v)) v346_l813)))
 
 
-(def v354_l829 (kind/doc #'elem/ceil))
+(def v348_l817 (kind/doc #'elem/ceil))
 
 
-(def v355_l831 (tensor/mget (elem/ceil (la/column [2.3])) 0 0))
+(def v349_l819 (tensor/mget (elem/ceil (la/column [2.3])) 0 0))
 
 
-(deftest t356_l833 (is ((fn [v] (== 3.0 v)) v355_l831)))
+(deftest t350_l821 (is ((fn [v] (== 3.0 v)) v349_l819)))
 
 
-(def v357_l835 (kind/doc #'elem/min))
+(def v351_l823 (kind/doc #'elem/min))
 
 
 (def
- v358_l837
+ v352_l825
  (tensor/mget (elem/min (la/column [3]) (la/column [5])) 0 0))
 
 
-(deftest t359_l839 (is ((fn [v] (== 3.0 v)) v358_l837)))
+(deftest t353_l827 (is ((fn [v] (== 3.0 v)) v352_l825)))
 
 
-(def v360_l841 (kind/doc #'elem/max))
+(def v354_l829 (kind/doc #'elem/max))
 
 
 (def
- v361_l843
+ v355_l831
  (tensor/mget (elem/max (la/column [3]) (la/column [5])) 0 0))
 
 
-(deftest t362_l845 (is ((fn [v] (== 5.0 v)) v361_l843)))
+(deftest t356_l833 (is ((fn [v] (== 5.0 v)) v355_l831)))
 
 
-(def v363_l847 (kind/doc #'elem/asin))
+(def v357_l835 (kind/doc #'elem/asin))
 
 
-(def v364_l849 (tensor/mget (elem/asin (la/column [0.5])) 0 0))
+(def v358_l837 (tensor/mget (elem/asin (la/column [0.5])) 0 0))
+
+
+(deftest
+ t359_l839
+ (is ((fn [v] (la/close-scalar? v (math/asin 0.5))) v358_l837)))
+
+
+(def v360_l841 (kind/doc #'elem/acos))
+
+
+(def v361_l843 (tensor/mget (elem/acos (la/column [0.5])) 0 0))
+
+
+(deftest
+ t362_l845
+ (is ((fn [v] (la/close-scalar? v (math/acos 0.5))) v361_l843)))
+
+
+(def v363_l847 (kind/doc #'elem/atan))
+
+
+(def v364_l849 (tensor/mget (elem/atan (la/column [1.0])) 0 0))
 
 
 (deftest
  t365_l851
- (is ((fn [v] (la/close-scalar? v (math/asin 0.5))) v364_l849)))
+ (is ((fn [v] (la/close-scalar? v (math/atan 1.0))) v364_l849)))
 
 
-(def v366_l853 (kind/doc #'elem/acos))
+(def v366_l853 (kind/doc #'elem/log1p))
 
 
-(def v367_l855 (tensor/mget (elem/acos (la/column [0.5])) 0 0))
+(def v367_l855 (tensor/mget (elem/log1p (la/column [0.0])) 0 0))
 
 
-(deftest
- t368_l857
- (is ((fn [v] (la/close-scalar? v (math/acos 0.5))) v367_l855)))
+(deftest t368_l857 (is ((fn [v] (la/close-scalar? v 0.0)) v367_l855)))
 
 
-(def v369_l859 (kind/doc #'elem/atan))
+(def v369_l859 (kind/doc #'elem/expm1))
 
 
-(def v370_l861 (tensor/mget (elem/atan (la/column [1.0])) 0 0))
+(def v370_l861 (tensor/mget (elem/expm1 (la/column [0.0])) 0 0))
 
 
-(deftest
- t371_l863
- (is ((fn [v] (la/close-scalar? v (math/atan 1.0))) v370_l861)))
+(deftest t371_l863 (is ((fn [v] (la/close-scalar? v 0.0)) v370_l861)))
 
 
-(def v372_l865 (kind/doc #'elem/log1p))
+(def v372_l865 (kind/doc #'elem/round))
 
 
-(def v373_l867 (tensor/mget (elem/log1p (la/column [0.0])) 0 0))
+(def v373_l867 (tensor/mget (elem/round (la/column [2.7])) 0 0))
 
 
-(deftest t374_l869 (is ((fn [v] (la/close-scalar? v 0.0)) v373_l867)))
+(deftest t374_l869 (is ((fn [v] (== 3.0 v)) v373_l867)))
 
 
-(def v375_l871 (kind/doc #'elem/expm1))
+(def v375_l871 (kind/doc #'elem/clip))
 
 
-(def v376_l873 (tensor/mget (elem/expm1 (la/column [0.0])) 0 0))
+(def v376_l873 (la/flatten (elem/clip (la/column [-2 0.5 3]) -1 1)))
 
 
-(deftest t377_l875 (is ((fn [v] (la/close-scalar? v 0.0)) v376_l873)))
+(deftest t377_l875 (is ((fn [v] (= [-1.0 0.5 1.0] v)) v376_l873)))
 
 
-(def v378_l877 (kind/doc #'elem/round))
-
-
-(def v379_l879 (tensor/mget (elem/round (la/column [2.7])) 0 0))
-
-
-(deftest t380_l881 (is ((fn [v] (== 3.0 v)) v379_l879)))
-
-
-(def v381_l883 (kind/doc #'elem/clip))
-
-
-(def v382_l885 (la/flatten (elem/clip (la/column [-2 0.5 3]) -1 1)))
-
-
-(deftest t383_l887 (is ((fn [v] (= [-1.0 0.5 1.0] v)) v382_l885)))
-
-
-(def v385_l893 (kind/doc #'grad/grad))
+(def v379_l881 (kind/doc #'grad/grad))
 
 
 (def
- v386_l895
+ v380_l883
  (let
   [A
    (la/matrix [[1 2] [3 4]])
@@ -1472,36 +1454,36 @@
   (la/close? (.get grads A) (la/scale A 2))))
 
 
-(deftest t387_l901 (is (true? v386_l895)))
+(deftest t381_l889 (is (true? v380_l883)))
 
 
-(def v389_l907 (kind/doc #'vis/arrow-plot))
+(def v383_l895 (kind/doc #'vis/arrow-plot))
 
 
 (def
- v390_l909
+ v384_l897
  (vis/arrow-plot
   [{:xy [2 1], :color "#2266cc", :label "u"}
    {:xy [-1 1.5], :color "#cc4422", :label "v"}]
   {:width 250}))
 
 
-(def v391_l913 (kind/doc #'vis/graph-plot))
+(def v385_l901 (kind/doc #'vis/graph-plot))
 
 
 (def
- v392_l915
+ v386_l903
  (vis/graph-plot
   [[0 0] [1 0] [0.5 0.87]]
   [[0 1] [1 2] [2 0]]
   {:width 250, :labels ["A" "B" "C"]}))
 
 
-(def v393_l919 (kind/doc #'vis/matrix->gray-image))
+(def v387_l907 (kind/doc #'vis/matrix->gray-image))
 
 
 (def
- v394_l921
+ v388_l909
  (let
   [m
    (tensor/compute-tensor
@@ -1512,16 +1494,16 @@
 
 
 (deftest
- t395_l926
+ t389_l914
  (is
-  ((fn [img] (= java.awt.image.BufferedImage (type img))) v394_l921)))
+  ((fn [img] (= java.awt.image.BufferedImage (type img))) v388_l909)))
 
 
-(def v396_l928 (kind/doc #'vis/extract-channel))
+(def v390_l916 (kind/doc #'vis/extract-channel))
 
 
 (def
- v397_l930
+ v391_l918
  (let
   [img
    (tensor/compute-tensor
@@ -1532,6 +1514,6 @@
 
 
 (deftest
- t398_l936
+ t392_l924
  (is
-  ((fn [img] (= java.awt.image.BufferedImage (type img))) v397_l930)))
+  ((fn [img] (= java.awt.image.BufferedImage (type img))) v391_l918)))

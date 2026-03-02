@@ -180,78 +180,47 @@
 (deftest t64_l188 (is ((fn [v] (== 10.0 v)) v63_l186)))
 
 
-(def v66_l198 (defn read-matrix [form] (la/matrix form)))
+(def v66_l196 (pr-str (la/matrix [[1 2] [3 4]])))
 
 
-(def v67_l201 (defn read-column [form] (la/column form)))
+(deftest
+ t67_l198
+ (is ((fn [s] (clojure.string/starts-with? s "#la/R")) v66_l196)))
 
 
-(def v69_l206 (read-matrix [[1 2] [3 4]]))
+(def v68_l200 (pr-str (la/column [5 6 7])))
 
 
-(deftest t70_l208 (is ((fn [m] (= [2 2] (dtype/shape m))) v69_l206)))
-
-
-(def v71_l210 (read-column [1 2 3]))
-
-
-(deftest t72_l212 (is ((fn [v] (= [3 1] (dtype/shape v))) v71_l210)))
+(deftest
+ t69_l202
+ (is ((fn [s] (clojure.string/starts-with? s "#la/R")) v68_l200)))
 
 
 (def
- v74_l216
- (defn
-  tensor->tagged-str
-  [t]
-  (let
-   [shape (dtype/shape t)]
-   (cond
-    (and (= 2 (count shape)) (= 1 (second shape)))
-    (str "#la/v " (vec (dtype/->reader t :float64)))
-    (= 2 (count shape))
-    (let
-     [[r c] shape]
-     (str
-      "#la/m "
-      (vec
-       (for
-        [i (range r)]
-        (vec (for [j (range c)] (tensor/mget t i j)))))))
-    :else
-    (str t)))))
+ v71_l206
+ (=
+  (la/matrix [[1 2] [3 4]])
+  (read-string (pr-str (la/matrix [[1 2] [3 4]])))))
 
 
-(def v75_l233 (tensor->tagged-str (la/matrix [[1 2] [3 4]])))
+(deftest t72_l209 (is (true? v71_l206)))
 
 
-(deftest
- t76_l235
- (is ((fn [s] (clojure.string/starts-with? s "#la/m")) v75_l233)))
+(def v74_l215 (defn v [& xs] (la/column xs)))
 
 
-(def v77_l237 (tensor->tagged-str (la/column [5 6 7])))
+(def v75_l218 (defn m [& rows] (la/matrix rows)))
+
+
+(def v76_l221 (v 1 2 3))
+
+
+(deftest t77_l223 (is ((fn [c] (= [3 1] (dtype/shape c))) v76_l221)))
+
+
+(def v78_l225 (m [1 2] [3 4]))
 
 
 (deftest
- t78_l239
- (is ((fn [s] (clojure.string/starts-with? s "#la/v")) v77_l237)))
-
-
-(def v80_l250 (defn v [& xs] (la/column xs)))
-
-
-(def v81_l253 (defn m [& rows] (la/matrix rows)))
-
-
-(def v82_l256 (v 1 2 3))
-
-
-(deftest t83_l258 (is ((fn [c] (= [3 1] (dtype/shape c))) v82_l256)))
-
-
-(def v84_l260 (m [1 2] [3 4]))
-
-
-(deftest
- t85_l262
- (is ((fn [mat] (= [2 2] (dtype/shape mat))) v84_l260)))
+ t79_l227
+ (is ((fn [mat] (= [2 2] (dtype/shape mat))) v78_l225)))

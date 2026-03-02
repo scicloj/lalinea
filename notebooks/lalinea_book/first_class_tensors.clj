@@ -187,61 +187,26 @@
 
 (kind/test-last [(fn [v] (== 10.0 v))])
 
-;; ## Experiment: tagged literals
+;; ## Tagged literals
 
-;; La Linea now prints tensors as tagged literals: `#la/R` for real,
-;; `#la/C` for complex. This section shows the prototypes that led
-;; to the final implementation.
+;; La Linea prints tensors as tagged literals: `#la/R` for real,
+;; `#la/C` for complex. These round-trip through `pr-str` /
+;; `read-string`:
 
-;; A data reader function:
+(pr-str (la/matrix [[1 2] [3 4]]))
 
-(defn read-matrix [form]
-  (la/matrix form))
+(kind/test-last [(fn [s] (clojure.string/starts-with? s "#la/R"))])
 
-(defn read-column [form]
-  (la/column form))
+(pr-str (la/column [5 6 7]))
 
-;; Simulate reading tagged literals:
+(kind/test-last [(fn [s] (clojure.string/starts-with? s "#la/R"))])
 
-(read-matrix [[1 2] [3 4]])
+;; Reading back produces equal tensors:
 
-(kind/test-last [(fn [m] (= [2 2] (dtype/shape m)))])
+(= (la/matrix [[1 2] [3 4]])
+   (read-string (pr-str (la/matrix [[1 2] [3 4]]))))
 
-(read-column [1 2 3])
-
-(kind/test-last [(fn [v] (= [3 1] (dtype/shape v)))])
-
-;; A function to produce tagged-literal format:
-
-(defn tensor->tagged-str [t]
-  (let [shape (dtype/shape t)]
-    (cond
-      ;; Column vector [n 1]
-      (and (= 2 (count shape)) (= 1 (second shape)))
-      (str "#la/v " (vec (dtype/->reader t :float64)))
-
-      ;; Matrix [r c]
-      (= 2 (count shape))
-      (let [[r c] shape]
-        (str "#la/m "
-             (vec (for [i (range r)]
-                    (vec (for [j (range c)]
-                           (tensor/mget t i j)))))))
-
-      :else (str t))))
-
-(tensor->tagged-str (la/matrix [[1 2] [3 4]]))
-
-(kind/test-last [(fn [s] (clojure.string/starts-with? s "#la/m"))])
-
-(tensor->tagged-str (la/column [5 6 7]))
-
-(kind/test-last [(fn [s] (clojure.string/starts-with? s "#la/v"))])
-
-;; For small tensors, this produces readable output. For large
-;; tensors, truncation would be needed (like `*print-length*`).
-;; Installing this as a `print-method` would make tensors
-;; round-trip through `pr-str` / `read-string`.
+(kind/test-last [true?])
 
 ;; ## Experiment: constructor ergonomics
 
