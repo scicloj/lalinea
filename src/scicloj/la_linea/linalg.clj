@@ -157,8 +157,10 @@
                         dc (ejml/dmul da db)]
                     (bt/dmat->tensor dc)))))
 
+;; See also: https://www.mathworks.com/help/matlab/ref/mpower.html
 (defn mpow
-  "Matrix power A^k for non-negative integer k.
+  "Matrix power $A^k$ for non-negative integer k.
+   Uses exponentiation by squaring — $O(\\log k)$ multiplications.
    Returns the identity for k=0."
   [a k]
   (let [k (long k)]
@@ -166,10 +168,14 @@
       (neg? k) (throw (ex-info "mpow requires non-negative k" {:k k}))
       (zero? k) (eye (first (dtype/shape a)))
       (== k 1) a
-      :else (loop [result a i 1]
-              (if (>= i k)
-                result
-                (recur (mmul result a) (inc i)))))))
+      :else (loop [base a result nil k k]
+              (let [result (if (odd? k)
+                             (if result (mmul result base) base)
+                             result)
+                    k (quot k 2)]
+                (if (zero? k)
+                  result
+                  (recur (mmul base base) result k)))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Transpose
