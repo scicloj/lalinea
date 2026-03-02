@@ -26,17 +26,13 @@
 ;; #la/R — RealTensor printing
 ;; ---------------------------------------------------------------------------
 
-(defn- tensor-row-vec
-  "Extract row i of a 2D tensor as a Clojure vector of doubles."
-  [t i]
-  (vec (dtype/->reader (tensor/select t i :all) :float64)))
-
 (defn- print-real-tensor
   "Print a RealTensor in #la/R [:float64 [shape] data] format."
   [^RealTensor rt ^java.io.Writer w]
-  (let [t (rt/->tensor rt)
+  (let [t     (rt/->tensor rt)
         shape (vec (dtype/shape t))
-        ndims (count shape)]
+        ndims (count shape)
+        rdr   (dtype/->reader t :float64)]
     (.write w "#la/R [:float64 ")
     (.write w (pr-str shape))
     (cond
@@ -44,51 +40,40 @@
       (zero? ndims)
       (do
         (.write w " ")
-        (.write w (str (double (tensor/mget t))))
+        (.write w (str (double (rdr 0))))
         (.write w "]"))
 
       ;; Vector [n]
       (= 1 ndims)
-      (let [n (long (first shape))]
-        (if (truncated? shape)
-          (let [max-n (min n (long *print-threshold*))]
-            (.write w "\n       [")
-            (dotimes [k max-n]
-              (when (pos? k) (.write w " "))
-              (.write w (str (double (tensor/mget t k)))))
-            (when (< max-n n)
-              (.write w " ..."))
-            (.write w "]]"))
-          (do
-            (.write w "\n       ")
-            (.write w (pr-str (vec (dtype/->reader t :float64))))
-            (.write w "]"))))
+      (let [n     (long (first shape))
+            max-n (if (truncated? shape) (min n (long *print-threshold*)) n)]
+        (.write w "\n       [")
+        (dotimes [k max-n]
+          (when (pos? k) (.write w " "))
+          (.write w (str (double (rdr k)))))
+        (when (< max-n n)
+          (.write w " ..."))
+        (.write w "]]"))
 
       ;; Matrix [r c]
       :else
-      (let [[r c] shape]
-        (if (truncated? shape)
-          (let [max-r (min (long r) *print-threshold*)
-                max-c (min (long c) *print-threshold*)]
-            (.write w "\n       [")
-            (dotimes [i max-r]
-              (when (pos? i) (.write w "\n        "))
-              (.write w "[")
-              (dotimes [j max-c]
-                (when (pos? j) (.write w " "))
-                (.write w (str (double (tensor/mget t i j)))))
-              (when (< max-c (long c))
-                (.write w " ..."))
-              (.write w "]"))
-            (when (< max-r (long r))
-              (.write w "\n        ..."))
-            (.write w "]]"))
-          (do
-            (.write w "\n       [")
-            (dotimes [i r]
-              (when (pos? i) (.write w "\n        "))
-              (.write w (pr-str (tensor-row-vec t i))))
-            (.write w "]]")))))))
+      (let [[r c] shape
+            max-r (if (truncated? shape) (min (long r) (long *print-threshold*)) (long r))
+            max-c (if (truncated? shape) (min (long c) (long *print-threshold*)) (long c))
+            c     (long c)]
+        (.write w "\n       [")
+        (dotimes [i max-r]
+          (when (pos? i) (.write w "\n        "))
+          (.write w "[")
+          (dotimes [j max-c]
+            (when (pos? j) (.write w " "))
+            (.write w (str (double (rdr (+ (* i c) j))))))
+          (when (< max-c c)
+            (.write w " ..."))
+          (.write w "]"))
+        (when (< max-r (long r))
+          (.write w "\n        ..."))
+        (.write w "]]")))))
 
 (defmethod print-method RealTensor
   [^RealTensor t ^java.io.Writer w]
@@ -107,19 +92,13 @@
       (str re " - " (Math/abs im) " i")
       (str re " + " im " i"))))
 
-(defn- cx-element-str
-  "Format element at position [indices...] in the underlying complex tensor."
-  [raw-tensor indices]
-  (let [re (double (apply tensor/mget raw-tensor (concat indices [0])))
-        im (double (apply tensor/mget raw-tensor (concat indices [1])))]
-    (format-complex-tokens re im)))
-
 (defn- print-complex-tensor
   "Print a ComplexTensor in #la/C [:float64 [shape] data] format."
   [^ComplexTensor ct ^java.io.Writer w]
-  (let [raw (cx/->tensor ct)
+  (let [raw    (cx/->tensor ct)
         cshape (cx/complex-shape ct)
-        ndims (count cshape)]
+        ndims  (count cshape)
+        rdr    (dtype/->reader raw :float64)]
     (.write w "#la/C [:float64 ")
     (.write w (pr-str cshape))
     (cond
@@ -127,57 +106,42 @@
       (zero? ndims)
       (do
         (.write w " [")
-        (.write w (cx-element-str raw []))
+        (.write w (format-complex-tokens (rdr 0) (rdr 1)))
         (.write w "]]"))
 
       ;; Vector [n]
       (= 1 ndims)
-      (let [n (long (first cshape))]
-        (if (truncated? cshape)
-          (let [max-n (min n (long *print-threshold*))]
-            (.write w "\n       [")
-            (dotimes [k max-n]
-              (when (pos? k) (.write w "  "))
-              (.write w (cx-element-str raw [k])))
-            (when (< max-n n)
-              (.write w "  ..."))
-            (.write w "]]"))
-          (do
-            (.write w "\n       [")
-            (dotimes [k n]
-              (when (pos? k) (.write w "  "))
-              (.write w (cx-element-str raw [k])))
-            (.write w "]]"))))
+      (let [n     (long (first cshape))
+            max-n (if (truncated? cshape) (min n (long *print-threshold*)) n)]
+        (.write w "\n       [")
+        (dotimes [k max-n]
+          (when (pos? k) (.write w "  "))
+          (let [base (* k 2)]
+            (.write w (format-complex-tokens (rdr base) (rdr (inc base))))))
+        (when (< max-n n)
+          (.write w "  ..."))
+        (.write w "]]"))
 
       ;; Matrix [r c]
       :else
-      (let [[r c] cshape]
-        (if (truncated? cshape)
-          (let [max-r (min (long r) (long *print-threshold*))
-                max-c (min (long c) (long *print-threshold*))]
-            (.write w "\n       [")
-            (dotimes [i max-r]
-              (when (pos? i) (.write w "\n        "))
-              (.write w "[")
-              (dotimes [j max-c]
-                (when (pos? j) (.write w "  "))
-                (.write w (cx-element-str raw [i j])))
-              (when (< max-c (long c))
-                (.write w "  ..."))
-              (.write w "]"))
-            (when (< max-r (long r))
-              (.write w "\n        ..."))
-            (.write w "]]"))
-          (do
-            (.write w "\n       [")
-            (dotimes [i r]
-              (when (pos? i) (.write w "\n        "))
-              (.write w "[")
-              (dotimes [j c]
-                (when (pos? j) (.write w "  "))
-                (.write w (cx-element-str raw [i j])))
-              (.write w "]"))
-            (.write w "]]")))))))
+      (let [[r c] cshape
+            max-r (if (truncated? cshape) (min (long r) (long *print-threshold*)) (long r))
+            max-c (if (truncated? cshape) (min (long c) (long *print-threshold*)) (long c))
+            stride (* (long c) 2)]
+        (.write w "\n       [")
+        (dotimes [i max-r]
+          (when (pos? i) (.write w "\n        "))
+          (.write w "[")
+          (dotimes [j max-c]
+            (when (pos? j) (.write w "  "))
+            (let [base (+ (* i stride) (* j 2))]
+              (.write w (format-complex-tokens (rdr base) (rdr (inc base))))))
+          (when (< max-c (long c))
+            (.write w "  ..."))
+          (.write w "]"))
+        (when (< max-r (long r))
+          (.write w "\n        ..."))
+        (.write w "]]")))))
 
 (defmethod print-method ComplexTensor
   [^ComplexTensor ct ^java.io.Writer w]
