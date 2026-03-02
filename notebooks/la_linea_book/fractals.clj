@@ -27,7 +27,8 @@
    ;; Tensor ↔ BufferedImage conversion:
    [tech.v3.libs.buffered-image :as bufimg]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
-   [scicloj.kindly.v4.kind :as kind]))
+   [scicloj.kindly.v4.kind :as kind]
+   [clojure.math :as math]))
 
 ;; ## Building a complex plane grid
 ;;
@@ -104,9 +105,9 @@
                                (if (= cnt max-iter) 0
                                    (let [t (/ (double cnt) max-iter)]
                                      (case (int ch)
-                                       0 (int (* 255 (* 0.5 (+ 1.0 (Math/cos (* 2.0 Math/PI (+ t 0.0)))))))
-                                       1 (int (* 255 (* 0.5 (+ 1.0 (Math/cos (* 2.0 Math/PI (+ t 0.33)))))))
-                                       2 (int (* 255 (* 0.5 (+ 1.0 (Math/cos (* 2.0 Math/PI (+ t 0.67))))))))))))
+                                       0 (int (* 255 (* 0.5 (+ 1.0 (math/cos (* 2.0 math/PI (+ t 0.0)))))))
+                                       1 (int (* 255 (* 0.5 (+ 1.0 (math/cos (* 2.0 math/PI (+ t 0.33)))))))
+                                       2 (int (* 255 (* 0.5 (+ 1.0 (math/cos (* 2.0 math/PI (+ t 0.67))))))))))))
                            :uint8)))
 
 ;; ### The classic view
@@ -245,8 +246,8 @@
 (let [a (cx/complex-tensor (la/matrix [[3]]) (la/matrix [[4]]))
       b (cx/complex-tensor (la/matrix [[1]]) (la/matrix [[2]]))
       result (complex-div a b)]
-  (and (< (Math/abs (- (tensor/mget (cx/re result) 0 0) 2.2)) 1e-10)
-       (< (Math/abs (- (tensor/mget (cx/im result) 0 0) -0.4)) 1e-10)))
+  (and (< (abs (- (tensor/mget (cx/re result) 0 0) 2.2)) 1e-10)
+       (< (abs (- (tensor/mget (cx/im result) 0 0) -0.4)) 1e-10)))
 
 (kind/test-last [true?])
 
@@ -262,10 +263,10 @@
                                       :float64))
           ;; The three cube roots of unity
           roots [(cx/complex 1.0 0.0)
-                 (cx/complex (Math/cos (/ (* 2.0 Math/PI) 3.0))
-                             (Math/sin (/ (* 2.0 Math/PI) 3.0)))
-                 (cx/complex (Math/cos (/ (* 4.0 Math/PI) 3.0))
-                             (Math/sin (/ (* 4.0 Math/PI) 3.0)))]
+                 (cx/complex (math/cos (/ (* 2.0 math/PI) 3.0))
+                             (math/sin (/ (* 2.0 math/PI) 3.0)))
+                 (cx/complex (math/cos (/ (* 4.0 math/PI) 3.0))
+                             (math/sin (/ (* 4.0 math/PI) 3.0)))]
           root-idx (int-array (* h w) -1)]
       ;; Iterate Newton's method
       (loop [z (dtype/clone z0) k 0]

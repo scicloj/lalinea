@@ -17,7 +17,8 @@
    ;; Element-wise array math:
    [tech.v3.datatype.functional :as dfn]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
-   [scicloj.kindly.v4.kind :as kind])
+   [scicloj.kindly.v4.kind :as kind]
+   [clojure.math :as math])
   (:import [org.ejml.data DMatrixRMaj]))
 
 ;; ## dtype-next: typed numerical arrays
@@ -191,7 +192,7 @@
 
 (la/norm (la/matrix [[1 2 3] [4 5 6]]))
 
-(kind/test-last [(fn [v] (< (Math/abs (- v (Math/sqrt 91.0))) 1e-10))])
+(kind/test-last [(fn [v] (< (abs (- v (math/sqrt 91.0))) 1e-10))])
 
 ;; ## Decompositions
 

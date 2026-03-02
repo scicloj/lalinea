@@ -24,7 +24,8 @@
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]
    ;; Arrow diagrams for 2D vectors:
-   [scicloj.la-linea.vis :as vis]))
+   [scicloj.la-linea.vis :as vis]
+   [clojure.math :as math]))
 
 ;; We use the same example vectors as in the previous chapter:
 
@@ -90,16 +91,16 @@
 (la/mmul R90 (la/column [1 0]))
 
 (kind/test-last
- [(fn [r] (and (< (Math/abs (tensor/mget r 0 0)) 1e-10)
-               (< (Math/abs (- (tensor/mget r 1 0) 1.0)) 1e-10)))])
+ [(fn [r] (and (< (abs (tensor/mget r 0 0)) 1e-10)
+               (< (abs (- (tensor/mget r 1 0) 1.0)) 1e-10)))])
 
 ;; And the y-axis to the negative x-axis:
 
 (la/mmul R90 (la/column [0 1]))
 
 (kind/test-last
- [(fn [r] (and (< (Math/abs (- (tensor/mget r 0 0) -1.0)) 1e-10)
-               (< (Math/abs (tensor/mget r 1 0)) 1e-10)))])
+ [(fn [r] (and (< (abs (- (tensor/mget r 0 0) -1.0)) 1e-10)
+               (< (abs (tensor/mget r 1 0)) 1e-10)))])
 
 ;; Visualising the effect on our vectors — each arrow
 ;; rotates 90° counter-clockwise:
@@ -135,7 +136,7 @@
 ;; Stretches the x-direction by 3, leaves y unchanged.
 ;; Let us see what it does to a set of points on the unit circle:
 
-(let [angles (dfn/* (/ (* 2.0 Math/PI) 40.0) (dtype/make-reader :float64 41 idx))
+(let [angles (dfn/* (/ (* 2.0 math/PI) 40.0) (dtype/make-reader :float64 41 idx))
       circle-x (dfn/cos angles)
       circle-y (dfn/sin angles)
       stretched (mapv (fn [cx cy]
@@ -180,7 +181,7 @@
 (la/det proj-xy)
 
 (kind/test-last
- [(fn [d] (< (Math/abs d) 1e-10))])
+ [(fn [d] (< (abs d) 1e-10))])
 
 ;; ### Example: shear
 ;;
@@ -194,7 +195,7 @@
 (la/det shear-mat)
 
 (kind/test-last
- [(fn [d] (< (Math/abs (- d 1.0)) 1e-10))])
+ [(fn [d] (< (abs (- d 1.0)) 1e-10))])
 
 ;; The shear fixes $\mathbf{e}_1$ but slides $\mathbf{e}_2$
 ;; sideways — it tilts the vertical axis:

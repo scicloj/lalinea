@@ -318,7 +318,7 @@
                     [1 2]]))
 
 (kind/test-last
- [(fn [d] (> (Math/abs d) 1e-10))])
+ [(fn [d] (> (abs d) 1e-10))])
 
 ;; Now two parallel vectors — one is $2\times$ the other:
 
@@ -334,7 +334,7 @@
                     [1 2]]))
 
 (kind/test-last
- [(fn [d] (< (Math/abs d) 1e-10))])
+ [(fn [d] (< (abs d) 1e-10))])
 
 ;; In $\mathbb{R}^3$, three vectors are independent when they
 ;; do not all lie in the same plane:
@@ -344,7 +344,7 @@
                     [0 0 1]]))
 
 (kind/test-last
- [(fn [d] (< (Math/abs (- d 1.0)) 1e-10))])
+ [(fn [d] (< (abs (- d 1.0)) 1e-10))])
 
 ;; But if the third is the sum of the first two, they lie in a
 ;; plane — the determinant is zero:
@@ -354,7 +354,7 @@
                     [0 0 0]]))
 
 (kind/test-last
- [(fn [d] (< (Math/abs d) 1e-10))])
+ [(fn [d] (< (abs d) 1e-10))])
 
 ;; ---
 ;;
@@ -425,7 +425,7 @@
                     [0 0 1]]))
 
 (kind/test-last
- [(fn [d] (< (Math/abs (- d 1.0)) 1e-10))])
+ [(fn [d] (< (abs (- d 1.0)) 1e-10))])
 
 ;; Now introduce a fourth vector. It must be expressible as
 ;; a linear combination of the first three — because three

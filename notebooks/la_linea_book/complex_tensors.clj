@@ -22,8 +22,6 @@
    [scicloj.la-linea.complex :as cx]
    ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
    [tech.v3.tensor :as tensor]
-   ;; Low-level buffer operations:
-   [tech.v3.datatype :as dtype]
    ;; Element-wise array math:
    [tech.v3.datatype.functional :as dfn]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
@@ -158,8 +156,8 @@
 
 ;; $|3+4i| = 5$, $|0+i| = 1$
 
-(kind/test-last [(fn [v] (and (< (Math/abs (- (first v) 5.0)) 1e-10)
-                              (< (Math/abs (- (second v) 1.0)) 1e-10)))])
+(kind/test-last [(fn [v] (and (< (abs (- (first v) 5.0)) 1e-10)
+                              (< (abs (- (second v) 1.0)) 1e-10)))])
 
 ;; ## [Hermitian inner product](https://en.wikipedia.org/wiki/Inner_product_space#Hermitian_inner_product)
 ;;
@@ -171,8 +169,8 @@
 
 ;; $|3+4i|^2 + |1+2i|^2 = 25 + 5 = 30$
 
-(kind/test-last [(fn [v] (and (< (Math/abs (- (:norm-sq v) 30.0)) 1e-10)
-                              (< (Math/abs (:im-part v)) 1e-10)))])
+(kind/test-last [(fn [v] (and (< (abs (- (:norm-sq v) 30.0)) 1e-10)
+                              (< (abs (:im-part v)) 1e-10)))])
 
 ;; ## Complex matrix operations via EJML
 ;;
@@ -207,8 +205,8 @@
 
 ;; $\det(A) = (1+2i)(7+8i) - (3+4i)(5+6i) = -16i$
 
-(kind/test-last [(fn [d] (and (< (Math/abs (cx/re d)) 1e-10)
-                              (< (Math/abs (- (cx/im d) -16.0)) 1e-10)))])
+(kind/test-last [(fn [d] (and (< (abs (cx/re d)) 1e-10)
+                              (< (abs (- (cx/im d) -16.0)) 1e-10)))])
 
 ;; Inverse:
 

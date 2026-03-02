@@ -85,14 +85,14 @@
   ((fn
     [v]
     (and
-     (< (Math/abs (- (+ (v 0) (v 1) (v 2)) 1.0)) 1.0E-10)
+     (< (abs (- (+ (v 0) (v 1) (v 2)) 1.0)) 1.0E-10)
      (let
       [prev (nth walk-history 18)]
       (<
        (+
-        (Math/abs (- (v 0) (:sunny prev)))
-        (Math/abs (- (v 1) (:cloudy prev)))
-        (Math/abs (- (v 2) (:rainy prev))))
+        (abs (- (v 0) (:sunny prev)))
+        (abs (- (v 1) (:cloudy prev)))
+        (abs (- (v 2) (:rainy prev))))
        1.0E-6))))
    v15_l114)))
 
@@ -112,7 +112,7 @@
     idx
     (first
      (sort-by
-      (fn [i] (Math/abs (- (double (reals i)) 1.0)))
+      (fn [i] (abs (- (double (reals i)) 1.0)))
       (range (count eigenvectors))))
     ev
     (nth eigenvectors idx)
@@ -129,18 +129,14 @@
 (deftest
  t22_l153
  (is
-  ((fn
-    [v]
-    (and (< (Math/abs (- (dfn/sum v) 1.0)) 1.0E-10) (every? pos? v)))
+  ((fn [v] (and (< (abs (- (dfn/sum v) 1.0)) 1.0E-10) (every? pos? v)))
    v21_l151)))
 
 
 (def
  v24_l160
  (every?
-  (fn
-   [[eigen walk]]
-   (< (Math/abs (- (double eigen) (double walk))) 1.0E-4))
+  (fn [[eigen walk]] (< (abs (- (double eigen) (double walk))) 1.0E-4))
   (map
    vector
    stationary-eigen
@@ -286,9 +282,7 @@
 (def v50_l313 (dfn/sum pagerank))
 
 
-(deftest
- t51_l315
- (is ((fn [s] (< (Math/abs (- s 1.0)) 1.0E-10)) v50_l313)))
+(deftest t51_l315 (is ((fn [s] (< (abs (- s 1.0)) 1.0E-10)) v50_l313)))
 
 
 (def v53_l320 (nth course-names (argops/argmax pagerank)))

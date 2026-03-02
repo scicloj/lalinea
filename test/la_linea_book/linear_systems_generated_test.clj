@@ -26,9 +26,7 @@
   (dtype/clone
    (tensor/compute-tensor
     [n n]
-    (fn
-     [i j]
-     (cond (= i j) 2.0 (= (Math/abs (- i j)) 1) -1.0 :else 0.0))
+    (fn [i j] (cond (= i j) 2.0 (= (abs (- i j)) 1) -1.0 :else 0.0))
     :float64))))
 
 

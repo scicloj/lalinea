@@ -248,7 +248,7 @@
 (def v58_l317 (la/det (la/matrix [[3 1] [1 2]])))
 
 
-(deftest t59_l320 (is ((fn [d] (> (Math/abs d) 1.0E-10)) v58_l317)))
+(deftest t59_l320 (is ((fn [d] (> (abs d) 1.0E-10)) v58_l317)))
 
 
 (def
@@ -262,21 +262,19 @@
 (def v63_l333 (la/det (la/matrix [[3 6] [1 2]])))
 
 
-(deftest t64_l336 (is ((fn [d] (< (Math/abs d) 1.0E-10)) v63_l333)))
+(deftest t64_l336 (is ((fn [d] (< (abs d) 1.0E-10)) v63_l333)))
 
 
 (def v66_l342 (la/det (la/matrix [[1 0 0] [0 1 0] [0 0 1]])))
 
 
-(deftest
- t67_l346
- (is ((fn [d] (< (Math/abs (- d 1.0)) 1.0E-10)) v66_l342)))
+(deftest t67_l346 (is ((fn [d] (< (abs (- d 1.0)) 1.0E-10)) v66_l342)))
 
 
 (def v69_l352 (la/det (la/matrix [[1 0 1] [0 1 1] [0 0 0]])))
 
 
-(deftest t70_l356 (is ((fn [d] (< (Math/abs d) 1.0E-10)) v69_l352)))
+(deftest t70_l356 (is ((fn [d] (< (abs d) 1.0E-10)) v69_l352)))
 
 
 (def v72_l376 (def e1 (la/column [1 0 0])))
@@ -315,9 +313,7 @@
 (def v84_l423 (la/det (la/matrix [[1 0 0] [0 1 0] [0 0 1]])))
 
 
-(deftest
- t85_l427
- (is ((fn [d] (< (Math/abs (- d 1.0)) 1.0E-10)) v84_l423)))
+(deftest t85_l427 (is ((fn [d] (< (abs (- d 1.0)) 1.0E-10)) v84_l423)))
 
 
 (def v87_l434 (def v4 (la/column [2 3 1])))

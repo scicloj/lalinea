@@ -20,7 +20,8 @@
    ;; Element-wise array math:
    [tech.v3.datatype.functional :as dfn]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
-   [scicloj.kindly.v4.kind :as kind]))
+   [scicloj.kindly.v4.kind :as kind]
+   [clojure.math :as math]))
 
 ;; ## Creating matrices
 ;;
@@ -68,7 +69,7 @@
 
 (la/det (la/matrix [[1 2] [3 4]]))
 
-(kind/test-last [(fn [v] (< (Math/abs (- v -2.0)) 1e-10))])
+(kind/test-last [(fn [v] (< (abs (- v -2.0)) 1e-10))])
 
 (la/trace (la/matrix [[1 2] [3 4]]))
 
@@ -76,7 +77,7 @@
 
 (la/norm (la/matrix [[1 2] [3 4]]))
 
-(kind/test-last [(fn [v] (< (Math/abs (- v 5.477225575051661)) 1e-10))])
+(kind/test-last [(fn [v] (< (abs (- v 5.477225575051661)) 1e-10))])
 
 ;; ## Solving linear systems
 ;;
@@ -89,8 +90,8 @@
 
 ;; $x = \begin{pmatrix} 1 \\ 3 \end{pmatrix}$
 
-(kind/test-last [(fn [x] (and (< (Math/abs (- (tensor/mget x 0 0) 1.0)) 1e-10)
-                              (< (Math/abs (- (tensor/mget x 1 0) 3.0)) 1e-10)))])
+(kind/test-last [(fn [x] (and (< (abs (- (tensor/mget x 0 0) 1.0)) 1e-10)
+                              (< (abs (- (tensor/mget x 1 0) 3.0)) 1e-10)))])
 
 ;; ## Decompositions
 ;;
@@ -100,14 +101,14 @@
 
 ;; Eigenvalues are $3$ and $1$.
 
-(kind/test-last [(fn [evs] (and (< (Math/abs (- (first evs) 1.0)) 1e-10)
-                                (< (Math/abs (- (second evs) 3.0)) 1e-10)))])
+(kind/test-last [(fn [evs] (and (< (abs (- (first evs) 1.0)) 1e-10)
+                                (< (abs (- (second evs) 3.0)) 1e-10)))])
 
 ;; SVD:
 
 (:S (la/svd (la/matrix [[1 2] [3 4]])))
 
-(kind/test-last [(fn [S] (< (Math/abs (- (first S) 5.4649857)) 1e-4))])
+(kind/test-last [(fn [S] (< (abs (- (first S) 5.4649857)) 1e-4))])
 
 ;; ## Complex tensors
 ;;
@@ -136,7 +137,7 @@
 ;; $\hat{f} = [2, 0, 2, 0]$ — a signal with energy at DC and Nyquist.
 
 (kind/test-last [(fn [ct] (and (= [4] (cx/complex-shape ct))
-                               (< (Math/abs (- (cx/re (ct 0)) 2.0)) 1e-10)))])
+                               (< (abs (- (cx/re (ct 0)) 2.0)) 1e-10)))])
 
 ;; Round-trip:
 
@@ -144,7 +145,7 @@
       recovered (vec (bfft/inverse-real (bfft/forward signal)))]
   recovered)
 
-(kind/test-last [(fn [v] (every? #(< (Math/abs %) 1e-10)
+(kind/test-last [(fn [v] (every? #(< (abs %) 1e-10)
                                  (map - v [1.0 2.0 3.0 4.0])))])
 
 ;; ## Composing with dtype-next
@@ -211,7 +212,7 @@
 
 (elem/exp (la/column [0.0 1.0 2.0]))
 
-(kind/test-last [(fn [v] (la/close? v (la/column [1.0 (Math/exp 1.0) (Math/exp 2.0)])))])
+(kind/test-last [(fn [v] (la/close? v (la/column [1.0 (math/exp 1.0) (math/exp 2.0)])))])
 
 (elem/clip (la/column [-2 0.5 3]) -1 1)
 

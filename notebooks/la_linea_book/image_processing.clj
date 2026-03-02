@@ -20,7 +20,8 @@
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]
    ;; Visualization helpers:
-   [scicloj.la-linea.vis :as vis]))
+   [scicloj.la-linea.vis :as vis]
+   [clojure.math :as math]))
 
 ;; ## Synthetic test images
 ;;
@@ -64,7 +65,7 @@
     (tensor/compute-tensor [size size 3]
                            (fn [r c ch]
                              (let [dr (- r cy) dc (- c cx)
-                                   dist (Math/sqrt (+ (* dr dr) (* dc dc)))]
+                                   dist (math/sqrt (+ (* dr dr) (* dc dc)))]
                                (if (<= dist radius)
                                  (case (int ch)
                                    0 50             ;; dark red
@@ -302,7 +303,7 @@
                                              (+ a (* (aget sy-arr (+ (* kr 3) kc))
                                                      (aget ch0 (+ (* (+ r kr) w)
                                                                   (+ c kc)))))))))))
-                mag (Math/sqrt (+ (* gx gx) (* gy gy)))]
+                mag (math/sqrt (+ (* gx gx) (* gy gy)))]
             (aset out (+ (* ri w) ci) mag))))
       (tensor/compute-tensor [h w 3]
                              (fn [r c _ch]

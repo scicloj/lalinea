@@ -28,7 +28,8 @@
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]
    ;; Visualization helpers:
-   [scicloj.la-linea.vis :as vis]))
+   [scicloj.la-linea.vis :as vis]
+   [clojure.math :as math]))
 
 ;; ## Image compression with SVD
 ;;
@@ -56,7 +57,7 @@
                              (let [x (/ (- c 50.0) 50.0)
                                    y (/ (- r 50.0) 50.0)
                                    circle (if (< (+ (* x x) (* y y)) 0.5) 200.0 50.0)
-                                   gradient (* 100.0 (+ 0.5 (* 0.5 (Math/sin (* 3.0 x)))))]
+                                   gradient (* 100.0 (+ 0.5 (* 0.5 (math/sin (* 3.0 x)))))]
                                (+ (* 0.6 circle) (* 0.4 gradient))))
                            :float64))))
 
@@ -168,8 +169,8 @@
 (def n-points 200)
 
 (def data-tensor
-  (let [theta (/ Math/PI 6)
-        cos-t (Math/cos theta) sin-t (Math/sin theta)
+  (let [theta (/ math/PI 6)
+        cos-t (math/cos theta) sin-t (math/sin theta)
         rng (frand/rng :mersenne 42)
         flat (->> (range n-points)
                   (mapcat (fn [_]
@@ -235,10 +236,10 @@ cov-matrix
       ev1 (nth eigenvectors (first sorted-idx))
       lam2 (double (reals (second sorted-idx)))
       ev2 (nth eigenvectors (second sorted-idx))
-      pc1-x (* (Math/sqrt lam1) (tensor/mget ev1 0 0))
-      pc1-y (* (Math/sqrt lam1) (tensor/mget ev1 1 0))
-      pc2-x (* (Math/sqrt lam2) (tensor/mget ev2 0 0))
-      pc2-y (* (Math/sqrt lam2) (tensor/mget ev2 1 0))
+      pc1-x (* (math/sqrt lam1) (tensor/mget ev1 0 0))
+      pc1-y (* (math/sqrt lam1) (tensor/mget ev1 1 0))
+      pc2-x (* (math/sqrt lam2) (tensor/mget ev2 0 0))
+      pc2-y (* (math/sqrt lam2) (tensor/mget ev2 1 0))
       pts (mapv (fn [i] {:x (tensor/mget X i 0) :y (tensor/mget X i 1) :type "data"})
                 (range n-points))
       pc1-pts [{:x 0.0 :y 0.0 :type "PC1"}
@@ -314,7 +315,7 @@ true-eigenvalues
                                (tensor/mget A-next i i))
                              (range 3)))
             ;; Off-diagonal magnitude
-            off-diag (Math/sqrt
+            off-diag (math/sqrt
                       (+ (let [v (tensor/mget A-next 0 1)] (* v v))
                          (let [v (tensor/mget A-next 1 0)] (* v v))
                          (let [v (tensor/mget A-next 0 2)] (* v v))
@@ -346,7 +347,7 @@ true-eigenvalues
 (let [final (last qr-history)
       computed (sort [(:eig-1 final) (:eig-2 final) (:eig-3 final)])]
   (every? identity
-          (map (fn [a b] (< (Math/abs (- a b)) 1e-4))
+          (map (fn [a b] (< (abs (- a b)) 1e-4))
                computed true-eigenvalues)))
 
 (kind/test-last [true?])

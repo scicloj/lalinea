@@ -24,7 +24,8 @@
    [tech.v3.tensor :as tensor]
    [tech.v3.datatype :as dtype]
    [tech.v3.libs.buffered-image :as bufimg]
-   [scicloj.kindly.v4.kind :as kind]))
+   [scicloj.kindly.v4.kind :as kind]
+   [clojure.math :as math]))
 
 ;; ## `scicloj.la-linea.linalg`
 
@@ -657,7 +658,7 @@
 
 (kind/doc #'elem/log)
 
-(la/close-scalar? (tensor/mget (elem/log (la/column [(Math/E)])) 0 0) 1.0)
+(la/close-scalar? (tensor/mget (elem/log (la/column [math/E])) 0 0) 1.0)
 
 (kind/test-last [true?])
 
@@ -669,7 +670,7 @@
 
 (kind/doc #'elem/sin)
 
-(la/close-scalar? (tensor/mget (elem/sin (la/column [(/ Math/PI 2)])) 0 0) 1.0)
+(la/close-scalar? (tensor/mget (elem/sin (la/column [(/ math/PI 2)])) 0 0) 1.0)
 
 (kind/test-last [true?])
 
@@ -681,7 +682,7 @@
 
 (kind/doc #'elem/tan)
 
-(la/close-scalar? (tensor/mget (elem/tan (la/column [(/ Math/PI 4)])) 0 0) 1.0)
+(la/close-scalar? (tensor/mget (elem/tan (la/column [(/ math/PI 4)])) 0 0) 1.0)
 
 (kind/test-last [true?])
 
@@ -761,19 +762,19 @@
 
 (tensor/mget (elem/asin (la/column [0.5])) 0 0)
 
-(kind/test-last [(fn [v] (la/close-scalar? v (Math/asin 0.5)))])
+(kind/test-last [(fn [v] (la/close-scalar? v (math/asin 0.5)))])
 
 (kind/doc #'elem/acos)
 
 (tensor/mget (elem/acos (la/column [0.5])) 0 0)
 
-(kind/test-last [(fn [v] (la/close-scalar? v (Math/acos 0.5)))])
+(kind/test-last [(fn [v] (la/close-scalar? v (math/acos 0.5)))])
 
 (kind/doc #'elem/atan)
 
 (tensor/mget (elem/atan (la/column [1.0])) 0 0)
 
-(kind/test-last [(fn [v] (la/close-scalar? v (Math/atan 1.0)))])
+(kind/test-last [(fn [v] (la/close-scalar? v (math/atan 1.0)))])
 
 (kind/doc #'elem/log1p)
 

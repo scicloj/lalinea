@@ -23,7 +23,8 @@
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
    [scicloj.tableplot.v1.plotly :as plotly]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
-   [scicloj.kindly.v4.kind :as kind]))
+   [scicloj.kindly.v4.kind :as kind]
+   [clojure.math :as math]))
 
 ;; ## The problem
 ;;
@@ -92,8 +93,8 @@ c-linear
 
 (kind/test-last
  [(fn [c]
-    (and (< (Math/abs (- (tensor/mget c 0 0) 2.0)) 0.5)
-         (< (Math/abs (- (tensor/mget c 1 0) 3.0)) 0.5)))])
+    (and (< (abs (- (tensor/mget c 0 0) 2.0)) 0.5)
+         (< (abs (- (tensor/mget c 1 0) 3.0)) 0.5)))])
 
 ;; The fitted coefficients are close to the true values
 ;; $c_0 \approx 2$, $c_1 \approx 3$.
@@ -104,7 +105,7 @@ c-linear
   (la/sub (la/mmul A-linear c-linear) y-col))
 
 (def rms-linear
-  (Math/sqrt (/ (dfn/sum (dfn/* residual-linear residual-linear))
+  (math/sqrt (/ (dfn/sum (dfn/* residual-linear residual-linear))
                 (count x-data))))
 
 rms-linear
@@ -159,7 +160,7 @@ rms-linear
     (let [m (count xs)]
       (la/matrix
        (mapv (fn [i]
-               (mapv (fn [j] (Math/pow (xs i) j))
+               (mapv (fn [j] (math/pow (xs i) j))
                      (range (inc degree))))
              (range m))))))
 
@@ -173,9 +174,9 @@ c-poly
 
 (kind/test-last
  [(fn [c]
-    (and (< (Math/abs (- (tensor/mget c 0 0) 1.0)) 1.0)
-         (< (Math/abs (- (tensor/mget c 1 0) -2.0)) 1.0)
-         (< (Math/abs (- (tensor/mget c 2 0) 1.0)) 1.0)))])
+    (and (< (abs (- (tensor/mget c 0 0) 1.0)) 1.0)
+         (< (abs (- (tensor/mget c 1 0) -2.0)) 1.0)
+         (< (abs (- (tensor/mget c 2 0) 1.0)) 1.0)))])
 
 ;; The fitted coefficients recover the true polynomial $1 - 2x + x^2$.
 
@@ -300,7 +301,7 @@ S-svd
 
 (def x-trig
   (dtype/make-reader :float64 40
-                     (* (/ (* 2.0 Math/PI) 40.0) idx)))
+                     (* (/ (* 2.0 math/PI) 40.0) idx)))
 
 (def noise-trig
   (tensor/->tensor [-0.058  0.218 -0.109  0.034  0.192 -0.277  0.138  0.065
@@ -322,10 +323,10 @@ S-svd
      (mapv (fn [i]
              (let [xi (x-trig i)]
                [1.0
-                (Math/cos xi)
-                (Math/sin xi)
-                (Math/cos (* 2.0 xi))
-                (Math/sin (* 2.0 xi))]))
+                (math/cos xi)
+                (math/sin xi)
+                (math/cos (* 2.0 xi))
+                (math/sin (* 2.0 xi))]))
            (range m)))))
 
 (def c-trig
@@ -336,10 +337,10 @@ c-trig
 
 (kind/test-last
  [(fn [c]
-    (and (< (Math/abs (- (tensor/mget c 0 0) 3.0)) 0.3)
-         (< (Math/abs (- (tensor/mget c 1 0) 2.0)) 0.3)
-         (< (Math/abs (- (tensor/mget c 2 0) -1.5)) 0.3)
-         (< (Math/abs (- (tensor/mget c 3 0) 0.5)) 0.3)))])
+    (and (< (abs (- (tensor/mget c 0 0) 3.0)) 0.3)
+         (< (abs (- (tensor/mget c 1 0) 2.0)) 0.3)
+         (< (abs (- (tensor/mget c 2 0) -1.5)) 0.3)
+         (< (abs (- (tensor/mget c 3 0) 0.5)) 0.3)))])
 
 ;; The recovered coefficients are close to the true values:
 ;; $a_0 \approx 3$, $a_1 \approx 2$, $b_1 \approx -1.5$, $a_2 \approx 0.5$.
@@ -347,7 +348,7 @@ c-trig
 ;; Visualise:
 
 (let [x-fit (dtype/make-reader :float64 200
-                               (* (/ (* 2.0 Math/PI) 200.0) idx))
+                               (* (/ (* 2.0 math/PI) 200.0) idx))
       y-fit (dfn/+ (dfn/* (tensor/mget c-trig 0 0) 1.0)
                    (dfn/+ (dfn/* (tensor/mget c-trig 1 0) (dfn/cos x-fit))
                           (dfn/+ (dfn/* (tensor/mget c-trig 2 0) (dfn/sin x-fit))

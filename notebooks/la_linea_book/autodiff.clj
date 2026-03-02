@@ -20,20 +20,20 @@
 ;;
 ;; | Operation | Gradient rule |
 ;; |-----------|--------------|
-;; | `add(a,b)` | ḡ, ḡ |
-;; | `sub(a,b)` | ḡ, −ḡ |
-;; | `mmul(A,B)` | ḡBᵀ, Aᵀḡ |
-;; | `transpose(A)` | ḡᵀ |
-;; | `trace(A)` | ḡ·I |
-;; | `sq(a)` | 2a⊙ḡ |
-;; | `sum(a)` | broadcast ḡ |
+;; | `add(a,b)` | $\bar{g}, \bar{g}$ |
+;; | `sub(a,b)` | $\bar{g}, -\bar{g}$ |
+;; | `mmul(A,B)` | $\bar{g}B^T,\; A^T\bar{g}$ |
+;; | `transpose(A)` | $\bar{g}^T$ |
+;; | `trace(A)` | $\bar{g} \cdot I$ |
+;; | `sq(a)` | $2a \odot \bar{g}$ |
+;; | `sum(a)` | broadcast $\bar{g}$ |
 ;;
 ;; `grad/grad` takes a tape result and a scalar target value, then
 ;; walks entries in reverse to accumulate gradients for each input.
 
-;; ## Example: derivative of trace(AᵀA)
+;; ## Example: derivative of $\text{trace}(A^T A)$
 
-;; The derivative of trace(AᵀA) with respect to A is 2A. Let us
+;; The derivative of $\text{trace}(A^T A)$ with respect to $A$ is $2A$. Let us
 ;; verify this with automatic differentiation.
 
 (def A (la/matrix [[1 2]
@@ -73,9 +73,9 @@
 
 ;; ## Example: least-squares gradient
 
-;; For ‖Ax − b‖² = sum(sq(Ax − b)), the gradient with respect to x
-;; is 2Aᵀ(Ax − b). This connects automatic differentiation to the
-;; [normal equations](https://en.wikipedia.org/wiki/Ordinary_least_squares#Normal_equations): setting the gradient to zero gives Aᵀ Ax = Aᵀ b.
+;; For $\|Ax - b\|^2 = \text{sum}(\text{sq}(Ax - b))$, the gradient with respect to $x$
+;; is $2A^T(Ax - b)$. This connects automatic differentiation to the
+;; [normal equations](https://en.wikipedia.org/wiki/Ordinary_least_squares#Normal_equations): setting the gradient to zero gives $A^T A x = A^T b$.
 
 (def A2 (la/matrix [[1 0]
                     [0 2]
@@ -103,7 +103,7 @@ grad-x
 (kind/test-last
  [(fn [g] (la/close? g (la/column [-8 -4])))])
 
-;; Verify against the analytic gradient 2Aᵀ(Ax − b):
+;; Verify against the analytic gradient $2A^T(Ax - b)$:
 
 (def expected-grad
   (la/scale (la/mmul (la/transpose A2)
@@ -123,8 +123,8 @@ expected-grad
 ;; ## Example: gradient with respect to a matrix
 
 ;; We can also differentiate with respect to the matrix A itself.
-;; For loss = sum(sq(Ax − b)), the gradient with respect to A is
-;; 2(Ax − b)xᵀ.
+;; For $\text{loss} = \text{sum}(\text{sq}(Ax - b))$, the gradient with respect to $A$ is
+;; $2(Ax - b)x^T$.
 
 (def ls-tape-A
   (tape/with-tape

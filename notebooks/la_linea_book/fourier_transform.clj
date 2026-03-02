@@ -23,7 +23,8 @@
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
    [scicloj.tableplot.v1.plotly :as plotly]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
-   [scicloj.kindly.v4.kind :as kind]))
+   [scicloj.kindly.v4.kind :as kind]
+   [clojure.math :as math]))
 
 ;; ## Forward [FFT](https://en.wikipedia.org/wiki/Fast_Fourier_transform)
 ;;
@@ -33,7 +34,7 @@
 
 ;; The DC component ($k=0$) is $\sum x_n = 0$.
 
-(kind/test-last [(fn [ct] (< (Math/abs (double (cx/re (ct 0)))) 1e-10))])
+(kind/test-last [(fn [ct] (< (abs (double (cx/re (ct 0)))) 1e-10))])
 
 ;; ## Round-trip
 ;;
@@ -59,7 +60,7 @@
       time-energy (dfn/sum (dfn/* signal signal))
       magnitudes (la/abs spectrum)
       freq-energy (/ (dfn/sum (dfn/* magnitudes magnitudes)) n)]
-  (< (Math/abs (- time-energy freq-energy)) 1e-10))
+  (< (abs (- time-energy freq-energy)) 1e-10))
 
 (kind/test-last [true?])
 
@@ -115,8 +116,8 @@
 
 (def signal-composed
   (let [t (mapv #(/ (double %) N-vis) (range N-vis))]
-    (mapv (fn [ti] (+ (Math/sin (* 2 Math/PI 3 ti))
-                      (* 0.5 (Math/sin (* 2 Math/PI 7 ti)))))
+    (mapv (fn [ti] (+ (math/sin (* 2 math/PI 3 ti))
+                      (* 0.5 (math/sin (* 2 math/PI 7 ti)))))
           t)))
 
 ;; The time-domain waveform:
@@ -158,7 +159,7 @@
   {:dc (cx/re (spectrum 0))
    :others [(la/abs (spectrum 1)) (la/abs (spectrum 2)) (la/abs (spectrum 3))]})
 
-(kind/test-last [(fn [v] (and (< (Math/abs (- (double (:dc v)) 12.0)) 1e-10)
+(kind/test-last [(fn [v] (and (< (abs (- (double (:dc v)) 12.0)) 1e-10)
                               (every? #(< % 1e-10) (:others v))))])
 
 ;; The DFT of $x = [1, -1, 1, -1]$ has energy only at Nyquist ($k = N/2$).
@@ -168,7 +169,7 @@
    :nyquist (double (cx/re (spectrum 2)))})
 
 (kind/test-last [(fn [v] (and (< (:dc v) 1e-10)
-                              (< (Math/abs (- (:nyquist v) 4.0)) 1e-10)))])
+                              (< (abs (- (:nyquist v) 4.0)) 1e-10)))])
 
 ;; ## Complex-to-complex FFT
 ;;

@@ -9,19 +9,20 @@
   [tablecloth.api :as tc]
   [scicloj.tableplot.v1.plotly :as plotly]
   [scicloj.kindly.v4.kind :as kind]
+  [clojure.math :as math]
   [clojure.test :refer [deftest is]]))
 
 
-(def v3_l32 (bfft/forward [1.0 0.0 -1.0 0.0]))
+(def v3_l33 (bfft/forward [1.0 0.0 -1.0 0.0]))
 
 
 (deftest
- t5_l36
- (is ((fn [ct] (< (Math/abs (double (cx/re (ct 0)))) 1.0E-10)) v3_l32)))
+ t5_l37
+ (is ((fn [ct] (< (abs (double (cx/re (ct 0)))) 1.0E-10)) v3_l33)))
 
 
 (def
- v7_l42
+ v7_l43
  (let
   [signal
    [1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0]
@@ -32,11 +33,11 @@
   (dfn/reduce-max (dfn/abs (dfn/- recovered signal)))))
 
 
-(deftest t8_l47 (is ((fn [v] (< v 1.0E-10)) v7_l42)))
+(deftest t8_l48 (is ((fn [v] (< v 1.0E-10)) v7_l43)))
 
 
 (def
- v10_l56
+ v10_l57
  (let
   [signal
    [1.0 2.0 3.0 4.0]
@@ -50,14 +51,14 @@
    (la/abs spectrum)
    freq-energy
    (/ (dfn/sum (dfn/* magnitudes magnitudes)) n)]
-  (< (Math/abs (- time-energy freq-energy)) 1.0E-10)))
+  (< (abs (- time-energy freq-energy)) 1.0E-10)))
 
 
-(deftest t11_l64 (is (true? v10_l56)))
+(deftest t11_l65 (is (true? v10_l57)))
 
 
 (def
- v13_l70
+ v13_l71
  (let
   [x
    [1.0 2.0 3.0 4.0]
@@ -84,11 +85,11 @@
     1.0E-10))))
 
 
-(deftest t14_l81 (is (true? v13_l70)))
+(deftest t14_l82 (is (true? v13_l71)))
 
 
 (def
- v16_l90
+ v16_l91
  (let
   [x
    [1.0 2.0 0.0 0.0]
@@ -126,37 +127,37 @@
    1.0E-10)))
 
 
-(deftest t17_l108 (is (true? v16_l90)))
+(deftest t17_l109 (is (true? v16_l91)))
 
 
-(def v19_l114 (def N-vis 64))
+(def v19_l115 (def N-vis 64))
 
 
 (def
- v20_l116
+ v20_l117
  (def
   signal-composed
   (let
    [t
     (mapv
-     (fn* [p1__71868#] (/ (double p1__71868#) N-vis))
+     (fn* [p1__202197#] (/ (double p1__202197#) N-vis))
      (range N-vis))]
    (mapv
     (fn
      [ti]
      (+
-      (Math/sin (* 2 Math/PI 3 ti))
-      (* 0.5 (Math/sin (* 2 Math/PI 7 ti)))))
+      (math/sin (* 2 math/PI 3 ti))
+      (* 0.5 (math/sin (* 2 math/PI 7 ti)))))
     t))))
 
 
 (def
- v22_l124
+ v22_l125
  (->
   (tc/dataset
    {:t
     (mapv
-     (fn* [p1__71869#] (/ (double p1__71869#) N-vis))
+     (fn* [p1__202198#] (/ (double p1__202198#) N-vis))
      (range N-vis)),
     :amplitude (vec signal-composed)})
   (plotly/base {:=x :t, :=y :amplitude})
@@ -165,7 +166,7 @@
 
 
 (def
- v24_l133
+ v24_l134
  (let
   [spectrum (bfft/forward signal-composed) mags (la/abs spectrum)]
   (->
@@ -178,7 +179,7 @@
 
 
 (def
- v26_l143
+ v26_l144
  (let
   [spectrum
    (bfft/forward signal-composed)
@@ -193,11 +194,11 @@
   (= [3 7] (vec (sort (take 2 peak-idx))))))
 
 
-(deftest t27_l150 (is (true? v26_l143)))
+(deftest t27_l151 (is (true? v26_l144)))
 
 
 (def
- v29_l157
+ v29_l158
  (let
   [spectrum (bfft/forward [3.0 3.0 3.0 3.0])]
   {:dc (cx/re (spectrum 0)),
@@ -208,18 +209,18 @@
 
 
 (deftest
- t30_l161
+ t30_l162
  (is
   ((fn
     [v]
     (and
-     (< (Math/abs (- (double (:dc v)) 12.0)) 1.0E-10)
-     (every? (fn* [p1__71870#] (< p1__71870# 1.0E-10)) (:others v))))
-   v29_l157)))
+     (< (abs (- (double (:dc v)) 12.0)) 1.0E-10)
+     (every? (fn* [p1__202199#] (< p1__202199# 1.0E-10)) (:others v))))
+   v29_l158)))
 
 
 (def
- v32_l166
+ v32_l167
  (let
   [spectrum (bfft/forward [1.0 -1.0 1.0 -1.0])]
   {:dc (double (la/abs (spectrum 0))),
@@ -227,18 +228,16 @@
 
 
 (deftest
- t33_l170
+ t33_l171
  (is
   ((fn
     [v]
-    (and
-     (< (:dc v) 1.0E-10)
-     (< (Math/abs (- (:nyquist v) 4.0)) 1.0E-10)))
-   v32_l166)))
+    (and (< (:dc v) 1.0E-10) (< (abs (- (:nyquist v) 4.0)) 1.0E-10)))
+   v32_l167)))
 
 
 (def
- v35_l177
+ v35_l178
  (let
   [signal
    (cx/complex-tensor [1.0 0.0] [0.0 1.0])
@@ -255,11 +254,11 @@
     1.0E-10))))
 
 
-(deftest t36_l183 (is (true? v35_l177)))
+(deftest t36_l184 (is (true? v35_l178)))
 
 
 (def
- v38_l189
+ v38_l190
  (let
   [signal
    [1.0 2.0 3.0 4.0]
@@ -270,4 +269,4 @@
   (< (dfn/reduce-max (dfn/abs (dfn/- recovered signal))) 1.0E-10)))
 
 
-(deftest t39_l194 (is (true? v38_l189)))
+(deftest t39_l195 (is (true? v38_l190)))

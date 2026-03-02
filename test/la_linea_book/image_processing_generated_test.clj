@@ -8,11 +8,12 @@
   [tech.v3.libs.buffered-image :as bufimg]
   [scicloj.kindly.v4.kind :as kind]
   [scicloj.la-linea.vis :as vis]
+  [clojure.math :as math]
   [clojure.test :refer [deftest is]]))
 
 
 (def
- v3_l32
+ v3_l33
  (def
   gradient
   (tensor/compute-tensor
@@ -30,16 +31,16 @@
    :uint8)))
 
 
-(def v4_l41 (bufimg/tensor->image gradient))
+(def v4_l42 (bufimg/tensor->image gradient))
 
 
 (deftest
- t5_l43
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v4_l41)))
+ t5_l44
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v4_l42)))
 
 
 (def
- v7_l48
+ v7_l49
  (def
   checkerboard
   (let
@@ -50,16 +51,16 @@
     :uint8))))
 
 
-(def v8_l55 (bufimg/tensor->image checkerboard))
+(def v8_l56 (bufimg/tensor->image checkerboard))
 
 
 (deftest
- t9_l57
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v8_l55)))
+ t9_l58
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v8_l56)))
 
 
 (def
- v11_l62
+ v11_l63
  (def
   circle-img
   (let
@@ -74,41 +75,41 @@
        dc
        (- c cx)
        dist
-       (Math/sqrt (+ (* dr dr) (* dc dc)))]
+       (math/sqrt (+ (* dr dr) (* dc dc)))]
       (if (<= dist radius) (case (int ch) 0 50 1 180 2 220) 20)))
     :uint8))))
 
 
-(def v12_l76 (bufimg/tensor->image circle-img))
+(def v12_l77 (bufimg/tensor->image circle-img))
 
 
 (deftest
- t13_l78
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v12_l76)))
+ t13_l79
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v12_l77)))
 
 
-(def v15_l91 (bufimg/tensor->image (vis/extract-channel gradient 0)))
+(def v15_l92 (bufimg/tensor->image (vis/extract-channel gradient 0)))
 
 
 (deftest
- t16_l93
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v15_l91)))
+ t16_l94
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v15_l92)))
 
 
 (def
- v18_l98
+ v18_l99
  (let
   [ch (tensor/select gradient :all :all 0)]
   [(int (tensor/mget ch 0 0)) (int (tensor/mget ch 199 0))]))
 
 
 (deftest
- t19_l102
- (is ((fn [[top bottom]] (and (< top 10) (> bottom 250))) v18_l98)))
+ t19_l103
+ (is ((fn [[top bottom]] (and (< top 10) (> bottom 250))) v18_l99)))
 
 
 (def
- v21_l109
+ v21_l110
  (def
   swapped
   (let
@@ -121,16 +122,16 @@
     :uint8))))
 
 
-(def v22_l117 (bufimg/tensor->image swapped))
+(def v22_l118 (bufimg/tensor->image swapped))
 
 
 (deftest
- t23_l119
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v22_l117)))
+ t23_l120
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v22_l118)))
 
 
 (def
- v25_l132
+ v25_l133
  (def
   brighten
   (fn
@@ -146,16 +147,16 @@
     (tensor/reshape (dtype/shape img))))))
 
 
-(def v26_l143 (bufimg/tensor->image (brighten circle-img)))
+(def v26_l144 (bufimg/tensor->image (brighten circle-img)))
 
 
 (deftest
- t27_l145
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v26_l143)))
+ t27_l146
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v26_l144)))
 
 
 (def
- v29_l157
+ v29_l158
  (def
   to-grayscale
   (fn
@@ -183,39 +184,39 @@
      :uint8)))))
 
 
-(def v30_l172 (bufimg/tensor->image (to-grayscale gradient)))
+(def v30_l173 (bufimg/tensor->image (to-grayscale gradient)))
 
 
 (deftest
- t31_l174
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v30_l172)))
+ t31_l175
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v30_l173)))
 
 
 (def
- v33_l186
+ v33_l187
  (def
   blur-kernel
   (la/scale (la/matrix [[1 1 1] [1 1 1] [1 1 1]]) (/ 1.0 9.0))))
 
 
 (def
- v34_l189
+ v34_l190
  (def sharpen-kernel (la/matrix [[0 -1 0] [-1 5 -1] [0 -1 0]])))
 
 
 (def
- v35_l194
+ v35_l195
  (def edge-kernel (la/matrix [[-1 -1 -1] [-1 8 -1] [-1 -1 -1]])))
 
 
-(def v37_l201 (dfn/sum edge-kernel))
+(def v37_l202 (dfn/sum edge-kernel))
 
 
-(deftest t38_l203 (is ((fn [v] (== 0.0 v)) v37_l201)))
+(deftest t38_l204 (is ((fn [v] (== 0.0 v)) v37_l202)))
 
 
 (def
- v40_l212
+ v40_l213
  (def
   apply-kernel
   (fn
@@ -266,43 +267,43 @@
 
 
 (def
- v42_l239
+ v42_l240
  (bufimg/tensor->image (apply-kernel checkerboard blur-kernel)))
 
 
 (deftest
- t43_l241
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v42_l239)))
+ t43_l242
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v42_l240)))
 
 
 (def
- v45_l249
+ v45_l250
  (bufimg/tensor->image (apply-kernel checkerboard edge-kernel)))
 
 
 (deftest
- t46_l251
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v45_l249)))
+ t46_l252
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v45_l250)))
 
 
 (def
- v48_l258
+ v48_l259
  (bufimg/tensor->image (apply-kernel circle-img sharpen-kernel)))
 
 
 (deftest
- t49_l260
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v48_l258)))
+ t49_l261
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v48_l259)))
 
 
-(def v51_l271 (def sobel-x (la/matrix [[-1 0 1] [-2 0 2] [-1 0 1]])))
+(def v51_l272 (def sobel-x (la/matrix [[-1 0 1] [-2 0 2] [-1 0 1]])))
 
 
-(def v52_l274 (def sobel-y (la/matrix [[-1 -2 -1] [0 0 0] [1 2 1]])))
+(def v52_l275 (def sobel-y (la/matrix [[-1 -2 -1] [0 0 0] [1 2 1]])))
 
 
 (def
- v53_l277
+ v53_l278
  (def
   sobel-edges
   (fn
@@ -368,7 +369,7 @@
                 (aget sy-arr (+ (* kr 3) kc))
                 (aget ch0 (+ (* (+ r kr) w) (+ c kc)))))))))))
         mag
-        (Math/sqrt (+ (* gx gx) (* gy gy)))]
+        (math/sqrt (+ (* gx gx) (* gy gy)))]
        (aset out (+ (* ri w) ci) mag))))
     (tensor/compute-tensor
      [h w 3]
@@ -376,9 +377,9 @@
      :uint8)))))
 
 
-(def v54_l312 (bufimg/tensor->image (sobel-edges circle-img)))
+(def v54_l313 (bufimg/tensor->image (sobel-edges circle-img)))
 
 
 (deftest
- t55_l314
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v54_l312)))
+ t55_l315
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v54_l313)))

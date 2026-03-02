@@ -18,7 +18,8 @@
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]
    ;; Arrow diagrams for 2D vectors:
-   [scicloj.la-linea.vis :as vis]))
+   [scicloj.la-linea.vis :as vis]
+   [clojure.math :as math]))
 
 ;; ## Inner products
 ;;
@@ -65,7 +66,7 @@
 ;; $1 \cdot 4 + 2 \cdot 5 + 3 \cdot 6 = 32$.
 
 (kind/test-last
- [(fn [d] (< (Math/abs (- d 32.0)) 1e-10))])
+ [(fn [d] (< (abs (- d 32.0)) 1e-10))])
 
 ;; ### Verifying the axioms
 ;;
@@ -120,14 +121,14 @@
 (la/norm u-ip)
 
 (kind/test-last
- [(fn [d] (la/close-scalar? d (Math/sqrt 2.0)))])
+ [(fn [d] (la/close-scalar? d (math/sqrt 2.0)))])
 
 ;; Weighted length ($\sqrt{\mathbf{u}^T W \mathbf{u}}$):
 
-(Math/sqrt (tensor/mget (la/mmul (la/transpose u-ip) (la/mmul W-ip u-ip)) 0 0))
+(math/sqrt (tensor/mget (la/mmul (la/transpose u-ip) (la/mmul W-ip u-ip)) 0 0))
 
 (kind/test-last
- [(fn [d] (la/close-scalar? d (Math/sqrt 3.0)))])
+ [(fn [d] (la/close-scalar? d (math/sqrt 3.0)))])
 
 ;; The same vector has length $\sqrt{2}$ under the standard
 ;; inner product but $\sqrt{3}$ under the weighted one. The
@@ -151,7 +152,7 @@
 (la/norm a3)
 
 (kind/test-last
- [(fn [d] (< (Math/abs (- d (Math/sqrt 14.0))) 1e-10))])
+ [(fn [d] (< (abs (- d (math/sqrt 14.0))) 1e-10))])
 
 ;; ### Orthogonality
 ;;
@@ -162,7 +163,7 @@
 (la/dot (la/column [1 0]) (la/column [0 1]))
 
 (kind/test-last
- [(fn [d] (< (Math/abs d) 1e-10))])
+ [(fn [d] (< (abs d) 1e-10))])
 
 ;; A set of vectors is **orthonormal** if they are all unit
 ;; length and mutually orthogonal. The standard basis is the
@@ -193,14 +194,14 @@
 cos-theta
 
 (kind/test-last
- [(fn [c] (< (Math/abs (- c (/ 1.0 (Math/sqrt 2.0)))) 1e-10))])
+ [(fn [c] (< (abs (- c (/ 1.0 (math/sqrt 2.0)))) 1e-10))])
 
 ;; $\cos \theta = 1/\sqrt{2}$, so $\theta = 45°$:
 
-(Math/toDegrees (Math/acos cos-theta))
+(math/to-degrees (math/acos cos-theta))
 
 (kind/test-last
- [(fn [d] (< (Math/abs (- d 45.0)) 1e-10))])
+ [(fn [d] (< (abs (- d 45.0)) 1e-10))])
 
 ;; ### [Orthogonal projection](https://en.wikipedia.org/wiki/Projection_(linear_algebra))
 ;;
@@ -323,9 +324,9 @@ q2-gs
 
 (kind/test-last
  [(fn [m]
-    (and (< (Math/abs (- (:q1-norm m) 1.0)) 1e-10)
-         (< (Math/abs (- (:q2-norm m) 1.0)) 1e-10)
-         (< (Math/abs (:dot m)) 1e-10)))])
+    (and (< (abs (- (:q1-norm m) 1.0)) 1e-10)
+         (< (abs (- (:q2-norm m) 1.0)) 1e-10)
+         (< (abs (:dot m)) 1e-10)))])
 
 ;; The first two components of each vector, showing the
 ;; original pair (gray/blue) and the orthogonalised pair
@@ -333,8 +334,8 @@ q2-gs
 
 (vis/arrow-plot [{:label "a" :xy [1 1] :color "#999999"}
                  {:label "b" :xy [1 0] :color "#2266cc"}
-                 {:label "q1" :xy [(/ 1 (Math/sqrt 2)) (/ 1 (Math/sqrt 2))] :color "#228833"}
-                 {:label "q2" :xy [(/ 1 (Math/sqrt 6)) (/ -1 (Math/sqrt 6))] :color "#cc4422"}]
+                 {:label "q1" :xy [(/ 1 (math/sqrt 2)) (/ 1 (math/sqrt 2))] :color "#228833"}
+                 {:label "q2" :xy [(/ 1 (math/sqrt 6)) (/ -1 (math/sqrt 6))] :color "#cc4422"}]
                 {})
 
 ;; ### Connection to QR decomposition

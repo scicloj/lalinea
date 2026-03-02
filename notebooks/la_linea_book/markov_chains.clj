@@ -118,12 +118,12 @@
 
 (kind/test-last
  [(fn [v]
-    (and (< (Math/abs (- (+ (v 0) (v 1) (v 2)) 1.0)) 1e-10)
+    (and (< (abs (- (+ (v 0) (v 1) (v 2)) 1.0)) 1e-10)
          ;; Verify convergence: last two steps are nearly identical
          (let [prev (nth walk-history 18)]
-           (< (+ (Math/abs (- (v 0) (:sunny prev)))
-                 (Math/abs (- (v 1) (:cloudy prev)))
-                 (Math/abs (- (v 2) (:rainy prev))))
+           (< (+ (abs (- (v 0) (:sunny prev)))
+                 (abs (- (v 1) (:cloudy prev)))
+                 (abs (- (v 2) (:rainy prev))))
               1e-6))))])
 
 ;; ## Stationary distribution via eigendecomposition
@@ -141,7 +141,7 @@
 (def stationary-eigen
   (let [{:keys [eigenvalues eigenvectors]} eigen-result
         reals (cx/re eigenvalues)
-        idx (first (sort-by (fn [i] (Math/abs (- (double (reals i)) 1.0)))
+        idx (first (sort-by (fn [i] (abs (- (double (reals i)) 1.0)))
                             (range (count eigenvectors))))
         ev (nth eigenvectors idx)
         col (tensor/select ev :all 0)
@@ -151,14 +151,14 @@
 stationary-eigen
 
 (kind/test-last
- [(fn [v] (and (< (Math/abs (- (dfn/sum v) 1.0)) 1e-10)
+ [(fn [v] (and (< (abs (- (dfn/sum v) 1.0)) 1e-10)
                (every? pos? v)))])
 
 ;; The stationary distribution from eigendecomposition should
 ;; agree with the random walk convergence:
 
 (every? (fn [[eigen walk]]
-          (< (Math/abs (- (double eigen) (double walk))) 1e-4))
+          (< (abs (- (double eigen) (double walk))) 1e-4))
         (map vector stationary-eigen
              (let [s (last walk-history)]
                [(:sunny s) (:cloudy s) (:rainy s)])))
@@ -312,7 +312,7 @@ stationary-eigen
 
 (dfn/sum pagerank)
 
-(kind/test-last [(fn [s] (< (Math/abs (- s 1.0)) 1e-10))])
+(kind/test-last [(fn [s] (< (abs (- s 1.0)) 1e-10))])
 
 ;; Linear Algebra receives the most inbound links (from Calculus,
 ;; Statistics, Machine Learning, and AI) and ranks highest:

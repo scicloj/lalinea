@@ -39,7 +39,8 @@
    ;; Visualization:
    [tablecloth.api :as tc]
    [scicloj.tableplot.v1.plotly :as plotly]
-   [scicloj.kindly.v4.kind :as kind]))
+   [scicloj.kindly.v4.kind :as kind]
+   [clojure.math :as math]))
 
 ;; ## Benchmark utility
 ;;
@@ -153,14 +154,14 @@ la-normal-result
 
 (let [fm-coeffs (cons fm-intercept fm-beta)
       la-svd-coeffs (cons (:intercept la-result) (:beta la-result))]
-  (every? (fn [[a b]] (< (Math/abs (- (double a) (double b))) 1e-6))
+  (every? (fn [[a b]] (< (abs (- (double a) (double b))) 1e-6))
           (map vector fm-coeffs la-svd-coeffs)))
 
 (kind/test-last [true?])
 
 (let [fm-coeffs (cons fm-intercept fm-beta)
       la-ne-coeffs (cons (:intercept la-normal-result) (:beta la-normal-result))]
-  (every? (fn [[a b]] (< (Math/abs (- (double a) (double b))) 1e-6))
+  (every? (fn [[a b]] (< (abs (- (double a) (double b))) 1e-6))
           (map vector fm-coeffs la-ne-coeffs)))
 
 (kind/test-last [true?])
@@ -205,7 +206,7 @@ la-normal-result
 
 (def gp-xs (mapv (fn [i] (/ (double i) gp-n)) (range gp-n)))
 (def gp-ys (mapv (fn [^double x]
-                   (+ (Math/sin (* 2.0 Math/PI x))
+                   (+ (math/sin (* 2.0 math/PI x))
                       (frand/grandom rng 0.0 0.1)))
                  gp-xs))
 
@@ -264,7 +265,7 @@ la-normal-result
 ;; ### Correctness
 
 (every? (fn [[a b]]
-          (< (Math/abs (- (double a) (double b))) 1e-6))
+          (< (abs (- (double a) (double b))) 1e-6))
         (map vector fm-gp-preds la-gp-preds))
 
 (kind/test-last [true?])
@@ -304,7 +305,7 @@ la-normal-result
     (mapcat
      (fn [n]
        (let [xs (mapv (fn [i] [(/ (double i) n)]) (range n))
-             ys (mapv (fn [[x]] (Math/sin (* 2.0 Math/PI (double x)))) xs)
+             ys (mapv (fn [[x]] (math/sin (* 2.0 math/PI (double x)))) xs)
              n-iter (max 5 (quot 2000 (* n n)))]
          [{:n n :method "fastmath"
            :ms (bench-fn #(gp/gaussian-process xs ys
@@ -381,7 +382,7 @@ la-rbf-preds
 ;; ### Correctness
 
 (every? (fn [[a b]]
-          (< (Math/abs (- (double a) (double b))) 1e-6))
+          (< (abs (- (double a) (double b))) 1e-6))
         (map vector fm-rbf-preds la-rbf-preds))
 
 (kind/test-last [true?])
@@ -479,7 +480,7 @@ la-kriging-preds
 ;; ### Correctness
 
 (every? (fn [[a b]]
-          (< (Math/abs (- (double a) (double b))) 1e-6))
+          (< (abs (- (double a) (double b))) 1e-6))
         (map vector fm-kriging-preds la-kriging-preds))
 
 (kind/test-last [true?])
@@ -528,7 +529,7 @@ fm-mah
           d-sq (tensor/mget (la/mmul (la/transpose diff)
                                      (la/mmul S-inv diff))
                             0 0)]
-      (Math/sqrt d-sq))))
+      (math/sqrt d-sq))))
 
 (def la-mah (la-mahalanobis mah-x mah-mean mah-cov))
 
@@ -536,7 +537,7 @@ la-mah
 
 ;; ### Correctness
 
-(< (Math/abs (- fm-mah la-mah)) 1e-10)
+(< (abs (- fm-mah la-mah)) 1e-10)
 
 (kind/test-last [true?])
 
@@ -597,7 +598,7 @@ la-helmert-contrasts
           (let [fm-row (vec (fm-helmert-contrasts k))
                 la-row (vec (la-helmert-contrasts k))]
             (every? (fn [[a b]]
-                      (< (Math/abs (- (double a) (double b))) 1e-8))
+                      (< (abs (- (double a) (double b))) 1e-8))
                     (map vector fm-row la-row))))
         (keys fm-helmert-contrasts))
 
@@ -620,7 +621,7 @@ la-helmert-contrasts
 
 (def sg-signal
   (mapv (fn [i]
-          (+ (Math/sin (* 0.1 i))
+          (+ (math/sin (* 0.1 i))
              (frand/grandom rng 0.0 0.2)))
         (range 100)))
 
@@ -639,7 +640,7 @@ la-helmert-contrasts
     (let [fc (quot (dec length) 2)
           ;; Build Vandermonde matrix
           rows (mapv (fn [v]
-                       (mapv (fn [p] (Math/pow (double v) (double p)))
+                       (mapv (fn [p] (math/pow (double v) (double p)))
                              (range (inc order))))
                      (range (- fc) (inc fc)))
           V (la/matrix rows)
@@ -665,7 +666,7 @@ la-sg-coeffs
 ;; The convolution step is identical once coefficients match.
 
 (let [fm-coeffs (-> (for [v (range -3 4)]
-                      (mapv #(Math/pow (double v) (double %))
+                      (mapv #(math/pow (double v) (double %))
                             (range 4)))
                     (m/seq->double-double-array)
                     (org.apache.commons.math3.linear.Array2DRowRealMatrix.)
@@ -675,7 +676,7 @@ la-sg-coeffs
                     (.getRow 0)
                     (vec))]
   (every? (fn [[a b]]
-            (< (Math/abs (- (double a) (double b))) 1e-10))
+            (< (abs (- (double a) (double b))) 1e-10))
           (map vector fm-coeffs la-sg-coeffs)))
 
 (kind/test-last [true?])
@@ -707,7 +708,7 @@ fm-fd
     (let [noff (count offsets)
           ;; Build matrix: row i = [offset_0^i, offset_1^i, ...]
           rows (mapv (fn [i]
-                       (mapv (fn [j] (Math/pow (double j) (double i)))
+                       (mapv (fn [j] (math/pow (double j) (double i)))
                              offsets))
                      (range noff))
           M (la/matrix rows)
@@ -728,7 +729,7 @@ la-fd
 ;; ### Correctness
 
 (every? (fn [[a b]]
-          (< (Math/abs (- (double a) (double b))) 1e-10))
+          (< (abs (- (double a) (double b))) 1e-10))
         (map vector (second fm-fd) (second la-fd)))
 
 (kind/test-last [true?])
@@ -739,7 +740,7 @@ la-fd
 (def la-fd2 (la-fd-coeffs 2 [-2 -1 0 1 2]))
 
 (every? (fn [[a b]]
-          (< (Math/abs (- (double a) (double b))) 1e-10))
+          (< (abs (- (double a) (double b))) 1e-10))
         (map vector (second fm-fd2) (second la-fd2)))
 
 (kind/test-last [true?])
@@ -772,7 +773,7 @@ la-fd
 (def jacobi-b
   (mapv (fn [j]
           (let [j (double (inc j))]
-            (/ j (Math/sqrt (dec (* 4.0 j j))))))
+            (/ j (math/sqrt (dec (* 4.0 j j))))))
         (range (dec quad-n))))
 
 (def fm-quad-nodes
@@ -807,7 +808,7 @@ la-nodes
 ;; ### Correctness
 
 (every? (fn [[a b]]
-          (< (Math/abs (- (double a) (double b))) 1e-10))
+          (< (abs (- (double a) (double b))) 1e-10))
         (map vector (sort fm-quad-nodes) (sort la-nodes)))
 
 (kind/test-last [true?])
@@ -875,12 +876,12 @@ la-ince-c
 ;; normalize. Compare directions (normalize both, then compare).
 
 (let [normalize (fn [v]
-                  (let [norm (Math/sqrt (reduce + (map #(* % %) v)))]
+                  (let [norm (math/sqrt (reduce + (map #(* % %) v)))]
                     (mapv #(/ (double %) norm) v)))
       fm-normed (normalize (vec fm-ince-c))
       la-normed (normalize la-ince-c)]
   (every? (fn [[a b]]
-            (< (Math/abs (- (double a) (double b))) 1e-10))
+            (< (abs (- (double a) (double b))) 1e-10))
           (map vector fm-normed la-normed)))
 
 (kind/test-last [true?])

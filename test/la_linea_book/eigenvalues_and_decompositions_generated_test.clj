@@ -46,9 +46,9 @@
   ((fn
     [v]
     (and
-     (< (Math/abs (- (nth v 0) 2.0)) 1.0E-10)
-     (< (Math/abs (- (nth v 1) 3.0)) 1.0E-10)
-     (< (Math/abs (- (nth v 2) 4.0)) 1.0E-10)))
+     (< (abs (- (nth v 0) 2.0)) 1.0E-10)
+     (< (abs (- (nth v 1) 3.0)) 1.0E-10)
+     (< (abs (- (nth v 2) 4.0)) 1.0E-10)))
    v11_l83)))
 
 
@@ -76,15 +76,13 @@
 
 (def
  v18_l119
- (< (Math/abs (- (la/trace A-eig) (dfn/sum eig-reals))) 1.0E-10))
+ (< (abs (- (la/trace A-eig) (dfn/sum eig-reals))) 1.0E-10))
 
 
 (deftest t19_l121 (is (true? v18_l119)))
 
 
-(def
- v20_l123
- (< (Math/abs (- (la/det A-eig) (reduce * eig-reals))) 1.0E-10))
+(def v20_l123 (< (abs (- (la/det A-eig) (reduce * eig-reals))) 1.0E-10))
 
 
 (deftest t21_l125 (is (true? v20_l123)))
@@ -128,10 +126,10 @@
   ((fn
     [d]
     (and
-     (< (Math/abs (- (tensor/mget d 0 0) 2.0)) 1.0E-10)
-     (< (Math/abs (tensor/mget d 0 1)) 1.0E-10)
-     (< (Math/abs (tensor/mget d 1 0)) 1.0E-10)
-     (< (Math/abs (- (tensor/mget d 1 1) 3.0)) 1.0E-10)))
+     (< (abs (- (tensor/mget d 0 0) 2.0)) 1.0E-10)
+     (< (abs (tensor/mget d 0 1)) 1.0E-10)
+     (< (abs (tensor/mget d 1 0)) 1.0E-10)
+     (< (abs (- (tensor/mget d 1 1) 3.0)) 1.0E-10)))
    v31_l180)))
 
 
@@ -248,7 +246,7 @@
 (def v66_l371 (def approx-err (la/norm (la/sub A-lr A-rank1))))
 
 
-(def v67_l373 (< (Math/abs (- approx-err (second sigmas))) 1.0E-10))
+(def v67_l373 (< (abs (- approx-err (second sigmas))) 1.0E-10))
 
 
 (deftest t68_l375 (is (true? v67_l373)))
@@ -260,7 +258,7 @@
 (def
  v71_l403
  (every?
-  (fn* [p1__73210#] (>= p1__73210# -1.0E-10))
+  (fn* [p1__201538#] (>= p1__201538# -1.0E-10))
   (cx/re (:eigenvalues (la/eigen ATA)))))
 
 
@@ -291,7 +289,7 @@
        (fn
         [i]
         (every?
-         (fn [j] (< (Math/abs (tensor/mget L i j)) 1.0E-10))
+         (fn [j] (< (abs (tensor/mget L i j)) 1.0E-10))
          (range (inc i) c)))
        (range r)))))
    v76_l421)))
@@ -336,9 +334,7 @@
 
 (def
  v95_l485
- (<
-  (Math/abs (- (la/trace A-final) (dfn/sum final-eigenvalues)))
-  1.0E-10))
+ (< (abs (- (la/trace A-final) (dfn/sum final-eigenvalues))) 1.0E-10))
 
 
 (deftest t96_l489 (is (true? v95_l485)))
@@ -346,9 +342,7 @@
 
 (def
  v98_l493
- (<
-  (Math/abs (- (la/det A-final) (reduce * final-eigenvalues)))
-  1.0E-10))
+ (< (abs (- (la/det A-final) (reduce * final-eigenvalues))) 1.0E-10))
 
 
 (deftest t99_l497 (is (true? v98_l493)))

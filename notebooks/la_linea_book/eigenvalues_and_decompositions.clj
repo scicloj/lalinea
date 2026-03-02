@@ -84,9 +84,9 @@
 
 (kind/test-last
  [(fn [v]
-    (and (< (Math/abs (- (nth v 0) 2.0)) 1e-10)
-         (< (Math/abs (- (nth v 1) 3.0)) 1e-10)
-         (< (Math/abs (- (nth v 2) 4.0)) 1e-10)))])
+    (and (< (abs (- (nth v 0) 2.0)) 1e-10)
+         (< (abs (- (nth v 1) 3.0)) 1e-10)
+         (< (abs (- (nth v 2) 4.0)) 1e-10)))])
 
 ;; ### Verifying the eigenvalue equation
 ;;
@@ -116,11 +116,11 @@
 
 (def eig-reals (cx/re (:eigenvalues eig-result)))
 
-(< (Math/abs (- (la/trace A-eig) (dfn/sum eig-reals))) 1e-10)
+(< (abs (- (la/trace A-eig) (dfn/sum eig-reals))) 1e-10)
 
 (kind/test-last [true?])
 
-(< (Math/abs (- (la/det A-eig) (reduce * eig-reals))) 1e-10)
+(< (abs (- (la/det A-eig) (reduce * eig-reals))) 1e-10)
 
 (kind/test-last [true?])
 
@@ -181,10 +181,10 @@ D-result
 
 (kind/test-last
  [(fn [d]
-    (and (< (Math/abs (- (tensor/mget d 0 0) 2.0)) 1e-10)
-         (< (Math/abs (tensor/mget d 0 1)) 1e-10)
-         (< (Math/abs (tensor/mget d 1 0)) 1e-10)
-         (< (Math/abs (- (tensor/mget d 1 1) 3.0)) 1e-10)))])
+    (and (< (abs (- (tensor/mget d 0 0) 2.0)) 1e-10)
+         (< (abs (tensor/mget d 0 1)) 1e-10)
+         (< (abs (tensor/mget d 1 0)) 1e-10)
+         (< (abs (- (tensor/mget d 1 1) 3.0)) 1e-10)))])
 
 ;; In the eigenvector basis, the map is just scaling along
 ;; each axis. This is the simplest possible form.
@@ -370,7 +370,7 @@ sigmas
 
 (def approx-err (la/norm (la/sub A-lr A-rank1)))
 
-(< (Math/abs (- approx-err (second sigmas))) 1e-10)
+(< (abs (- approx-err (second sigmas))) 1e-10)
 
 (kind/test-last [true?])
 
@@ -424,7 +424,7 @@ chol-L
  [(fn [L] (let [[r c] (dtype/shape L)]
             (and (= r c)
                  ;; upper triangle is zero (lower triangular)
-                 (every? (fn [i] (every? (fn [j] (< (Math/abs (tensor/mget L i j)) 1e-10))
+                 (every? (fn [i] (every? (fn [j] (< (abs (tensor/mget L i j)) 1e-10))
                                          (range (inc i) c)))
                          (range r)))))])
 
@@ -482,16 +482,16 @@ final-eigenvalues
 
 ;; ### Trace = sum of eigenvalues
 
-(< (Math/abs (- (la/trace A-final)
-                (dfn/sum final-eigenvalues)))
+(< (abs (- (la/trace A-final)
+           (dfn/sum final-eigenvalues)))
    1e-10)
 
 (kind/test-last [true?])
 
 ;; ### Determinant = product of eigenvalues
 
-(< (Math/abs (- (la/det A-final)
-                (reduce * final-eigenvalues)))
+(< (abs (- (la/det A-final)
+           (reduce * final-eigenvalues)))
    1e-10)
 
 (kind/test-last [true?])

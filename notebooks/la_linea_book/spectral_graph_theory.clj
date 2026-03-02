@@ -31,7 +31,8 @@
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]
    ;; Graph and arrow diagrams:
-   [scicloj.la-linea.vis :as vis]))
+   [scicloj.la-linea.vis :as vis]
+   [clojure.math :as math]))
 
 ;; A helper for computing row sums of a matrix:
 
@@ -140,7 +141,7 @@ eigenvalues
 
 (kind/test-last
  [(fn [v]
-    (and (< (Math/abs (first v)) 1e-10)
+    (and (< (abs (first v)) 1e-10)
          (= 6 (count v))))])
 
 ;; The smallest eigenvalue is $0$ (confirming the graph is connected —
@@ -187,7 +188,7 @@ fiedler-entries
 ;; The Fiedler vector is orthogonal to the all-ones vector
 ;; (zero mean):
 
-(< (Math/abs (reduce + fiedler-entries)) 1e-10)
+(< (abs (reduce + fiedler-entries)) 1e-10)
 
 (kind/test-last [true?])
 
@@ -251,8 +252,8 @@ disc-eigenvalues
 
 (kind/test-last
  [(fn [v]
-    (and (< (Math/abs (first v)) 1e-10)
-         (< (Math/abs (second v)) 1e-10)
+    (and (< (abs (first v)) 1e-10)
+         (< (abs (second v)) 1e-10)
          (> (nth v 2) 0.1)))])
 
 ;; Two zero eigenvalues confirm two connected components.
@@ -281,8 +282,8 @@ K5-eigenvalues
 
 (kind/test-last
  [(fn [v]
-    (and (< (Math/abs (first v)) 1e-10)
-         (every? (fn [x] (< (Math/abs (- x 5.0)) 1e-10))
+    (and (< (abs (first v)) 1e-10)
+         (every? (fn [x] (< (abs (- x 5.0)) 1e-10))
                  (rest v))))])
 
 ;; Eigenvalue $0$ (multiplicity 1) and eigenvalue $5$ (multiplicity 4).
@@ -314,7 +315,7 @@ K5-eigenvalues
 
 (def cycle-theoretical
   (sort (dtype/make-reader :float64 cn
-                           (- 2.0 (* 2.0 (Math/cos (/ (* 2.0 Math/PI idx) cn)))))))
+                           (- 2.0 (* 2.0 (math/cos (/ (* 2.0 math/PI idx) cn)))))))
 
 ;; Computed eigenvalues:
 
@@ -342,7 +343,7 @@ cycle-theoretical
 
 (def path-adj
   (tensor/compute-tensor [pn pn]
-                         (fn [i j] (if (= 1 (Math/abs (- i j))) 1.0 0.0))
+                         (fn [i j] (if (= 1 (abs (- i j))) 1.0 0.0))
                          :float64))
 
 (vis/graph-plot [[0 0] [1 0] [2 0] [3 0] [4 0] [5 0]]
@@ -356,7 +357,7 @@ path-eigenvalues
 
 (def path-theoretical
   (sort (dtype/make-reader :float64 pn
-                           (- 2.0 (* 2.0 (Math/cos (/ (* Math/PI idx) pn)))))))
+                           (- 2.0 (* 2.0 (math/cos (/ (* math/PI idx) pn)))))))
 
 path-theoretical
 
@@ -414,7 +415,7 @@ comm-eigenvalues
 (kind/test-last
  [(fn [v]
     (and (= 9 (count v))
-         (< (Math/abs (first v)) 1e-10)
+         (< (abs (first v)) 1e-10)
          (< (nth v 2) 1.0)
          (> (nth v 3) (* 2.0 (nth v 2)))))])
 
@@ -460,7 +461,7 @@ comm-eigenvalues
 
 (let [xs (vec (:x embed-data))
       ys (vec (:y embed-data))
-      dist (fn [i j] (Math/sqrt (+ (let [d (- (xs i) (xs j))] (* d d))
+      dist (fn [i j] (math/sqrt (+ (let [d (- (xs i) (xs j))] (* d d))
                                    (let [d (- (ys i) (ys j))] (* d d)))))
       within-A (dist 0 1)
       across-AB (apply min (for [a [0 1 2] b [3 4 5]] (dist a b)))]
@@ -486,7 +487,7 @@ comm-eigenvalues
 (def conductance (/ 1.0 3.0))
 
 (and (<= (/ fiedler-value 2.0) conductance)
-     (<= conductance (Math/sqrt (* 2.0 fiedler-value))))
+     (<= conductance (math/sqrt (* 2.0 fiedler-value))))
 
 (kind/test-last [true?])
 

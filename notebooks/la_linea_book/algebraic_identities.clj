@@ -19,7 +19,8 @@
    ;; Element-wise array math:
    [tech.v3.datatype.functional :as dfn]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
-   [scicloj.kindly.v4.kind :as kind]))
+   [scicloj.kindly.v4.kind :as kind]
+   [clojure.math :as math]))
 
 ;; ## Test matrices
 ;;
@@ -270,7 +271,7 @@
 
 (let [alpha 2.0 n 3]
   (la/close-scalar? (la/det (la/scale A alpha))
-                    (* (Math/pow alpha n) (la/det A))))
+                    (* (math/pow alpha n) (la/det A))))
 
 (kind/test-last [true?])
 
@@ -344,7 +345,7 @@
 
 (let [alpha -2.5]
   (la/close-scalar? (la/norm (la/scale A alpha))
-                    (* (Math/abs alpha) (la/norm A))))
+                    (* (abs alpha) (la/norm A))))
 
 (kind/test-last [true?])
 
@@ -385,7 +386,7 @@
 (let [{:keys [R]} (la/qr A)]
   (every? (fn [i]
             (every? (fn [j]
-                      (< (Math/abs (tensor/mget R i j)) 1e-10))
+                      (< (abs (tensor/mget R i j)) 1e-10))
                     (range 0 i)))
           (range 1 3)))
 
@@ -463,7 +464,7 @@
       AtA-eigs (la/real-eigenvalues (la/mmul (la/transpose A) A))
       sv-squared (sort > (map #(* % %) S))]
   (every? identity
-          (map (fn [a b] (< (Math/abs (- a b)) 1e-8))
+          (map (fn [a b] (< (abs (- a b)) 1e-8))
                sv-squared (reverse AtA-eigs))))
 
 (kind/test-last [true?])
@@ -471,7 +472,7 @@
 ;; ### [Frobenius norm](https://en.wikipedia.org/wiki/Matrix_norm#Frobenius_norm) from singular values: $\|A\|_F = \sqrt{\sum \sigma_i^2}$
 
 (let [{:keys [S]} (la/svd A)
-      sv-norm (Math/sqrt (dfn/sum (dfn/* S S)))]
+      sv-norm (math/sqrt (dfn/sum (dfn/* S S)))]
   (la/close-scalar? (la/norm A) sv-norm))
 
 (kind/test-last [true?])
