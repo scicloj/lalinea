@@ -34,12 +34,6 @@
    [scicloj.lalinea.vis :as vis]
    [clojure.math :as math]))
 
-;; Build a graph Laplacian $L = D - A$:
-
-(def laplacian
-  (fn [adj]
-    (la/sub (la/diag (la/reduce-axis adj dfn/sum 1)) adj)))
-
 ;; ## From graphs to matrices
 ;;
 ;; Consider a small social network with 6 people.
@@ -88,6 +82,10 @@
 ;; where $D$ is the diagonal degree matrix.
 ;; The Laplacian encodes the same connectivity as $A$, but its eigenvalues
 ;; have direct structural meaning.
+
+(def laplacian
+  (fn [adj]
+    (la/sub (la/diag (la/reduce-axis adj dfn/sum 1)) adj)))
 
 (def L (laplacian adj))
 
