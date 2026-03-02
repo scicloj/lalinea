@@ -85,14 +85,6 @@ Round-trip through `pr-str` / `read-string`.
 - Mutations through either view are immediately visible in the other
 - All `dfn` element-wise operations work directly on matrices (they are tensors)
 
-## Installation
-
-Add to your `deps.edn`:
-
-```clojure
-{:deps {org.scicloj/lalinea {:mvn/version "0.1.0"}}}
-```
-
 ## Documentation
 
 The [La Linea book](https://scicloj.github.io/lalinea/) is a set of notebook-based chapters covering:
