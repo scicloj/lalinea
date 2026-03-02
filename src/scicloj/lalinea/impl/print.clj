@@ -84,9 +84,11 @@
               (.write w "\n        ..."))
             (.write w "]]"))
           (do
-            (.write w "\n       ")
-            (.write w (pr-str (mapv #(tensor-row-vec t %) (range r))))
-            (.write w "]")))))))
+            (.write w "\n       [")
+            (dotimes [i r]
+              (when (pos? i) (.write w "\n        "))
+              (.write w (pr-str (tensor-row-vec t i))))
+            (.write w "]]")))))))
 
 (defmethod print-method RealTensor
   [^RealTensor t ^java.io.Writer w]
