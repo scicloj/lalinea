@@ -95,6 +95,26 @@
 
 (kind/test-last [= 3.0])
 
+;; ### Lazy and noncaching
+;;
+;; dtype-next follows a **lazy, noncaching** philosophy.
+;; Operations like `dfn/+`, `dfn/sqrt`, and `tensor/compute-tensor`
+;; return lightweight readers that re-evaluate on every access
+;; rather than storing results. This avoids intermediate allocations
+;; and lets you compose long pipelines with near-zero overhead —
+;; only the final consumer triggers computation.
+;;
+;; The trade-off: reading the same element twice computes it twice.
+;; When you need a concrete array — for mutation, for passing to
+;; EJML, or for caching a costly result — call `dtype/clone`.
+;;
+;; La Linea inherits this philosophy. Its element-wise operations
+;; (`la/add`, `la/sub`, `la/scale`, `la/mul`) return lazy readers,
+;; while operations that cross into EJML (`la/mmul`, `la/solve`,
+;; `la/invert`, `la/eigen`) materialize at the boundary.
+;; You get lazy composition by default, with explicit
+;; materialization only where it matters.
+
 ;; ## EJML: efficient Java matrix library
 ;;
 ;; [EJML](https://ejml.org/) is a pure-Java linear algebra library.

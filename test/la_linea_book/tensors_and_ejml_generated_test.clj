@@ -73,7 +73,7 @@
 
 
 (def
- v22_l130
+ v22_l150
  (let
   [t (la/matrix [[1.0 2.0] [3.0 4.0]]) dm (la/tensor->dmat t)]
   {:identical? (identical? (dtype/->double-array t) (.data dm)),
@@ -82,81 +82,81 @@
 
 
 (deftest
- t23_l137
+ t23_l157
  (is
   ((fn [v] (and (:identical? v) (= (:rows v) 2) (= (:cols v) 2)))
-   v22_l130)))
+   v22_l150)))
 
 
 (def
- v25_l143
+ v25_l163
  (let
   [t (la/matrix [[1.0 0.0] [0.0 1.0]]) dm (la/tensor->dmat t)]
   (.set dm 0 1 99.0)
   (tensor/mget t 0 1)))
 
 
-(deftest t26_l148 (is (= v25_l143 99.0)))
+(deftest t26_l168 (is (= v25_l163 99.0)))
 
 
 (def
- v28_l152
+ v28_l172
  (let
   [t (la/matrix [[1.0 0.0] [0.0 1.0]]) dm (la/tensor->dmat t)]
   (tensor/mset! t 0 1 42.0)
   (.get dm 0 1)))
 
 
-(deftest t29_l157 (is (= v28_l152 42.0)))
+(deftest t29_l177 (is (= v28_l172 42.0)))
 
 
-(def v31_l164 (la/matrix [[1 2 3] [4 5 6] [7 8 9]]))
+(def v31_l184 (la/matrix [[1 2 3] [4 5 6] [7 8 9]]))
 
 
-(deftest t32_l168 (is ((fn [m] (= [3 3] (dtype/shape m))) v31_l164)))
+(deftest t32_l188 (is ((fn [m] (= [3 3] (dtype/shape m))) v31_l184)))
 
 
-(def v34_l180 (la/mmul (la/matrix [[1 2] [3 4]]) (la/eye 2)))
+(def v34_l200 (la/mmul (la/matrix [[1 2] [3 4]]) (la/eye 2)))
 
 
-(deftest t35_l183 (is ((fn [m] (= 1.0 (tensor/mget m 0 0))) v34_l180)))
+(deftest t35_l203 (is ((fn [m] (= 1.0 (tensor/mget m 0 0))) v34_l200)))
 
 
-(def v37_l187 (la/invert (la/matrix [[1 2] [3 4]])))
+(def v37_l207 (la/invert (la/matrix [[1 2] [3 4]])))
 
 
-(deftest t38_l189 (is ((fn [m] (= [2 2] (dtype/shape m))) v37_l187)))
+(deftest t38_l209 (is ((fn [m] (= [2 2] (dtype/shape m))) v37_l207)))
 
 
-(def v40_l193 (la/norm (la/matrix [[1 2 3] [4 5 6]])))
-
-
-(deftest
- t41_l195
- (is ((fn [v] (< (abs (- v (math/sqrt 91.0))) 1.0E-10)) v40_l193)))
-
-
-(def v43_l203 (la/real-eigenvalues (la/matrix [[4 1] [1 3]])))
-
-
-(deftest t44_l205 (is ((fn [evs] (= 2 (count evs))) v43_l203)))
-
-
-(def v46_l209 (:S (la/svd (la/matrix [[1 2] [3 4]]))))
-
-
-(deftest t47_l211 (is ((fn [S] (= 2 (count S))) v46_l209)))
-
-
-(def v49_l215 (la/qr (la/matrix [[1 2] [3 4]])))
+(def v40_l213 (la/norm (la/matrix [[1 2 3] [4 5 6]])))
 
 
 (deftest
- t50_l217
- (is ((fn [{:keys [Q R]}] (and (some? Q) (some? R))) v49_l215)))
+ t41_l215
+ (is ((fn [v] (< (abs (- v (math/sqrt 91.0))) 1.0E-10)) v40_l213)))
 
 
-(def v52_l221 (la/cholesky (la/matrix [[4 2] [2 3]])))
+(def v43_l223 (la/real-eigenvalues (la/matrix [[4 1] [1 3]])))
 
 
-(deftest t53_l223 (is ((fn [L] (= [2 2] (dtype/shape L))) v52_l221)))
+(deftest t44_l225 (is ((fn [evs] (= 2 (count evs))) v43_l223)))
+
+
+(def v46_l229 (:S (la/svd (la/matrix [[1 2] [3 4]]))))
+
+
+(deftest t47_l231 (is ((fn [S] (= 2 (count S))) v46_l229)))
+
+
+(def v49_l235 (la/qr (la/matrix [[1 2] [3 4]])))
+
+
+(deftest
+ t50_l237
+ (is ((fn [{:keys [Q R]}] (and (some? Q) (some? R))) v49_l235)))
+
+
+(def v52_l241 (la/cholesky (la/matrix [[4 2] [2 3]])))
+
+
+(deftest t53_l243 (is ((fn [L] (= [2 2] (dtype/shape L))) v52_l241)))
