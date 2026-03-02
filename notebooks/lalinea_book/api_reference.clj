@@ -23,6 +23,7 @@
    [scicloj.lalinea.vis :as vis]
    [tech.v3.tensor :as tensor]
    [tech.v3.datatype :as dtype]
+   [tech.v3.datatype.functional :as dfn]
    [tech.v3.libs.buffered-image :as bufimg]
    [scicloj.kindly.v4.kind :as kind]
    [clojure.math :as math]))
@@ -114,6 +115,15 @@
 (la/sum (la/matrix [[1 2] [3 4]]))
 
 (kind/test-last [(fn [v] (== 10.0 v))])
+
+(kind/doc #'la/reduce-axis)
+
+;; Row sums (axis 1) and column sums (axis 0):
+(la/reduce-axis (la/matrix [[1 2 3] [4 5 6]]) dfn/sum 1)
+
+(kind/test-last [(fn [v] (and (= [2] (dtype/shape v))
+                              (la/close-scalar? (v 0) 6.0)
+                              (la/close-scalar? (v 1) 15.0)))])
 
 (kind/doc #'la/mmul)
 
@@ -355,6 +365,22 @@
 
 (kind/test-last [(fn [t] (not (la/real-tensor? t)))])
 
+(kind/doc #'la/lift)
+
+;; One-shot bridge: unwrap, apply, re-wrap. Pass a Var for tape recording.
+(la/lift dfn/sqrt (la/matrix [[4 9] [16 25]]))
+
+(kind/test-last [(fn [m] (and (la/close-scalar? (tensor/mget m 0 0) 2.0)
+                              (la/close-scalar? (tensor/mget m 0 1) 3.0)))])
+
+(kind/doc #'la/lifted)
+
+;; Curried version — returns a reusable function.
+(let [my-sqrt (la/lifted dfn/sqrt)]
+  (my-sqrt (la/column [4 9 16])))
+
+(kind/test-last [(fn [v] (la/close-scalar? (tensor/mget v 0 0) 2.0))])
+
 ;; ## `scicloj.lalinea.complex`
 ;;
 ;; A ComplexTensor wraps a dtype-next tensor whose last dimension
@@ -427,6 +453,14 @@
   (vec (cx/->double-array ct)))
 
 (kind/test-last [= [1.0 3.0 2.0 4.0]])
+
+(kind/doc #'cx/wrap-tensor)
+
+(let [raw (tensor/->tensor [[1.0 2.0] [3.0 4.0]])
+      ct (cx/wrap-tensor raw)]
+  [(cx/complex? ct) (cx/complex-shape ct)])
+
+(kind/test-last [(fn [[c? shape]] (and c? (= [2] shape)))])
 
 (kind/doc #'cx/add)
 

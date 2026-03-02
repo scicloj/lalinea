@@ -35,10 +35,6 @@
     t
     (rt/->real-tensor t)))
 
-
-
-
-
 ;; ---------------------------------------------------------------------------
 ;; Matrix construction
 ;; ---------------------------------------------------------------------------
@@ -287,6 +283,24 @@
                   (if (cx/complex? a)
                     (cx/sum a)
                     (double (dfn/sum a))))))
+
+(defn reduce-axis
+  "Reduce a tensor along an axis.
+
+   `reduce-fn` is applied to each slice along the given axis
+   (e.g. `dfn/sum`, `dfn/reduce-max`).
+
+   For a 2D matrix: axis 0 reduces across rows (one result per column),
+   axis 1 reduces across columns (one result per row).
+
+   Returns a RealTensor for real input, ComplexTensor for complex input."
+  [a reduce-fn axis]
+  (tape/record! :la/reduce-axis [a reduce-fn axis]
+                (let [a (ensure-tensor a)]
+                  (if (cx/complex? a)
+                    (cx/wrap-tensor
+                     (tensor/reduce-axis (cx/->tensor a) reduce-fn (int axis)))
+                    (->rt (tensor/reduce-axis a reduce-fn (int axis)))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Scalar properties

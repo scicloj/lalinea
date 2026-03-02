@@ -34,19 +34,11 @@
    [scicloj.lalinea.vis :as vis]
    [clojure.math :as math]))
 
-;; A helper for computing row sums of a matrix:
-
-(def row-sums
-  (fn [m]
-    (let [nrows (first (dtype/shape m))]
-      (dtype/make-reader :float64 nrows
-                         (dfn/sum (tensor/select m idx :all))))))
-
 ;; Build a graph Laplacian $L = D - A$:
 
 (def laplacian
   (fn [adj]
-    (la/sub (la/diag (row-sums adj)) adj)))
+    (la/sub (la/diag (la/reduce-axis adj dfn/sum 1)) adj)))
 
 ;; ## From graphs to matrices
 ;;
@@ -79,7 +71,7 @@
 
 ;; The **degree** of each vertex — how many neighbours it has:
 
-(vec (row-sums adj))
+(vec (la/reduce-axis adj dfn/sum 1))
 
 (kind/test-last
  [(fn [v] (= v [2.0 2.0 3.0 3.0 2.0 2.0]))])
@@ -116,7 +108,7 @@ L
 
 ;; Let us verify that each row sums to zero:
 
-(dfn/reduce-max (dfn/abs (row-sums L)))
+(dfn/reduce-max (dfn/abs (la/reduce-axis L dfn/sum 1)))
 
 (kind/test-last
  [(fn [v] (< v 1e-10))])

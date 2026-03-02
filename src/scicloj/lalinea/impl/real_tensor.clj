@@ -100,7 +100,7 @@
   (rotate [t offset-vec]
     (tensor/rotate (->tensor t) offset-vec))
   (slice [t n-dims right?]
-    (tensor/slice (->tensor t) n-dims right?)))
+    (dtype-proto/slice (->tensor t) n-dims right?)))
 
 (hamf/extend-type RealTensor
   dtype-proto/PToArrayBuffer
