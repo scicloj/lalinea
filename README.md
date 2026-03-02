@@ -105,7 +105,7 @@ Each chapter includes inline tests via `kind/test-last`.
 (require '[scicloj.la-linea.transform :as xf])       ; FFT / DCT / DST / DHT bridge
 (require '[scicloj.la-linea.tape :as tape])          ; computation DAG recording, memory inspection
 (require '[scicloj.la-linea.grad :as grad])          ; reverse-mode automatic differentiation
-(require '[scicloj.la-linea.print])                  ; tagged-literal printing (#la/m, #la/v)
+(require '[scicloj.la-linea.impl.print])                  ; tagged-literal printing (#la/m, #la/v)
 (require '[scicloj.la-linea.vis :as vis])            ; visualization helpers
 ```
 

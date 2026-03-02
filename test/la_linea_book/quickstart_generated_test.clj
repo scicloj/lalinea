@@ -3,7 +3,7 @@
  (:require
   [scicloj.la-linea.linalg :as la]
   [scicloj.la-linea.complex :as cx]
-  [scicloj.la-linea.transform :as bfft]
+  [scicloj.la-linea.transform :as ft]
   [tech.v3.tensor :as tensor]
   [tech.v3.datatype :as dtype]
   [tech.v3.datatype.functional :as dfn]
@@ -132,7 +132,7 @@
  (is ((fn [ct] (= [2 2] (cx/complex-shape ct))) v41_l124)))
 
 
-(def v44_l135 (bfft/forward [1.0 0.0 1.0 0.0]))
+(def v44_l135 (ft/forward [1.0 0.0 1.0 0.0]))
 
 
 (deftest
@@ -152,7 +152,7 @@
   [signal
    [1.0 2.0 3.0 4.0]
    recovered
-   (vec (bfft/inverse-real (bfft/forward signal)))]
+   (vec (ft/inverse-real (ft/forward signal)))]
   recovered))
 
 
@@ -162,7 +162,7 @@
   ((fn
     [v]
     (every?
-     (fn* [p1__75769#] (< (abs p1__75769#) 1.0E-10))
+     (fn* [p1__205796#] (< (abs p1__205796#) 1.0E-10))
      (map - v [1.0 2.0 3.0 4.0])))
    v48_l144)))
 
@@ -213,7 +213,7 @@
  (is ((fn [m] (la/close? m (la/matrix [[1 5] [0 1]]))) v65_l187)))
 
 
-(def v68_l196 (require '[scicloj.la-linea.print]))
+(def v68_l196 (require '[scicloj.la-linea.impl.print]))
 
 
 (def v69_l198 (pr-str (la/matrix [[1 2] [3 4]])))

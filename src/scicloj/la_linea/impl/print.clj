@@ -1,4 +1,4 @@
-(ns scicloj.la-linea.print
+(ns scicloj.la-linea.impl.print
   "Tagged-literal printing for dtype-next tensors.
 
    Requiring this namespace installs print-method implementations

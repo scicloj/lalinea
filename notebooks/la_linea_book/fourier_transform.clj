@@ -13,7 +13,7 @@
    ;; Complex tensors — interleaved [re im] layout:
    [scicloj.la-linea.complex :as cx]
    ;; FFT bridge — Fastmath transforms ↔ ComplexTensor:
-   [scicloj.la-linea.transform :as bfft]
+   [scicloj.la-linea.transform :as ft]
    ;; Low-level buffer operations:
    [tech.v3.datatype :as dtype]
    ;; Element-wise array math:
@@ -30,7 +30,7 @@
 ;;
 ;; A real signal produces a complex spectrum.
 
-(bfft/forward [1.0 0.0 -1.0 0.0])
+(ft/forward [1.0 0.0 -1.0 0.0])
 
 ;; The DC component ($k=0$) is $\sum x_n = 0$.
 
@@ -41,8 +41,8 @@
 ;; FFT followed by inverse FFT recovers the original signal.
 
 (let [signal [1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0]
-      spectrum (bfft/forward signal)
-      recovered (bfft/inverse-real spectrum)]
+      spectrum (ft/forward signal)
+      recovered (ft/inverse-real spectrum)]
   (dfn/reduce-max (dfn/abs (dfn/- recovered signal))))
 
 (kind/test-last [(fn [v] (< v 1e-10))])
@@ -56,7 +56,7 @@
 
 (let [signal [1.0 2.0 3.0 4.0]
       n (count signal)
-      spectrum (bfft/forward signal)
+      spectrum (ft/forward signal)
       time-energy (dfn/sum (dfn/* signal signal))
       magnitudes (la/abs spectrum)
       freq-energy (/ (dfn/sum (dfn/* magnitudes magnitudes)) n)]
@@ -73,9 +73,9 @@
       alpha 2.0
       beta -1.5
       combined (dfn/+ (dfn/* alpha x) (dfn/* beta y))
-      lhs (bfft/forward combined)
-      rhs (la/add (la/scale (bfft/forward x) alpha)
-                  (la/scale (bfft/forward y) beta))]
+      lhs (ft/forward combined)
+      rhs (la/add (la/scale (ft/forward x) alpha)
+                  (la/scale (ft/forward y) beta))]
   (and (< (dfn/reduce-max (dfn/abs (dfn/- (cx/re lhs) (cx/re rhs)))) 1e-10)
        (< (dfn/reduce-max (dfn/abs (dfn/- (cx/im lhs) (cx/im rhs)))) 1e-10)))
 
@@ -90,10 +90,10 @@
 
 (let [x [1.0 2.0 0.0 0.0]
       y [1.0 0.0 1.0 0.0]
-      Fx (bfft/forward x)
-      Fy (bfft/forward y)
+      Fx (ft/forward x)
+      Fy (ft/forward y)
       product-spectrum (la/mul Fx Fy)
-      conv-result (bfft/inverse-real product-spectrum)
+      conv-result (ft/inverse-real product-spectrum)
       n (count x)
       manual-conv (let [out (dtype/make-container :float64 n)]
                     (dotimes [k n]
@@ -131,7 +131,7 @@
 ;; The magnitude spectrum reveals two peaks at frequencies
 ;; 3 and 7:
 
-(let [spectrum (bfft/forward signal-composed)
+(let [spectrum (ft/forward signal-composed)
       mags (la/abs spectrum)]
   (-> (tc/dataset {:frequency (range (/ N-vis 2))
                    :magnitude (vec (take (/ N-vis 2) mags))})
@@ -141,7 +141,7 @@
 
 ;; The two largest magnitude bins are at frequencies 3 and 7:
 
-(let [spectrum (bfft/forward signal-composed)
+(let [spectrum (ft/forward signal-composed)
       mags (la/abs spectrum)
       half-mags (vec (take (/ N-vis 2) mags))
       peak-idx (sort-by (fn [i] (- (double (nth half-mags i))))
@@ -155,7 +155,7 @@
 ;; The DFT of a constant signal $x_n = c$ is $\hat{x}_0 = Nc$
 ;; with all other bins zero.
 
-(let [spectrum (bfft/forward [3.0 3.0 3.0 3.0])]
+(let [spectrum (ft/forward [3.0 3.0 3.0 3.0])]
   {:dc (cx/re (spectrum 0))
    :others [(la/abs (spectrum 1)) (la/abs (spectrum 2)) (la/abs (spectrum 3))]})
 
@@ -164,7 +164,7 @@
 
 ;; The DFT of $x = [1, -1, 1, -1]$ has energy only at Nyquist ($k = N/2$).
 
-(let [spectrum (bfft/forward [1.0 -1.0 1.0 -1.0])]
+(let [spectrum (ft/forward [1.0 -1.0 1.0 -1.0])]
   {:dc (double (la/abs (spectrum 0)))
    :nyquist (double (cx/re (spectrum 2)))})
 
@@ -176,8 +176,8 @@
 ;; When the input is already complex, use `forward-complex`.
 
 (let [signal (cx/complex-tensor [1.0 0.0] [0.0 1.0])
-      spectrum (bfft/forward-complex signal)
-      recovered (bfft/inverse spectrum)]
+      spectrum (ft/forward-complex signal)
+      recovered (ft/inverse spectrum)]
   (and (< (dfn/reduce-max (dfn/abs (dfn/- (cx/re recovered) (cx/re signal)))) 1e-10)
        (< (dfn/reduce-max (dfn/abs (dfn/- (cx/im recovered) (cx/im signal)))) 1e-10)))
 
@@ -188,8 +188,8 @@
 ;; [DCT](https://en.wikipedia.org/wiki/Discrete_cosine_transform), [DST](https://en.wikipedia.org/wiki/Discrete_sine_transform), and [DHT](https://en.wikipedia.org/wiki/Discrete_Hartley_transform) are also available, returning real tensors.
 
 (let [signal [1.0 2.0 3.0 4.0]
-      dct (bfft/dct-forward signal)
-      recovered (bfft/dct-inverse dct)]
+      dct (ft/dct-forward signal)
+      recovered (ft/dct-inverse dct)]
   (< (dfn/reduce-max (dfn/abs (dfn/- recovered signal))) 1e-10))
 
 (kind/test-last [true?])

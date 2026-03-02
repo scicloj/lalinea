@@ -3,7 +3,7 @@
  (:require
   [scicloj.la-linea.linalg :as la]
   [scicloj.la-linea.complex :as cx]
-  [scicloj.la-linea.transform :as bfft]
+  [scicloj.la-linea.transform :as ft]
   [tech.v3.datatype :as dtype]
   [tech.v3.datatype.functional :as dfn]
   [tablecloth.api :as tc]
@@ -13,7 +13,7 @@
   [clojure.test :refer [deftest is]]))
 
 
-(def v3_l33 (bfft/forward [1.0 0.0 -1.0 0.0]))
+(def v3_l33 (ft/forward [1.0 0.0 -1.0 0.0]))
 
 
 (deftest
@@ -27,9 +27,9 @@
   [signal
    [1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0]
    spectrum
-   (bfft/forward signal)
+   (ft/forward signal)
    recovered
-   (bfft/inverse-real spectrum)]
+   (ft/inverse-real spectrum)]
   (dfn/reduce-max (dfn/abs (dfn/- recovered signal)))))
 
 
@@ -44,7 +44,7 @@
    n
    (count signal)
    spectrum
-   (bfft/forward signal)
+   (ft/forward signal)
    time-energy
    (dfn/sum (dfn/* signal signal))
    magnitudes
@@ -71,11 +71,11 @@
    combined
    (dfn/+ (dfn/* alpha x) (dfn/* beta y))
    lhs
-   (bfft/forward combined)
+   (ft/forward combined)
    rhs
    (la/add
-    (la/scale (bfft/forward x) alpha)
-    (la/scale (bfft/forward y) beta))]
+    (la/scale (ft/forward x) alpha)
+    (la/scale (ft/forward y) beta))]
   (and
    (<
     (dfn/reduce-max (dfn/abs (dfn/- (cx/re lhs) (cx/re rhs))))
@@ -96,13 +96,13 @@
    y
    [1.0 0.0 1.0 0.0]
    Fx
-   (bfft/forward x)
+   (ft/forward x)
    Fy
-   (bfft/forward y)
+   (ft/forward y)
    product-spectrum
    (la/mul Fx Fy)
    conv-result
-   (bfft/inverse-real product-spectrum)
+   (ft/inverse-real product-spectrum)
    n
    (count x)
    manual-conv
@@ -140,7 +140,7 @@
   (let
    [t
     (mapv
-     (fn* [p1__76200#] (/ (double p1__76200#) N-vis))
+     (fn* [p1__206016#] (/ (double p1__206016#) N-vis))
      (range N-vis))]
    (mapv
     (fn
@@ -157,7 +157,7 @@
   (tc/dataset
    {:t
     (mapv
-     (fn* [p1__76201#] (/ (double p1__76201#) N-vis))
+     (fn* [p1__206017#] (/ (double p1__206017#) N-vis))
      (range N-vis)),
     :amplitude (vec signal-composed)})
   (plotly/base {:=x :t, :=y :amplitude})
@@ -168,7 +168,7 @@
 (def
  v24_l134
  (let
-  [spectrum (bfft/forward signal-composed) mags (la/abs spectrum)]
+  [spectrum (ft/forward signal-composed) mags (la/abs spectrum)]
   (->
    (tc/dataset
     {:frequency (range (/ N-vis 2)),
@@ -182,7 +182,7 @@
  v26_l144
  (let
   [spectrum
-   (bfft/forward signal-composed)
+   (ft/forward signal-composed)
    mags
    (la/abs spectrum)
    half-mags
@@ -200,7 +200,7 @@
 (def
  v29_l158
  (let
-  [spectrum (bfft/forward [3.0 3.0 3.0 3.0])]
+  [spectrum (ft/forward [3.0 3.0 3.0 3.0])]
   {:dc (cx/re (spectrum 0)),
    :others
    [(la/abs (spectrum 1))
@@ -215,14 +215,14 @@
     [v]
     (and
      (< (abs (- (double (:dc v)) 12.0)) 1.0E-10)
-     (every? (fn* [p1__76202#] (< p1__76202# 1.0E-10)) (:others v))))
+     (every? (fn* [p1__206018#] (< p1__206018# 1.0E-10)) (:others v))))
    v29_l158)))
 
 
 (def
  v32_l167
  (let
-  [spectrum (bfft/forward [1.0 -1.0 1.0 -1.0])]
+  [spectrum (ft/forward [1.0 -1.0 1.0 -1.0])]
   {:dc (double (la/abs (spectrum 0))),
    :nyquist (double (cx/re (spectrum 2)))}))
 
@@ -242,9 +242,9 @@
   [signal
    (cx/complex-tensor [1.0 0.0] [0.0 1.0])
    spectrum
-   (bfft/forward-complex signal)
+   (ft/forward-complex signal)
    recovered
-   (bfft/inverse spectrum)]
+   (ft/inverse spectrum)]
   (and
    (<
     (dfn/reduce-max (dfn/abs (dfn/- (cx/re recovered) (cx/re signal))))
@@ -263,9 +263,9 @@
   [signal
    [1.0 2.0 3.0 4.0]
    dct
-   (bfft/dct-forward signal)
+   (ft/dct-forward signal)
    recovered
-   (bfft/dct-inverse dct)]
+   (ft/dct-inverse dct)]
   (< (dfn/reduce-max (dfn/abs (dfn/- recovered signal))) 1.0E-10)))
 
 

@@ -16,7 +16,7 @@
   (:require
    [scicloj.la-linea.linalg :as la]
    [scicloj.la-linea.complex :as cx]
-   [scicloj.la-linea.transform :as bfft]
+   [scicloj.la-linea.transform :as ft]
    [scicloj.la-linea.tape :as tape]
    [scicloj.la-linea.elementwise :as elem]
    [scicloj.la-linea.grad :as grad]
@@ -485,76 +485,76 @@
 ;; Bridge between Fastmath transforms and La Linea tensors.
 ;; The FFT takes a real signal and returns a ComplexTensor spectrum.
 
-(kind/doc #'bfft/forward)
+(kind/doc #'ft/forward)
 
 (let [signal [1.0 0.0 0.0 0.0]
-      spectrum (bfft/forward signal)]
+      spectrum (ft/forward signal)]
   (cx/complex-shape spectrum))
 
 (kind/test-last [= [4]])
 
-(kind/doc #'bfft/inverse)
+(kind/doc #'ft/inverse)
 
-(let [spectrum (bfft/forward [1.0 2.0 3.0 4.0])
-      roundtrip (bfft/inverse spectrum)]
+(let [spectrum (ft/forward [1.0 2.0 3.0 4.0])
+      roundtrip (ft/inverse spectrum)]
   (la/close-scalar? (cx/re (roundtrip 0)) 1.0))
 
 (kind/test-last [true?])
 
-(kind/doc #'bfft/inverse-real)
+(kind/doc #'ft/inverse-real)
 
 (let [signal [1.0 2.0 3.0 4.0]
-      roundtrip (bfft/inverse-real (bfft/forward signal))]
+      roundtrip (ft/inverse-real (ft/forward signal))]
   (la/close-scalar? (roundtrip 0) 1.0))
 
 (kind/test-last [true?])
 
-(kind/doc #'bfft/forward-complex)
+(kind/doc #'ft/forward-complex)
 
 (let [ct (cx/complex-tensor-real [1.0 0.0 0.0 0.0])
-      spectrum (bfft/forward-complex ct)]
+      spectrum (ft/forward-complex ct)]
   (cx/complex-shape spectrum))
 
 (kind/test-last [= [4]])
 
-(kind/doc #'bfft/dct-forward)
+(kind/doc #'ft/dct-forward)
 
-(bfft/dct-forward [1.0 2.0 3.0 4.0])
+(ft/dct-forward [1.0 2.0 3.0 4.0])
 
 (kind/test-last [(fn [v] (= 4 (count v)))])
 
-(kind/doc #'bfft/dct-inverse)
+(kind/doc #'ft/dct-inverse)
 
 (let [signal [1.0 2.0 3.0 4.0]
-      roundtrip (bfft/dct-inverse (bfft/dct-forward signal))]
+      roundtrip (ft/dct-inverse (ft/dct-forward signal))]
   (la/close-scalar? (roundtrip 0) 1.0))
 
 (kind/test-last [true?])
 
-(kind/doc #'bfft/dst-forward)
+(kind/doc #'ft/dst-forward)
 
-(bfft/dst-forward [1.0 2.0 3.0 4.0])
+(ft/dst-forward [1.0 2.0 3.0 4.0])
 
 (kind/test-last [(fn [v] (= 4 (count v)))])
 
-(kind/doc #'bfft/dst-inverse)
+(kind/doc #'ft/dst-inverse)
 
 (let [signal [1.0 2.0 3.0 4.0]
-      roundtrip (bfft/dst-inverse (bfft/dst-forward signal))]
+      roundtrip (ft/dst-inverse (ft/dst-forward signal))]
   (la/close-scalar? (roundtrip 0) 1.0))
 
 (kind/test-last [true?])
 
-(kind/doc #'bfft/dht-forward)
+(kind/doc #'ft/dht-forward)
 
-(bfft/dht-forward [1.0 2.0 3.0 4.0])
+(ft/dht-forward [1.0 2.0 3.0 4.0])
 
 (kind/test-last [(fn [v] (= 4 (count v)))])
 
-(kind/doc #'bfft/dht-inverse)
+(kind/doc #'ft/dht-inverse)
 
 (let [signal [1.0 2.0 3.0 4.0]
-      roundtrip (bfft/dht-inverse (bfft/dht-forward signal))]
+      roundtrip (ft/dht-inverse (ft/dht-forward signal))]
   (la/close-scalar? (roundtrip 0) 1.0))
 
 (kind/test-last [true?])

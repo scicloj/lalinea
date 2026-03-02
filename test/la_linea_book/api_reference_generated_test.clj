@@ -3,7 +3,7 @@
  (:require
   [scicloj.la-linea.linalg :as la]
   [scicloj.la-linea.complex :as cx]
-  [scicloj.la-linea.transform :as bfft]
+  [scicloj.la-linea.transform :as ft]
   [scicloj.la-linea.tape :as tape]
   [scicloj.la-linea.elementwise :as elem]
   [scicloj.la-linea.grad :as grad]
@@ -781,36 +781,36 @@
 (deftest t197_l481 (is (= v196_l477 [6.0 15.0])))
 
 
-(def v199_l488 (kind/doc #'bfft/forward))
+(def v199_l488 (kind/doc #'ft/forward))
 
 
 (def
  v200_l490
  (let
-  [signal [1.0 0.0 0.0 0.0] spectrum (bfft/forward signal)]
+  [signal [1.0 0.0 0.0 0.0] spectrum (ft/forward signal)]
   (cx/complex-shape spectrum)))
 
 
 (deftest t201_l494 (is (= v200_l490 [4])))
 
 
-(def v202_l496 (kind/doc #'bfft/inverse))
+(def v202_l496 (kind/doc #'ft/inverse))
 
 
 (def
  v203_l498
  (let
   [spectrum
-   (bfft/forward [1.0 2.0 3.0 4.0])
+   (ft/forward [1.0 2.0 3.0 4.0])
    roundtrip
-   (bfft/inverse spectrum)]
+   (ft/inverse spectrum)]
   (la/close-scalar? (cx/re (roundtrip 0)) 1.0)))
 
 
 (deftest t204_l502 (is (true? v203_l498)))
 
 
-(def v205_l504 (kind/doc #'bfft/inverse-real))
+(def v205_l504 (kind/doc #'ft/inverse-real))
 
 
 (def
@@ -819,14 +819,14 @@
   [signal
    [1.0 2.0 3.0 4.0]
    roundtrip
-   (bfft/inverse-real (bfft/forward signal))]
+   (ft/inverse-real (ft/forward signal))]
   (la/close-scalar? (roundtrip 0) 1.0)))
 
 
 (deftest t207_l510 (is (true? v206_l506)))
 
 
-(def v208_l512 (kind/doc #'bfft/forward-complex))
+(def v208_l512 (kind/doc #'ft/forward-complex))
 
 
 (def
@@ -835,23 +835,23 @@
   [ct
    (cx/complex-tensor-real [1.0 0.0 0.0 0.0])
    spectrum
-   (bfft/forward-complex ct)]
+   (ft/forward-complex ct)]
   (cx/complex-shape spectrum)))
 
 
 (deftest t210_l518 (is (= v209_l514 [4])))
 
 
-(def v211_l520 (kind/doc #'bfft/dct-forward))
+(def v211_l520 (kind/doc #'ft/dct-forward))
 
 
-(def v212_l522 (bfft/dct-forward [1.0 2.0 3.0 4.0]))
+(def v212_l522 (ft/dct-forward [1.0 2.0 3.0 4.0]))
 
 
 (deftest t213_l524 (is ((fn [v] (= 4 (count v))) v212_l522)))
 
 
-(def v214_l526 (kind/doc #'bfft/dct-inverse))
+(def v214_l526 (kind/doc #'ft/dct-inverse))
 
 
 (def
@@ -860,23 +860,23 @@
   [signal
    [1.0 2.0 3.0 4.0]
    roundtrip
-   (bfft/dct-inverse (bfft/dct-forward signal))]
+   (ft/dct-inverse (ft/dct-forward signal))]
   (la/close-scalar? (roundtrip 0) 1.0)))
 
 
 (deftest t216_l532 (is (true? v215_l528)))
 
 
-(def v217_l534 (kind/doc #'bfft/dst-forward))
+(def v217_l534 (kind/doc #'ft/dst-forward))
 
 
-(def v218_l536 (bfft/dst-forward [1.0 2.0 3.0 4.0]))
+(def v218_l536 (ft/dst-forward [1.0 2.0 3.0 4.0]))
 
 
 (deftest t219_l538 (is ((fn [v] (= 4 (count v))) v218_l536)))
 
 
-(def v220_l540 (kind/doc #'bfft/dst-inverse))
+(def v220_l540 (kind/doc #'ft/dst-inverse))
 
 
 (def
@@ -885,23 +885,23 @@
   [signal
    [1.0 2.0 3.0 4.0]
    roundtrip
-   (bfft/dst-inverse (bfft/dst-forward signal))]
+   (ft/dst-inverse (ft/dst-forward signal))]
   (la/close-scalar? (roundtrip 0) 1.0)))
 
 
 (deftest t222_l546 (is (true? v221_l542)))
 
 
-(def v223_l548 (kind/doc #'bfft/dht-forward))
+(def v223_l548 (kind/doc #'ft/dht-forward))
 
 
-(def v224_l550 (bfft/dht-forward [1.0 2.0 3.0 4.0]))
+(def v224_l550 (ft/dht-forward [1.0 2.0 3.0 4.0]))
 
 
 (deftest t225_l552 (is ((fn [v] (= 4 (count v))) v224_l550)))
 
 
-(def v226_l554 (kind/doc #'bfft/dht-inverse))
+(def v226_l554 (kind/doc #'ft/dht-inverse))
 
 
 (def
@@ -910,7 +910,7 @@
   [signal
    [1.0 2.0 3.0 4.0]
    roundtrip
-   (bfft/dht-inverse (bfft/dht-forward signal))]
+   (ft/dht-inverse (ft/dht-forward signal))]
   (la/close-scalar? (roundtrip 0) 1.0)))
 
 

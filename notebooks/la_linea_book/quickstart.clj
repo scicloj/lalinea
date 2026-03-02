@@ -12,7 +12,7 @@
    ;; Complex tensors — interleaved [re im] layout:
    [scicloj.la-linea.complex :as cx]
    ;; FFT bridge — Fastmath transforms ↔ ComplexTensor:
-   [scicloj.la-linea.transform :as bfft]
+   [scicloj.la-linea.transform :as ft]
    ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
    [tech.v3.tensor :as tensor]
    ;; Low-level buffer operations:
@@ -132,7 +132,7 @@
 ;; The forward FFT takes a real signal and returns a ComplexTensor
 ;; spectrum — zero-copy from Fastmath's interleaved output.
 
-(bfft/forward [1.0 0.0 1.0 0.0])
+(ft/forward [1.0 0.0 1.0 0.0])
 
 ;; $\hat{f} = [2, 0, 2, 0]$ — a signal with energy at DC and Nyquist.
 
@@ -142,7 +142,7 @@
 ;; Round-trip:
 
 (let [signal [1.0 2.0 3.0 4.0]
-      recovered (vec (bfft/inverse-real (bfft/forward signal)))]
+      recovered (vec (ft/inverse-real (ft/forward signal)))]
   recovered)
 
 (kind/test-last [(fn [v] (every? #(< (abs %) 1e-10)
@@ -190,10 +190,10 @@
 
 ;; ## Tagged literals
 ;;
-;; Requiring `scicloj.la-linea.print` installs `#la/m` and `#la/v`
+;; Requiring `scicloj.la-linea.impl.print` installs `#la/m` and `#la/v`
 ;; tagged literals for round-trip printing:
 
-(require '[scicloj.la-linea.print])
+(require '[scicloj.la-linea.impl.print])
 
 (pr-str (la/matrix [[1 2] [3 4]]))
 
