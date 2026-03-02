@@ -56,7 +56,7 @@
    (tensor/->tensor [[1 2] [3 4]] {:datatype :float64})
    b
    (tensor/->tensor [[10 20] [30 40]] {:datatype :float64})]
-  (tensor/reshape (dfn/+ a b) (dtype/shape a))))
+  (dfn/+ a b)))
 
 
 (deftest t16_l87 (is ((fn [t] (= 44.0 (tensor/mget t 1 1))) v15_l83)))

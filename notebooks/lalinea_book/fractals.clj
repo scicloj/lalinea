@@ -233,13 +233,12 @@
 
 (def complex-div
   (fn [a b]
-    (let [ar (cx/re a) ai (cx/im a)
-          br (cx/re b) bi (cx/im b)
-          shape (dtype/shape ar)
+    (let [ar (la/->tensor (cx/re a)) ai (la/->tensor (cx/im a))
+          br (la/->tensor (cx/re b)) bi (la/->tensor (cx/im b))
           denom (dfn/+ (dfn/* br br) (dfn/* bi bi))]
       (cx/complex-tensor
-       (tensor/reshape (dfn// (dfn/+ (dfn/* ar br) (dfn/* ai bi)) denom) shape)
-       (tensor/reshape (dfn// (dfn/- (dfn/* ai br) (dfn/* ar bi)) denom) shape)))))
+       (dfn// (dfn/+ (dfn/* ar br) (dfn/* ai bi)) denom)
+       (dfn// (dfn/- (dfn/* ai br) (dfn/* ar bi)) denom)))))
 
 ;;  Verify: (3+4i)/(1+2i) = (11-2i)/5 = 2.2-0.4i
 

@@ -286,28 +286,22 @@
    [a b]
    (let
     [ar
-     (cx/re a)
+     (la/->tensor (cx/re a))
      ai
-     (cx/im a)
+     (la/->tensor (cx/im a))
      br
-     (cx/re b)
+     (la/->tensor (cx/re b))
      bi
-     (cx/im b)
-     shape
-     (dtype/shape ar)
+     (la/->tensor (cx/im b))
      denom
      (dfn/+ (dfn/* br br) (dfn/* bi bi))]
     (cx/complex-tensor
-     (tensor/reshape
-      (dfn// (dfn/+ (dfn/* ar br) (dfn/* ai bi)) denom)
-      shape)
-     (tensor/reshape
-      (dfn// (dfn/- (dfn/* ai br) (dfn/* ar bi)) denom)
-      shape))))))
+     (dfn// (dfn/+ (dfn/* ar br) (dfn/* ai bi)) denom)
+     (dfn// (dfn/- (dfn/* ai br) (dfn/* ar bi)) denom))))))
 
 
 (def
- v36_l246
+ v36_l245
  (let
   [a
    (cx/complex-tensor (la/matrix [[3]]) (la/matrix [[4]]))
@@ -320,11 +314,11 @@
    (< (abs (- (tensor/mget (cx/im result) 0 0) -0.4)) 1.0E-10))))
 
 
-(deftest t37_l252 (is (true? v36_l246)))
+(deftest t37_l251 (is (true? v36_l245)))
 
 
 (def
- v39_l256
+ v39_l255
  (def
   newton-roots
   (fn
@@ -405,11 +399,11 @@
        (recur z-next (inc k)))))))))
 
 
-(def v41_l308 (def root-colors [[230 50 50] [50 180 50] [50 80 220]]))
+(def v41_l307 (def root-colors [[230 50 50] [50 180 50] [50 80 220]]))
 
 
 (def
- v42_l313
+ v42_l312
  (def
   roots->image
   (fn
@@ -425,7 +419,7 @@
 
 
 (def
- v44_l324
+ v44_l323
  (def
   newton-img
   (let
@@ -440,16 +434,16 @@
    (roots->image root-idx h w))))
 
 
-(def v45_l329 (bufimg/tensor->image newton-img))
+(def v45_l328 (bufimg/tensor->image newton-img))
 
 
 (deftest
- t46_l331
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v45_l329)))
+ t46_l330
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v45_l328)))
 
 
 (def
- v48_l339
+ v48_l338
  (def
   newton-zoom
   (let
@@ -464,9 +458,9 @@
    (roots->image root-idx h w))))
 
 
-(def v49_l344 (bufimg/tensor->image newton-zoom))
+(def v49_l343 (bufimg/tensor->image newton-zoom))
 
 
 (deftest
- t50_l346
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v49_l344)))
+ t50_l345
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v49_l343)))

@@ -289,7 +289,7 @@
   "Scale by a real scalar."
   [^ComplexTensor ct alpha]
   (let [t (->tensor ct)
-        result (->ComplexTensor (tensor/reshape (dfn/* (double alpha) t) (dtype/shape t)))]
+        result (->ComplexTensor (dfn/* (double alpha) t))]
     (tape-record! :cx/scale [ct alpha] result)))
 
 (defn abs
@@ -297,10 +297,11 @@
    Returns a real tensor (or double for scalar)."
   [^ComplexTensor ct]
   (let [r (re ct) i (im ct)
-        result (dfn/sqrt (dfn/+ (dfn/* r r) (dfn/* i i)))
         result (if (number? r)
-                 result
-                 (tensor/reshape result (dtype/shape r)))]
+                 (dfn/sqrt (dfn/+ (dfn/* r r) (dfn/* i i)))
+                 (let [r (tensor/ensure-tensor r)
+                       i (tensor/ensure-tensor i)]
+                   (dfn/sqrt (dfn/+ (dfn/* r r) (dfn/* i i)))))]
     (tape-record! :cx/abs [ct] result)))
 
 (defn dot
@@ -331,7 +332,7 @@
           (complex (+ (double (re a)) (double (re b)))
                    (+ (double (im a)) (double (im b))))
           (let [ta (->tensor a)]
-            (->ComplexTensor (tensor/reshape (dfn/+ ta (->tensor b)) (dtype/shape ta)))))]
+            (->ComplexTensor (dfn/+ ta (->tensor b)))))]
     (tape-record! :cx/add [a b] result)))
 
 (defn sub
@@ -342,7 +343,7 @@
           (complex (- (double (re a)) (double (re b)))
                    (- (double (im a)) (double (im b))))
           (let [ta (->tensor a)]
-            (->ComplexTensor (tensor/reshape (dfn/- ta (->tensor b)) (dtype/shape ta)))))]
+            (->ComplexTensor (dfn/- ta (->tensor b)))))]
     (tape-record! :cx/sub [a b] result)))
 
 (defn sum

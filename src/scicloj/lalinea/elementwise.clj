@@ -28,10 +28,6 @@
     t
     (rt/->real-tensor t)))
 
-
-
-
-
 (defn- unsupported-complex! [op]
   (throw (ex-info (str op " is not supported for complex input")
                   {:op op})))
@@ -87,7 +83,7 @@
                 (let [a (ensure-tensor a)]
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/pow)
-                    (->rt (tensor/reshape (dfn/pow a (double exponent)) (dtype/shape a)))))))
+                    (->rt (dfn/pow a (double exponent)))))))
 
 (defn cbrt
   "Element-wise cube root. Real only."
@@ -274,7 +270,7 @@
                 (let [a (ensure-tensor a) b (ensure-tensor b)]
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/min)
-                    (->rt (tensor/reshape (dfn/min a b) (dtype/shape a)))))))
+                    (->rt (dfn/min a b))))))
 
 (defn max
   "Element-wise maximum. Real only."
@@ -283,7 +279,7 @@
                 (let [a (ensure-tensor a) b (ensure-tensor b)]
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/max)
-                    (->rt (tensor/reshape (dfn/max a b) (dtype/shape a)))))))
+                    (->rt (dfn/max a b))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Inverse trigonometric (real only)
@@ -360,5 +356,4 @@
                     (unsupported-complex! :elem/clip)
                     (let [lo (double lo)
                           hi (double hi)]
-                      (->rt (tensor/reshape (dfn/min (dfn/max a lo) hi)
-                                            (dtype/shape a))))))))
+                      (->rt (dfn/min (dfn/max a lo) hi)))))))

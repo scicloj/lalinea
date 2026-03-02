@@ -227,7 +227,7 @@
                 (let [a (ensure-tensor a) b (ensure-tensor b)]
                   (if (cx/complex? a)
                     (cx/add a b)
-                    (->rt (tensor/reshape (dfn/+ a b) (dtype/shape a)))))))
+                    (->rt (dfn/+ a b))))))
 
 (defn sub
   "Matrix subtraction."
@@ -236,7 +236,7 @@
                 (let [a (ensure-tensor a) b (ensure-tensor b)]
                   (if (cx/complex? a)
                     (cx/sub a b)
-                    (->rt (tensor/reshape (dfn/- a b) (dtype/shape a)))))))
+                    (->rt (dfn/- a b))))))
 
 (defn scale
   "Scalar multiply. Returns alpha * a."
@@ -245,7 +245,7 @@
                 (let [a (ensure-tensor a)]
                   (if (cx/complex? a)
                     (cx/scale a alpha)
-                    (->rt (tensor/reshape (dfn/* a (double alpha)) (dtype/shape a)))))))
+                    (->rt (dfn/* a (double alpha)))))))
 
 (defn mul
   "Element-wise multiply (Hadamard product for real, pointwise complex multiply for complex)."
@@ -254,7 +254,7 @@
                 (let [a (ensure-tensor a) b (ensure-tensor b)]
                   (if (cx/complex? a)
                     (cx/mul a b)
-                    (->rt (tensor/reshape (dfn/* a b) (dtype/shape a)))))))
+                    (->rt (dfn/* a b))))))
 
 (defn abs
   "Element-wise absolute value (magnitude for complex). Returns a real tensor."
@@ -263,7 +263,7 @@
                 (let [a (ensure-tensor a)]
                   (if (cx/complex? a)
                     (->rt (cx/abs a))
-                    (->rt (tensor/reshape (dfn/abs a) (dtype/shape a)))))))
+                    (->rt (dfn/abs a))))))
 
 (defn sq
   "Element-wise square."
@@ -272,7 +272,7 @@
                 (let [a (ensure-tensor a)]
                   (if (cx/complex? a)
                     (cx/mul a a)
-                    (->rt (tensor/reshape (dfn/* a a) (dtype/shape a)))))))
+                    (->rt (dfn/* a a))))))
 
 (defn sum
   "Sum of all elements. Returns a double for real tensors,
