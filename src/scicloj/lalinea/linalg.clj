@@ -14,7 +14,8 @@
             [scicloj.lalinea.tape :as tape]
             [tech.v3.tensor :as tensor]
             [tech.v3.datatype :as dtype]
-            [tech.v3.datatype.functional :as dfn])
+            [tech.v3.datatype.functional :as dfn]
+            [scicloj.lalinea.impl.print])
   (:import [java.util Arrays]
            [org.ejml.data DMatrixRMaj ZMatrixRMaj]))
 
@@ -28,9 +29,15 @@
   (if (rt/real-tensor? x) (rt/->tensor x) x))
 
 (defn- ->rt
-  "Wrap a bare tensor result in RealTensor. Nil-safe."
+  "Wrap a bare tensor result in RealTensor. Returns scalars as-is."
   [t]
-  (when t (rt/->real-tensor t)))
+  (if (or (nil? t) (number? t))
+    t
+    (rt/->real-tensor t)))
+
+
+
+
 
 ;; ---------------------------------------------------------------------------
 ;; Matrix construction
@@ -259,7 +266,7 @@
   (tape/record! :la/abs [a]
                 (let [a (ensure-tensor a)]
                   (if (cx/complex? a)
-                    (cx/abs a)
+                    (->rt (cx/abs a))
                     (->rt (tensor/reshape (dfn/abs a) (dtype/shape a)))))))
 
 (defn sq
@@ -435,7 +442,7 @@
                       result (ejml/dsvd (bt/tensor->dmat a))]
                   (when result
                     {:U (->rt (bt/dmat->tensor (:U result)))
-                     :S (:S result)
+                     :S (->rt (:S result))
                      :Vt (->rt (bt/dmat->tensor (:Vt result)))}))))
 
 (defn qr
@@ -481,7 +488,7 @@
       (if (= order (vec (range n)))
         {:U U :S S :Vt Vt}
         {:U  (submatrix U :all order)
-         :S  (tensor/ensure-tensor (dtype/make-container :float64 (mapv #(S %) order)))
+         :S  (->rt (tensor/ensure-tensor (dtype/make-container :float64 (mapv #(S %) order))))
          :Vt (submatrix Vt order :all)}))))
 
 (defn rank

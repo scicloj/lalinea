@@ -117,19 +117,13 @@
 
 (kind/test-last [= "[[1 2] [3 4]]"])
 
-;; Tensor output cannot be pasted back into the REPL. The
-;; `#tech.v3.tensor<float64>[2 2]` prefix is informative but
-;; not a valid reader form.
+;; La Linea tensors print as `#la/R` tagged literals — a readable
+;; format that round-trips through `pr-str` / `read-string`:
 
-;; Attempting to read a tensor's printed form fails:
+(read-string
+ (pr-str {:weights (la/matrix [[1 2] [3 4]])}))
 
-(try
-  (read-string
-   (pr-str {:weights (la/matrix [[1 2] [3 4]])}))
-  (catch Exception _
-    :read-failed))
-
-(kind/test-last [= :read-failed])
+(kind/test-last [(fn [v] (= (:weights v) (la/matrix [[1 2] [3 4]])))])
 
 ;; ### Immutability
 

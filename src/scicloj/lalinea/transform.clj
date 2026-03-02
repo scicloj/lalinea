@@ -8,7 +8,8 @@
   (:require [scicloj.lalinea.complex :as cx]
             [fastmath.transform :as ft]
             [tech.v3.tensor :as tensor]
-            [tech.v3.datatype :as dtype]))
+            [tech.v3.datatype :as dtype]
+            [scicloj.lalinea.impl.real-tensor :as rt]))
 
 ;; ---------------------------------------------------------------------------
 ;; Cached transformers (lazy, thread-safe)
@@ -47,7 +48,7 @@
    Useful when you know the result should be purely real."
   [spectrum]
   (let [ct (inverse spectrum)]
-    (cx/re ct)))
+    (rt/->real-tensor (cx/re ct))))
 
 ;; ---------------------------------------------------------------------------
 ;; Complex-to-complex transforms
@@ -68,29 +69,29 @@
 (defn dct-forward
   "Forward Discrete Cosine Transform. Real -> real."
   [signal]
-  (tensor/ensure-tensor (ft/forward-1d @dct* signal)))
+  (rt/->real-tensor (tensor/ensure-tensor (ft/forward-1d @dct* signal))))
 
 (defn dct-inverse
   "Inverse Discrete Cosine Transform. Real -> real."
   [spectrum]
-  (tensor/ensure-tensor (ft/reverse-1d @dct* spectrum)))
+  (rt/->real-tensor (tensor/ensure-tensor (ft/reverse-1d @dct* spectrum))))
 
 (defn dst-forward
   "Forward Discrete Sine Transform. Real -> real."
   [signal]
-  (tensor/ensure-tensor (ft/forward-1d @dst* signal)))
+  (rt/->real-tensor (tensor/ensure-tensor (ft/forward-1d @dst* signal))))
 
 (defn dst-inverse
   "Inverse Discrete Sine Transform. Real -> real."
   [spectrum]
-  (tensor/ensure-tensor (ft/reverse-1d @dst* spectrum)))
+  (rt/->real-tensor (tensor/ensure-tensor (ft/reverse-1d @dst* spectrum))))
 
 (defn dht-forward
   "Forward Discrete Hartley Transform. Real -> real."
   [signal]
-  (tensor/ensure-tensor (ft/forward-1d @dht* signal)))
+  (rt/->real-tensor (tensor/ensure-tensor (ft/forward-1d @dht* signal))))
 
 (defn dht-inverse
   "Inverse Discrete Hartley Transform. Real -> real."
   [spectrum]
-  (tensor/ensure-tensor (ft/reverse-1d @dht* spectrum)))
+  (rt/->real-tensor (tensor/ensure-tensor (ft/reverse-1d @dht* spectrum))))

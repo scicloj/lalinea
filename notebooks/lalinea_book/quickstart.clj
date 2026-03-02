@@ -190,10 +190,8 @@
 
 ;; ## Tagged literals
 ;;
-;; Requiring `scicloj.lalinea.impl.print` installs `#la/R` and `#la/C`
-;; tagged literals for round-trip printing:
-
-(require '[scicloj.lalinea.impl.print])
+;; La Linea tensors print as `#la/R` and `#la/C` tagged literals,
+;; enabling round-trip through `pr-str` / `read-string`:
 
 (pr-str (la/matrix [[1 2] [3 4]]))
 

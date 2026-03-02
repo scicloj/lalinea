@@ -22,9 +22,15 @@
   (if (rt/real-tensor? x) (rt/->tensor x) x))
 
 (defn- ->rt
-  "Wrap a bare tensor result in RealTensor. Nil-safe."
+  "Wrap a bare tensor result in RealTensor. Returns scalars as-is."
   [t]
-  (when t (rt/->real-tensor t)))
+  (if (or (nil? t) (number? t))
+    t
+    (rt/->real-tensor t)))
+
+
+
+
 
 (defn- unsupported-complex! [op]
   (throw (ex-info (str op " is not supported for complex input")
@@ -214,7 +220,7 @@
   (tape/record! :elem/abs [a]
                 (let [a (ensure-tensor a)]
                   (if (cx/complex? a)
-                    (cx/abs a)
+                    (->rt (cx/abs a))
                     (->rt (dfn/abs a))))))
 
 ;; ---------------------------------------------------------------------------

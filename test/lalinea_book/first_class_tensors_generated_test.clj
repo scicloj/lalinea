@@ -108,98 +108,98 @@
 
 
 (def
- v40_l126
- (try
-  (read-string (pr-str {:weights (la/matrix [[1 2] [3 4]])}))
-  (catch Exception _ :read-failed)))
+ v40_l123
+ (read-string (pr-str {:weights (la/matrix [[1 2] [3 4]])})))
 
 
-(deftest t41_l132 (is (= v40_l126 :read-failed)))
+(deftest
+ t41_l126
+ (is ((fn [v] (= (:weights v) (la/matrix [[1 2] [3 4]]))) v40_l123)))
 
 
-(def v43_l138 (def original [1 2 3]))
+(def v43_l132 (def original [1 2 3]))
 
 
-(def v44_l139 (def appended (conj original 4)))
+(def v44_l133 (def appended (conj original 4)))
 
 
-(def v45_l141 (= original [1 2 3]))
+(def v45_l135 (= original [1 2 3]))
 
 
-(deftest t46_l143 (is (true? v45_l141)))
+(deftest t46_l137 (is (true? v45_l135)))
 
 
-(def v48_l147 (def mat (la/matrix [[1 2] [3 4]])))
+(def v48_l141 (def mat (la/matrix [[1 2] [3 4]])))
 
 
-(def v49_l148 (def mat-t (la/transpose mat)))
+(def v49_l142 (def mat-t (la/transpose mat)))
 
 
 (def
- v51_l152
+ v51_l146
  (let
   [arr (dtype/->double-array mat)]
   (aset arr 0 99.0)
   [(tensor/mget mat 0 0) (tensor/mget mat-t 0 0)]))
 
 
-(deftest t52_l156 (is (= v51_l152 [99.0 99.0])))
+(deftest t52_l150 (is (= v51_l146 [99.0 99.0])))
 
 
 (def
- v54_l166
+ v54_l160
  (let
   [[a b c] (tensor/->tensor [10.0 20.0 30.0] :datatype :float64)]
   (+ a b c)))
 
 
-(deftest t55_l169 (is ((fn [v] (== 60.0 v)) v54_l166)))
+(deftest t55_l163 (is ((fn [v] (== 60.0 v)) v54_l160)))
 
 
 (def
- v57_l175
+ v57_l169
  (let
   [v (la/column [10 20 30])]
   (+ (tensor/mget v 0 0) (tensor/mget v 1 0) (tensor/mget v 2 0))))
 
 
-(deftest t58_l180 (is ((fn [v] (== 60.0 v)) v57_l175)))
+(deftest t58_l174 (is ((fn [v] (== 60.0 v)) v57_l169)))
 
 
 (def
- v60_l186
+ v60_l180
  (reduce + 0 (tensor/->tensor [1.0 2.0 3.0 4.0] :datatype :float64)))
 
 
-(deftest t61_l188 (is ((fn [v] (== 10.0 v)) v60_l186)))
+(deftest t61_l182 (is ((fn [v] (== 10.0 v)) v60_l180)))
 
 
-(def v63_l192 (dfn/sum (la/column [1 2 3 4])))
+(def v63_l186 (dfn/sum (la/column [1 2 3 4])))
 
 
-(deftest t64_l194 (is ((fn [v] (== 10.0 v)) v63_l192)))
+(deftest t64_l188 (is ((fn [v] (== 10.0 v)) v63_l186)))
 
 
-(def v66_l204 (defn read-matrix [form] (la/matrix form)))
+(def v66_l198 (defn read-matrix [form] (la/matrix form)))
 
 
-(def v67_l207 (defn read-column [form] (la/column form)))
+(def v67_l201 (defn read-column [form] (la/column form)))
 
 
-(def v69_l212 (read-matrix [[1 2] [3 4]]))
+(def v69_l206 (read-matrix [[1 2] [3 4]]))
 
 
-(deftest t70_l214 (is ((fn [m] (= [2 2] (dtype/shape m))) v69_l212)))
+(deftest t70_l208 (is ((fn [m] (= [2 2] (dtype/shape m))) v69_l206)))
 
 
-(def v71_l216 (read-column [1 2 3]))
+(def v71_l210 (read-column [1 2 3]))
 
 
-(deftest t72_l218 (is ((fn [v] (= [3 1] (dtype/shape v))) v71_l216)))
+(deftest t72_l212 (is ((fn [v] (= [3 1] (dtype/shape v))) v71_l210)))
 
 
 (def
- v74_l222
+ v74_l216
  (defn
   tensor->tagged-str
   [t]
@@ -221,37 +221,37 @@
     (str t)))))
 
 
-(def v75_l239 (tensor->tagged-str (la/matrix [[1 2] [3 4]])))
+(def v75_l233 (tensor->tagged-str (la/matrix [[1 2] [3 4]])))
 
 
 (deftest
- t76_l241
- (is ((fn [s] (clojure.string/starts-with? s "#la/m")) v75_l239)))
+ t76_l235
+ (is ((fn [s] (clojure.string/starts-with? s "#la/m")) v75_l233)))
 
 
-(def v77_l243 (tensor->tagged-str (la/column [5 6 7])))
-
-
-(deftest
- t78_l245
- (is ((fn [s] (clojure.string/starts-with? s "#la/v")) v77_l243)))
-
-
-(def v80_l256 (defn v [& xs] (la/column xs)))
-
-
-(def v81_l259 (defn m [& rows] (la/matrix rows)))
-
-
-(def v82_l262 (v 1 2 3))
-
-
-(deftest t83_l264 (is ((fn [c] (= [3 1] (dtype/shape c))) v82_l262)))
-
-
-(def v84_l266 (m [1 2] [3 4]))
+(def v77_l237 (tensor->tagged-str (la/column [5 6 7])))
 
 
 (deftest
- t85_l268
- (is ((fn [mat] (= [2 2] (dtype/shape mat))) v84_l266)))
+ t78_l239
+ (is ((fn [s] (clojure.string/starts-with? s "#la/v")) v77_l237)))
+
+
+(def v80_l250 (defn v [& xs] (la/column xs)))
+
+
+(def v81_l253 (defn m [& rows] (la/matrix rows)))
+
+
+(def v82_l256 (v 1 2 3))
+
+
+(deftest t83_l258 (is ((fn [c] (= [3 1] (dtype/shape c))) v82_l256)))
+
+
+(def v84_l260 (m [1 2] [3 4]))
+
+
+(deftest
+ t85_l262
+ (is ((fn [mat] (= [2 2] (dtype/shape mat))) v84_l260)))

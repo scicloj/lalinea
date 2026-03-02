@@ -33,7 +33,7 @@
 (def
  v5_l52
  (let
-  [g (complex-grid -2.0 1.0 -1.5 1.5 3 3) raw (.tensor g)]
+  [g (complex-grid -2.0 1.0 -1.5 1.5 3 3) raw (cx/->tensor g)]
   {:shape (cx/complex-shape g),
    :top-left-re (tensor/mget raw 0 0 0),
    :bottom-right-im (tensor/mget raw 2 2 1)}))

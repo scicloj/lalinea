@@ -55,6 +55,9 @@
   (seq [this]
     (when (pos? (.count this))
       (map #(.nth this %) (range (.count this)))))
+  Iterable
+  (iterator [this]
+    (.iterator ^Iterable (or (.seq this) ())))
 
   Object
   (equals [_ other]

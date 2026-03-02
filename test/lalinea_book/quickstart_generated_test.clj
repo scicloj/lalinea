@@ -162,7 +162,7 @@
   ((fn
     [v]
     (every?
-     (fn* [p1__76362#] (< (abs p1__76362#) 1.0E-10))
+     (fn* [p1__11110#] (< (abs p1__11110#) 1.0E-10))
      (map - v [1.0 2.0 3.0 4.0])))
    v48_l144)))
 
@@ -213,53 +213,50 @@
  (is ((fn [m] (la/close? m (la/matrix [[1 5] [0 1]]))) v65_l187)))
 
 
-(def v68_l196 (require '[scicloj.lalinea.impl.print]))
-
-
-(def v69_l198 (pr-str (la/matrix [[1 2] [3 4]])))
+(def v68_l196 (pr-str (la/matrix [[1 2] [3 4]])))
 
 
 (deftest
- t70_l200
- (is ((fn [s] (clojure.string/starts-with? s "#la/R")) v69_l198)))
+ t69_l198
+ (is ((fn [s] (clojure.string/starts-with? s "#la/R")) v68_l196)))
 
 
-(def v71_l202 (pr-str (la/column [5 6 7])))
-
-
-(deftest
- t72_l204
- (is ((fn [s] (clojure.string/starts-with? s "#la/R")) v71_l202)))
-
-
-(def v74_l211 (require '[scicloj.lalinea.elementwise :as elem]))
-
-
-(def v75_l213 (elem/exp (la/column [0.0 1.0 2.0])))
+(def v70_l200 (pr-str (la/column [5 6 7])))
 
 
 (deftest
- t76_l215
+ t71_l202
+ (is ((fn [s] (clojure.string/starts-with? s "#la/R")) v70_l200)))
+
+
+(def v73_l209 (require '[scicloj.lalinea.elementwise :as elem]))
+
+
+(def v74_l211 (elem/exp (la/column [0.0 1.0 2.0])))
+
+
+(deftest
+ t75_l213
  (is
   ((fn
     [v]
     (la/close? v (la/column [1.0 (math/exp 1.0) (math/exp 2.0)])))
-   v75_l213)))
+   v74_l211)))
 
 
-(def v77_l217 (elem/clip (la/column [-2 0.5 3]) -1 1))
+(def v76_l215 (elem/clip (la/column [-2 0.5 3]) -1 1))
 
 
 (deftest
- t78_l219
- (is ((fn [v] (la/close? v (la/column [-1 0.5 1]))) v77_l217)))
+ t77_l217
+ (is ((fn [v] (la/close? v (la/column [-1 0.5 1]))) v76_l215)))
 
 
-(def v80_l225 (require '[scicloj.lalinea.tape :as tape]))
+(def v79_l223 (require '[scicloj.lalinea.tape :as tape]))
 
 
 (def
- v81_l227
+ v80_l225
  (let
   [{:keys [entries]}
    (tape/with-tape
@@ -268,15 +265,15 @@
 
 
 (deftest
- t82_l232
- (is ((fn [ops] (= [:la/matrix :la/column :la/mmul] ops)) v81_l227)))
+ t81_l230
+ (is ((fn [ops] (= [:la/matrix :la/column :la/mmul] ops)) v80_l225)))
 
 
-(def v84_l238 (require '[scicloj.lalinea.grad :as grad]))
+(def v83_l236 (require '[scicloj.lalinea.grad :as grad]))
 
 
 (def
- v85_l240
+ v84_l238
  (let
   [A
    (la/matrix [[1 2] [3 4]])
@@ -288,4 +285,4 @@
   (tensor/mget (.get grads A) 0 0)))
 
 
-(deftest t86_l247 (is ((fn [v] (number? v)) v85_l240)))
+(deftest t85_l245 (is ((fn [v] (number? v)) v84_l238)))
