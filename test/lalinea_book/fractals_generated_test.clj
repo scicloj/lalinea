@@ -362,9 +362,9 @@
           [idx
            (+ (* r w) c)
            zr
-           (tensor/mget (.tensor z-final) r c 0)
+           (tensor/mget (cx/->tensor z-final) r c 0)
            zi
-           (tensor/mget (.tensor z-final) r c 1)
+           (tensor/mget (cx/->tensor z-final) r c 1)
            best
            (reduce
             (fn

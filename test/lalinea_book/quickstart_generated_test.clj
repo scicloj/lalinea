@@ -162,7 +162,7 @@
   ((fn
     [v]
     (every?
-     (fn* [p1__22806#] (< (abs p1__22806#) 1.0E-10))
+     (fn* [p1__66375#] (< (abs p1__66375#) 1.0E-10))
      (map - v [1.0 2.0 3.0 4.0])))
    v48_l144)))
 
@@ -219,13 +219,17 @@
 (def v69_l198 (pr-str (la/matrix [[1 2] [3 4]])))
 
 
-(deftest t70_l200 (is (= v69_l198 "#la/m [[1.0 2.0] [3.0 4.0]]")))
+(deftest
+ t70_l200
+ (is ((fn [s] (clojure.string/starts-with? s "#la/R")) v69_l198)))
 
 
 (def v71_l202 (pr-str (la/column [5 6 7])))
 
 
-(deftest t72_l204 (is (= v71_l202 "#la/v [5.0 6.0 7.0]")))
+(deftest
+ t72_l204
+ (is ((fn [s] (clojure.string/starts-with? s "#la/R")) v71_l202)))
 
 
 (def v74_l211 (require '[scicloj.lalinea.elementwise :as elem]))

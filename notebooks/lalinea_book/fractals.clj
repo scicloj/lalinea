@@ -276,8 +276,8 @@
             (dotimes [r h]
               (dotimes [c w]
                 (let [idx (+ (* r w) c)
-                      zr (tensor/mget (.tensor ^scicloj.lalinea.complex.ComplexTensor z-final) r c 0)
-                      zi (tensor/mget (.tensor ^scicloj.lalinea.complex.ComplexTensor z-final) r c 1)
+                      zr (tensor/mget (cx/->tensor z-final) r c 0)
+                      zi (tensor/mget (cx/->tensor z-final) r c 1)
                       best (reduce (fn [best-i i]
                                      (let [root (nth roots i)
                                            dr (- zr (double (cx/re root)))

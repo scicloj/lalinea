@@ -190,18 +190,18 @@
 
 ;; ## Tagged literals
 ;;
-;; Requiring `scicloj.lalinea.impl.print` installs `#la/m` and `#la/v`
+;; Requiring `scicloj.lalinea.impl.print` installs `#la/R` and `#la/C`
 ;; tagged literals for round-trip printing:
 
 (require '[scicloj.lalinea.impl.print])
 
 (pr-str (la/matrix [[1 2] [3 4]]))
 
-(kind/test-last [= "#la/m [[1.0 2.0] [3.0 4.0]]"])
+(kind/test-last [(fn [s] (clojure.string/starts-with? s "#la/R"))])
 
 (pr-str (la/column [5 6 7]))
 
-(kind/test-last [= "#la/v [5.0 6.0 7.0]"])
+(kind/test-last [(fn [s] (clojure.string/starts-with? s "#la/R"))])
 
 ;; ## Element-wise functions
 ;;

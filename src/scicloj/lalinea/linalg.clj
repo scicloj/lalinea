@@ -571,12 +571,27 @@
 ;; Tagged literal readers
 ;; ---------------------------------------------------------------------------
 
+;; ---------------------------------------------------------------------------
+;; Tagged literal readers
+;; ---------------------------------------------------------------------------
+
+(defn read-real-tensor
+  "Reader function for `#la/R` tagged literal.
+
+   Format: `#la/R [:float64 [shape] data]`
+
+   Truncated literals (containing `...`) cannot be read back."
+  [[_dtype _shape data]]
+  (when (some #{'...} (flatten data))
+    (throw (ex-info "Cannot read truncated #la/R literal" {:shape _shape})))
+  (->rt (tensor/->tensor data {:datatype :float64})))
+
 (defn read-matrix
-  "Reader function for `#la/m` tagged literal."
+  "Reader function for `#la/m` tagged literal (deprecated, use `#la/R`)."
   [form]
   (matrix form))
 
 (defn read-column
-  "Reader function for `#la/v` tagged literal."
+  "Reader function for `#la/v` tagged literal (deprecated, use `#la/R`)."
   [form]
   (column form))

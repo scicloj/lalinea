@@ -16,9 +16,7 @@
   (:require [tech.v3.tensor :as tensor]
             [tech.v3.datatype :as dtype]
             [tech.v3.datatype.functional :as dfn]
-            [tech.v3.datatype.protocols :as dtype-proto]
-            [tech.v3.tensor.pprint :as tpp]
-            [tech.v3.datatype.pprint :as dtype-pprint]))
+            [tech.v3.datatype.protocols :as dtype-proto]))
 
 ;; ---------------------------------------------------------------------------
 ;; Protocol
@@ -38,157 +36,6 @@
   (let [ndims (count (dtype/shape tensor))]
     (apply tensor/select tensor
            (concat (repeat (dec ndims) :all) [idx]))))
-
-;; ---------------------------------------------------------------------------
-;; Printing — mirrors tech.v3.tensor.pprint conventions
-;; ---------------------------------------------------------------------------
-
-(def ^:private ^String NL (System/getProperty "line.separator"))
-
-(defn- format-complex
-  "Format a single complex number as a string, using dtype-next's number formatter."
-  [re im]
-  (let [re-s (dtype-pprint/format-object re)
-        im-s (dtype-pprint/format-object (Math/abs (double im)))
-        im-zero? (zero? im)
-        re-zero? (zero? re)]
-    (cond
-      im-zero? re-s
-      re-zero? (if (neg? im)
-                 (str "-" im-s "i")
-                 (str im-s "i"))
-      (neg? im) (str re-s "-" im-s "i")
-      :else (str re-s "+" im-s "i"))))
-
-(defn- truncate-indices
-  "For a dimension of size n, return the indices to show.
-   If elipsis? is true, shows first max-dim-count and last max-dim-count."
-  [n elipsis?]
-  (if elipsis?
-    (let [mdc (long tpp/*max-dim-count)]
-      (vec (concat (range mdc) (range (- n mdc) n))))
-    (vec (range n))))
-
-(defn- format-and-truncate
-  "Format complex elements from a raw [... 2] tensor, applying elipsis truncation.
-   Returns a nested structure of formatted strings matching the truncated shape.
-   complex-shape is the shape without the trailing 2."
-  [tensor complex-shape elipsis-vec]
-  (let [ndims (count complex-shape)]
-    (cond
-      ;; Scalar
-      (zero? ndims)
-      (format-complex (double (tensor 0)) (double (tensor 1)))
-
-      ;; Vector [n 2]
-      (= 1 ndims)
-      (let [n (first complex-shape)
-            indices (truncate-indices n (first elipsis-vec))]
-        (mapv (fn [i]
-                (let [pair (tensor i)]
-                  (format-complex (double (pair 0)) (double (pair 1)))))
-              indices))
-
-      ;; Matrix or higher
-      :else
-      (let [n (first complex-shape)
-            indices (truncate-indices n (first elipsis-vec))]
-        (mapv (fn [i]
-                (format-and-truncate (tensor i)
-                                     (vec (rest complex-shape))
-                                     (vec (rest elipsis-vec))))
-              indices)))))
-
-(defn- leaf-rows
-  "Collect all leaf rows (vectors of strings) from nested formatted structure."
-  [fmt-tens]
-  (cond
-    (string? fmt-tens) []
-    (string? (first fmt-tens)) [fmt-tens]
-    :else (mapcat leaf-rows fmt-tens)))
-
-(defn- complex-column-lengths
-  "Compute max formatted string width per column position."
-  [fmt-tens complex-shape]
-  (if (or (string? fmt-tens)
-          (<= (count complex-shape) 1))
-    ;; Scalar or vector — each element is its own column
-    (if (string? fmt-tens)
-      [(count fmt-tens)]
-      (mapv count fmt-tens))
-    ;; Matrix or higher — columns are the last dim
-    (let [rows (leaf-rows fmt-tens)
-          n-cols (count (first rows))]
-      (mapv (fn [col-idx]
-              (apply max 0 (map #(count (nth % col-idx "")) rows)))
-            (range n-cols)))))
-
-(defn- append-elem
-  "Append a right-padded element to sb."
-  [^StringBuilder sb ^String elem ^long col-width]
-  (let [pad (- col-width (count elem))]
-    (dotimes [_ pad]
-      (.append sb \space))
-    (.append sb elem)))
-
-(defn- append-row
-  "Append a row of formatted complex strings with column alignment and elipsis."
-  [^StringBuilder sb row col-widths elipsis?]
-  (let [n (count row)
-        half (quot n 2)]
-    (.append sb \[)
-    (dotimes [i n]
-      (when (pos? i) (.append sb \space))
-      (append-elem sb (nth row i) (nth col-widths i))
-      (when (and elipsis? (= (inc i) half))
-        (.append sb " ...")))
-    (.append sb \])))
-
-(defn- rprint-complex
-  "Recursively print formatted complex tensor with alignment and elipsis."
-  [^StringBuilder sb fmt-tens col-widths prefix elipsis-vec]
-  (let [elipsis? (first elipsis-vec)]
-    (cond
-      ;; Scalar — just a string
-      (string? fmt-tens)
-      (.append sb fmt-tens)
-
-      ;; Leaf row — vector of strings
-      (string? (first fmt-tens))
-      (append-row sb fmt-tens col-widths elipsis?)
-
-      ;; Higher rank — recurse
-      :else
-      (let [n (count fmt-tens)
-            half (quot n 2)
-            inner-prefix (str prefix " ")]
-        (.append sb \[)
-        (dotimes [i n]
-          (when (pos? i)
-            (.append sb NL)
-            (.append sb inner-prefix))
-          (rprint-complex sb (nth fmt-tens i) col-widths inner-prefix (rest elipsis-vec))
-          (when (and elipsis? (= (inc i) half))
-            (.append sb NL)
-            (.append sb inner-prefix)
-            (.append sb "...")))
-        (.append sb \])))))
-
-(defn- complex-tensor->string
-  "Pretty-print a ComplexTensor to a string, following dtype-next tensor conventions."
-  [tensor]
-  (let [raw-shape (vec (dtype/shape tensor))
-        complex-shape (vec (butlast raw-shape))
-        elipsis-vec (tpp/shape->elipsis-vec complex-shape)
-        fmt-tens (format-and-truncate tensor complex-shape elipsis-vec)
-        col-widths (complex-column-lengths fmt-tens complex-shape)
-        sb (StringBuilder.)]
-    (rprint-complex sb fmt-tens col-widths "" elipsis-vec)
-    (.toString sb)))
-
-;; ---------------------------------------------------------------------------
-;; Non-printing internal helpers
-;; ---------------------------------------------------------------------------
 
 ;; ---------------------------------------------------------------------------
 ;; ComplexTensor deftype
@@ -262,13 +109,9 @@
   (hashCode [_] (.hashCode tensor))
   (toString [_]
     (let [complex-shape (vec (butlast (dtype/shape tensor)))]
-      (format "#ComplexTensor<float64>%s%s%s"
-              (str complex-shape)
-              NL
-              (complex-tensor->string tensor)))))
+      (format "ComplexTensor<float64>%s" (str complex-shape)))))
 
-(defmethod print-method ComplexTensor [^ComplexTensor ct ^java.io.Writer w]
-  (.write w (.toString ct)))
+;; print-method installed by impl/print.clj (loaded via linalg.clj)
 
 ;; ---------------------------------------------------------------------------
 ;; Tape recording (lazy resolution to avoid circular dep with tape ns)
@@ -499,20 +342,68 @@
     (tape-record! :cx/sum [ct] result)))
 
 ;; ---------------------------------------------------------------------------
+;; Tagged literal reader
+;; ---------------------------------------------------------------------------
+
+(defn- parse-complex-tokens
+  "Parse a flat sequence of tokens [re +/- im i ...] into [re im] pairs."
+  [tokens]
+  (loop [ts (seq tokens) pairs (transient [])]
+    (if (nil? ts)
+      (persistent! pairs)
+      (let [[re-val sign im-val i-sym & rest-ts] ts]
+        (when (or (nil? re-val) (nil? sign) (nil? im-val) (nil? i-sym))
+          (throw (ex-info "Incomplete complex number in #la/C literal"
+                          {:remaining (vec ts)})))
+        (when-not (= 'i i-sym)
+          (throw (ex-info (str "Expected 'i' symbol, got: " i-sym)
+                          {:token i-sym})))
+        (let [im-val (double im-val)
+              im (case sign
+                   + im-val
+                   - (- im-val)
+                   (throw (ex-info (str "Expected + or -, got: " sign)
+                                   {:sign sign})))]
+          (recur rest-ts (conj! pairs [(double re-val) im])))))))
+
+(defn read-complex-tensor
+  "Reader function for `#la/C` tagged literal.
+
+   Format: `#la/C [:float64 [shape] data]` where data uses
+   `re + im i` / `re - im i` notation.
+
+   Scalar: `#la/C [:float64 [] [3.0 + 4.0 i]]`
+   Vector: `#la/C [:float64 [2] [1.0 + 2.0 i 3.0 + 4.0 i]]`
+   Matrix: `#la/C [:float64 [2 2] [[1.0 + 2.0 i 3.0 + 4.0 i] [5.0 + 6.0 i 7.0 + 8.0 i]]]`"
+  [[_dtype shape data]]
+  (when (some #{'...} (flatten data))
+    (throw (ex-info "Cannot read truncated #la/C literal" {:shape shape})))
+  (let [ndims (count shape)]
+    (cond
+      ;; Scalar: shape [], data = [re + im i]
+      (zero? ndims)
+      (let [[[r i]] (parse-complex-tokens data)]
+        (complex r i))
+
+      ;; Vector: shape [n], data = [re + im i  re + im i ...]
+      (= 1 ndims)
+      (let [pairs (parse-complex-tokens data)
+            re-arr (double-array (mapv first pairs))
+            im-arr (double-array (mapv second pairs))]
+        (complex-tensor (tensor/ensure-tensor re-arr)
+                        (tensor/ensure-tensor im-arr)))
+
+      ;; Matrix: shape [r c], data = [[row1-tokens] [row2-tokens] ...]
+      :else
+      (let [row-pairs (mapv parse-complex-tokens data)
+            all-pairs (vec (apply concat row-pairs))
+            re-arr (double-array (mapv first all-pairs))
+            im-arr (double-array (mapv second all-pairs))]
+        (complex-tensor (tensor/reshape (tensor/ensure-tensor re-arr) shape)
+                        (tensor/reshape (tensor/ensure-tensor im-arr) shape))))))
+
+;; ---------------------------------------------------------------------------
 ;; dtype-next protocol extensions
 ;; ---------------------------------------------------------------------------
 
 ;; dtype-next protocol implementations moved into deftype (v11 compatibility)
-
-
-
-
-
-
-
-
-
-
-
-
-
