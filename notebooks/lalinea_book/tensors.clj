@@ -101,7 +101,7 @@
                    [4 5 6]])]
   (t/select A 0 :all))
 
-(kind/test-last [(fn [r] (= [1.0 2.0 3.0] (seq r)))])
+(kind/test-last [(fn [r] (= [1.0 2.0 3.0] r))])
 
 ;; `t/submatrix` extracts a contiguous submatrix (always a copy):
 

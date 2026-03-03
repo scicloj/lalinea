@@ -85,7 +85,7 @@
  (let [A (t/matrix [[1 2 3] [4 5 6]])] (t/select A 0 :all)))
 
 
-(deftest t35_l104 (is ((fn [r] (= [1.0 2.0 3.0] (seq r))) v34_l100)))
+(deftest t35_l104 (is ((fn [r] (= [1.0 2.0 3.0] r)) v34_l100)))
 
 
 (def
