@@ -2,7 +2,8 @@
 ;;
 ;; Complete reference for the `scicloj.lalinea` public API:
 ;;
-;; - `scicloj.lalinea.linalg` — matrix construction, arithmetic, decompositions
+;; - `scicloj.lalinea.tensor` — tensor construction, structural operations, EJML interop
+;; - `scicloj.lalinea.linalg` — arithmetic, decompositions, solve
 ;; - `scicloj.lalinea.complex` — complex tensors
 ;; - `scicloj.lalinea.transform` — FFT and real-valued transforms
 ;; - `scicloj.lalinea.tape` — computation tape and memory inspection
