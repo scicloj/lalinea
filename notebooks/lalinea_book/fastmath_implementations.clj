@@ -17,9 +17,11 @@
   (:require
    ;; La Linea:
    [scicloj.lalinea.linalg :as la]
+            [scicloj.lalinea.tensor :as t]
+            [scicloj.lalinea.elementwise :as elem]
    [scicloj.lalinea.complex :as cx]
    ;; dtype-next:
-   [tech.v3.tensor :as tensor]
+   [tech.v3.tensor :as dtt]
    [tech.v3.datatype :as dtype]
    [tech.v3.datatype.functional :as dfn]
    ;; Fastmath:
@@ -107,17 +109,17 @@
           flat (->> xs
                     (mapcat (fn [row] (cons 1.0 row)))
                     (dtype/make-container :float64))
-          X (tensor/reshape flat [n pp1])
-          y (la/column ys)
+          X (dtt/reshape flat [n pp1])
+          y (t/column ys)
           ;; SVD: X = U Σ V^T
           {:keys [U S Vt]} (la/svd X)
           ;; Pseudoinverse: V Σ^{-1} U^T y
-          S-inv (la/diag (dfn// 1.0 S))
-          Ut-thin (la/submatrix U :all (range pp1))
+          S-inv (t/diag (dfn// 1.0 S))
+          Ut-thin (t/submatrix U :all (range pp1))
           beta (la/mmul (la/mmul (la/transpose Vt) S-inv)
                         (la/mmul (la/transpose Ut-thin) y))]
-      {:intercept (tensor/mget beta 0 0)
-       :beta (mapv (fn [i] (tensor/mget beta (inc i) 0))
+      {:intercept (dtt/mget beta 0 0)
+       :beta (mapv (fn [i] (dtt/mget beta (inc i) 0))
                    (range p))})))
 
 (def la-result (la-ols ols-xs ols-ys))
@@ -137,13 +139,13 @@ la-result
           flat (->> xs
                     (mapcat (fn [row] (cons 1.0 row)))
                     (dtype/make-container :float64))
-          X (tensor/reshape flat [n pp1])
-          y (la/column ys)
+          X (dtt/reshape flat [n pp1])
+          y (t/column ys)
           Xt (la/transpose X)
           beta (la/mmul (la/invert (la/mmul Xt X))
                         (la/mmul Xt y))]
-      {:intercept (tensor/mget beta 0 0)
-       :beta (mapv (fn [i] (tensor/mget beta (inc i) 0))
+      {:intercept (dtt/mget beta 0 0)
+       :beta (mapv (fn [i] (dtt/mget beta (inc i) 0))
                    (range p))})))
 
 (def la-normal-result (la-ols-normal ols-xs ols-ys))
@@ -236,25 +238,25 @@ la-normal-result
                       (* (double kscale)
                          (double (kernel xi xj))))
                     (dtype/make-container :float64))
-          K (dtype/clone (tensor/reshape flat [n n]))
+          K (dtype/clone (dtt/reshape flat [n n]))
           ;; Add noise to diagonal
           _ (dotimes [i n]
-              (tensor/mset! K i i
-                            (+ (double (tensor/mget K i i))
+              (dtt/mset! K i i
+                            (+ (double (dtt/mget K i i))
                                (double noise))))
           ;; Solve K*w = y
-          y-col (la/column ys)
+          y-col (t/column ys)
           w (la/solve K y-col)]
       {:K K :w w :xs xs :kernel kernel :kscale kscale})))
 
 (def la-gp-predict
   (fn [{:keys [w xs kernel kscale]} x-new]
-    (let [k-vec (la/column
+    (let [k-vec (t/column
                  (mapv (fn [xi]
                          (* (double kscale)
                             (double (kernel x-new xi))))
                        xs))]
-      (tensor/mget (la/mmul (la/transpose w) k-vec) 0 0))))
+      (dtt/mget (la/mmul (la/transpose w) k-vec) 0 0))))
 
 (def la-gp-model
   (la-gp (mapv vector gp-xs) gp-ys gp-kernel 1.0 0.01))
@@ -359,19 +361,19 @@ fm-rbf-preds
           flat (->> (for [x1 xs x2 xs]
                       (kernel (dist/euclidean-1d x1 x2)))
                     (dtype/make-container :float64))
-          Phi (tensor/reshape flat [n n])
+          Phi (dtt/reshape flat [n n])
           ;; Solve Φ w = y
-          y-col (la/column ys)
+          y-col (t/column ys)
           w (la/solve Phi y-col)]
       {:w w :xs xs :kernel kernel})))
 
 (def la-rbf-predict
   (fn [{:keys [w xs kernel]} x-new]
-    (let [phi-vec (la/column
+    (let [phi-vec (t/column
                    (mapv (fn [xi]
                            (kernel (dist/euclidean-1d xi x-new)))
                          xs))]
-      (tensor/mget (la/mmul (la/transpose w) phi-vec) 0 0))))
+      (dtt/mget (la/mmul (la/transpose w) phi-vec) 0 0))))
 
 (def la-rbf-model (la-rbf rbf-xs rbf-ys rbf-kernel))
 
@@ -435,19 +437,19 @@ fm-kriging-preds
           flat (->> (for [x1 xs x2 xs]
                       (variogram (dist/euclidean-1d x1 x2)))
                     (dtype/make-container :float64))
-          V (tensor/reshape flat [n n])
+          V (dtt/reshape flat [n n])
           ;; Augment with polynomial terms
           pterms (mapv pt-fn xs)
           ptsize (count (first pterms))
           total (+ n ptsize)
           ;; Build augmented matrix (materialized for mutation)
           aug-flat (double-array (* total total))
-          aug (tensor/reshape (tensor/ensure-tensor aug-flat) [total total])
+          aug (dtt/reshape (dtt/ensure-tensor aug-flat) [total total])
           ;; Copy V into top-left
           _ (dotimes [i n]
               (dotimes [j n]
                 (aset aug-flat (+ (* i total) j)
-                      (double (tensor/mget V i j)))))
+                      (double (dtt/mget V i j)))))
           ;; P and P^T blocks
           _ (dotimes [i n]
               (dotimes [j ptsize]
@@ -455,19 +457,19 @@ fm-kriging-preds
                   (aset aug-flat (+ (* i total) n j) v)
                   (aset aug-flat (+ (* (+ n j) total) i) v))))
           ;; Augmented RHS
-          y-aug (la/column (concat ys (repeat ptsize 0.0)))
+          y-aug (t/column (concat ys (repeat ptsize 0.0)))
           ;; Solve
           w-full (la/solve aug y-aug)
-          w (la/submatrix w-full (range n) :all)
-          c (la/submatrix w-full (range n total) :all)]
+          w (t/submatrix w-full (range n) :all)
+          c (t/submatrix w-full (range n total) :all)]
       {:w w :c c :xs xs :variogram variogram :pt-fn pt-fn})))
 
 (def la-kriging-predict
   (fn [{:keys [w c xs variogram pt-fn]} x-new]
     (let [v-vec (mapv (fn [xi] (variogram (dist/euclidean-1d xi x-new))) xs)
           p-vec (pt-fn x-new)]
-      (+ (double (la/dot (la/column v-vec) w))
-         (double (la/dot (la/column p-vec) c))))))
+      (+ (double (la/dot (t/column v-vec) w))
+         (double (la/dot (t/column p-vec) c))))))
 
 (def la-kriging-model
   (la-kriging kriging-xs kriging-ys auto-variogram (constantly [1.0])))
@@ -523,10 +525,10 @@ fm-mah
 
 (def la-mahalanobis
   (fn [x mean cov]
-    (let [S-inv (la/invert (la/matrix cov))
-          diff (la/column (mapv (fn [a b] (- (double a) (double b))) x mean))
+    (let [S-inv (la/invert (t/matrix cov))
+          diff (t/column (mapv (fn [a b] (- (double a) (double b))) x mean))
           ;; d² = diff^T S^{-1} diff
-          d-sq (tensor/mget (la/mmul (la/transpose diff)
+          d-sq (dtt/mget (la/mmul (la/transpose diff)
                                      (la/mmul S-inv diff))
                             0 0)]
       (math/sqrt d-sq))))
@@ -576,13 +578,13 @@ fm-helmert-contrasts
     (let [{:keys [names levels mapping]} coding
           ;; Build coding matrix: each row = [1.0, code-values...]
           rows (mapv (fn [l] (vec (cons 1.0 (mapping l)))) levels)
-          M (la/matrix rows)
+          M (t/matrix rows)
           M-inv (la/invert M)
           ;; Match fastmath's key ordering: :$intercept first
           nms (vec (cons :$intercept names))
           n-levels (count levels)
           inv-rows (mapv (fn [i]
-                           (mapv (fn [j] (tensor/mget M-inv i j))
+                           (mapv (fn [j] (dtt/mget M-inv i j))
                                  (range n-levels)))
                          (range (count nms)))]
       (zipmap nms inv-rows))))
@@ -643,16 +645,16 @@ la-helmert-contrasts
                        (mapv (fn [p] (math/pow (double v) (double p)))
                              (range (inc order))))
                      (range (- fc) (inc fc)))
-          V (la/matrix rows)
+          V (t/matrix rows)
           ;; Pseudoinverse via SVD: V = U Σ Vt → V^+ = Vt^T Σ^{-1} U^T
           {:keys [U S Vt]} (la/svd V)
           k (count S)
-          S-inv (la/diag (dfn// 1.0 (tensor/select S (range k))))
-          Ut-thin (la/submatrix U :all (range k))
+          S-inv (t/diag (dfn// 1.0 (dtt/select S (range k))))
+          Ut-thin (t/submatrix U :all (range k))
           V-pinv (la/mmul (la/mmul (la/transpose Vt) S-inv)
                           (la/transpose Ut-thin))
           ;; Extract the derivative-th row
-          coeffs (mapv (fn [j] (tensor/mget V-pinv derivative j))
+          coeffs (mapv (fn [j] (dtt/mget V-pinv derivative j))
                        (range length))]
       coeffs)))
 
@@ -711,16 +713,16 @@ fm-fd
                        (mapv (fn [j] (math/pow (double j) (double i)))
                              offsets))
                      (range noff))
-          M (la/matrix rows)
+          M (t/matrix rows)
           ;; RHS: e_n * n!
-          rhs (la/column
+          rhs (t/column
                (mapv (fn [id]
                        (if (== (long id) (long n))
                          (double (reduce * (range 1 (inc (long n)))))
                          0.0))
                      (range noff)))
           w (la/solve M rhs)]
-      [offsets (mapv (fn [i] (tensor/mget w i 0)) (range noff))])))
+      [offsets (mapv (fn [i] (dtt/mget w i 0)) (range noff))])))
 
 (def la-fd (la-fd-coeffs 1 [-1 0 1]))
 
@@ -795,7 +797,7 @@ fm-quad-nodes
               (let [v (double (b i))]
                 (aset arr (+ (* i sz) (inc i)) v)
                 (aset arr (+ (* (inc i) sz) i) v)))
-          T (tensor/reshape (tensor/ensure-tensor arr) [sz sz])
+          T (dtt/reshape (dtt/ensure-tensor arr) [sz sz])
           ;; Eigenvalues = quadrature nodes
           evals (la/real-eigenvalues T)]
       ;; Take top n (largest), reverse to match fastmath ordering
@@ -851,7 +853,7 @@ la-nodes
                 (aset arr (+ (* ip N) i) (* e (- n i)))))
           ;; Special entry: double the (1,0) element
           _ (aset arr N (* 2.0 (aget arr N)))
-          M (tensor/reshape (tensor/ensure-tensor arr) [N N])
+          M (dtt/reshape (dtt/ensure-tensor arr) [N N])
           ;; Eigendecomposition
           {:keys [eigenvalues eigenvectors]} (la/eigen M)
           ;; Sort eigenvalues ascending, pick the order-th
@@ -861,7 +863,7 @@ la-nodes
           target-idx (nth sorted-idx order)
           ev (nth eigenvectors target-idx)
           ;; Extract eigenvector components
-          coeffs (mapv (fn [i] (tensor/mget ev i 0)) (range N))
+          coeffs (mapv (fn [i] (dtt/mget ev i 0)) (range N))
           ;; Normalize sign: sign of sum
           sgn (if (neg? (reduce + coeffs)) -1.0 1.0)]
       (mapv (fn [v] (* sgn v)) coeffs))))

@@ -11,13 +11,8 @@
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
-   ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
-   [tech.v3.tensor :as tensor]
-   ;; Low-level buffer operations:
-   [tech.v3.datatype :as dtype]
-   ;; Element-wise array math:
-   [tech.v3.datatype.functional :as dfn]
-   ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
+   [scicloj.lalinea.tensor :as t]
+   [scicloj.lalinea.elementwise :as elem]   ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
    [scicloj.tableplot.v1.plotly :as plotly]
@@ -29,8 +24,8 @@
 
 ;; We use the same example vectors as in the previous chapter:
 
-(def u (la/column [3 1]))
-(def v (la/column [1 2]))
+(def u (t/column [3 1]))
+(def v (t/column [1 2]))
 
 ;; ---
 ;;
@@ -83,12 +78,12 @@
 ;; Rotation by 90° counter-clockwise:
 
 (def R90
-  (la/matrix [[0 -1]
-              [1  0]]))
+  (t/matrix [[0 -1]
+             [1  0]]))
 
 ;; It maps the x-axis to the y-axis:
 
-(la/mmul R90 (la/column [1 0]))
+(la/mmul R90 (t/column [1 0]))
 
 (kind/test-last
  [(fn [r] (and (< (abs (r 0 0)) 1e-10)
@@ -96,7 +91,7 @@
 
 ;; And the y-axis to the negative x-axis:
 
-(la/mmul R90 (la/column [0 1]))
+(la/mmul R90 (t/column [0 1]))
 
 (kind/test-last
  [(fn [r] (and (< (abs (- (r 0 0) -1.0)) 1e-10)
@@ -130,19 +125,19 @@
 ;; ### Example: stretching
 
 (def stretch-mat
-  (la/matrix [[3 0]
-              [0 1]]))
+  (t/matrix [[3 0]
+             [0 1]]))
 
 ;; Stretches the x-direction by 3, leaves y unchanged.
 ;; Let us see what it does to a set of points on the unit circle:
 
-(let [angles (dfn/* (/ (* 2.0 math/PI) 40.0) (dtype/make-reader :float64 41 idx))
-      circle-x (dfn/cos angles)
-      circle-y (dfn/sin angles)
-      data-mat (la/hstack [(la/column circle-x) (la/column circle-y)])
+(let [angles (la/mul (/ (* 2.0 math/PI) 40.0) (t/make-reader :float64 41 idx))
+      circle-x (elem/cos angles)
+      circle-y (elem/sin angles)
+      data-mat (t/hstack [(t/column circle-x) (t/column circle-y)])
       stretched-mat (la/transpose (la/mmul stretch-mat (la/transpose data-mat)))]
-  (-> (tc/dataset {:x (tensor/select stretched-mat :all 0)
-                   :y (tensor/select stretched-mat :all 1)
+  (-> (tc/dataset {:x (t/select stretched-mat :all 0)
+                   :y (t/select stretched-mat :all 1)
                    :shape (repeat 41 "stretched")})
       (tc/concat (tc/dataset {:x circle-x
                               :y circle-y
@@ -160,13 +155,13 @@
 ;; one dimension, losing information:
 
 (def proj-xy
-  (la/matrix [[1 0 0]
-              [0 1 0]
-              [0 0 0]]))
+  (t/matrix [[1 0 0]
+             [0 1 0]
+             [0 0 0]]))
 
 ;; This projects 3D space onto the $xy$-plane by zeroing out $z$:
 
-(la/mmul proj-xy (la/column [5 3 7]))
+(la/mmul proj-xy (t/column [5 3 7]))
 
 (kind/test-last
  [(fn [r] (and (= 5.0 (r 0 0))
@@ -187,8 +182,8 @@
 ;; It changes shape but preserves area (determinant = 1):
 
 (def shear-mat
-  (la/matrix [[1 2]
-              [0 1]]))
+  (t/matrix [[1 2]
+             [0 1]]))
 
 (la/det shear-mat)
 
@@ -269,14 +264,14 @@
 ;; the first two:
 
 (def M
-  (la/matrix [[1 2 3]
-              [4 5 9]
-              [7 8 15]]))
+  (t/matrix [[1 2 3]
+             [4 5 9]
+             [7 8 15]]))
 
 ;; Since column 3 = column 1 + column 2, the vector $[1, 1, -1]^T$
 ;; is in the null space:
 
-(la/mmul M (la/column [1 1 -1]))
+(la/mmul M (t/column [1 1 -1]))
 
 (kind/test-last
  [(fn [r] (< (la/norm r) 1e-10))])
@@ -289,7 +284,7 @@
 ;; scalar multiples. Any scalar times a null space vector
 ;; is again a null space vector (that is the subspace property):
 
-(la/mmul M (la/scale (la/column [1 1 -1]) 7.0))
+(la/mmul M (la/scale (t/column [1 1 -1]) 7.0))
 
 (kind/test-last
  [(fn [r] (< (la/norm r) 1e-10))])
@@ -328,7 +323,7 @@ rank-M
 ;; The **nullity** is the dimension of the null space —
 ;; the number of independent directions collapsed to zero.
 
-(def nullity-M (- (second (dtype/shape M)) rank-M))
+(def nullity-M (- (second (t/shape M)) rank-M))
 
 nullity-M
 
@@ -345,7 +340,7 @@ nullity-M
 ;; for all $n$ input dimensions.
 
 (= (+ rank-M nullity-M)
-   (second (dtype/shape M)))
+   (second (t/shape M)))
 
 (kind/test-last [true?])
 
@@ -374,7 +369,7 @@ null-basis
 
 ;; Full-rank square matrix:
 
-(def A-full (la/matrix [[2 1] [1 3]]))
+(def A-full (t/matrix [[2 1] [1 3]]))
 
 (la/rank A-full)
 
@@ -383,14 +378,14 @@ null-basis
 
 ;; Invertible — unique solution for any right-hand side:
 
-(la/solve A-full (la/column [5 7]))
+(la/solve A-full (t/column [5 7]))
 
 (kind/test-last
  [(fn [x] (some? x))])
 
 ;; Rank-deficient matrix — `la/solve` returns nil:
 
-(la/solve M (la/column [1 2 3]))
+(la/solve M (t/column [1 2 3]))
 
 (kind/test-last [nil?])
 
@@ -429,7 +424,7 @@ col-space-basis
 (def left-null-basis
   (let [r (la/rank M)
         U (:U svd-M)]
-    (la/submatrix U :all (range r (first (dtype/shape M))))))
+    (t/submatrix U :all (range r (first (t/shape M))))))
 
 left-null-basis
 
@@ -439,7 +434,7 @@ left-null-basis
 (def row-space-basis
   (let [r (la/rank M)
         Vt (:Vt svd-M)]
-    (la/transpose (la/submatrix Vt (range r) :all))))
+    (la/transpose (t/submatrix Vt (range r) :all))))
 
 row-space-basis
 
@@ -447,10 +442,10 @@ row-space-basis
 
 ;; Let us verify the dimensions match the table:
 
-{:col-space (second (dtype/shape col-space-basis))
- :left-null (second (dtype/shape left-null-basis))
- :row-space (second (dtype/shape row-space-basis))
- :null-space (second (dtype/shape null-basis))}
+{:col-space (second (t/shape col-space-basis))
+ :left-null (second (t/shape left-null-basis))
+ :row-space (second (t/shape row-space-basis))
+ :null-space (second (t/shape null-basis))}
 
 (kind/test-last
  [(fn [m] (and (= 2 (:col-space m))

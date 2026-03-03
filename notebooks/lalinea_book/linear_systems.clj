@@ -21,11 +21,7 @@
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
-   ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
-   [tech.v3.tensor :as tensor]
-   ;; Low-level buffer operations:
-   [tech.v3.datatype :as dtype]
-   ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
+   [scicloj.lalinea.tensor :as t]   ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
    [scicloj.tableplot.v1.plotly :as plotly]
@@ -68,8 +64,8 @@
 ;; on each adjacent diagonal:
 
 (def A-heat
-  (dtype/clone
-   (tensor/compute-tensor
+  (t/clone
+   (t/compute-tensor
     [n n]
     (fn [i j]
       (cond (= i j) 2.0
@@ -80,21 +76,21 @@
 A-heat
 
 (kind/test-last
- [(fn [m] (= [n n] (dtype/shape m)))])
+ [(fn [m] (= [n n] (t/shape m)))])
 
 ;; The right-hand side absorbs the boundary conditions.
 ;; Only the first entry is nonzero (since $T(1) = 0$):
 
 (def b-heat
-  (la/column (dtype/make-reader :float64 n
-                                (cond (== idx 0) T-left
-                                      (== idx (dec n)) T-right
-                                      :else 0.0))))
+  (t/column (t/make-reader :float64 n
+                           (cond (== idx 0) T-left
+                                 (== idx (dec n)) T-right
+                                 :else 0.0))))
 
 b-heat
 
 (kind/test-last
- [(fn [b] (= [n 1] (dtype/shape b)))])
+ [(fn [b] (= [n 1] (t/shape b)))])
 
 ;; ### Direct solution
 
@@ -107,8 +103,8 @@ T-direct
 
 ;; The exact solution is linear: $T(x) = 100(1-x)$
 
-(let [xs (dtype/make-reader :float64 n (/ (double (inc idx)) (double (inc n))))
-      expected (la/column (dtype/make-reader :float64 n (* 100.0 (- 1.0 (double (xs idx))))))]
+(let [xs (t/make-reader :float64 n (/ (double (inc idx)) (double (inc n))))
+      expected (t/column (t/make-reader :float64 n (* 100.0 (- 1.0 (double (xs idx))))))]
   (la/close? T-direct expected))
 
 (kind/test-last [true?])
@@ -120,13 +116,13 @@ T-direct
 ;; ### Temperature profile
 
 (def x-interior
-  (la/->real-tensor
-   (tensor/->tensor
-    (dtype/make-reader :float64 n (/ (double (inc idx)) (double (inc n)))))))
+  (t/->real-tensor
+   (t/matrix
+    (t/make-reader :float64 n (/ (double (inc idx)) (double (inc n)))))))
 
 (-> (tc/dataset {:x x-interior
-                 :T (dtype/->reader
-                     (tensor/select T-direct :all 0))})
+                 :T (t/->reader
+                     (t/select T-direct :all 0))})
     (plotly/base {:=x :x :=y :T})
     (plotly/layer-line)
     (plotly/layer-point {:=mark-size 5})
@@ -182,24 +178,24 @@ T-direct
 ;; directly rather than the general Gauss-Seidel row sum.
 
 (def gs-result
-  (let [b-buf (dtype/->reader b-heat)
-        x     (dtype/make-container :float64 n)
+  (let [b-buf (t/->reader b-heat)
+        x     (t/make-container :float64 n)
         iters 500]
     (loop [k 0, history []]
       (if (>= k iters)
-        {:x-final (dtype/clone x)
+        {:x-final (t/clone x)
          :history history}
         (do
           (dotimes [i n]
             (let [left  (if (pos? i) (x (dec i)) 0.0)
                   right (if (< i (dec n)) (x (inc i)) 0.0)]
-              (dtype/set-value! x i (/ (+ left right (b-buf i)) 2.0))))
-          (let [x-col    (la/column (dtype/clone x))
+              (t/set-value! x i (/ (+ left right (b-buf i)) 2.0))))
+          (let [x-col    (t/column (t/clone x))
                 residual (la/norm (la/sub (la/mmul A-heat x-col) b-heat))]
             (recur (inc k)
                    (conj history {:iteration (inc k)
                                   :residual  residual
-                                  :profile   (dtype/clone x)}))))))))
+                                  :profile   (t/clone x)}))))))))
 
 ;; ### Watching convergence
 ;;
@@ -240,7 +236,7 @@ T-direct
 ;;
 ;; The iterative solution should be close to the direct one:
 
-(let [x-iter (la/column (:x-final gs-result))]
+(let [x-iter (t/column (:x-final gs-result))]
   (la/norm (la/sub x-iter T-direct)))
 
 (kind/test-last [(fn [d] (< d 0.01))])

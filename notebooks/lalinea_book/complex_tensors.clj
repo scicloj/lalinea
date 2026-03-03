@@ -18,13 +18,10 @@
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
+   [scicloj.lalinea.tensor :as t]
+   [scicloj.lalinea.elementwise :as elem]
    ;; Complex tensors — interleaved [re im] layout:
-   [scicloj.lalinea.complex :as cx]
-   ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
-   [tech.v3.tensor :as tensor]
-   ;; Element-wise array math:
-   [tech.v3.datatype.functional :as dfn]
-   ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
+   [scicloj.lalinea.complex :as cx]   ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
    [scicloj.tableplot.v1.plotly :as plotly]
@@ -48,7 +45,7 @@
 
 ;; ### Wrapping an existing tensor (zero-copy)
 
-(cx/complex-tensor (tensor/->tensor [[1.0 2.0] [3.0 4.0]]))
+(cx/complex-tensor (t/matrix [[1.0 2.0] [3.0 4.0]]))
 
 (kind/test-last [(fn [v] (and (= [2] (cx/complex-shape v))
                               (= [1.0 3.0] (cx/re v))))])
@@ -216,7 +213,7 @@
       product (la/mmul A Ainv)
       re-part (cx/re product)
       im-part (cx/im product)]
-  (and (< (dfn/reduce-max (dfn/abs (dfn/- re-part (la/eye 2)))) 1e-10)
-       (< (dfn/reduce-max (dfn/abs im-part)) 1e-10)))
+  (and (< (elem/reduce-max (elem/abs (la/sub re-part (t/eye 2)))) 1e-10)
+       (< (elem/reduce-max (elem/abs im-part)) 1e-10)))
 
 (kind/test-last [true?])

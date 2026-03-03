@@ -1,7 +1,7 @@
 (ns scicloj.lalinea.vis
   "Visualization helpers for linear algebra."
   (:require [scicloj.kindly.v4.kind :as kind]
-            [tech.v3.tensor :as tensor]
+            [tech.v3.tensor :as dtt]
             [tech.v3.datatype :as dtype]))
 
 (defn arrow-plot
@@ -158,9 +158,9 @@
   suitable for display as an image. Values are clamped to [0, 255]."
   [m]
   (let [[h w] (dtype/shape m)]
-    (tensor/compute-tensor [h w 3]
+    (dtt/compute-tensor [h w 3]
                            (fn [r c _ch]
-                             (int (max 0 (min 255 (tensor/mget m r c)))))
+                             (int (max 0 (min 255 (dtt/mget m r c)))))
                            :uint8)))
 
 (defn extract-channel
@@ -168,7 +168,7 @@
   it as a `[h w 3]` grayscale tensor (the channel replicated three times)."
   [img ch]
   (let [[h w _c] (dtype/shape img)
-        channel (tensor/select img :all :all ch)]
-    (tensor/compute-tensor [h w 3]
-                           (fn [r c _] (int (tensor/mget channel r c)))
+        channel (dtt/select img :all :all ch)]
+    (dtt/compute-tensor [h w 3]
+                           (fn [r c _] (int (dtt/mget channel r c)))
                            :uint8)))

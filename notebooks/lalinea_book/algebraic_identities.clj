@@ -12,13 +12,10 @@
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
+   [scicloj.lalinea.tensor :as t]
+   [scicloj.lalinea.elementwise :as elem]
    ;; Complex tensors — interleaved [re im] layout:
-   [scicloj.lalinea.complex :as cx]
-   ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
-   [tech.v3.tensor :as tensor]
-   ;; Element-wise array math:
-   [tech.v3.datatype.functional :as dfn]
-   ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
+   [scicloj.lalinea.complex :as cx]   ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]
    [clojure.math :as math]))
 
@@ -27,21 +24,21 @@
 ;; We use a diverse set of matrices so that identities are tested
 ;; on both nice and awkward inputs.
 
-(def A (la/matrix [[2 1 0]
-                   [1 3 1]
-                   [0 1 2]]))
+(def A (t/matrix [[2 1 0]
+                  [1 3 1]
+                  [0 1 2]]))
 
-(def B (la/matrix [[1 -1 2]
-                   [0  2 1]
-                   [3  0 1]]))
+(def B (t/matrix [[1 -1 2]
+                  [0  2 1]
+                  [3  0 1]]))
 
-(def C (la/matrix [[-1 4 2]
-                   [3 0 1]
-                   [2 1 5]]))
+(def C (t/matrix [[-1 4 2]
+                  [3 0 1]
+                  [2 1 5]]))
 
-(def I3 (la/eye 3))
+(def I3 (t/eye 3))
 
-(def v (la/column [1 2 3]))
+(def v (t/column [1 2 3]))
 
 ;; ---
 ;;
@@ -64,7 +61,7 @@
 
 ;; ### Additive identity: $A + 0 = A$
 
-(la/close? (la/add A (la/zeros 3 3)) A)
+(la/close? (la/add A (t/zeros 3 3)) A)
 
 (kind/test-last [true?])
 
@@ -337,7 +334,7 @@
 
 (and (>= (la/norm A) 0)
      (> (la/norm A) 0)
-     (< (la/norm (la/zeros 3 3)) 1e-10))
+     (< (la/norm (t/zeros 3 3)) 1e-10))
 
 (kind/test-last [true?])
 
@@ -415,7 +412,7 @@
 ;; ### Trace equals sum of eigenvalues: $\operatorname{tr}(A) = \sum \lambda_i$
 
 (let [{:keys [eigenvalues]} (la/eigen A)
-      eig-sum (dfn/sum (cx/re eigenvalues))]
+      eig-sum (la/sum (cx/re eigenvalues))]
   (la/close-scalar? (la/trace A) eig-sum))
 
 (kind/test-last [true?])
@@ -439,7 +436,7 @@
 ;; ### Reconstruction: $U \Sigma V^T = A$
 
 (let [{:keys [U S Vt]} (la/svd A)
-      Sigma (la/diag S)]
+      Sigma (t/diag S)]
   (la/close? (la/mmul U (la/mmul Sigma Vt)) A))
 
 (kind/test-last [true?])
@@ -463,15 +460,15 @@
 (let [{:keys [S]} (la/svd A)
       AtA-eigs (la/real-eigenvalues (la/mmul (la/transpose A) A))
       sv-squared (sort > (la/sq S))]
-  (la/close? (la/->real-tensor sv-squared)
-             (la/->real-tensor (reverse AtA-eigs)) 1e-8))
+  (la/close? (t/->real-tensor sv-squared)
+             (t/->real-tensor (reverse AtA-eigs)) 1e-8))
 
 (kind/test-last [true?])
 
 ;; ### [Frobenius norm](https://en.wikipedia.org/wiki/Matrix_norm#Frobenius_norm) from singular values: $\|A\|_F = \sqrt{\sum \sigma_i^2}$
 
 (let [{:keys [S]} (la/svd A)
-      sv-norm (math/sqrt (dfn/sum (dfn/* S S)))]
+      sv-norm (math/sqrt (la/sum (la/mul S S)))]
   (la/close-scalar? (la/norm A) sv-norm))
 
 (kind/test-last [true?])
@@ -494,7 +491,7 @@
 
 ;; ### Returns nil for non-SPD matrices
 
-(nil? (la/cholesky (la/matrix [[1 2] [2 1]])))
+(nil? (la/cholesky (t/matrix [[1 2] [2 1]])))
 
 (kind/test-last [true?])
 
@@ -506,7 +503,7 @@
 ;;
 ;; ### Solution satisfies $Ax = b$
 
-(let [b (la/column [1 2 3])
+(let [b (t/column [1 2 3])
       x (la/solve A b)]
   (la/close? (la/mmul A x) b))
 
@@ -514,7 +511,7 @@
 
 ;; ### Inverse solves: $A^{-1} b = x$
 
-(let [b (la/column [1 2 3])
+(let [b (t/column [1 2 3])
       x-solve (la/solve A b)
       x-inv (la/mmul (la/invert A) b)]
   (la/close? x-solve x-inv))
@@ -552,9 +549,9 @@
 
 ;; ### Magnitude is multiplicative: $|a \cdot b| = |a| \cdot |b|$
 
-(< (dfn/reduce-max
-    (dfn/abs (dfn/- (la/abs (la/mul ca cb))
-                    (dfn/* (la/abs ca) (la/abs cb)))))
+(< (elem/reduce-max
+    (elem/abs (la/sub (la/abs (la/mul ca cb))
+                      (la/mul (la/abs ca) (la/abs cb)))))
    1e-10)
 
 (kind/test-last [true?])

@@ -1,21 +1,22 @@
 (ns scicloj.lalinea.linalg
-  "Linear algebra operations on dtype-next tensors, backed by EJML.
+  "Linear algebra: arithmetic, decompositions, solve, and related operations.
 
-   Matrices are dtype-next tensors of shape [r c]. All operations
-   accept tensors and return tensors — EJML is used internally for
-   computation, with zero-copy conversion.
+   All operations accept RealTensors or ComplexTensors and return
+   the appropriate type. EJML is used internally for computation,
+   with zero-copy conversion.
 
-   For complex matrices, functions accept and return ComplexTensors."
-  (:refer-clojure :exclude [abs flatten])
+   For tensor construction and structural operations, see
+   `scicloj.lalinea.tensor`."
+  (:refer-clojure :exclude [abs])
   (:require [scicloj.lalinea.impl.tensor :as bt]
             [scicloj.lalinea.impl.real-tensor :as rt]
             [scicloj.lalinea.complex :as cx]
             [scicloj.lalinea.impl.ejml :as ejml]
             [scicloj.lalinea.tape :as tape]
-            [tech.v3.tensor :as tensor]
+            [scicloj.lalinea.tensor :as t]
+            [tech.v3.tensor :as dtt]
             [tech.v3.datatype :as dtype]
-            [tech.v3.datatype.functional :as dfn]
-            [scicloj.lalinea.impl.print])
+            [tech.v3.datatype.functional :as dfn])
   (:import [java.util Arrays]
            [org.ejml.data DMatrixRMaj ZMatrixRMaj]))
 
@@ -36,148 +37,13 @@
     (rt/->real-tensor t)))
 
 ;; ---------------------------------------------------------------------------
-;; Matrix construction
-;; ---------------------------------------------------------------------------
-
-(defn matrix
-  "Create a matrix (rank-2 tensor) from nested sequences.
-
-   ```clojure
-   (matrix [[1 2] [3 4]])
-   ;; => #tech.v3.tensor<float64>[2 2]
-   ;; [[1.000 2.000]
-   ;;  [3.000 4.000]]
-   ```"
-  [rows]
-  (tape/record! :la/matrix [rows]
-                (if (rt/real-tensor? rows)
-                  rows
-                  (->rt (bt/matrix rows)))))
-
-(defn eye
-  "Identity matrix of size n × n."
-  [n]
-  (tape/record! :la/eye [n]
-                (->rt (bt/eye n))))
-
-(defn zeros
-  "Zero matrix of size r × c."
-  [r c]
-  (tape/record! :la/zeros [r c]
-                (->rt (bt/zeros r c))))
-
-(defn ones
-  "Matrix of ones, size r × c."
-  [r c]
-  (tape/record! :la/ones [r c]
-                (->rt (tensor/compute-tensor [r c] (fn [& _] 1.0) :float64))))
-
-(defn diag
-  "Diagonal operations:
-   - Given a 2D matrix: extract the main diagonal as a 1D tensor.
-   - Given a 1D sequence/tensor: create a diagonal matrix."
-  [a]
-  (tape/record! :la/diag [a]
-                (let [a (ensure-tensor a)
-                      ndims (count (dtype/shape a))]
-                  (if (= 2 ndims)
-                    ;; Extract diagonal from matrix
-                    (let [n (long (apply min (dtype/shape a)))]
-                      (->rt (dtype/clone
-                             (dtype/make-reader :float64 n
-                                                (double (tensor/mget a idx idx))))))
-                    ;; Create diagonal matrix from values
-                    (let [v (dtype/->reader (dtype/make-container :float64 a))
-                          n (count v)]
-                      (->rt (tensor/compute-tensor
-                             [n n]
-                             (fn [i j] (if (== i j) (double (v i)) 0.0))
-                             :float64)))))))
-
-(defn column
-  "Create a column vector (shape [n 1]) from a sequence."
-  [xs]
-  (tape/record! :la/column [xs]
-                (->rt (bt/col-vector xs))))
-
-(defn row
-  "Create a row vector (shape [1 n]) from a sequence."
-  [xs]
-  (tape/record! :la/row [xs]
-                (->rt (bt/row-vector xs))))
-
-;; ---------------------------------------------------------------------------
-;; EJML interop
-;; ---------------------------------------------------------------------------
-
-(defn tensor->dmat
-  "Zero-copy: convert a [r c] tensor to an EJML DMatrixRMaj sharing
-   the same double[]. Mutations through either view are visible in
-   the other.
-
-   Falls back to a copy if the tensor is not backed by a contiguous
-   double[] (e.g. a lazy reader or a strided view)."
-  ^DMatrixRMaj [tensor]
-  (bt/tensor->dmat tensor))
-
-(defn dmat->tensor
-  "Zero-copy: convert an EJML DMatrixRMaj to a [r c] tensor sharing
-   the same double[]. Mutations through either view are visible in
-   the other."
-  [^DMatrixRMaj dm]
-  (bt/dmat->tensor dm))
-
-(defn complex-tensor->zmat
-  "Zero-copy: convert a ComplexTensor to an EJML ZMatrixRMaj sharing
-   the same double[]. Mutations through either view are visible in
-   the other.
-
-   For a matrix ComplexTensor [r c], creates an r*c ZMatrixRMaj.
-   For a vector ComplexTensor [n], creates an n*1 column vector.
-   For a scalar ComplexTensor [], creates a 1*1 matrix.
-
-   Falls back to a copy if the tensor is not backed by a contiguous
-   double[] (e.g. a lazy ComplexTensor from arithmetic operations)."
-  ^ZMatrixRMaj [ct]
-  (ejml/ct->zmat ct))
-
-(defn zmat->complex-tensor
-  "Zero-copy: convert an EJML ZMatrixRMaj to a ComplexTensor [r c]
-   sharing the same double[]. Mutations through either view are
-   visible in the other."
-  [^ZMatrixRMaj zm]
-  (ejml/zmat->ct zm))
-
-;; ---------------------------------------------------------------------------
-(defn submatrix
-  "Extract a contiguous submatrix. rows and cols can be :all or a range.
-
-   tensor/select returns a non-contiguous view; this function clones
-   it into a contiguous tensor suitable for EJML operations.
-
-   For ComplexTensors, operates on the complex dimensions and preserves
-   the ComplexTensor type.
-
-   ```clojure
-   (submatrix U :all (range k))   ;; first k columns
-   (submatrix Vt (range k) :all)  ;; first k rows
-   ```"
-  [m rows cols]
-  (tape/record! :la/submatrix [m rows cols]
-                (let [m (ensure-tensor m)]
-                  (if (cx/complex? m)
-                    (cx/complex-tensor
-                     (dtype/clone (tensor/select (cx/->tensor m) rows cols :all)))
-                    (->rt (dtype/clone (tensor/select m rows cols)))))))
-
-;; ---------------------------------------------------------------------------
 ;; Matrix multiply
 ;; ---------------------------------------------------------------------------
 
 (defn mmul
   "Matrix multiply. Accepts dtype-next tensors or ComplexTensors.
 
-   For real matrices: C = A * B
+   For real matrices: $C = A B$.
    For complex matrices: delegates to EJML's ZMatrixRMaj multiply."
   [a b]
   (tape/record! :la/mmul [a b]
@@ -192,17 +58,16 @@
                           dc (ejml/dmul da db)]
                       (->rt (bt/dmat->tensor dc)))))))
 
-;; See also: https://www.mathworks.com/help/matlab/ref/mpower.html
 (defn mpow
-  "Matrix power $A^k$ for non-negative integer k.
+  "Matrix power $A^k$ for non-negative integer $k$.
    Uses exponentiation by squaring — $O(\\log k)$ multiplications.
-   Returns the identity for k=0."
+   Returns the identity for $k=0$."
   [a k]
   (tape/record! :la/mpow [a k]
                 (let [k (long k)]
                   (cond
                     (neg? k) (throw (ex-info "mpow requires non-negative k" {:k k}))
-                    (zero? k) (eye (first (dtype/shape a)))
+                    (zero? k) (t/eye (first (dtype/shape (ensure-tensor a))))
                     (== k 1) a
                     :else (loop [base a result nil k k]
                             (let [result (if (odd? k)
@@ -221,17 +86,17 @@
   "Matrix transpose (real) or conjugate transpose (complex).
 
    For real matrices: returns a zero-copy strided view sharing the
-   same backing data. For complex matrices: B = A† (Hermitian adjoint)."
+   same backing data. For complex matrices: $B = A^\\dagger$ (Hermitian adjoint)."
   [a]
   (tape/record! :la/transpose [a]
                 (let [a (ensure-tensor a)]
                   (if (cx/complex? a)
                     (let [za (ejml/ct->zmat a)]
                       (ejml/zmat->ct (ejml/ztranspose-conj za)))
-                    (->rt (tensor/transpose a [1 0]))))))
+                    (->rt (dtt/transpose a [1 0]))))))
 
 ;; ---------------------------------------------------------------------------
-;; Addition and subtraction
+;; Arithmetic
 ;; ---------------------------------------------------------------------------
 
 (defn add
@@ -253,7 +118,7 @@
                     (->rt (dfn/- a b))))))
 
 (defn scale
-  "Scalar multiply. Returns alpha * a."
+  "Scalar multiply. Returns $\\alpha \\cdot a$."
   [a alpha]
   (tape/record! :la/scale [a alpha]
                 (let [a (ensure-tensor a)]
@@ -305,64 +170,6 @@
                 (let [a (ensure-tensor a)]
                   (reduce * (dtype/->reader a :float64)))))
 
-(defn compute-matrix
-  "Build an `[r c]` matrix from a function of row and column indices.
-   `f` takes two longs (row, col) and returns a double."
-  [r c f]
-  (tape/record! :la/compute-matrix [r c f]
-                (->rt (tensor/compute-tensor [(long r) (long c)]
-                                             (fn [i j] (double (f i j)))
-                                             :float64))))
-
-(defn reduce-axis
-  "Reduce a tensor along an axis.
-
-   `reduce-fn` is applied to each slice along the given axis
-   (e.g. `dfn/sum`, `dfn/reduce-max`).
-
-   For a 2D matrix: axis 0 reduces across rows (one result per column),
-   axis 1 reduces across columns (one result per row).
-
-   Returns a RealTensor for real input, ComplexTensor for complex input."
-  [a reduce-fn axis]
-  (tape/record! :la/reduce-axis [a reduce-fn axis]
-                (let [a (ensure-tensor a)]
-                  (if (cx/complex? a)
-                    (cx/wrap-tensor
-                     (tensor/reduce-axis (cx/->tensor a) reduce-fn (int axis)))
-                    (->rt (tensor/reduce-axis a reduce-fn (int axis)))))))
-
-(defn flatten
-  "Reshape a tensor to 1D, preserving element order.
-   Column vectors `[n 1]` become `[n]`, matrices `[r c]` become `[r*c]`.
-   For ComplexTensors, flattens the logical dimensions (trailing 2 preserved)."
-  [a]
-  (tape/record! :la/flatten [a]
-                (let [a (ensure-tensor a)]
-                  (if (cx/complex? a)
-                    (let [raw (cx/->tensor a)
-                          n (apply * (cx/complex-shape a))]
-                      (cx/wrap-tensor (tensor/reshape raw [n 2])))
-                    (let [n (dtype/ecount a)]
-                      (->rt (tensor/reshape a [n])))))))
-
-(defn hstack
-  "Assemble a matrix by placing column vectors side by side.
-   Each element should be a column vector `[n 1]` or a 1D tensor `[n]`.
-   Returns an `[n k]` matrix where k is the number of columns."
-  [cols]
-  (tape/record! :la/hstack [cols]
-                (let [ts (mapv ensure-tensor cols)
-                      n (long (first (dtype/shape (first ts))))
-                      k (count ts)
-                      buf (dtype/make-container :float64 (* n k))
-                      out (tensor/reshape buf [n k])]
-                  (dotimes [j k]
-                    (let [reader (dtype/->reader (nth ts j) :float64)]
-                      (dotimes [i n]
-                        (tensor/mset! out i j (double (reader i))))))
-                  (->rt out))))
-
 ;; ---------------------------------------------------------------------------
 ;; Scalar properties
 ;; ---------------------------------------------------------------------------
@@ -379,7 +186,7 @@
                     (let [shape (dtype/shape a)
                           n (min (long (first shape)) (long (second shape)))]
                       (double (dfn/sum (dtype/make-reader :float64 n
-                                                          (tensor/mget a idx idx)))))))))
+                                                          (dtt/mget a idx idx)))))))))
 
 (defn det
   "Matrix determinant. Returns a double for real matrices, a scalar
@@ -402,8 +209,9 @@
                     (Math/sqrt (double (dfn/sum (dfn/* a a))))))))
 
 (defn dot
-  "Inner product. For real vectors: Σ u_i v_i (returns double).
-   For complex vectors: Hermitian ⟨u,v⟩ = Σ u_i conj(v_i) (returns scalar ComplexTensor)."
+  "Inner product. For real vectors: $\\sum u_i v_i$ (returns double).
+   For complex vectors: Hermitian $\\langle u,v \\rangle = \\sum u_i \\overline{v_i}$
+   (returns scalar ComplexTensor)."
   [u v]
   (tape/record! :la/dot [u v]
                 (let [u (ensure-tensor u) v (ensure-tensor v)]
@@ -417,13 +225,13 @@
 
 (defn close?
   "True when two matrices (or ComplexTensors) are approximately equal:
-   ‖a − b‖_F < tol. Default tolerance is 1e-10."
+   $\\|a - b\\|_F < \\mathrm{tol}$. Default tolerance is 1e-10."
   ([a b] (close? a b 1e-10))
   ([a b tol] (< (norm (sub a b)) (double tol))))
 
 (defn close-scalar?
   "True when two scalars are approximately equal:
-   |a − b| < tol. Default tolerance is 1e-10."
+   $|a - b| < \\mathrm{tol}$. Default tolerance is 1e-10."
   ([a b] (close-scalar? a b 1e-10))
   ([a b tol] (< (Math/abs (- (double a) (double b))) (double tol))))
 
@@ -443,8 +251,8 @@
                       (->rt (bt/dmat->tensor inv)))))))
 
 (defn solve
-  "Solve A * X = B for X. Returns nil if singular.
-   A is [n n], B is [n m]. Returns X as tensor or ComplexTensor."
+  "Solve $AX = B$ for $X$. Returns nil if singular.
+   $A$ is `[n n]`, $B$ is `[n m]`. Returns $X$ as tensor or ComplexTensor."
   [a b]
   (tape/record! :la/solve [a b]
                 (let [a (ensure-tensor a) b (ensure-tensor b)]
@@ -464,14 +272,11 @@
 
 (defn eigen
   "Eigendecomposition of a real matrix. Returns a map:
-   :eigenvalues  — ComplexTensor of shape [n] (complex vector of eigenvalues)
-   :eigenvectors — vector of column eigenvectors as real tensors (or nil)
+   `:eigenvalues`  — ComplexTensor of shape `[n]` (complex vector)
+   `:eigenvectors` — vector of column eigenvectors as real tensors (or nil)
 
-   Eigenvalues are returned as a ComplexTensor even for real-eigenvalue
-   matrices. Use `(cx/re (:eigenvalues result))` for the real parts, or
-   `real-eigenvalues` for a sorted real tensor.
-
-   Currently accepts real matrices only (EJML limitation)."
+   Use `(cx/re (:eigenvalues result))` for the real parts, or
+   `real-eigenvalues` for a sorted real tensor."
   [a]
   (tape/record! :la/eigen [a]
                 (let [a (ensure-tensor a)
@@ -485,7 +290,7 @@
                           (aset arr (* 2 i) (double re))
                           (aset arr (inc (* 2 i)) (double im))))
                       (cond-> {:eigenvalues (cx/complex-tensor
-                                             (tensor/reshape (tensor/ensure-tensor arr) [n 2]))}
+                                             (dtt/reshape (dtt/ensure-tensor arr) [n 2]))}
                         (:eigenvectors result)
                         (assoc :eigenvectors
                                (mapv (fn [ev]
@@ -494,24 +299,16 @@
 
 (defn real-eigenvalues
   "Sorted real eigenvalues of a symmetric/Hermitian matrix.
-   Returns a real [n] tensor, sorted ascending.
-
-   Equivalent to extracting real parts from `eigen` and sorting,
-   but more concise and avoids intermediate allocations."
+   Returns a real `[n]` tensor, sorted ascending."
   [a]
   (let [evals (:eigenvalues (eigen a))
         arr (dtype/->double-array (cx/re evals))]
     (Arrays/sort arr)
-    (->rt (tensor/ensure-tensor arr))))
+    (->rt (dtt/ensure-tensor arr))))
 
 (defn svd
-  "Singular value decomposition: A = U * diag(S) * V^T.
-   Returns a map:
-   :U  — left singular vectors as tensor
-   :S  — singular values as 1D tensor
-   :Vt — right singular vectors (transposed) as tensor
-
-   Currently accepts real matrices only (EJML limitation)."
+  "Singular value decomposition: $A = U \\Sigma V^T$.
+   Returns a map with `:U`, `:S` (singular values), `:Vt`."
   [a]
   (tape/record! :la/svd [a]
                 (let [a (ensure-tensor a)
@@ -522,8 +319,8 @@
                      :Vt (->rt (bt/dmat->tensor (:Vt result)))}))))
 
 (defn qr
-  "QR decomposition: A = Q * R.
-   Returns a map with :Q and :R as tensors (or ComplexTensors)."
+  "QR decomposition: $A = QR$.
+   Returns a map with `:Q` and `:R`."
   [a]
   (tape/record! :la/qr [a]
                 (let [a (ensure-tensor a)]
@@ -538,8 +335,8 @@
                          :R (->rt (bt/dmat->tensor (:R result)))}))))))
 
 (defn cholesky
-  "Cholesky decomposition: A = L * L^T (real) or A = L * L† (complex).
-   Returns the lower-triangular L, or nil if not SPD/HPD."
+  "Cholesky decomposition: $A = LL^T$ (real) or $A = LL^\\dagger$ (complex).
+   Returns the lower-triangular $L$, or nil if not SPD/HPD."
   [a]
   (tape/record! :la/cholesky [a]
                 (let [a (ensure-tensor a)]
@@ -554,18 +351,16 @@
 ;; ---------------------------------------------------------------------------
 
 (defn- sorted-svd
-  "SVD with singular values sorted in descending order.
-   EJML does not guarantee sort order, so we sort and
-   permute U/Vt columns/rows accordingly."
+  "SVD with singular values sorted in descending order."
   [a]
   (when-let [{:keys [U S Vt]} (svd a)]
     (let [n (count S)
           order (vec (sort-by (fn [i] (- (double (S i)))) (range n)))]
       (if (= order (vec (range n)))
         {:U U :S S :Vt Vt}
-        {:U  (submatrix U :all order)
-         :S  (->rt (tensor/ensure-tensor (dtype/make-container :float64 (mapv #(S %) order))))
-         :Vt (submatrix Vt order :all)}))))
+        {:U  (t/submatrix U :all order)
+         :S  (->rt (dtt/ensure-tensor (dtype/make-container :float64 (mapv #(S %) order))))
+         :Vt (t/submatrix Vt order :all)}))))
 
 (defn rank
   "Matrix rank: number of singular values above `tol` (default 1e-10)."
@@ -575,80 +370,56 @@
      (long (dfn/sum (dfn/> sv (double tol)))))))
 
 (defn condition-number
-  "Condition number κ(A) = σ_max / σ_min from the SVD."
+  "Condition number $\\kappa(A) = \\sigma_{\\max} / \\sigma_{\\min}$ from the SVD."
   [a]
   (let [sv (:S (sorted-svd a))]
     (/ (double (first sv))
        (double (sv (dec (count sv)))))))
 
 (defn pinv
-  "Moore-Penrose pseudoinverse via SVD: V Σ⁻¹ Uᵀ.
+  "Moore-Penrose pseudoinverse via SVD: $V \\Sigma^{-1} U^T$.
    Singular values below `tol` (default 1e-10) are treated as zero."
   ([a] (pinv a 1e-10))
   ([a tol]
    (let [{:keys [U S Vt]} (sorted-svd a)
          r (long (dfn/sum (dfn/> S (double tol))))
-         U-thin (submatrix U :all (range r))
-         Vt-thin (submatrix Vt (range r) :all)
-         S-inv (diag (mapv #(/ 1.0 (double %)) (take r S)))]
+         U-thin (t/submatrix U :all (range r))
+         Vt-thin (t/submatrix Vt (range r) :all)
+         S-inv (t/diag (mapv #(/ 1.0 (double %)) (take r S)))]
      (mmul (transpose Vt-thin) (mmul S-inv (transpose U-thin))))))
 
 (defn lstsq
-  "Least-squares solve: minimise ‖Ax − b‖₂.
-   Returns a map with :x (solution), :residuals (‖Ax−b‖²),
-   and :rank (effective rank of A).
-   Uses the pseudoinverse via SVD."
+  "Least-squares solve: minimise $\\|Ax - b\\|_2$.
+   Returns a map with `:x`, `:residuals` ($\\|Ax-b\\|^2$),
+   and `:rank`."
   ([a b] (lstsq a b 1e-10))
   ([a b tol]
    (let [x (mmul (pinv a tol) b)
          residual (sub (mmul a x) b)
          r (rank a tol)]
      {:x x
-      :residuals (double (dfn/sum (dfn/* residual residual)))
+      :residuals (double (dfn/sum (dfn/* (ensure-tensor residual) (ensure-tensor residual))))
       :rank r})))
 
 (defn null-space
-  "Null space basis: columns of V corresponding to singular values ≈ 0.
-   Returns a matrix whose columns span Null(A), or nil if the null
-   space is trivial (full column rank).
-   Singular values below `tol` (default 1e-10) are treated as zero."
+  "Null space basis: columns of $V$ corresponding to singular values $\\approx 0$.
+   Returns a matrix whose columns span $\\mathrm{Null}(A)$, or nil if full rank."
   ([a] (null-space a 1e-10))
   ([a tol]
    (let [{:keys [S Vt]} (sorted-svd a)
-         n (second (dtype/shape a))
+         n (second (dtype/shape (ensure-tensor a)))
          r (long (dfn/sum (dfn/> S (double tol))))]
      (when (< r (long n))
-       (transpose (submatrix Vt (range r n) :all))))))
+       (transpose (t/submatrix Vt (range r n) :all))))))
 
 (defn col-space
-  "Column space basis: first r columns of U from the SVD,
-   where r is the number of singular values above `tol` (default 1e-10).
-   Returns a matrix whose columns span Col(A)."
+  "Column space basis: first $r$ columns of $U$ from the SVD,
+   where $r$ is the number of singular values above `tol`."
   ([a] (col-space a 1e-10))
   ([a tol]
    (let [{:keys [U S]} (sorted-svd a)
          r (long (dfn/sum (dfn/> S (double tol))))]
-     (submatrix U :all (range r)))))
-
-;; ---------------------------------------------------------------------------
-;; Interop: wrap / unwrap
-;; ---------------------------------------------------------------------------
-
-(defn ->real-tensor
-  "Wrap a dtype-next tensor in a RealTensor."
-  [t]
-  (rt/->real-tensor t))
-
-(defn ->tensor
-  "Extract the underlying dtype-next tensor from a RealTensor.
-   Returns x unchanged if it is not a RealTensor."
-  [x]
-  (ensure-tensor x))
-
-(defn real-tensor?
-  "True if x is a RealTensor."
-  [x]
-  (rt/real-tensor? x))
+     (t/submatrix U :all (range r)))))
 
 ;; ---------------------------------------------------------------------------
 ;; Lifting external functions
@@ -670,7 +441,7 @@
 (defn- rewrap-result
   "Re-wrap a result based on the dominant input type."
   [result orig-args ref-shape]
-  (if-not (or (tensor/tensor? result) (dtype/reader? result))
+  (if-not (or (dtt/tensor? result) (dtype/reader? result))
     result
     (let [had-real?    (some rt/real-tensor? orig-args)
           had-complex? (and (some cx/complex? orig-args) (not had-real?))
@@ -683,7 +454,7 @@
         (let [r (if (and ref-shape
                          (not= (vec rshape) (vec ref-shape))
                          (= (dtype/ecount result) (apply * ref-shape)))
-                  (tensor/reshape result ref-shape)
+                  (dtt/reshape result ref-shape)
                   result)]
           (->rt r))))))
 
@@ -711,9 +482,7 @@
   "Apply an external function to La Linea tensors (one-shot).
 
    Unwraps RealTensor/ComplexTensor arguments, applies f, and re-wraps
-   the result. Preserves tensor shape.
-
-   Pass a Var for tape recording:
+   the result. Pass a Var for tape recording:
      (la/lift #'dfn/sqrt A)   ;; tape-recorded
      (la/lift dfn/sqrt A)     ;; not recorded"
   [f-or-var & args]
@@ -725,9 +494,6 @@
 (defn lifted
   "Return a lifted version of an external function (curried).
 
-   The returned function unwraps La Linea types, applies f, and
-   re-wraps the result.
-
    Pass a Var for tape recording:
      (def my-sqrt (la/lifted #'dfn/sqrt))   ;; tape-aware
      (def my-sqrt (la/lifted dfn/sqrt))     ;; not recorded"
@@ -737,19 +503,3 @@
         op  (when v? (var->op-key f-or-var))]
     (fn [& args]
       (apply-lifted f op args))))
-
-;; ---------------------------------------------------------------------------
-;; Tagged literal readers
-;; ---------------------------------------------------------------------------
-
-(defn read-real-tensor
-  "Reader function for `#la/R` tagged literal.
-
-   Format: `#la/R [:float64 [shape] data]`
-
-   Truncated literals (containing `...`) cannot be read back."
-  [[_dtype _shape data]]
-  (when (some #{'...} (flatten data))
-    (throw (ex-info "Cannot read truncated #la/R literal" {:shape _shape})))
-  (->rt (tensor/->tensor data {:datatype :float64})))
-

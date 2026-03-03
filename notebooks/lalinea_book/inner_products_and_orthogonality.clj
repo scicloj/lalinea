@@ -11,11 +11,7 @@
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
-   ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
-   [tech.v3.tensor :as tensor]
-   ;; Low-level buffer operations:
-   [tech.v3.datatype :as dtype]
-   ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
+   [scicloj.lalinea.tensor :as t]   ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]
    ;; Arrow diagrams for 2D vectors:
    [scicloj.lalinea.vis :as vis]
@@ -58,8 +54,8 @@
 ;;
 ;; This is computed by `la/dot`:
 
-(def a3 (la/column [1 2 3]))
-(def b3 (la/column [4 5 6]))
+(def a3 (t/column [1 2 3]))
+(def b3 (t/column [4 5 6]))
 
 (la/dot a3 b3)
 
@@ -74,7 +70,7 @@
 ;; Vectors and Spaces chapter, let us check that the dot product satisfies the
 ;; three inner product axioms.
 
-(def c3 (la/column [7 8 9]))
+(def c3 (t/column [7 8 9]))
 
 ;; **Axiom 1 — Linearity:**
 
@@ -97,7 +93,7 @@
 
 (kind/test-last [true?])
 
-(la/close-scalar? (la/dot (la/column [0 0 0]) (la/column [0 0 0])) 0.0)
+(la/close-scalar? (la/dot (t/column [0 0 0]) (t/column [0 0 0])) 0.0)
 
 (kind/test-last [true?])
 
@@ -112,9 +108,9 @@
 ;; This also satisfies the three axioms (because $W$ is symmetric
 ;; and positive definite), but it gives a different geometry.
 
-(def W-ip (la/matrix [[2 0] [0 1]]))
+(def W-ip (t/matrix [[2 0] [0 1]]))
 
-(def u-ip (la/column [1 1]))
+(def u-ip (t/column [1 1]))
 
 ;; Standard length:
 
@@ -160,7 +156,7 @@
 ;;
 ;; $$\langle \mathbf{u}, \mathbf{v} \rangle = 0$$
 
-(la/dot (la/column [1 0]) (la/column [0 1]))
+(la/dot (t/column [1 0]) (t/column [0 1]))
 
 (kind/test-last
  [(fn [d] (< (abs d) 1e-10))])
@@ -184,8 +180,8 @@
 ;;
 ;; $\cos \theta = 1$ for parallel, $0$ for orthogonal, $-1$ for opposite.
 
-(def p (la/column [1 0]))
-(def q (la/column [1 1]))
+(def p (t/column [1 0]))
+(def q (t/column [1 1]))
 
 (def cos-theta
   (/ (la/dot p q)
@@ -230,9 +226,9 @@ cos-theta
 ;; to it. The general formula for higher dimensions:
 
 (def W-proj
-  (la/matrix [[1 0]
-              [0 1]
-              [1 1]]))
+  (t/matrix [[1 0]
+             [0 1]
+             [1 1]]))
 
 ;; This defines a 2D subspace of $\mathbb{R}^3$ (the span
 ;; of the two columns).
@@ -253,7 +249,7 @@ P-proj
 
 ;; Project a point:
 
-(def point3d (la/column [1 2 3]))
+(def point3d (t/column [1 2 3]))
 
 (def projected-pt (la/mmul P-proj point3d))
 
@@ -292,8 +288,8 @@ resid
 ;;
 ;; Start with two non-orthogonal vectors in $\mathbb{R}^3$:
 
-(def a-gs (la/column [1 1 0]))
-(def b-gs (la/column [1 0 1]))
+(def a-gs (t/column [1 1 0]))
+(def b-gs (t/column [1 0 1]))
 
 ;; Step 1 — normalise $\mathbf{a}$:
 
@@ -348,17 +344,17 @@ q2-gs
 ;; This decomposition is fundamental for solving least squares
 ;; problems and computing eigenvalues.
 
-(def A-qr (la/matrix [[1 1]
-                      [1 0]
-                      [0 1]]))
+(def A-qr (t/matrix [[1 1]
+                     [1 0]
+                     [0 1]]))
 
 (def qr-result (la/qr A-qr))
 
 ;; Extract the thin Q (first $n$ columns):
 
-(def ncols-qr (second (dtype/shape A-qr)))
-(def Q-thin (la/submatrix (:Q qr-result) :all (range ncols-qr)))
-(def R-thin (la/submatrix (:R qr-result) (range ncols-qr) :all))
+(def ncols-qr (second (t/shape A-qr)))
+(def Q-thin (t/submatrix (:Q qr-result) :all (range ncols-qr)))
+(def R-thin (t/submatrix (:R qr-result) (range ncols-qr) :all))
 
 ;; $Q$ (orthonormal columns):
 
@@ -370,7 +366,7 @@ R-thin
 
 ;; Verify $Q^T Q = I$ (orthonormal columns):
 
-(la/norm (la/sub (la/mmul (la/transpose Q-thin) Q-thin) (la/eye 2)))
+(la/norm (la/sub (la/mmul (la/transpose Q-thin) Q-thin) (t/eye 2)))
 
 (kind/test-last
  [(fn [d] (< d 1e-10))])

@@ -15,197 +15,256 @@
 (ns lalinea-book.api-reference
   (:require
    [scicloj.lalinea.linalg :as la]
+   [scicloj.lalinea.tensor :as t]
    [scicloj.lalinea.complex :as cx]
    [scicloj.lalinea.transform :as ft]
    [scicloj.lalinea.tape :as tape]
    [scicloj.lalinea.elementwise :as elem]
    [scicloj.lalinea.grad :as grad]
-   [scicloj.lalinea.vis :as vis]
-   [tech.v3.tensor :as tensor]
-   [tech.v3.datatype :as dtype]
-   [tech.v3.datatype.functional :as dfn]
-   [tech.v3.libs.buffered-image :as bufimg]
+   [scicloj.lalinea.vis :as vis]   [tech.v3.libs.buffered-image :as bufimg]
    [scicloj.kindly.v4.kind :as kind]
    [clojure.math :as math]))
+;; ## `scicloj.lalinea.tensor`
 
-;; ## `scicloj.lalinea.linalg`
+(kind/doc #'t/matrix)
 
-(kind/doc #'la/matrix)
+(t/matrix [[1 2] [3 4]])
 
-(la/matrix [[1 2] [3 4]])
+(kind/test-last [(fn [m] (= [2 2] (t/shape m)))])
 
-(kind/test-last [(fn [m] (= [2 2] (dtype/shape m)))])
+(kind/doc #'t/eye)
 
-(kind/doc #'la/eye)
+(t/eye 3)
 
-(la/eye 3)
-
-(kind/test-last [(fn [m] (and (= [3 3] (dtype/shape m))
+(kind/test-last [(fn [m] (and (= [3 3] (t/shape m))
                               (== 1.0 (m 0 0))
                               (== 0.0 (m 0 1))))])
 
-(kind/doc #'la/zeros)
+(kind/doc #'t/zeros)
 
-(la/zeros 2 3)
+(t/zeros 2 3)
 
-(kind/test-last [(fn [m] (= [2 3] (dtype/shape m)))])
+(kind/test-last [(fn [m] (= [2 3] (t/shape m)))])
 
-(kind/doc #'la/diag)
+(kind/doc #'t/diag)
 
-(la/diag [3 5 7])
+(t/diag [3 5 7])
 
-(kind/test-last [(fn [m] (and (= [3 3] (dtype/shape m))
+(kind/test-last [(fn [m] (and (= [3 3] (t/shape m))
                               (== 5.0 (m 1 1))
                               (== 0.0 (m 0 1))))])
 
 ;; Extract diagonal from a 2D matrix:
 
-(la/diag (la/matrix [[1 2 3] [4 5 6] [7 8 9]]))
+(t/diag (t/matrix [[1 2 3] [4 5 6] [7 8 9]]))
 
 (kind/test-last [(fn [v] (= [1.0 5.0 9.0] v))])
 
-(kind/doc #'la/column)
+(kind/doc #'t/column)
 
-(la/column [1 2 3])
+(t/column [1 2 3])
 
-(kind/test-last [(fn [v] (= [3 1] (dtype/shape v)))])
+(kind/test-last [(fn [v] (= [3 1] (t/shape v)))])
 
-(kind/doc #'la/row)
+(kind/doc #'t/row)
 
-(la/row [1 2 3])
+(t/row [1 2 3])
 
-(kind/test-last [(fn [v] (= [1 3] (dtype/shape v)))])
+(kind/test-last [(fn [v] (= [1 3] (t/shape v)))])
+
+
+(kind/doc #'t/compute-matrix)
+
+(t/compute-matrix 3 3 (fn [i j] (if (== i j) 1.0 0.0)))
+
+(kind/test-last [(fn [m] (= (t/eye 3) m))])
+
+(kind/doc #'t/reduce-axis)
+
+;; Row sums (axis 1) and column sums (axis 0):
+(t/reduce-axis (t/matrix [[1 2 3] [4 5 6]]) la/sum 1)
+
+(kind/test-last [(fn [v] (and (= [2] (t/shape v))
+                              (la/close-scalar? (v 0) 6.0)
+                              (la/close-scalar? (v 1) 15.0)))])
+
+(kind/doc #'t/flatten)
+
+(t/flatten (t/column [1 2 3]))
+
+(kind/test-last [(fn [v] (= [1.0 2.0 3.0] v))])
+
+(kind/doc #'t/hstack)
+
+(t/hstack [(t/column [1 2]) (t/column [3 4])])
+
+(kind/test-last [(fn [m] (= [[1.0 3.0] [2.0 4.0]] m))])
+
+(kind/doc #'t/submatrix)
+
+(t/submatrix (t/eye 4) :all (range 2))
+
+(kind/test-last [(fn [m] (= [4 2] (t/shape m)))])
+
+(kind/doc #'t/tensor->dmat)
+
+(let [t (t/matrix [[1 2] [3 4]])
+      dm (t/tensor->dmat t)]
+  (= org.ejml.data.DMatrixRMaj (type dm)))
+
+(kind/test-last [true?])
+
+(kind/doc #'t/dmat->tensor)
+
+(let [dm (t/tensor->dmat (t/eye 2))
+      t (t/dmat->tensor dm)]
+  (= [2 2] (t/shape t)))
+
+(kind/test-last [true?])
+
+(kind/doc #'t/complex-tensor->zmat)
+
+(let [ct (cx/complex-tensor [1.0 2.0] [3.0 4.0])
+      zm (t/complex-tensor->zmat ct)]
+  (= org.ejml.data.ZMatrixRMaj (type zm)))
+
+(kind/test-last [true?])
+
+(kind/doc #'t/zmat->complex-tensor)
+
+(let [zm (t/complex-tensor->zmat (cx/complex-tensor [1.0 2.0] [3.0 4.0]))
+      ct (t/zmat->complex-tensor zm)]
+  (cx/complex? ct))
+
+(kind/test-last [true?])
+
+(kind/doc #'t/ones)
+
+(t/ones 2 3)
+
+(kind/test-last [(fn [m] (= [2 3] (t/shape m)))])
+
+(kind/doc #'t/real-tensor?)
+
+(t/real-tensor? (t/matrix [[1 2] [3 4]]))
+
+(kind/test-last [true?])
+
+(t/real-tensor? [1 2 3])
+
+(kind/test-last [false?])
+
+(kind/doc #'t/->real-tensor)
+
+(t/->real-tensor (t/matrix [[1 2] [3 4]]))
+
+(kind/test-last [(fn [rt] (t/real-tensor? rt))])
+
+(kind/doc #'t/->tensor)
+
+(t/->tensor (t/matrix [[1 2] [3 4]]))
+
+(kind/test-last [(fn [t] (not (t/real-tensor? t)))])
+
+;; ## `scicloj.lalinea.linalg`
 
 (kind/doc #'la/add)
 
-(la/add (la/matrix [[1 2] [3 4]])
-        (la/matrix [[10 20] [30 40]]))
+(la/add (t/matrix [[1 2] [3 4]])
+        (t/matrix [[10 20] [30 40]]))
 
 (kind/test-last [(fn [m] (== 11.0 (m 0 0)))])
 
 (kind/doc #'la/sub)
 
-(la/sub (la/matrix [[10 20] [30 40]])
-        (la/matrix [[1 2] [3 4]]))
+(la/sub (t/matrix [[10 20] [30 40]])
+        (t/matrix [[1 2] [3 4]]))
 
 (kind/test-last [(fn [m] (== 9.0 (m 0 0)))])
 
 (kind/doc #'la/scale)
 
-(la/scale (la/matrix [[1 2] [3 4]]) 3.0)
+(la/scale (t/matrix [[1 2] [3 4]]) 3.0)
 
 (kind/test-last [(fn [m] (== 6.0 (m 0 1)))])
 
 (kind/doc #'la/mul)
 
-(la/mul (la/matrix [[2 3] [4 5]])
-        (la/matrix [[10 20] [30 40]]))
+(la/mul (t/matrix [[2 3] [4 5]])
+        (t/matrix [[10 20] [30 40]]))
 
 (kind/test-last [(fn [m] (and (== 20.0 (m 0 0))
                               (== 60.0 (m 0 1))))])
 
 (kind/doc #'la/abs)
 
-(la/abs (la/matrix [[-3 2] [-1 4]]))
+(la/abs (t/matrix [[-3 2] [-1 4]]))
 
 (kind/test-last [(fn [m] (== 3.0 (m 0 0)))])
 
 (kind/doc #'la/sq)
 
-(la/sq (la/matrix [[2 3] [4 5]]))
+(la/sq (t/matrix [[2 3] [4 5]]))
 
 (kind/test-last [(fn [m] (== 4.0 (m 0 0)))])
 
 (kind/doc #'la/sum)
 
-(la/sum (la/matrix [[1 2] [3 4]]))
+(la/sum (t/matrix [[1 2] [3 4]]))
 
 (kind/test-last [(fn [v] (== 10.0 v))])
 
 (kind/doc #'la/prod)
 
-(la/prod (la/->real-tensor [2 3 4]))
+(la/prod (t/matrix [2 3 4]))
 
 (kind/test-last [(fn [v] (== 24.0 v))])
 
-(kind/doc #'la/compute-matrix)
-
-(la/compute-matrix 3 3 (fn [i j] (if (== i j) 1.0 0.0)))
-
-(kind/test-last [(fn [m] (= (la/eye 3) m))])
-
-(kind/doc #'la/reduce-axis)
-
-;; Row sums (axis 1) and column sums (axis 0):
-(la/reduce-axis (la/matrix [[1 2 3] [4 5 6]]) dfn/sum 1)
-
-(kind/test-last [(fn [v] (and (= [2] (dtype/shape v))
-                              (la/close-scalar? (v 0) 6.0)
-                              (la/close-scalar? (v 1) 15.0)))])
-
-(kind/doc #'la/flatten)
-
-(la/flatten (la/column [1 2 3]))
-
-(kind/test-last [(fn [v] (= [1.0 2.0 3.0] v))])
-
-(kind/doc #'la/hstack)
-
-(la/hstack [(la/column [1 2]) (la/column [3 4])])
-
-(kind/test-last [(fn [m] (= [[1.0 3.0] [2.0 4.0]] m))])
-
 (kind/doc #'la/mmul)
 
-(la/mmul (la/matrix [[1 2] [3 4]])
-         (la/column [5 6]))
+(la/mmul (t/matrix [[1 2] [3 4]])
+         (t/column [5 6]))
 
-(kind/test-last [(fn [m] (and (= [2 1] (dtype/shape m))
+(kind/test-last [(fn [m] (and (= [2 1] (t/shape m))
                               (== 17.0 (m 0 0))))])
 
 (kind/doc #'la/transpose)
 
-(la/transpose (la/matrix [[1 2 3] [4 5 6]]))
+(la/transpose (t/matrix [[1 2 3] [4 5 6]]))
 
-(kind/test-last [(fn [m] (= [3 2] (dtype/shape m)))])
-
-(kind/doc #'la/submatrix)
-
-(la/submatrix (la/eye 4) :all (range 2))
-
-(kind/test-last [(fn [m] (= [4 2] (dtype/shape m)))])
+(kind/test-last [(fn [m] (= [3 2] (t/shape m)))])
 
 (kind/doc #'la/trace)
 
-(la/trace (la/matrix [[1 2] [3 4]]))
+(la/trace (t/matrix [[1 2] [3 4]]))
 
 (kind/test-last [(fn [v] (== 5.0 v))])
 
 (kind/doc #'la/det)
 
-(la/det (la/matrix [[1 2] [3 4]]))
+(la/det (t/matrix [[1 2] [3 4]]))
 
 (kind/test-last [(fn [v] (la/close-scalar? v -2.0))])
 
 (kind/doc #'la/norm)
 
-(la/norm (la/matrix [[3 0] [0 4]]))
+(la/norm (t/matrix [[3 0] [0 4]]))
 
 (kind/test-last [(fn [v] (la/close-scalar? v 5.0))])
 
 (kind/doc #'la/dot)
 
-(la/dot (la/column [1 2 3]) (la/column [4 5 6]))
+(la/dot (t/column [1 2 3]) (t/column [4 5 6]))
 
 (kind/test-last [(fn [v] (== 32.0 v))])
 
 (kind/doc #'la/close?)
 
-(la/close? (la/eye 2) (la/eye 2))
+(la/close? (t/eye 2) (t/eye 2))
 
 (kind/test-last [true?])
 
-(la/close? (la/eye 2) (la/zeros 2 2))
+(la/close? (t/eye 2) (t/zeros 2 2))
 
 (kind/test-last [false?])
 
@@ -217,16 +276,16 @@
 
 (kind/doc #'la/invert)
 
-(let [A (la/matrix [[1 2] [3 5]])]
-  (la/close? (la/mmul A (la/invert A)) (la/eye 2)))
+(let [A (t/matrix [[1 2] [3 5]])]
+  (la/close? (la/mmul A (la/invert A)) (t/eye 2)))
 
 (kind/test-last [true?])
 
 (kind/doc #'la/solve)
 
 ;; Solve $Ax = b$:
-(let [A (la/matrix [[2 1] [1 3]])
-      b (la/column [5 7])]
+(let [A (t/matrix [[2 1] [1 3]])
+      b (t/column [5 7])]
   (la/solve A b))
 
 (kind/test-last [(fn [x] (and (la/close-scalar? (x 0 0) 1.6)
@@ -234,7 +293,7 @@
 
 (kind/doc #'la/eigen)
 
-(let [result (la/eigen (la/matrix [[2 1] [1 2]]))]
+(let [result (la/eigen (t/matrix [[2 1] [1 2]]))]
   [(count (:eigenvectors result))
    (cx/complex-shape (:eigenvalues result))])
 
@@ -244,17 +303,17 @@
 
 (kind/doc #'la/real-eigenvalues)
 
-(la/real-eigenvalues (la/matrix [[2 1] [1 2]]))
+(la/real-eigenvalues (t/matrix [[2 1] [1 2]]))
 
 (kind/test-last [(fn [evs] (and (la/close-scalar? (evs 0) 1.0)
                                 (la/close-scalar? (evs 1) 3.0)))])
 
 (kind/doc #'la/svd)
 
-(let [{:keys [U S Vt]} (la/svd (la/matrix [[1 0] [0 2] [0 0]]))]
-  [(dtype/shape U)
+(let [{:keys [U S Vt]} (la/svd (t/matrix [[1 0] [0 2] [0 0]]))]
+  [(t/shape U)
    (count S)
-   (dtype/shape Vt)])
+   (t/shape Vt)])
 
 (kind/test-last [(fn [[u-shape n-s vt-shape]]
                    (and (= [3 3] u-shape)
@@ -263,130 +322,70 @@
 
 (kind/doc #'la/qr)
 
-(let [{:keys [Q R]} (la/qr (la/matrix [[1 1] [1 2] [0 1]]))]
-  (la/close? (la/mmul Q R) (la/matrix [[1 1] [1 2] [0 1]])))
+(let [{:keys [Q R]} (la/qr (t/matrix [[1 1] [1 2] [0 1]]))]
+  (la/close? (la/mmul Q R) (t/matrix [[1 1] [1 2] [0 1]])))
 
 (kind/test-last [true?])
 
 (kind/doc #'la/cholesky)
 
-(let [A (la/matrix [[4 2] [2 3]])
+(let [A (t/matrix [[4 2] [2 3]])
       L (la/cholesky A)]
   (la/close? (la/mmul L (la/transpose L)) A))
 
 (kind/test-last [true?])
 
-(kind/doc #'la/tensor->dmat)
-
-(let [t (la/matrix [[1 2] [3 4]])
-      dm (la/tensor->dmat t)]
-  (= org.ejml.data.DMatrixRMaj (type dm)))
-
-(kind/test-last [true?])
-
-(kind/doc #'la/dmat->tensor)
-
-(let [dm (la/tensor->dmat (la/eye 2))
-      t (la/dmat->tensor dm)]
-  (= [2 2] (dtype/shape t)))
-
-(kind/test-last [true?])
-
-(kind/doc #'la/complex-tensor->zmat)
-
-(let [ct (cx/complex-tensor [1.0 2.0] [3.0 4.0])
-      zm (la/complex-tensor->zmat ct)]
-  (= org.ejml.data.ZMatrixRMaj (type zm)))
-
-(kind/test-last [true?])
-
-(kind/doc #'la/zmat->complex-tensor)
-
-(let [zm (la/complex-tensor->zmat (cx/complex-tensor [1.0 2.0] [3.0 4.0]))
-      ct (la/zmat->complex-tensor zm)]
-  (cx/complex? ct))
-
-(kind/test-last [true?])
-
-(kind/doc #'la/ones)
-
-(la/ones 2 3)
-
-(kind/test-last [(fn [m] (= [2 3] (dtype/shape m)))])
-
 (kind/doc #'la/mpow)
 
-(la/mpow (la/matrix [[1 1] [0 1]]) 5)
+(la/mpow (t/matrix [[1 1] [0 1]]) 5)
 
-(kind/test-last [(fn [m] (la/close? m (la/matrix [[1 5] [0 1]])))])
+(kind/test-last [(fn [m] (la/close? m (t/matrix [[1 5] [0 1]])))])
 
 (kind/doc #'la/rank)
 
-(la/rank (la/matrix [[1 2] [2 4]]))
+(la/rank (t/matrix [[1 2] [2 4]]))
 
 (kind/test-last [(fn [r] (= 1 r))])
 
 (kind/doc #'la/condition-number)
 
-(la/condition-number (la/matrix [[2 1] [1 3]]))
+(la/condition-number (t/matrix [[2 1] [1 3]]))
 
 (kind/test-last [(fn [v] (> v 1.0))])
 
 (kind/doc #'la/pinv)
 
-(let [A (la/matrix [[2 1] [1 3]])]
-  (la/close? (la/mmul A (la/pinv A)) (la/eye 2)))
+(let [A (t/matrix [[2 1] [1 3]])]
+  (la/close? (la/mmul A (la/pinv A)) (t/eye 2)))
 
 (kind/test-last [true?])
 
 (kind/doc #'la/lstsq)
 
-(let [{:keys [x rank]} (la/lstsq (la/matrix [[1 1] [1 2] [1 3]])
-                                 (la/column [1 2 3]))]
-  {:rank rank :close? (la/close? x (la/column [0 1]))})
+(let [{:keys [x rank]} (la/lstsq (t/matrix [[1 1] [1 2] [1 3]])
+                                 (t/column [1 2 3]))]
+  {:rank rank :close? (la/close? x (t/column [0 1]))})
 
 (kind/test-last [(fn [m] (and (= 2 (:rank m)) (:close? m)))])
 
 (kind/doc #'la/null-space)
 
-(let [ns (la/null-space (la/matrix [[1 2] [2 4]]))]
-  (la/close? (la/mmul (la/matrix [[1 2] [2 4]]) ns)
-             (la/zeros 2 1)))
+(let [ns (la/null-space (t/matrix [[1 2] [2 4]]))]
+  (la/close? (la/mmul (t/matrix [[1 2] [2 4]]) ns)
+             (t/zeros 2 1)))
 
 (kind/test-last [true?])
 
 (kind/doc #'la/col-space)
 
-(second (dtype/shape (la/col-space (la/matrix [[1 2] [2 4]]))))
+(second (t/shape (la/col-space (t/matrix [[1 2] [2 4]]))))
 
 (kind/test-last [(fn [r] (= 1 r))])
-
-(kind/doc #'la/real-tensor?)
-
-(la/real-tensor? (la/matrix [[1 2] [3 4]]))
-
-(kind/test-last [true?])
-
-(la/real-tensor? [1 2 3])
-
-(kind/test-last [false?])
-
-(kind/doc #'la/->real-tensor)
-
-(la/->real-tensor (tensor/->tensor [[1 2] [3 4]]))
-
-(kind/test-last [(fn [rt] (la/real-tensor? rt))])
-
-(kind/doc #'la/->tensor)
-
-(la/->tensor (la/matrix [[1 2] [3 4]]))
-
-(kind/test-last [(fn [t] (not (la/real-tensor? t)))])
 
 (kind/doc #'la/lift)
 
 ;; One-shot bridge: unwrap, apply, re-wrap. Pass a Var for tape recording.
-(la/lift dfn/sqrt (la/matrix [[4 9] [16 25]]))
+(la/lift elem/sqrt (t/matrix [[4 9] [16 25]]))
 
 (kind/test-last [(fn [m] (and (la/close-scalar? (m 0 0) 2.0)
                               (la/close-scalar? (m 0 1) 3.0)))])
@@ -394,8 +393,8 @@
 (kind/doc #'la/lifted)
 
 ;; Curried version — returns a reusable function.
-(let [my-sqrt (la/lifted dfn/sqrt)]
-  (my-sqrt (la/column [4 9 16])))
+(let [my-sqrt (la/lifted elem/sqrt)]
+  (my-sqrt (t/column [4 9 16])))
 
 (kind/test-last [(fn [v] (la/close-scalar? (v 0 0) 2.0))])
 
@@ -455,13 +454,13 @@
 
 (kind/test-last [true?])
 
-(cx/complex? (la/eye 2))
+(cx/complex? (t/eye 2))
 
 (kind/test-last [false?])
 
 (kind/doc #'cx/->tensor)
 
-(dtype/shape (cx/->tensor (cx/complex-tensor [1.0 2.0] [3.0 4.0])))
+(t/shape (cx/->tensor (cx/complex-tensor [1.0 2.0] [3.0 4.0])))
 
 (kind/test-last [= [2 2]])
 
@@ -474,7 +473,7 @@
 
 (kind/doc #'cx/wrap-tensor)
 
-(let [raw (tensor/->tensor [[1.0 2.0] [3.0 4.0]])
+(let [raw (t/matrix [[1.0 2.0] [3.0 4.0]])
       ct (cx/wrap-tensor raw)]
   [(cx/complex? ct) (cx/complex-shape ct)])
 
@@ -639,30 +638,30 @@
 
 (kind/doc #'tape/memory-status)
 
-(tape/memory-status (la/matrix [[1 2] [3 4]]))
+(tape/memory-status (t/matrix [[1 2] [3 4]]))
 
 (kind/test-last [(fn [s] (= :contiguous s))])
 
-(tape/memory-status (la/transpose (la/matrix [[1 2] [3 4]])))
+(tape/memory-status (la/transpose (t/matrix [[1 2] [3 4]])))
 
 (kind/test-last [(fn [s] (= :strided s))])
 
-(tape/memory-status (la/add (la/eye 2) (la/eye 2)))
+(tape/memory-status (la/add (t/eye 2) (t/eye 2)))
 
 (kind/test-last [(fn [s] (= :lazy s))])
 
 (kind/doc #'tape/memory-relation)
 
-(let [A (la/matrix [[1 2] [3 4]])]
+(let [A (t/matrix [[1 2] [3 4]])]
   (tape/memory-relation A (la/transpose A)))
 
 (kind/test-last [(fn [r] (= :shared r))])
 
-(tape/memory-relation (la/matrix [[1 0] [0 1]]) (la/matrix [[5 6] [7 8]]))
+(tape/memory-relation (t/matrix [[1 0] [0 1]]) (t/matrix [[5 6] [7 8]]))
 
 (kind/test-last [(fn [r] (= :independent r))])
 
-(tape/memory-relation (la/matrix [[1 2] [3 4]]) (la/add (la/eye 2) (la/eye 2)))
+(tape/memory-relation (t/matrix [[1 2] [3 4]]) (la/add (t/eye 2) (t/eye 2)))
 
 (kind/test-last [(fn [r] (= :unknown-lazy r))])
 
@@ -670,7 +669,7 @@
 
 (def tape-example
   (tape/with-tape
-    (let [A (la/matrix [[1 2] [3 4]])
+    (let [A (t/matrix [[1 2] [3 4]])
           B (la/scale A 2.0)]
       (la/mmul B (la/transpose A)))))
 
@@ -714,163 +713,163 @@
 
 (kind/doc #'elem/sq)
 
-(elem/sq (la/column [2 3 4]))
+(elem/sq (t/column [2 3 4]))
 
 (kind/test-last [(fn [v] (la/close-scalar? (v 0 0) 4.0))])
 
 (kind/doc #'elem/sqrt)
 
-(elem/sqrt (la/column [4 9 16]))
+(elem/sqrt (t/column [4 9 16]))
 
 (kind/test-last [(fn [v] (la/close-scalar? (v 0 0) 2.0))])
 
 (kind/doc #'elem/exp)
 
-(la/close-scalar? ((elem/exp (la/column [0])) 0 0) 1.0)
+(la/close-scalar? ((elem/exp (t/column [0])) 0 0) 1.0)
 
 (kind/test-last [true?])
 
 (kind/doc #'elem/log)
 
-(la/close-scalar? ((elem/log (la/column [math/E])) 0 0) 1.0)
+(la/close-scalar? ((elem/log (t/column [math/E])) 0 0) 1.0)
 
 (kind/test-last [true?])
 
 (kind/doc #'elem/log10)
 
-(la/close-scalar? ((elem/log10 (la/column [100])) 0 0) 2.0)
+(la/close-scalar? ((elem/log10 (t/column [100])) 0 0) 2.0)
 
 (kind/test-last [true?])
 
 (kind/doc #'elem/sin)
 
-(la/close-scalar? ((elem/sin (la/column [(/ math/PI 2)])) 0 0) 1.0)
+(la/close-scalar? ((elem/sin (t/column [(/ math/PI 2)])) 0 0) 1.0)
 
 (kind/test-last [true?])
 
 (kind/doc #'elem/cos)
 
-(la/close-scalar? ((elem/cos (la/column [0])) 0 0) 1.0)
+(la/close-scalar? ((elem/cos (t/column [0])) 0 0) 1.0)
 
 (kind/test-last [true?])
 
 (kind/doc #'elem/tan)
 
-(la/close-scalar? ((elem/tan (la/column [(/ math/PI 4)])) 0 0) 1.0)
+(la/close-scalar? ((elem/tan (t/column [(/ math/PI 4)])) 0 0) 1.0)
 
 (kind/test-last [true?])
 
 (kind/doc #'elem/sinh)
 
-(la/close-scalar? ((elem/sinh (la/column [0])) 0 0) 0.0)
+(la/close-scalar? ((elem/sinh (t/column [0])) 0 0) 0.0)
 
 (kind/test-last [true?])
 
 (kind/doc #'elem/cosh)
 
-(la/close-scalar? ((elem/cosh (la/column [0])) 0 0) 1.0)
+(la/close-scalar? ((elem/cosh (t/column [0])) 0 0) 1.0)
 
 (kind/test-last [true?])
 
 (kind/doc #'elem/tanh)
 
-(la/close-scalar? ((elem/tanh (la/column [0])) 0 0) 0.0)
+(la/close-scalar? ((elem/tanh (t/column [0])) 0 0) 0.0)
 
 (kind/test-last [true?])
 
 (kind/doc #'elem/abs)
 
-((elem/abs (la/column [-5])) 0 0)
+((elem/abs (t/column [-5])) 0 0)
 
 (kind/test-last [(fn [v] (== 5.0 v))])
 
 (kind/doc #'elem/sum)
 
-(elem/sum (la/column [1 2 3 4]))
+(elem/sum (t/column [1 2 3 4]))
 
 (kind/test-last [(fn [v] (== 10.0 v))])
 
 (kind/doc #'elem/mean)
 
-(elem/mean (la/column [2 4 6]))
+(elem/mean (t/column [2 4 6]))
 
 (kind/test-last [(fn [v] (== 4.0 v))])
 
 (kind/doc #'elem/pow)
 
-((elem/pow (la/column [2]) 3) 0 0)
+((elem/pow (t/column [2]) 3) 0 0)
 
 (kind/test-last [(fn [v] (== 8.0 v))])
 
 (kind/doc #'elem/cbrt)
 
-(la/close-scalar? ((elem/cbrt (la/column [27])) 0 0) 3.0)
+(la/close-scalar? ((elem/cbrt (t/column [27])) 0 0) 3.0)
 
 (kind/test-last [true?])
 
 (kind/doc #'elem/floor)
 
-((elem/floor (la/column [2.7])) 0 0)
+((elem/floor (t/column [2.7])) 0 0)
 
 (kind/test-last [(fn [v] (== 2.0 v))])
 
 (kind/doc #'elem/ceil)
 
-((elem/ceil (la/column [2.3])) 0 0)
+((elem/ceil (t/column [2.3])) 0 0)
 
 (kind/test-last [(fn [v] (== 3.0 v))])
 
 (kind/doc #'elem/min)
 
-((elem/min (la/column [3]) (la/column [5])) 0 0)
+((elem/min (t/column [3]) (t/column [5])) 0 0)
 
 (kind/test-last [(fn [v] (== 3.0 v))])
 
 (kind/doc #'elem/max)
 
-((elem/max (la/column [3]) (la/column [5])) 0 0)
+((elem/max (t/column [3]) (t/column [5])) 0 0)
 
 (kind/test-last [(fn [v] (== 5.0 v))])
 
 (kind/doc #'elem/asin)
 
-((elem/asin (la/column [0.5])) 0 0)
+((elem/asin (t/column [0.5])) 0 0)
 
 (kind/test-last [(fn [v] (la/close-scalar? v (math/asin 0.5)))])
 
 (kind/doc #'elem/acos)
 
-((elem/acos (la/column [0.5])) 0 0)
+((elem/acos (t/column [0.5])) 0 0)
 
 (kind/test-last [(fn [v] (la/close-scalar? v (math/acos 0.5)))])
 
 (kind/doc #'elem/atan)
 
-((elem/atan (la/column [1.0])) 0 0)
+((elem/atan (t/column [1.0])) 0 0)
 
 (kind/test-last [(fn [v] (la/close-scalar? v (math/atan 1.0)))])
 
 (kind/doc #'elem/log1p)
 
-((elem/log1p (la/column [0.0])) 0 0)
+((elem/log1p (t/column [0.0])) 0 0)
 
 (kind/test-last [(fn [v] (la/close-scalar? v 0.0))])
 
 (kind/doc #'elem/expm1)
 
-((elem/expm1 (la/column [0.0])) 0 0)
+((elem/expm1 (t/column [0.0])) 0 0)
 
 (kind/test-last [(fn [v] (la/close-scalar? v 0.0))])
 
 (kind/doc #'elem/round)
 
-((elem/round (la/column [2.7])) 0 0)
+((elem/round (t/column [2.7])) 0 0)
 
 (kind/test-last [(fn [v] (== 3.0 v))])
 
 (kind/doc #'elem/clip)
 
-(la/flatten (elem/clip (la/column [-2 0.5 3]) -1 1))
+(t/flatten (elem/clip (t/column [-2 0.5 3]) -1 1))
 
 (kind/test-last [(fn [v] (= [-1.0 0.5 1.0] v))])
 
@@ -880,7 +879,7 @@
 
 (kind/doc #'grad/grad)
 
-(let [A (la/matrix [[1 2] [3 4]])
+(let [A (t/matrix [[1 2] [3 4]])
       tape-result (tape/with-tape
                     (la/trace (la/mmul (la/transpose A) A)))
       grads (grad/grad tape-result (:result tape-result))]
@@ -906,19 +905,19 @@
 
 (kind/doc #'vis/matrix->gray-image)
 
-(let [m (tensor/compute-tensor [50 50]
-                               (fn [r c] (* 255.0 (/ (+ r c) 100.0)))
-                               :float64)]
+(let [m (t/compute-tensor [50 50]
+                          (fn [r c] (* 255.0 (/ (+ r c) 100.0)))
+                          :float64)]
   (bufimg/tensor->image (vis/matrix->gray-image m)))
 
 (kind/test-last [(fn [img] (= java.awt.image.BufferedImage (type img)))])
 
 (kind/doc #'vis/extract-channel)
 
-(let [img (tensor/compute-tensor [50 50 3]
-                                 (fn [r c ch]
-                                   (case (int ch) 0 (int (* 255 (/ r 50.0))) 1 128 2 64))
-                                 :uint8)]
+(let [img (t/compute-tensor [50 50 3]
+                            (fn [r c ch]
+                              (case (int ch) 0 (int (* 255 (/ r 50.0))) 1 128 2 64))
+                            :uint8)]
   (bufimg/tensor->image (vis/extract-channel img 0)))
 
 (kind/test-last [(fn [img] (= java.awt.image.BufferedImage (type img)))])

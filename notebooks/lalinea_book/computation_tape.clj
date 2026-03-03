@@ -10,10 +10,10 @@
 
 (ns lalinea-book.computation-tape
   (:require [scicloj.lalinea.linalg :as la]
+            [scicloj.lalinea.tensor :as t]
+            [scicloj.lalinea.elementwise :as elem]
             [scicloj.lalinea.tape :as tape]
             [scicloj.lalinea.complex :as cx]
-            [tech.v3.datatype.functional :as dfn]
-            [tech.v3.tensor :as tensor]
             [scicloj.kindly.v4.kind :as kind])
   (:import [org.ejml.data DMatrixRMaj]))
 
@@ -26,7 +26,7 @@
 ;; - `:strided` — shares a `double[]` but with reordered strides
 ;; - `:lazy` — no backing array, recomputes on each access
 
-(def A (la/matrix [[1 2] [3 4]]))
+(def A (t/matrix [[1 2] [3 4]]))
 
 (tape/memory-status A)
 
@@ -44,7 +44,7 @@
 ;; `la/add` returns a lazy reader — no allocation, recomputes
 ;; on every access.
 
-(def B (la/matrix [[5 6] [7 8]]))
+(def B (t/matrix [[5 6] [7 8]]))
 
 (tape/memory-status (la/add A B))
 
@@ -81,11 +81,11 @@
 (kind/test-last
  [(fn [r] (= :independent r))])
 
-;; `la/column` on a `double[]` shares memory with it:
+;; Two `t/column` calls on the same `double[]` share memory:
 
 (def arr (double-array [10 20 30]))
 
-(tape/memory-relation (la/column arr) (tensor/ensure-tensor arr))
+(tape/memory-relation (t/column arr) (t/column arr))
 
 (kind/test-last
  [(fn [r] (= :shared r))])
@@ -104,7 +104,7 @@
 ;; `:reads-through` instead of `:unknown-lazy`:
 
 (let [tr (tape/with-tape
-           (let [M (la/matrix [[1 2] [3 4]])
+           (let [M (t/matrix [[1 2] [3 4]])
                  S (la/add M M)]
              S))]
   (tape/detect-memory-status (last (:entries tr))))
@@ -119,9 +119,9 @@
 
 (def tape-result
   (tape/with-tape
-    (let [M (la/matrix [[1 2] [3 4]])
+    (let [M (t/matrix [[1 2] [3 4]])
           S (la/scale M 2.0)
-          I (la/eye 2)
+          I (t/eye 2)
           C (la/add S I)
           D (la/mmul C (la/transpose M))]
       D)))
@@ -129,7 +129,7 @@
 (dissoc tape-result :registry)
 
 (kind/test-last
- [(fn [tr] (and (la/real-tensor? (:result tr))
+ [(fn [tr] (and (t/real-tensor? (:result tr))
                 (= 6 (count (:entries tr)))))])
 
 ;; The result is a map with `:result` (the computed value) and
@@ -145,12 +145,12 @@
 
 ;; ### Double arrays
 
-;; A `double[]` passed to `la/column` is external — the tape
-;; records `la/column` but not the array construction.
+;; A `double[]` passed to `t/column` is external — the tape
+;; records `t/column` but not the array construction.
 
 (def array-tape
   (tape/with-tape
-    (let [v (la/column [1 2 3])
+    (let [v (t/column [1 2 3])
           w (la/scale v 5.0)]
       w)))
 
@@ -159,57 +159,57 @@
 
 (kind/test-last
  [(fn [entries]
-    (and (= :la/column (:op (first entries)))
+    (and (= :t/column (:op (first entries)))
          (= [{:external true}] (:inputs (first entries)))
          (= {:id "t1"} (first (:inputs (second entries))))))])
 
 ;; ### Clojure vectors and sequences
 
-;; Clojure data structures are external too. `la/matrix` wraps
+;; Clojure data structures are external too. `t/matrix` wraps
 ;; them into tensors — the tape records that wrapping.
 
 (def seq-tape
   (tape/with-tape
-    (let [M (la/matrix (for [i (range 3)]
+    (let [M (t/matrix (for [i (range 3)]
                          (for [j (range 3)]
                            (* (inc i) (inc j)))))
-          v (la/column (repeat 3 1.0))]
+          v (t/column (repeat 3 1.0))]
       (la/mmul M v))))
 
 (mapv :op (:entries seq-tape))
 
 (kind/test-last
- [(fn [ops] (= [:la/matrix :la/column :la/mmul] ops))])
+ [(fn [ops] (= [:t/matrix :t/column :la/mmul] ops))])
 
 ;; ### dtype-next operations
 
-;; `dfn/` operations are not `la/` functions, so the tape does not
-;; record them. If a `dfn` result is fed into an `la/` function,
-;; it appears as external.
+;; Using `la/mul` instead of raw `dfn/*` means the tape captures
+;; the full chain. The `t/matrix` wrapper around the result is also
+;; recorded.
 
 (def dfn-tape
   (tape/with-tape
-    (let [A (la/matrix [[1 2] [3 4]])
-          doubled (dfn/* A 2.0)
-          result (la/add (la/matrix doubled) A)]
+    (let [A (t/matrix [[1 2] [3 4]])
+          doubled (la/mul A 2.0)
+          result (la/add (t/matrix doubled) A)]
       result)))
 
 (mapv (fn [e] (select-keys e [:id :op :inputs]))
       (:entries dfn-tape))
 
-;; `la/matrix` wraps the `dfn/*` result. The `dfn/*` output is
-;; external to the tape — but `la/matrix` and the subsequent
-;; `la/add` are tracked.
+;; `la/mul` computes the element-wise product, and `t/matrix` wraps
+;; its result. All four operations (`t/matrix`, `la/mul`, `t/matrix`,
+;; `la/add`) are tracked on the tape.
 
 (kind/test-last
  [(fn [entries]
-    (= [:la/matrix :la/matrix :la/add]
+    (= [:t/matrix :la/mul :t/matrix :la/add]
        (mapv :op entries)))])
 
 ;; ### EJML structures
 
 ;; EJML's `DMatrixRMaj` can be converted to a tensor via
-;; `la/dmat->tensor`. The conversion itself is not instrumented
+;; `t/dmat->tensor`. The conversion itself is not instrumented
 ;; (it is a low-level interop function), so the resulting tensor
 ;; is external to the tape.
 
@@ -217,37 +217,37 @@
   (tape/with-tape
     (let [dm (doto (DMatrixRMaj. 2 2)
                (.setData (double-array [1 0 0 1])))
-          I  (la/dmat->tensor dm)
-          result (la/add (la/matrix [[5 6] [7 8]]) I)]
+          I  (t/dmat->tensor dm)
+          result (la/add (t/matrix [[5 6] [7 8]]) I)]
       result)))
 
 (mapv (fn [e] (select-keys e [:id :op :inputs]))
       (:entries ejml-tape))
 
-;; The tensor from `dmat->tensor` enters the tape as external input
+;; The tensor from `t/dmat->tensor` enters the tape as external input
 ;; to `la/add`.
 
 (kind/test-last
  [(fn [entries]
-    (and (= [:la/matrix :la/add] (mapv :op entries))
+    (and (= [:t/matrix :la/add] (mapv :op entries))
          (:external (second (:inputs (second entries))))))])
 
 ;; ## Complex operations
 
 ;; `cx/` operations are recorded alongside `la/` operations. The tape
-;; shows the full chain: `la/matrix` → `cx/complex-tensor` → `la/add`.
+;; shows the full chain: `t/matrix` → `cx/complex-tensor` → `la/add`.
 
 (def complex-tape
   (tape/with-tape
-    (let [z1 (cx/complex-tensor (la/matrix [[1 0] [0 1]]))
-          z2 (cx/complex-tensor (la/matrix [[0 1] [1 0]]))
+    (let [z1 (cx/complex-tensor (t/matrix [[1 0] [0 1]]))
+          z2 (cx/complex-tensor (t/matrix [[0 1] [1 0]]))
           s  (la/add z1 z2)]
       s)))
 
 (mapv :op (:entries complex-tape))
 
 (kind/test-last
- [(fn [ops] (= [:la/matrix :cx/complex-tensor :la/matrix :cx/complex-tensor :la/add] ops))])
+ [(fn [ops] (= [:t/matrix :cx/complex-tensor :t/matrix :cx/complex-tensor :la/add] ops))])
 
 ;; When `la/add` dispatches to `cx/add` for complex inputs, only the
 ;; outermost operation is recorded — the tape shows `:la/add`, not
@@ -306,15 +306,15 @@
 
 (def pipeline-result
   (tape/with-tape
-    (let [data (la/matrix [[1 0 2]
+    (let [data (t/matrix [[1 0 2]
                            [0 3 0]
                            [4 0 5]])
-          centered (la/sub data (la/scale (la/matrix [[1 1 1]
+          centered (la/sub data (la/scale (t/matrix [[1 1 1]
                                                       [1 1 1]
                                                       [1 1 1]])
                                           (/ (double (la/trace data)) 3.0)))
           {:keys [U S Vt]} (la/svd centered)
-          projection (la/mmul (la/transpose Vt) (la/column [1 0 0]))]
+          projection (la/mmul (la/transpose Vt) (t/column [1 0 0]))]
       projection)))
 
 (tape/summary pipeline-result)

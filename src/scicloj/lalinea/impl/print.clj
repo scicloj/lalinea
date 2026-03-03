@@ -6,7 +6,7 @@
    round-trip through `pr-str` / `read-string` for small tensors."
   (:require [scicloj.kindly-advice.v1.api :as kindly-advice]
             [tech.v3.datatype :as dtype]
-            [tech.v3.tensor :as tensor]
+            [tech.v3.tensor :as dtt]
             [scicloj.lalinea.impl.real-tensor :as rt]
             [scicloj.lalinea.complex :as cx])
   (:import [scicloj.lalinea.impl.real_tensor RealTensor]

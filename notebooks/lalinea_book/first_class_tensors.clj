@@ -12,7 +12,9 @@
 
 (ns lalinea-book.first-class-tensors
   (:require [scicloj.lalinea.linalg :as la]
-            [tech.v3.tensor :as tensor]
+            [scicloj.lalinea.tensor :as t]
+            [scicloj.lalinea.elementwise :as elem]
+            [tech.v3.tensor :as dtt]
             [tech.v3.datatype :as dtype]
             [tech.v3.datatype.functional :as dfn]
             [scicloj.kindly.v4.kind :as kind]))
@@ -23,41 +25,41 @@
 
 ;; dtype-next tensors support structural equality:
 
-(= (la/column [1 2 3]) (la/column [1 2 3]))
+(= (t/column [1 2 3]) (t/column [1 2 3]))
 
 (kind/test-last [true?])
 
 ;; Different objects with the same content are equal:
 
-(identical? (la/column [1 2 3]) (la/column [1 2 3]))
+(identical? (t/column [1 2 3]) (t/column [1 2 3]))
 
 (kind/test-last [false?])
 
 ;; This works for matrices too:
 
-(= (la/matrix [[1 2] [3 4]]) (la/matrix [[1 2] [3 4]]))
+(= (t/matrix [[1 2] [3 4]]) (t/matrix [[1 2] [3 4]]))
 
 (kind/test-last [true?])
 
 ;; And even for lazy tensors (results of arithmetic):
 
-(= (la/add (la/eye 2) (la/eye 2))
-   (la/scale (la/eye 2) 2))
+(= (la/add (t/eye 2) (t/eye 2))
+   (la/scale (t/eye 2) 2))
 
 (kind/test-last [true?])
 
 ;; Hashing is consistent — tensors can be map keys:
 
-(get {(la/column [1 2 3]) :found}
-     (la/column [1 2 3]))
+(get {(t/column [1 2 3]) :found}
+     (t/column [1 2 3]))
 
 (kind/test-last [= :found])
 
 ;; And set members:
 
-(count (hash-set (la/column [1 2 3])
-                 (la/column [1 2 3])
-                 (la/column [4 5 6])))
+(count (hash-set (t/column [1 2 3])
+                 (t/column [1 2 3])
+                 (t/column [4 5 6])))
 
 (kind/test-last [= 2])
 
@@ -69,15 +71,15 @@
 ;; Tensors nest naturally in Clojure maps:
 
 (def model
-  {:weights (la/matrix [[0.5 0.3] [0.2 0.8]])
-   :bias (la/column [0.1 0.2])
+  {:weights (t/matrix [[0.5 0.3] [0.2 0.8]])
+   :bias (t/column [0.1 0.2])
    :name "simple-model"})
 
 (:name model)
 
 (kind/test-last [= "simple-model"])
 
-(la/close? (:bias model) (la/column [0.1 0.2]))
+(la/close? (:bias model) (t/column [0.1 0.2]))
 
 (kind/test-last [true?])
 
@@ -85,23 +87,23 @@
 
 ;; La Linea provides vectorized operations that feel natural:
 
-(la/add (la/column [1 2 3]) (la/column [10 20 30]))
+(la/add (t/column [1 2 3]) (t/column [10 20 30]))
 
 (kind/test-last
- [(fn [v] (la/close? v (la/column [11 22 33])))])
+ [(fn [v] (la/close? v (t/column [11 22 33])))])
 
-(la/scale (la/matrix [[1 2] [3 4]]) 2)
+(la/scale (t/matrix [[1 2] [3 4]]) 2)
 
 (kind/test-last
- [(fn [m] (la/close? m (la/matrix [[2 4] [6 8]])))])
+ [(fn [m] (la/close? m (t/matrix [[2 4] [6 8]])))])
 
 ;; Chaining with `->` threads cleanly:
 
-(-> (la/matrix [[1 0] [0 1]])
+(-> (t/matrix [[1 0] [0 1]])
     (la/scale 3)
-    (la/add (la/eye 2)))
+    (la/add (t/eye 2)))
 
-(kind/test-last [(fn [m] (la/close? m (la/scale (la/eye 2) 4)))])
+(kind/test-last [(fn [m] (la/close? m (la/scale (t/eye 2) 4)))])
 
 ;; ## What does not work
 
@@ -109,7 +111,7 @@
 
 ;; Tensors print with a type prefix:
 
-(la/matrix [[1 2] [3 4]])
+(t/matrix [[1 2] [3 4]])
 
 ;; Vectors print readably — you can paste them back:
 
@@ -121,9 +123,9 @@
 ;; format that round-trips through `pr-str` / `read-string`:
 
 (read-string
- (pr-str {:weights (la/matrix [[1 2] [3 4]])}))
+ (pr-str {:weights (t/matrix [[1 2] [3 4]])}))
 
-(kind/test-last [(fn [v] (= (:weights v) (la/matrix [[1 2] [3 4]])))])
+(kind/test-last [(fn [v] (= (:weights v) (t/matrix [[1 2] [3 4]])))])
 
 ;; ### Immutability
 
@@ -138,14 +140,14 @@
 
 ;; Tensors are mutable. Zero-copy views share backing memory:
 
-(def mat (la/matrix [[1 2] [3 4]]))
+(def mat (t/matrix [[1 2] [3 4]]))
 (def mat-t (la/transpose mat))
 
 ;; Mutating `mat` through the backing array also changes `mat-t`:
 
 (let [arr (dtype/->double-array mat)]
   (aset arr 0 99.0)
-  [(tensor/mget mat 0 0) (tensor/mget mat-t 0 0)])
+  [(dtt/mget mat 0 0) (dtt/mget mat-t 0 0)])
 
 (kind/test-last [= [99.0 99.0]])
 
@@ -157,7 +159,7 @@
 
 ;; 1D tensors support sequential destructuring:
 
-(let [[a b c] (tensor/->tensor [10.0 20.0 30.0] :datatype :float64)]
+(let [[a b c] (dtt/->tensor [10.0 20.0 30.0] :datatype :float64)]
   (+ a b c))
 
 (kind/test-last [(fn [v] (== 60.0 v))])
@@ -166,10 +168,10 @@
 ;; scalars), which prevents direct arithmetic on the elements.
 ;; For column vectors, use indexed access:
 
-(let [v (la/column [10 20 30])]
-  (+ (tensor/mget v 0 0)
-     (tensor/mget v 1 0)
-     (tensor/mget v 2 0)))
+(let [v (t/column [10 20 30])]
+  (+ (dtt/mget v 0 0)
+     (dtt/mget v 1 0)
+     (dtt/mget v 2 0)))
 
 (kind/test-last [(fn [v] (== 60.0 v))])
 
@@ -177,13 +179,13 @@
 
 ;; `reduce` works on 1D tensors:
 
-(reduce + 0 (tensor/->tensor [1.0 2.0 3.0 4.0] :datatype :float64))
+(reduce + 0 (dtt/->tensor [1.0 2.0 3.0 4.0] :datatype :float64))
 
 (kind/test-last [(fn [v] (== 10.0 v))])
 
 ;; This boxes every element. The fast path is `dfn/sum`:
 
-(dfn/sum (la/column [1 2 3 4]))
+(dfn/sum (t/column [1 2 3 4]))
 
 (kind/test-last [(fn [v] (== 10.0 v))])
 
@@ -193,18 +195,18 @@
 ;; `#la/C` for complex. These round-trip through `pr-str` /
 ;; `read-string`:
 
-(pr-str (la/matrix [[1 2] [3 4]]))
+(pr-str (t/matrix [[1 2] [3 4]]))
 
 (kind/test-last [(fn [s] (clojure.string/starts-with? s "#la/R"))])
 
-(pr-str (la/column [5 6 7]))
+(pr-str (t/column [5 6 7]))
 
 (kind/test-last [(fn [s] (clojure.string/starts-with? s "#la/R"))])
 
 ;; Reading back produces equal tensors:
 
-(= (la/matrix [[1 2] [3 4]])
-   (read-string (pr-str (la/matrix [[1 2] [3 4]]))))
+(= (t/matrix [[1 2] [3 4]])
+   (read-string (pr-str (t/matrix [[1 2] [3 4]]))))
 
 (kind/test-last [true?])
 
@@ -213,10 +215,10 @@
 ;; Could `(la/v 1 2 3)` feel as natural as `[1 2 3]`?
 
 (defn v [& xs]
-  (la/column xs))
+  (t/column xs))
 
 (defn m [& rows]
-  (la/matrix rows))
+  (t/matrix rows))
 
 (v 1 2 3)
 

@@ -15,11 +15,7 @@
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
-   ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
-   [tech.v3.tensor :as tensor]
-   ;; Low-level buffer operations:
-   [tech.v3.datatype :as dtype]
-   ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
+   [scicloj.lalinea.tensor :as t]   ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
    [scicloj.tableplot.v1.plotly :as plotly]
@@ -36,8 +32,8 @@
 ;; lists of $n$ real numbers. A vector in $\mathbb{R}^2$ (the plane)
 ;; has two entries; a vector in $\mathbb{R}^3$ (space) has three.
 
-(def u (la/column [3 1]))
-(def v (la/column [1 2]))
+(def u (t/column [3 1]))
+(def v (t/column [1 2]))
 
 ;; We can think of these as arrows from the origin to a point,
 ;; or as displacements — "go 3 units right and 1 unit up."
@@ -120,8 +116,8 @@
 ;; entry-wise addition and scaling — but checking them builds
 ;; intuition for what each rule says.
 
-(def w-ax (la/column [-1 4]))
-(def zero2 (la/column [0 0]))
+(def w-ax (t/column [-1 4]))
+(def zero2 (t/column [0 0]))
 
 ;; **Axiom 1 — Commutativity:**
 
@@ -235,15 +231,15 @@
                    b (range -2.0 2.1 0.5)]
                [a b])
       n (count coeffs)
-      points (dtype/clone
-              (tensor/compute-tensor [n 2]
-                                     (fn [i j]
-                                       (let [[a b] (nth coeffs i)]
-                                         (+ (* a (u j 0))
-                                            (* b (v j 0)))))
-                                     :float64))
-      xs (tensor/select points :all 0)
-      ys (tensor/select points :all 1)]
+      points (t/clone
+              (t/compute-tensor [n 2]
+                                (fn [i j]
+                                  (let [[a b] (nth coeffs i)]
+                                    (+ (* a (u j 0))
+                                       (* b (v j 0)))))
+                                :float64))
+      xs (t/select points :all 0)
+      ys (t/select points :all 1)]
   (-> (tc/dataset {:x xs :y ys})
       (plotly/base {:=x :x :=y :y})
       (plotly/layer-point {:=mark-size 6})
@@ -256,21 +252,21 @@
 ;; What if the vectors point in the **same** direction?
 ;; Take $[1,2]^T$ and $[2,4]^T$ — one is just $2\times$ the other:
 
-(let [s1 (la/column [1 2])
-      s2 (la/column [2 4])
+(let [s1 (t/column [1 2])
+      s2 (t/column [2 4])
       coeffs (for [a (range -2.0 2.1 0.5)
                    b (range -2.0 2.1 0.5)]
                [a b])
       n (count coeffs)
-      points (dtype/clone
-              (tensor/compute-tensor [n 2]
-                                     (fn [i j]
-                                       (let [[a b] (nth coeffs i)]
-                                         (+ (* a (s1 j 0))
-                                            (* b (s2 j 0)))))
-                                     :float64))
-      xs (tensor/select points :all 0)
-      ys (tensor/select points :all 1)]
+      points (t/clone
+              (t/compute-tensor [n 2]
+                                (fn [i j]
+                                  (let [[a b] (nth coeffs i)]
+                                    (+ (* a (s1 j 0))
+                                       (* b (s2 j 0)))))
+                                :float64))
+      xs (t/select points :all 0)
+      ys (t/select points :all 1)]
   (-> (tc/dataset {:x xs :y ys})
       (plotly/base {:=x :x :=y :y})
       (plotly/layer-point {:=mark-size 6})
@@ -314,8 +310,8 @@
 
 ;; Independent — two non-parallel directions:
 
-(la/det (la/matrix [[3 1]
-                    [1 2]]))
+(la/det (t/matrix [[3 1]
+                   [1 2]]))
 
 (kind/test-last
  [(fn [d] (> (abs d) 1e-10))])
@@ -330,8 +326,8 @@
 
 ;; Dependent — second column is $2 \times$ the first:
 
-(la/det (la/matrix [[3 6]
-                    [1 2]]))
+(la/det (t/matrix [[3 6]
+                   [1 2]]))
 
 (kind/test-last
  [(fn [d] (< (abs d) 1e-10))])
@@ -339,9 +335,9 @@
 ;; In $\mathbb{R}^3$, three vectors are independent when they
 ;; do not all lie in the same plane:
 
-(la/det (la/matrix [[1 0 0]
-                    [0 1 0]
-                    [0 0 1]]))
+(la/det (t/matrix [[1 0 0]
+                   [0 1 0]
+                   [0 0 1]]))
 
 (kind/test-last
  [(fn [d] (< (abs (- d 1.0)) 1e-10))])
@@ -349,9 +345,9 @@
 ;; But if the third is the sum of the first two, they lie in a
 ;; plane — the determinant is zero:
 
-(la/det (la/matrix [[1 0 1]
-                    [0 1 1]
-                    [0 0 0]]))
+(la/det (t/matrix [[1 0 1]
+                   [0 1 1]
+                   [0 0 0]]))
 
 (kind/test-last
  [(fn [d] (< (abs d) 1e-10))])
@@ -373,9 +369,9 @@
 ;;
 ;; The **standard basis** for $\mathbb{R}^3$ has three vectors:
 
-(def e1 (la/column [1 0 0]))
-(def e2 (la/column [0 1 0]))
-(def e3 (la/column [0 0 1]))
+(def e1 (t/column [1 0 0]))
+(def e2 (t/column [0 1 0]))
+(def e3 (t/column [0 0 1]))
 
 ;; ### Coordinates
 ;;
@@ -385,7 +381,7 @@
 ;;
 ;; For the standard basis, coordinates are just the entries:
 
-(def w (la/column [5 -3 7]))
+(def w (t/column [5 -3 7]))
 
 ;; $\mathbf{w} = 5\mathbf{e}_1 + (-3)\mathbf{e}_2 + 7\mathbf{e}_3$:
 
@@ -416,13 +412,13 @@
 ;; Here are three independent vectors in $\mathbb{R}^3$ (they
 ;; form a basis because the determinant is non-zero):
 
-(def v1 (la/column [1 0 0]))
-(def v2 (la/column [0 1 0]))
-(def v3 (la/column [0 0 1]))
+(def v1 (t/column [1 0 0]))
+(def v2 (t/column [0 1 0]))
+(def v3 (t/column [0 0 1]))
 
-(la/det (la/matrix [[1 0 0]
-                    [0 1 0]
-                    [0 0 1]]))
+(la/det (t/matrix [[1 0 0]
+                   [0 1 0]
+                   [0 0 1]]))
 
 (kind/test-last
  [(fn [d] (< (abs (- d 1.0)) 1e-10))])
@@ -431,7 +427,7 @@
 ;; a linear combination of the first three — because three
 ;; independent vectors already fill all of $\mathbb{R}^3$:
 
-(def v4 (la/column [2 3 1]))
+(def v4 (t/column [2 3 1]))
 
 (la/close? v4
            (la/add (la/scale v1 2.0)

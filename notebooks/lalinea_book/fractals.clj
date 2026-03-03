@@ -16,15 +16,10 @@
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
+   [scicloj.lalinea.tensor :as t]
+   [scicloj.lalinea.elementwise :as elem]
    ;; Complex tensors — interleaved [re im] layout:
-   [scicloj.lalinea.complex :as cx]
-   ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
-   [tech.v3.tensor :as tensor]
-   ;; Low-level buffer operations:
-   [tech.v3.datatype :as dtype]
-   ;; Element-wise array math:
-   [tech.v3.datatype.functional :as dfn]
-   ;; Tensor ↔ BufferedImage conversion:
+   [scicloj.lalinea.complex :as cx]   ;; Tensor ↔ BufferedImage conversion:
    [tech.v3.libs.buffered-image :as bufimg]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]
@@ -34,18 +29,18 @@
 ;;
 ;; We represent the complex plane as a ComplexTensor of shape
 ;; `[height width]`, where each element is a complex number
-;; $x + yi$. `tensor/compute-tensor` fills the underlying
+;; $x + yi$. `t/compute-tensor` fills the underlying
 ;; `[h w 2]` real tensor with the real and imaginary parts.
 
 (def complex-grid
   (fn [re-min re-max im-min im-max h w]
     (cx/complex-tensor
-     (tensor/compute-tensor [h w 2]
-                            (fn [r c part]
-                              (if (zero? part)
-                                (+ re-min (* (- re-max re-min) (/ c (double (dec w)))))
-                                (+ im-min (* (- im-max im-min) (/ r (double (dec h)))))))
-                            :float64))))
+     (t/compute-tensor [h w 2]
+                       (fn [r c part]
+                         (if (zero? part)
+                           (+ re-min (* (- re-max re-min) (/ c (double (dec w)))))
+                           (+ im-min (* (- im-max im-min) (/ r (double (dec h)))))))
+                       :float64))))
 
 ;; A small test grid — the four corners should span the range:
 
@@ -77,12 +72,12 @@
     (let [c (complex-grid re-min re-max im-min im-max h w)
           counts (int-array (* h w) 0)
           zero-grid (cx/complex-tensor
-                     (tensor/compute-tensor [h w 2]
-                                            (fn [_ _ _] 0.0) :float64))]
+                     (t/compute-tensor [h w 2]
+                                       (fn [_ _ _] 0.0) :float64))]
       (loop [z zero-grid k 0]
         (if (>= k max-iter)
           counts
-          (let [z2 (dtype/clone (la/add (la/mul z z) c))
+          (let [z2 (t/clone (la/add (la/mul z z) c))
                 abs-t (la/abs z2)]
             (dotimes [r h]
               (dotimes [col w]
@@ -99,16 +94,16 @@
 
 (def counts->image
   (fn [counts h w max-iter]
-    (tensor/compute-tensor [h w 3]
-                           (fn [r c ch]
-                             (let [cnt (aget counts (+ (* r w) c))]
-                               (if (= cnt max-iter) 0
-                                   (let [t (/ (double cnt) max-iter)]
-                                     (case (int ch)
-                                       0 (int (* 255 (* 0.5 (+ 1.0 (math/cos (* 2.0 math/PI (+ t 0.0)))))))
-                                       1 (int (* 255 (* 0.5 (+ 1.0 (math/cos (* 2.0 math/PI (+ t 0.33)))))))
-                                       2 (int (* 255 (* 0.5 (+ 1.0 (math/cos (* 2.0 math/PI (+ t 0.67))))))))))))
-                           :uint8)))
+    (t/compute-tensor [h w 3]
+                      (fn [r c ch]
+                        (let [cnt (aget counts (+ (* r w) c))]
+                          (if (= cnt max-iter) 0
+                              (let [t (/ (double cnt) max-iter)]
+                                (case (int ch)
+                                  0 (int (* 255 (* 0.5 (+ 1.0 (math/cos (* 2.0 math/PI (+ t 0.0)))))))
+                                  1 (int (* 255 (* 0.5 (+ 1.0 (math/cos (* 2.0 math/PI (+ t 0.33)))))))
+                                  2 (int (* 255 (* 0.5 (+ 1.0 (math/cos (* 2.0 math/PI (+ t 0.67))))))))))))
+                      :uint8)))
 
 ;; ### The classic view
 
@@ -147,14 +142,14 @@
   (fn [c-re c-im re-min re-max im-min im-max h w max-iter]
     (let [z0 (complex-grid re-min re-max im-min im-max h w)
           c-grid (cx/complex-tensor
-                  (tensor/compute-tensor [h w 2]
-                                         (fn [_ _ part] (if (zero? part) c-re c-im))
-                                         :float64))
+                  (t/compute-tensor [h w 2]
+                                    (fn [_ _ part] (if (zero? part) c-re c-im))
+                                    :float64))
           counts (int-array (* h w) 0)]
       (loop [z z0 k 0]
         (if (>= k max-iter)
           counts
-          (let [z2 (dtype/clone (la/add (la/mul z z) c-grid))
+          (let [z2 (t/clone (la/add (la/mul z z) c-grid))
                 abs-t (la/abs z2)]
             (dotimes [r h]
               (dotimes [col w]
@@ -233,17 +228,17 @@
 
 (def complex-div
   (fn [a b]
-    (let [ar (la/->tensor (cx/re a)) ai (la/->tensor (cx/im a))
-          br (la/->tensor (cx/re b)) bi (la/->tensor (cx/im b))
-          denom (dfn/+ (dfn/* br br) (dfn/* bi bi))]
+    (let [ar (t/->tensor (cx/re a)) ai (t/->tensor (cx/im a))
+          br (t/->tensor (cx/re b)) bi (t/->tensor (cx/im b))
+          denom (la/add (la/mul br br) (la/mul bi bi))]
       (cx/complex-tensor
-       (dfn// (dfn/+ (dfn/* ar br) (dfn/* ai bi)) denom)
-       (dfn// (dfn/- (dfn/* ai br) (dfn/* ar bi)) denom)))))
+       (elem/div (la/add (la/mul ar br) (la/mul ai bi)) denom)
+       (elem/div (la/sub (la/mul ai br) (la/mul ar bi)) denom)))))
 
 ;;  Verify: (3+4i)/(1+2i) = (11-2i)/5 = 2.2-0.4i
 
-(let [a (cx/complex-tensor (la/matrix [[3]]) (la/matrix [[4]]))
-      b (cx/complex-tensor (la/matrix [[1]]) (la/matrix [[2]]))
+(let [a (cx/complex-tensor (t/matrix [[3]]) (t/matrix [[4]]))
+      b (cx/complex-tensor (t/matrix [[1]]) (t/matrix [[2]]))
       result (complex-div a b)]
   (and (< (abs (- ((cx/re result) 0 0) 2.2)) 1e-10)
        (< (abs (- ((cx/im result) 0 0) -0.4)) 1e-10)))
@@ -257,9 +252,9 @@
     (let [z0 (complex-grid re-min re-max im-min im-max h w)
           ;; Constant grid of 1 + 0i
           one (cx/complex-tensor
-               (tensor/compute-tensor [h w 2]
-                                      (fn [_ _ part] (if (zero? part) 1.0 0.0))
-                                      :float64))
+               (t/compute-tensor [h w 2]
+                                 (fn [_ _ part] (if (zero? part) 1.0 0.0))
+                                 :float64))
           ;; The three cube roots of unity
           roots [(cx/complex 1.0 0.0)
                  (cx/complex (math/cos (/ (* 2.0 math/PI) 3.0))
@@ -268,7 +263,7 @@
                              (math/sin (/ (* 4.0 math/PI) 3.0)))]
           root-idx (int-array (* h w) -1)]
       ;; Iterate Newton's method
-      (loop [z (dtype/clone z0) k 0]
+      (loop [z (t/clone z0) k 0]
         (if (>= k max-iter)
           ;; Classify each point by nearest root
           (let [z-final z]
@@ -295,7 +290,7 @@
                 z3 (la/mul z z2)
                 fz (la/sub z3 one)
                 fpz (la/scale z2 3.0)
-                z-next (dtype/clone (la/sub z (complex-div fz fpz)))]
+                z-next (t/clone (la/sub z (complex-div fz fpz)))]
             (recur z-next (inc k))))))))
 
 ;; ### Rendering
@@ -311,12 +306,12 @@
 
 (def roots->image
   (fn [root-idx h w]
-    (tensor/compute-tensor [h w 3]
-                           (fn [r c ch]
-                             (let [idx (aget root-idx (+ (* r w) c))]
-                               (if (neg? idx) 0
-                                   (nth (nth root-colors idx) ch))))
-                           :uint8)))
+    (t/compute-tensor [h w 3]
+                      (fn [r c ch]
+                        (let [idx (aget root-idx (+ (* r w) c))]
+                          (if (neg? idx) 0
+                              (nth (nth root-colors idx) ch))))
+                      :uint8)))
 
 ;; ### The full view
 

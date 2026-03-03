@@ -10,7 +10,7 @@
    Use `with-tape` to record operations, `memory-status` and
    `memory-relation` for standalone inspection."
   (:require [tech.v3.datatype :as dtype]
-            [tech.v3.tensor :as tensor]
+            [tech.v3.tensor :as dtt]
             [scicloj.lalinea.complex :as cx]
             [scicloj.lalinea.impl.real-tensor :as rt]
             [scicloj.kindly.v4.kind :as kind])
@@ -46,7 +46,7 @@
                 :else t)]
     (if-let [ab (dtype/as-array-buffer t)]
       (.ary-data ab)
-      (when (tensor/tensor? t)
+      (when (dtt/tensor? t)
         (when-let [buf (.buffer t)]
           (when-let [ab (dtype/as-array-buffer buf)]
             (.ary-data ab)))))))
@@ -97,7 +97,7 @@
   (cond
     (cx/complex? x) (cx/complex-shape x)
     (rt/real-tensor? x) (vec (dtype/shape x))
-    (tensor/tensor? x) (vec (dtype/shape x))
+    (dtt/tensor? x) (vec (dtype/shape x))
     (map? x) :map
     :else nil))
 
@@ -108,7 +108,7 @@
   [^IdentityHashMap registry ^clojure.lang.Atom counter input]
   (if-let [id (.get registry input)]
     {:id id}
-    (if (or (tensor/tensor? input) (cx/complex? input) (rt/real-tensor? input))
+    (if (or (dtt/tensor? input) (cx/complex? input) (rt/real-tensor? input))
       (let [id (str "x" (swap! counter inc))]
         (.put registry input id)
         {:id id :external true})

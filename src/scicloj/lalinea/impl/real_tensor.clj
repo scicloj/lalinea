@@ -5,11 +5,11 @@
    and structural equality — mirroring ComplexTensor for complex values."
   (:require [tech.v3.datatype :as dtype]
             [tech.v3.datatype.protocols :as dtype-proto]
-            [tech.v3.tensor :as tensor]
+            [tech.v3.tensor :as dtt]
             [ham-fisted.defprotocol :as hamf])
   (:import [clojure.lang IHashEq IPersistentCollection Sequential RT ArityException Util]
            [tech.v3.datatype.protocols
-            PElemwiseDatatype PECount PShape PClone PToReader]))
+            PElemwiseDatatype PECount PShape PClone PToReader PToBuffer]))
 
 (declare ->RealTensor)
 
@@ -19,7 +19,7 @@
   [t i]
   (if (== 1 (count (dtype/shape t)))
     (t i)
-    (tensor/select t (int i))))
+    (dtt/select t (int i))))
 
 (deftype RealTensor [tensor]
   PElemwiseDatatype
@@ -118,19 +118,19 @@
 (hamf/extend-type RealTensor
   dtype-proto/PTensor
   (mget [t idx-seq]
-    (apply tensor/mget (->tensor t) idx-seq))
+    (apply dtt/mget (->tensor t) idx-seq))
   (mset! [t idx-seq value]
-    (apply tensor/mset! (->tensor t) (concat idx-seq [value])))
+    (apply dtt/mset! (->tensor t) (concat idx-seq [value])))
   (reshape [t new-shape]
-    (tensor/reshape (->tensor t) new-shape))
+    (dtt/reshape (->tensor t) new-shape))
   (select [t select-args]
-    (apply tensor/select (->tensor t) select-args))
+    (apply dtt/select (->tensor t) select-args))
   (transpose [t reorder-vec]
-    (tensor/transpose (->tensor t) reorder-vec))
+    (dtt/transpose (->tensor t) reorder-vec))
   (broadcast [t new-shape]
-    (tensor/broadcast (->tensor t) new-shape))
+    (dtt/broadcast (->tensor t) new-shape))
   (rotate [t offset-vec]
-    (tensor/rotate (->tensor t) offset-vec))
+    (dtt/rotate (->tensor t) offset-vec))
   (slice [t n-dims right?]
     (dtype-proto/slice (->tensor t) n-dims right?)))
 
@@ -140,3 +140,12 @@
     (dtype-proto/convertible-to-array-buffer? (->tensor buf)))
   (->array-buffer [buf]
     (dtype-proto/->array-buffer (->tensor buf))))
+
+(hamf/extend-type RealTensor
+  dtype-proto/PToBuffer
+  (convertible-to-buffer? [buf] true)
+  (->buffer [buf]
+    (let [t (->tensor buf)]
+      (if (dtype-proto/convertible-to-buffer? t)
+        (dtype-proto/->buffer t)
+        (dtype-proto/->buffer (dtype-proto/->reader t))))))

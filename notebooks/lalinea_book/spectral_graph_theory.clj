@@ -16,15 +16,10 @@
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
+   [scicloj.lalinea.tensor :as t]
+   [scicloj.lalinea.elementwise :as elem]
    ;; Complex tensors — interleaved [re im] layout:
-   [scicloj.lalinea.complex :as cx]
-   ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
-   [tech.v3.tensor :as tensor]
-   ;; Low-level buffer operations:
-   [tech.v3.datatype :as dtype]
-   ;; Element-wise array math:
-   [tech.v3.datatype.functional :as dfn]
-   ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
+   [scicloj.lalinea.complex :as cx]   ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
    [scicloj.tableplot.v1.plotly :as plotly]
@@ -44,12 +39,12 @@
 ;; $A$ is symmetric.
 
 (def adj
-  (la/matrix [[0 1 1 0 0 0]
-              [1 0 1 0 0 0]
-              [1 1 0 1 0 0]
-              [0 0 1 0 1 1]
-              [0 0 0 1 0 1]
-              [0 0 0 1 1 0]]))
+  (t/matrix [[0 1 1 0 0 0]
+             [1 0 1 0 0 0]
+             [1 1 0 1 0 0]
+             [0 0 1 0 1 1]
+             [0 0 0 1 0 1]
+             [0 0 0 1 1 0]]))
 
 ;; The graph has two clusters: vertices {0, 1, 2} and {3, 4, 5},
 ;; connected through a single bridge edge (2–3).
@@ -65,7 +60,7 @@
 
 ;; The **degree** of each vertex — how many neighbours it has:
 
-(la/reduce-axis adj dfn/sum 1)
+(t/reduce-axis adj la/sum 1)
 
 (kind/test-last
  [(fn [v] (= v [2.0 2.0 3.0 3.0 2.0 2.0]))])
@@ -85,7 +80,7 @@
 
 (def laplacian
   (fn [adj]
-    (la/sub (la/diag (la/reduce-axis adj dfn/sum 1)) adj)))
+    (la/sub (t/diag (t/reduce-axis adj la/sum 1)) adj)))
 
 (def L (laplacian adj))
 
@@ -93,7 +88,7 @@ L
 
 (kind/test-last
  [(fn [m]
-    (and (= [6 6] (dtype/shape m))
+    (and (= [6 6] (t/shape m))
          (= 2.0 (m 0 0))
          (= -1.0 (m 0 1))))])
 
@@ -106,7 +101,7 @@ L
 
 ;; Let us verify that each row sums to zero:
 
-(dfn/reduce-max (dfn/abs (la/reduce-axis L dfn/sum 1)))
+(elem/reduce-max (elem/abs (t/reduce-axis L la/sum 1)))
 
 (kind/test-last
  [(fn [v] (< v 1e-10))])
@@ -169,7 +164,7 @@ fiedler-value
 ;; The Fiedler vector entries:
 
 (def fiedler-entries
-  (la/flatten fiedler-eigvec))
+  (t/flatten fiedler-eigvec))
 
 fiedler-entries
 
@@ -224,12 +219,12 @@ cluster-assignment
 ;; two components. The Laplacian then has **two** zero eigenvalues.
 
 (def adj-disconnected
-  (la/matrix [[0 1 1 0 0 0]
-              [1 0 1 0 0 0]
-              [1 1 0 0 0 0]
-              [0 0 0 0 1 1]
-              [0 0 0 1 0 1]
-              [0 0 0 1 1 0]]))
+  (t/matrix [[0 1 1 0 0 0]
+             [1 0 1 0 0 0]
+             [1 1 0 0 0 0]
+             [0 0 0 0 1 1]
+             [0 0 0 1 0 1]
+             [0 0 0 1 1 0]]))
 
 (vis/graph-plot six-pos
                 [[0 1] [0 2] [1 2] [3 4] [3 5] [4 5]]
@@ -258,9 +253,9 @@ disc-eigenvalues
 (def kn 5)
 
 (def K5-adj
-  (tensor/compute-tensor [kn kn]
-                         (fn [i j] (if (not= i j) 1.0 0.0))
-                         :float64))
+  (t/compute-tensor [kn kn]
+                    (fn [i j] (if (not= i j) 1.0 0.0))
+                    :float64))
 
 (vis/graph-plot [[0.0 1.0] [-0.951 0.309] [-0.588 -0.809] [0.588 -0.809] [0.951 0.309]]
                 [[0 1] [0 2] [0 3] [0 4] [1 2] [1 3] [1 4] [2 3] [2 4] [3 4]]
@@ -291,11 +286,11 @@ K5-eigenvalues
 (def cn 8)
 
 (def cycle-adj
-  (tensor/compute-tensor [cn cn]
-                         (fn [i j] (if (or (= j (mod (inc i) cn))
-                                           (= j (mod (+ i (dec cn)) cn)))
-                                     1.0 0.0))
-                         :float64))
+  (t/compute-tensor [cn cn]
+                    (fn [i j] (if (or (= j (mod (inc i) cn))
+                                      (= j (mod (+ i (dec cn)) cn)))
+                                1.0 0.0))
+                    :float64))
 
 (vis/graph-plot [[0.0 1.0] [-0.707 0.707] [-1.0 0.0] [-0.707 -0.707] [-0.0 -1.0] [0.707 -0.707] [1.0 -0.0] [0.707 0.707]]
                 [[0 1] [1 2] [2 3] [3 4] [4 5] [5 6] [6 7] [7 0]]
@@ -305,8 +300,8 @@ K5-eigenvalues
   (la/real-eigenvalues (laplacian cycle-adj)))
 
 (def cycle-theoretical
-  (sort (dtype/make-reader :float64 cn
-                           (- 2.0 (* 2.0 (math/cos (/ (* 2.0 math/PI idx) cn)))))))
+  (sort (t/make-reader :float64 cn
+                       (- 2.0 (* 2.0 (math/cos (/ (* 2.0 math/PI idx) cn)))))))
 
 ;; Computed eigenvalues:
 
@@ -318,8 +313,8 @@ cycle-theoretical
 
 ;; They agree to machine precision:
 
-(< (dfn/reduce-max
-    (dfn/abs (dfn/- cycle-eigenvalues cycle-theoretical)))
+(< (elem/reduce-max
+    (elem/abs (la/sub cycle-eigenvalues cycle-theoretical)))
    1e-10)
 
 (kind/test-last [true?])
@@ -333,9 +328,9 @@ cycle-theoretical
 (def pn 6)
 
 (def path-adj
-  (tensor/compute-tensor [pn pn]
-                         (fn [i j] (if (= 1 (abs (- i j))) 1.0 0.0))
-                         :float64))
+  (t/compute-tensor [pn pn]
+                    (fn [i j] (if (= 1 (abs (- i j))) 1.0 0.0))
+                    :float64))
 
 (vis/graph-plot [[0 0] [1 0] [2 0] [3 0] [4 0] [5 0]]
                 [[0 1] [1 2] [2 3] [3 4] [4 5]]
@@ -347,13 +342,13 @@ cycle-theoretical
 path-eigenvalues
 
 (def path-theoretical
-  (sort (dtype/make-reader :float64 pn
-                           (- 2.0 (* 2.0 (math/cos (/ (* math/PI idx) pn)))))))
+  (sort (t/make-reader :float64 pn
+                       (- 2.0 (* 2.0 (math/cos (/ (* math/PI idx) pn)))))))
 
 path-theoretical
 
-(< (dfn/reduce-max
-    (dfn/abs (dfn/- path-eigenvalues path-theoretical)))
+(< (elem/reduce-max
+    (elem/abs (la/sub path-eigenvalues path-theoretical)))
    1e-10)
 
 (kind/test-last [true?])
@@ -367,7 +362,7 @@ path-theoretical
 ;; Consider a graph with three clear communities:
 
 (def community-adj
-  (la/matrix
+  (t/matrix
    [;; Community 1: vertices 0-2
     [0 1 1 0 0 0 0 0 0]
     [1 0 1 0 0 0 0 0 0]
@@ -433,8 +428,8 @@ comm-eigenvalues
   (let [ev2 (nth (:eigenvectors comm-eig) (nth sorted-comm-indices 1))
         ev3 (nth (:eigenvectors comm-eig) (nth sorted-comm-indices 2))]
     (tc/dataset {:vertex (range 9)
-                 :x (dtype/->reader ev2)
-                 :y (dtype/->reader ev3)
+                 :x (t/->reader ev2)
+                 :y (t/->reader ev3)
                  :community (mapv #(cond (<= % 2) "A"
                                          (<= % 5) "B"
                                          :else "C")

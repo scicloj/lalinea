@@ -10,15 +10,12 @@
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
+   [scicloj.lalinea.tensor :as t]
+   [scicloj.lalinea.elementwise :as elem]
    ;; Complex tensors — interleaved [re im] layout:
    [scicloj.lalinea.complex :as cx]
    ;; FFT bridge — Fastmath transforms ↔ ComplexTensor:
-   [scicloj.lalinea.transform :as ft]
-   ;; Low-level buffer operations:
-   [tech.v3.datatype :as dtype]
-   ;; Element-wise array math:
-   [tech.v3.datatype.functional :as dfn]
-   ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
+   [scicloj.lalinea.transform :as ft]   ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
    [scicloj.tableplot.v1.plotly :as plotly]
@@ -43,7 +40,7 @@
 (let [signal [1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0]
       spectrum (ft/forward signal)
       recovered (ft/inverse-real spectrum)]
-  (dfn/reduce-max (dfn/abs (dfn/- recovered signal))))
+  (elem/reduce-max (elem/abs (la/sub recovered signal))))
 
 (kind/test-last [(fn [v] (< v 1e-10))])
 
@@ -57,9 +54,9 @@
 (let [signal [1.0 2.0 3.0 4.0]
       n (count signal)
       spectrum (ft/forward signal)
-      time-energy (dfn/sum (dfn/* signal signal))
+      time-energy (la/sum (la/mul signal signal))
       magnitudes (la/abs spectrum)
-      freq-energy (/ (dfn/sum (dfn/* magnitudes magnitudes)) n)]
+      freq-energy (/ (la/sum (la/mul magnitudes magnitudes)) n)]
   (< (abs (- time-energy freq-energy)) 1e-10))
 
 (kind/test-last [true?])
@@ -72,12 +69,12 @@
       y [5.0 6.0 7.0 8.0]
       alpha 2.0
       beta -1.5
-      combined (dfn/+ (dfn/* alpha x) (dfn/* beta y))
+      combined (la/add (la/mul alpha x) (la/mul beta y))
       lhs (ft/forward combined)
       rhs (la/add (la/scale (ft/forward x) alpha)
                   (la/scale (ft/forward y) beta))]
-  (and (< (dfn/reduce-max (dfn/abs (dfn/- (cx/re lhs) (cx/re rhs)))) 1e-10)
-       (< (dfn/reduce-max (dfn/abs (dfn/- (cx/im lhs) (cx/im rhs)))) 1e-10)))
+  (and (< (elem/reduce-max (elem/abs (la/sub (cx/re lhs) (cx/re rhs)))) 1e-10)
+       (< (elem/reduce-max (elem/abs (la/sub (cx/im lhs) (cx/im rhs)))) 1e-10)))
 
 (kind/test-last [true?])
 
@@ -95,16 +92,16 @@
       product-spectrum (la/mul Fx Fy)
       conv-result (ft/inverse-real product-spectrum)
       n (count x)
-      manual-conv (let [out (dtype/make-container :float64 n)]
+      manual-conv (let [out (t/make-container :float64 n)]
                     (dotimes [k n]
                       (let [s (loop [j 0 acc 0.0]
                                 (if (>= j n) acc
                                     (recur (inc j)
                                            (+ acc (* (double (x j))
                                                      (double (y (mod (- k j) n))))))))]
-                        (dtype/set-value! out k s)))
+                        (t/set-value! out k s)))
                     out)]
-  (< (dfn/reduce-max (dfn/abs (dfn/- conv-result manual-conv))) 1e-10))
+  (< (elem/reduce-max (elem/abs (la/sub conv-result manual-conv))) 1e-10))
 
 (kind/test-last [true?])
 
@@ -115,16 +112,16 @@
 (def N-vis 64)
 
 (def signal-composed
-  (la/->real-tensor
-   (dtype/clone
-    (dtype/make-reader :float64 N-vis
-      (let [ti (/ (double idx) N-vis)]
-        (+ (math/sin (* 2 math/PI 3 ti))
-           (* 0.5 (math/sin (* 2 math/PI 7 ti)))))))))
+  (t/->real-tensor
+   (t/clone
+    (t/make-reader :float64 N-vis
+                   (let [ti (/ (double idx) N-vis)]
+                     (+ (math/sin (* 2 math/PI 3 ti))
+                        (* 0.5 (math/sin (* 2 math/PI 7 ti)))))))))
 
 ;; The time-domain waveform:
 
-(-> (tc/dataset {:t (dtype/make-reader :float64 N-vis (/ (double idx) N-vis))
+(-> (tc/dataset {:t (t/make-reader :float64 N-vis (/ (double idx) N-vis))
                  :amplitude signal-composed})
     (plotly/base {:=x :t :=y :amplitude})
     (plotly/layer-line)
@@ -180,8 +177,8 @@
 (let [signal (cx/complex-tensor [1.0 0.0] [0.0 1.0])
       spectrum (ft/forward-complex signal)
       recovered (ft/inverse spectrum)]
-  (and (< (dfn/reduce-max (dfn/abs (dfn/- (cx/re recovered) (cx/re signal)))) 1e-10)
-       (< (dfn/reduce-max (dfn/abs (dfn/- (cx/im recovered) (cx/im signal)))) 1e-10)))
+  (and (< (elem/reduce-max (elem/abs (la/sub (cx/re recovered) (cx/re signal)))) 1e-10)
+       (< (elem/reduce-max (elem/abs (la/sub (cx/im recovered) (cx/im signal)))) 1e-10)))
 
 (kind/test-last [true?])
 
@@ -192,6 +189,6 @@
 (let [signal [1.0 2.0 3.0 4.0]
       dct (ft/dct-forward signal)
       recovered (ft/dct-inverse dct)]
-  (< (dfn/reduce-max (dfn/abs (dfn/- recovered signal))) 1e-10))
+  (< (elem/reduce-max (elem/abs (la/sub recovered signal))) 1e-10))
 
 (kind/test-last [true?])

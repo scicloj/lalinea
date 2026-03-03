@@ -2,16 +2,16 @@
  lalinea-book.computation-tape-generated-test
  (:require
   [scicloj.lalinea.linalg :as la]
+  [scicloj.lalinea.tensor :as t]
+  [scicloj.lalinea.elementwise :as elem]
   [scicloj.lalinea.tape :as tape]
   [scicloj.lalinea.complex :as cx]
-  [tech.v3.datatype.functional :as dfn]
-  [tech.v3.tensor :as tensor]
   [scicloj.kindly.v4.kind :as kind]
   [clojure.test :refer [deftest is]])
  (:import [org.ejml.data DMatrixRMaj]))
 
 
-(def v3_l29 (def A (la/matrix [[1 2] [3 4]])))
+(def v3_l29 (def A (t/matrix [[1 2] [3 4]])))
 
 
 (def v4_l31 (tape/memory-status A))
@@ -26,7 +26,7 @@
 (deftest t8_l41 (is ((fn [s] (= :strided s)) v7_l39)))
 
 
-(def v10_l47 (def B (la/matrix [[5 6] [7 8]])))
+(def v10_l47 (def B (t/matrix [[5 6] [7 8]])))
 
 
 (def v11_l49 (tape/memory-status (la/add A B)))
@@ -56,9 +56,7 @@
 (def v23_l86 (def arr (double-array [10 20 30])))
 
 
-(def
- v24_l88
- (tape/memory-relation (la/column arr) (tensor/ensure-tensor arr)))
+(def v24_l88 (tape/memory-relation (t/column arr) (t/column arr)))
 
 
 (deftest t25_l90 (is ((fn [r] (= :shared r)) v24_l88)))
@@ -75,7 +73,7 @@
  (let
   [tr
    (tape/with-tape
-    (let [M (la/matrix [[1 2] [3 4]]) S (la/add M M)] S))]
+    (let [M (t/matrix [[1 2] [3 4]]) S (la/add M M)] S))]
   (tape/detect-memory-status (last (:entries tr)))))
 
 
@@ -89,11 +87,11 @@
   (tape/with-tape
    (let
     [M
-     (la/matrix [[1 2] [3 4]])
+     (t/matrix [[1 2] [3 4]])
      S
      (la/scale M 2.0)
      I
-     (la/eye 2)
+     (t/eye 2)
      C
      (la/add S I)
      D
@@ -109,7 +107,7 @@
  (is
   ((fn
     [tr]
-    (and (la/real-tensor? (:result tr)) (= 6 (count (:entries tr)))))
+    (and (t/real-tensor? (:result tr)) (= 6 (count (:entries tr)))))
    v34_l129)))
 
 
@@ -117,7 +115,7 @@
  v37_l151
  (def
   array-tape
-  (tape/with-tape (let [v (la/column [1 2 3]) w (la/scale v 5.0)] w))))
+  (tape/with-tape (let [v (t/column [1 2 3]) w (la/scale v 5.0)] w))))
 
 
 (def
@@ -133,7 +131,7 @@
   ((fn
     [entries]
     (and
-     (= :la/column (:op (first entries)))
+     (= :t/column (:op (first entries)))
      (= [{:external true}] (:inputs (first entries)))
      (= {:id "t1"} (first (:inputs (second entries))))))
    v38_l157)))
@@ -146,10 +144,10 @@
   (tape/with-tape
    (let
     [M
-     (la/matrix
+     (t/matrix
       (for [i (range 3)] (for [j (range 3)] (* (inc i) (inc j)))))
      v
-     (la/column (repeat 3 1.0))]
+     (t/column (repeat 3 1.0))]
     (la/mmul M v)))))
 
 
@@ -158,7 +156,7 @@
 
 (deftest
  t43_l181
- (is ((fn [ops] (= [:la/matrix :la/column :la/mmul] ops)) v42_l179)))
+ (is ((fn [ops] (= [:t/matrix :t/column :la/mmul] ops)) v42_l179)))
 
 
 (def
@@ -168,11 +166,11 @@
   (tape/with-tape
    (let
     [A
-     (la/matrix [[1 2] [3 4]])
+     (t/matrix [[1 2] [3 4]])
      doubled
-     (dfn/* A 2.0)
+     (la/mul A 2.0)
      result
-     (la/add (la/matrix doubled) A)]
+     (la/add (t/matrix doubled) A)]
     result))))
 
 
@@ -186,7 +184,7 @@
  (is
   ((fn
     [entries]
-    (= [:la/matrix :la/matrix :la/add] (mapv :op entries)))
+    (= [:t/matrix :la/mul :t/matrix :la/add] (mapv :op entries)))
    v46_l197)))
 
 
@@ -199,9 +197,9 @@
     [dm
      (doto (DMatrixRMaj. 2 2) (.setData (double-array [1 0 0 1])))
      I
-     (la/dmat->tensor dm)
+     (t/dmat->tensor dm)
      result
-     (la/add (la/matrix [[5 6] [7 8]]) I)]
+     (la/add (t/matrix [[5 6] [7 8]]) I)]
     result))))
 
 
@@ -216,7 +214,7 @@
   ((fn
     [entries]
     (and
-     (= [:la/matrix :la/add] (mapv :op entries))
+     (= [:t/matrix :la/add] (mapv :op entries))
      (:external (second (:inputs (second entries))))))
    v51_l224)))
 
@@ -228,9 +226,9 @@
   (tape/with-tape
    (let
     [z1
-     (cx/complex-tensor (la/matrix [[1 0] [0 1]]))
+     (cx/complex-tensor (t/matrix [[1 0] [0 1]]))
      z2
-     (cx/complex-tensor (la/matrix [[0 1] [1 0]]))
+     (cx/complex-tensor (t/matrix [[0 1] [1 0]]))
      s
      (la/add z1 z2)]
     s))))
@@ -245,9 +243,9 @@
   ((fn
     [ops]
     (=
-     [:la/matrix
+     [:t/matrix
       :cx/complex-tensor
-      :la/matrix
+      :t/matrix
       :cx/complex-tensor
       :la/add]
      ops))
@@ -289,17 +287,17 @@
   (tape/with-tape
    (let
     [data
-     (la/matrix [[1 0 2] [0 3 0] [4 0 5]])
+     (t/matrix [[1 0 2] [0 3 0] [4 0 5]])
      centered
      (la/sub
       data
       (la/scale
-       (la/matrix [[1 1 1] [1 1 1] [1 1 1]])
+       (t/matrix [[1 1 1] [1 1 1] [1 1 1]])
        (/ (double (la/trace data)) 3.0)))
      {:keys [U S Vt]}
      (la/svd centered)
      projection
-     (la/mmul (la/transpose Vt) (la/column [1 0 0]))]
+     (la/mmul (la/transpose Vt) (t/column [1 0 0]))]
     projection))))
 
 

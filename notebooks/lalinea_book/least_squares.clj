@@ -12,13 +12,8 @@
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
-   ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
-   [tech.v3.tensor :as tensor]
-   ;; Low-level buffer operations:
-   [tech.v3.datatype :as dtype]
-   ;; Element-wise array math:
-   [tech.v3.datatype.functional :as dfn]
-   ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
+   [scicloj.lalinea.tensor :as t]
+   [scicloj.lalinea.elementwise :as elem]   ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
    [scicloj.tableplot.v1.plotly :as plotly]
@@ -48,32 +43,31 @@
 ;; Some noisy data along the line $y = 2 + 3x$:
 
 (def x-data
-  (dtype/make-reader :float64 20
-                     (* 0.1 idx)))
+  (t/make-reader :float64 20
+                 (* 0.1 idx)))
 
 (def noise-linear
-  (tensor/->tensor [0.343 0.276 -0.285 -0.332 0.084 0.205 -0.245 -0.419
+  (t/matrix [0.343 0.276 -0.285 -0.332 0.084 0.205 -0.245 -0.419
                     -0.057 0.446 0.241 -0.036 0.423 -0.192 -0.363 0.106
-                    -0.147 0.165 -0.361 0.096]
-                   :datatype :float64))
+                    -0.147 0.165 -0.361 0.096]))
 
 (def y-linear
-  (dfn/+ (dfn/+ 2.0 (dfn/* 3.0 x-data)) noise-linear))
+  (la/add (la/add 2.0 (la/mul 3.0 x-data)) noise-linear))
 
 ;; Build the design matrix $A$:
 
 (def A-linear
-  (la/compute-matrix (count x-data) 2
-                     (fn [i j] (if (zero? j) 1.0 (double (x-data i))))))
+  (t/compute-matrix (count x-data) 2
+                    (fn [i j] (if (zero? j) 1.0 (double (x-data i))))))
 
 A-linear
 
 (kind/test-last
- [(fn [m] (= [20 2] (dtype/shape m)))])
+ [(fn [m] (= [20 2] (t/shape m)))])
 
 ;; The observation vector $\mathbf{y}$ as a column:
 
-(def y-col (la/column y-linear))
+(def y-col (t/column y-linear))
 
 ;; ## The [normal equations](https://en.wikipedia.org/wiki/Ordinary_least_squares#Normal_equations)
 ;;
@@ -103,7 +97,7 @@ c-linear
   (la/sub (la/mmul A-linear c-linear) y-col))
 
 (def rms-linear
-  (math/sqrt (/ (dfn/sum (dfn/* residual-linear residual-linear))
+  (math/sqrt (/ (la/sum (la/mul residual-linear residual-linear))
                 (count x-data))))
 
 rms-linear
@@ -115,8 +109,8 @@ rms-linear
 
 (let [c0 (c-linear 0 0)
       c1 (c-linear 1 0)
-      x-fit (dtype/make-reader :float64 100 (* 0.019 idx))
-      y-fit (dfn/+ c0 (dfn/* c1 x-fit))]
+      x-fit (t/make-reader :float64 100 (* 0.019 idx))
+      y-fit (la/add c0 (la/mul c1 x-fit))]
   (-> (tc/dataset {:x x-data
                    :y y-linear
                    :type (repeat (count x-data) "data")})
@@ -139,30 +133,29 @@ rms-linear
 ;; Some data along $y = 1 - 2x + x^2$:
 
 (def x-poly
-  (dtype/make-reader :float64 30
-                     (- (* 0.2 idx) 3.0)))
+  (t/make-reader :float64 30
+                 (- (* 0.2 idx) 3.0)))
 
 (def noise-poly
-  (tensor/->tensor [0.132 -0.541  0.269  0.370  0.067  0.284 -0.096 -0.651
+  (t/matrix [0.132 -0.541  0.269  0.370  0.067  0.284 -0.096 -0.651
                     -0.228  0.055  0.483 -0.301  0.088 -0.104  0.612  0.073
                     -0.318  0.247 -0.428  0.518 -0.092  0.146 -0.190  0.398
-                    0.031 -0.263  0.195 -0.416  0.347  0.010]
-                   :datatype :float64))
+                    0.031 -0.263  0.195 -0.416  0.347  0.010]))
 
 (def y-poly
-  (dfn/+ (dfn/+ 1.0 (dfn/* -2.0 x-poly))
-         (dfn/+ (dfn/* x-poly x-poly) noise-poly)))
+  (la/add (la/add 1.0 (la/mul -2.0 x-poly))
+          (la/add (la/mul x-poly x-poly) noise-poly)))
 
 (def vandermonde
   (fn [xs degree]
-    (la/compute-matrix (count xs) (inc degree)
-                       (fn [i j] (math/pow (double (xs i)) (double j))))))
+    (t/compute-matrix (count xs) (inc degree)
+                      (fn [i j] (math/pow (double (xs i)) (double j))))))
 
 (def A-poly (vandermonde x-poly 2))
 
 (def c-poly
   (la/solve (la/mmul (la/transpose A-poly) A-poly)
-            (la/mmul (la/transpose A-poly) (la/column y-poly))))
+            (la/mmul (la/transpose A-poly) (t/column y-poly))))
 
 c-poly
 
@@ -179,8 +172,8 @@ c-poly
 (let [c0 (c-poly 0 0)
       c1 (c-poly 1 0)
       c2 (c-poly 2 0)
-      x-fit (dtype/make-reader :float64 100 (- (* 0.06 idx) 3.0))
-      y-fit (dfn/+ c0 (dfn/+ (dfn/* c1 x-fit) (dfn/* c2 (dfn/* x-fit x-fit))))]
+      x-fit (t/make-reader :float64 100 (- (* 0.06 idx) 3.0))
+      y-fit (la/add c0 (la/add (la/mul c1 x-fit) (la/mul c2 (la/mul x-fit x-fit))))]
   (-> (tc/dataset {:x x-poly
                    :y y-poly
                    :type (repeat 30 "data")})
@@ -208,10 +201,10 @@ c-poly
 ;; EJML returns the full QR. For least squares we extract the
 ;; "thin" (economy) form: $Q_1$ is $m \times n$, $R_1$ is $n \times n$.
 
-(def ncols (second (dtype/shape A-poly)))
+(def ncols (second (t/shape A-poly)))
 
-(def Q1 (la/submatrix (:Q qr-result) :all (range ncols)))
-(def R1 (la/submatrix (:R qr-result) (range ncols) :all))
+(def Q1 (t/submatrix (:Q qr-result) :all (range ncols)))
+(def R1 (t/submatrix (:R qr-result) (range ncols) :all))
 
 ;; Verify $A = Q_1 R_1$:
 
@@ -223,7 +216,7 @@ c-poly
 ;; Solve $R_1 \mathbf{c} = Q_1^T \mathbf{y}$:
 
 (def c-qr
-  (la/solve R1 (la/mmul (la/transpose Q1) (la/column y-poly))))
+  (la/solve R1 (la/mmul (la/transpose Q1) (t/column y-poly))))
 
 ;; Compare with the normal-equation solution:
 
@@ -249,7 +242,7 @@ c-poly
 ;; (first $n$ columns of $U$) for the pseudoinverse.
 
 (def S-svd (:S svd-result))
-(def U-thin (la/submatrix (:U svd-result) :all (range (count S-svd))))
+(def U-thin (t/submatrix (:U svd-result) :all (range (count S-svd))))
 (def Vt-svd (:Vt svd-result))
 
 ;; The singular values:
@@ -264,9 +257,9 @@ S-svd
 
 (def c-svd
   (let [k (count S-svd)
-        S-inv (la/diag (dtype/make-reader :float64 k
-                                          (/ 1.0 (S-svd idx))))
-        Ut-y (la/mmul (la/transpose U-thin) (la/column y-poly))]
+        S-inv (t/diag (t/make-reader :float64 k
+                                     (/ 1.0 (S-svd idx))))
+        Ut-y (la/mmul (la/transpose U-thin) (t/column y-poly))]
     (la/mmul (la/transpose Vt-svd) (la/mmul S-inv Ut-y))))
 
 ;; Compare:
@@ -279,7 +272,7 @@ S-svd
 ;; The `la/pinv` convenience wrapper computes the pseudoinverse
 ;; in one call:
 
-(la/close? c-svd (la/mmul (la/pinv A-poly) (la/column y-poly)))
+(la/close? c-svd (la/mmul (la/pinv A-poly) (t/column y-poly)))
 
 (kind/test-last [true?])
 
@@ -294,37 +287,36 @@ S-svd
 ;; $y = a_0 + a_1 \cos(x) + b_1 \sin(x) + a_2 \cos(2x) + b_2 \sin(2x)$
 
 (def x-trig
-  (dtype/make-reader :float64 40
-                     (* (/ (* 2.0 math/PI) 40.0) idx)))
+  (t/make-reader :float64 40
+                 (* (/ (* 2.0 math/PI) 40.0) idx)))
 
 (def noise-trig
-  (tensor/->tensor [-0.058  0.218 -0.109  0.034  0.192 -0.277  0.138  0.065
+  (t/matrix [-0.058  0.218 -0.109  0.034  0.192 -0.277  0.138  0.065
                     -0.193  0.145 -0.044  0.291 -0.180  0.077  0.253 -0.116
                     0.162 -0.207  0.098 -0.151  0.184 -0.023  0.211 -0.138
                     0.073 -0.246  0.119  0.047 -0.183  0.264 -0.091  0.156
-                    -0.228  0.103  0.189 -0.144  0.268 -0.076  0.131 -0.201]
-                   :datatype :float64))
+                    -0.228  0.103  0.189 -0.144  0.268 -0.076  0.131 -0.201]))
 
 (def y-trig
-  (dfn/+ (dfn/+ 3.0 (dfn/* 2.0 (dfn/cos x-trig)))
-         (dfn/+ (dfn/* -1.5 (dfn/sin x-trig))
-                (dfn/+ (dfn/* 0.5 (dfn/cos (dfn/* 2.0 x-trig)))
-                       noise-trig))))
+  (la/add (la/add 3.0 (la/mul 2.0 (elem/cos x-trig)))
+          (la/add (la/mul -1.5 (elem/sin x-trig))
+                  (la/add (la/mul 0.5 (elem/cos (la/mul 2.0 x-trig)))
+                          noise-trig))))
 
 (def A-trig
-  (la/compute-matrix (count x-trig) 5
-                     (fn [i j]
-                       (let [xi (double (x-trig i))]
-                         (case (int j)
-                           0 1.0
-                           1 (math/cos xi)
-                           2 (math/sin xi)
-                           3 (math/cos (* 2.0 xi))
-                           4 (math/sin (* 2.0 xi)))))))
+  (t/compute-matrix (count x-trig) 5
+                    (fn [i j]
+                      (let [xi (double (x-trig i))]
+                        (case (int j)
+                          0 1.0
+                          1 (math/cos xi)
+                          2 (math/sin xi)
+                          3 (math/cos (* 2.0 xi))
+                          4 (math/sin (* 2.0 xi)))))))
 
 (def c-trig
   (la/solve (la/mmul (la/transpose A-trig) A-trig)
-            (la/mmul (la/transpose A-trig) (la/column y-trig))))
+            (la/mmul (la/transpose A-trig) (t/column y-trig))))
 
 c-trig
 
@@ -340,13 +332,13 @@ c-trig
 
 ;; Visualise:
 
-(let [x-fit (dtype/make-reader :float64 200
-                               (* (/ (* 2.0 math/PI) 200.0) idx))
-      y-fit (dfn/+ (dfn/* (c-trig 0 0) 1.0)
-                   (dfn/+ (dfn/* (c-trig 1 0) (dfn/cos x-fit))
-                          (dfn/+ (dfn/* (c-trig 2 0) (dfn/sin x-fit))
-                                 (dfn/+ (dfn/* (c-trig 3 0) (dfn/cos (dfn/* 2.0 x-fit)))
-                                        (dfn/* (c-trig 4 0) (dfn/sin (dfn/* 2.0 x-fit)))))))]
+(let [x-fit (t/make-reader :float64 200
+                           (* (/ (* 2.0 math/PI) 200.0) idx))
+      y-fit (la/add (la/mul (c-trig 0 0) 1.0)
+                    (la/add (la/mul (c-trig 1 0) (elem/cos x-fit))
+                            (la/add (la/mul (c-trig 2 0) (elem/sin x-fit))
+                                    (la/add (la/mul (c-trig 3 0) (elem/cos (la/mul 2.0 x-fit)))
+                                            (la/mul (c-trig 4 0) (elem/sin (la/mul 2.0 x-fit)))))))]
   (-> (tc/dataset {:x x-trig
                    :y y-trig
                    :type (repeat 40 "data")})
@@ -378,7 +370,7 @@ condition-number
 ;; interval has a much larger condition number:
 
 (def A-high
-  (vandermonde (dtype/make-reader :float64 30 (* 1.0 idx)) 8))
+  (vandermonde (t/make-reader :float64 30 (* 1.0 idx)) 8))
 
 (la/condition-number A-high)
 

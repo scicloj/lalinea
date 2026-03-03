@@ -10,7 +10,7 @@
             [scicloj.lalinea.complex :as cx]
             [tech.v3.datatype :as dtype]
             [tech.v3.datatype.functional :as dfn]
-            [tech.v3.tensor :as tensor]))
+            [tech.v3.tensor :as dtt]))
 
 ;; ---------------------------------------------------------------------------
 ;; Internal helpers
@@ -40,7 +40,7 @@
         flat (dtype/->reader t)
         n (dtype/ecount t)]
     (cx/complex-tensor
-     (tensor/reshape
+     (dtt/reshape
       (dtype/make-reader :float64 n
                          (let [base (-> idx (quot 2) (* 2))
                                x (double (flat base))
@@ -280,6 +280,14 @@
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/max)
                     (->rt (dfn/max a b))))))
+(defn div
+  "Element-wise division. Real only."
+  [a b]
+  (tape/record! :elem/div [a b]
+                (let [a (ensure-tensor a) b (ensure-tensor b)]
+                  (if (or (cx/complex? a) (cx/complex? b))
+                    (unsupported-complex! :elem/div)
+                    (->rt (dfn// a b))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Inverse trigonometric (real only)
@@ -357,3 +365,38 @@
                     (let [lo (double lo)
                           hi (double hi)]
                       (->rt (dfn/min (dfn/max a lo) hi)))))))
+
+;; ---------------------------------------------------------------------------
+;; Reductions (additional)
+;; ---------------------------------------------------------------------------
+
+(defn reduce-max
+  "Maximum element value. Returns double. Real only."
+  [a]
+  (tape/record! :elem/reduce-max [a]
+                (let [a (ensure-tensor a)]
+                  (if (cx/complex? a)
+                    (unsupported-complex! :elem/reduce-max)
+                    (double (dfn/reduce-max a))))))
+
+(defn reduce-min
+  "Minimum element value. Returns double. Real only."
+  [a]
+  (tape/record! :elem/reduce-min [a]
+                (let [a (ensure-tensor a)]
+                  (if (cx/complex? a)
+                    (unsupported-complex! :elem/reduce-min)
+                    (double (dfn/reduce-min a))))))
+
+;; ---------------------------------------------------------------------------
+;; Comparison (element-wise)
+;; ---------------------------------------------------------------------------
+
+(defn gt
+  "Element-wise greater-than. Returns a RealTensor of 0.0/1.0. Real only."
+  [a b]
+  (tape/record! :elem/gt [a b]
+                (let [a (ensure-tensor a) b (ensure-tensor b)]
+                  (if (or (cx/complex? a) (cx/complex? b))
+                    (unsupported-complex! :elem/gt)
+                    (->rt (dtype/elemwise-cast (dfn/> a b) :float64))))))

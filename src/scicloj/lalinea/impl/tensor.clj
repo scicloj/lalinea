@@ -7,7 +7,7 @@
 
    dtype-next tensors serve as the matrix type — no new deftype
    is introduced for real matrices."
-  (:require [tech.v3.tensor :as tensor]
+  (:require [tech.v3.tensor :as dtt]
             [tech.v3.datatype :as dtype])
   (:import [org.ejml.data DMatrixRMaj]))
 
@@ -40,18 +40,18 @@
   (let [r (.numRows dm)
         c (.numCols dm)
         arr (.data dm)]
-    (tensor/reshape (tensor/ensure-tensor arr) [r c])))
+    (dtt/reshape (dtt/ensure-tensor arr) [r c])))
 
 (defn matrix
   "Create an [r c] tensor from nested sequences or pass through
    an existing float64 rank-2 tensor unchanged.
    For nested sequences, allocates a contiguous double[]."
   [rows]
-  (if (and (tensor/tensor? rows)
+  (if (and (dtt/tensor? rows)
            (= :float64 (dtype/elemwise-datatype rows))
            (= 2 (count (dtype/shape rows))))
     rows
-    (tensor/->tensor rows {:datatype :float64})))
+    (dtt/->tensor rows {:datatype :float64})))
 
 (defn- ->float64-reader
   "Coerce to a float64 reader. Zero-copy for arrays/buffers/tensors;
@@ -68,7 +68,7 @@
   [xs]
   (let [r (->float64-reader xs)
         n (dtype/ecount r)]
-    (tensor/reshape (tensor/ensure-tensor r) [1 n])))
+    (dtt/reshape (dtt/ensure-tensor r) [1 n])))
 
 (defn col-vector
   "Create a [r 1] tensor from a flat sequence.
@@ -77,16 +77,16 @@
   [xs]
   (let [r (->float64-reader xs)
         n (dtype/ecount r)]
-    (tensor/reshape (tensor/ensure-tensor r) [n 1])))
+    (dtt/reshape (dtt/ensure-tensor r) [n 1])))
 
 (defn eye
   "Create an n x n identity matrix as a tensor."
   [n]
-  (tensor/compute-tensor [n n]
+  (dtt/compute-tensor [n n]
                          (fn [i j] (if (== i j) 1.0 0.0))
                          :float64))
 
 (defn zeros
   "Create an r x c zero matrix as a tensor."
   [r c]
-  (tensor/compute-tensor [r c] (fn [_ _] 0.0) :float64))
+  (dtt/compute-tensor [r c] (fn [_ _] 0.0) :float64))

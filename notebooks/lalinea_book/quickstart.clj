@@ -9,17 +9,11 @@
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
+   [scicloj.lalinea.tensor :as t]
    ;; Complex tensors — interleaved [re im] layout:
    [scicloj.lalinea.complex :as cx]
    ;; FFT bridge — Fastmath transforms ↔ ComplexTensor:
-   [scicloj.lalinea.transform :as ft]
-   ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
-   [tech.v3.tensor :as tensor]
-   ;; Low-level buffer operations:
-   [tech.v3.datatype :as dtype]
-   ;; Element-wise array math:
-   [tech.v3.datatype.functional :as dfn]
-   ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
+   [scicloj.lalinea.transform :as ft]   ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]
    [clojure.math :as math]))
 
@@ -28,54 +22,54 @@
 ;; Matrices are dtype-next tensors of shape $[r, c]$, backed by
 ;; a flat `double[]` in [row-major order](https://en.wikipedia.org/wiki/Row-_and_column-major_order).
 
-(la/matrix [[1 2 3]
-            [4 5 6]])
+(t/matrix [[1 2 3]
+           [4 5 6]])
 
-(kind/test-last [(fn [m] (= [2 3] (dtype/shape m)))])
+(kind/test-last [(fn [m] (= [2 3] (t/shape m)))])
 
 ;; Identity and zero matrices:
 
-(la/eye 3)
+(t/eye 3)
 
 (kind/test-last [(fn [m] (= 1.0 (m 1 1)))])
 
-(la/zeros 2 3)
+(t/zeros 2 3)
 
 (kind/test-last [(fn [m] (= 0.0 (m 0 0)))])
 
 ;; Diagonal matrices:
 
-(la/diag [1 2 3])
+(t/diag [1 2 3])
 
-(kind/test-last [(fn [m] (and (= [3 3] (dtype/shape m))
+(kind/test-last [(fn [m] (and (= [3 3] (t/shape m))
                               (= 2.0 (m 1 1))))])
 
 ;; ## Matrix arithmetic
 ;;
 ;; All operations accept tensors and return tensors.
 
-(la/mmul (la/matrix [[1 2] [3 4]])
-         (la/matrix [[5 6] [7 8]]))
+(la/mmul (t/matrix [[1 2] [3 4]])
+         (t/matrix [[5 6] [7 8]]))
 
 ;; $AB = \begin{pmatrix} 19 & 22 \\ 43 & 50 \end{pmatrix}$
 
 (kind/test-last [(fn [m] (= 19.0 (m 0 0)))])
 
-(la/transpose (la/matrix [[1 2] [3 4]]))
+(la/transpose (t/matrix [[1 2] [3 4]]))
 
 (kind/test-last [(fn [m] (= 3.0 (m 0 1)))])
 
 ;; ## Scalar properties
 
-(la/det (la/matrix [[1 2] [3 4]]))
+(la/det (t/matrix [[1 2] [3 4]]))
 
 (kind/test-last [(fn [v] (< (abs (- v -2.0)) 1e-10))])
 
-(la/trace (la/matrix [[1 2] [3 4]]))
+(la/trace (t/matrix [[1 2] [3 4]]))
 
 (kind/test-last [(fn [v] (= v 5.0))])
 
-(la/norm (la/matrix [[1 2] [3 4]]))
+(la/norm (t/matrix [[1 2] [3 4]]))
 
 (kind/test-last [(fn [v] (< (abs (- v 5.477225575051661)) 1e-10))])
 
@@ -85,8 +79,8 @@
 ;; $A = \begin{pmatrix} 2 & 1 \\ 1 & 3 \end{pmatrix}$,
 ;; $b = \begin{pmatrix} 5 \\ 10 \end{pmatrix}$.
 
-(la/solve (la/matrix [[2 1] [1 3]])
-          (la/matrix [[5] [10]]))
+(la/solve (t/matrix [[2 1] [1 3]])
+          (t/matrix [[5] [10]]))
 
 ;; $x = \begin{pmatrix} 1 \\ 3 \end{pmatrix}$
 
@@ -97,7 +91,7 @@
 ;;
 ;; [Eigendecomposition](https://en.wikipedia.org/wiki/Eigendecomposition_of_a_matrix) of a symmetric matrix:
 
-(la/real-eigenvalues (la/matrix [[2 1] [1 2]]))
+(la/real-eigenvalues (t/matrix [[2 1] [1 2]]))
 
 ;; Eigenvalues are $3$ and $1$.
 
@@ -106,7 +100,7 @@
 
 ;; [SVD](https://en.wikipedia.org/wiki/Singular_value_decomposition):
 
-(:S (la/svd (la/matrix [[1 2] [3 4]])))
+(:S (la/svd (t/matrix [[1 2] [3 4]])))
 
 (kind/test-last [(fn [S] (< (abs (- (first S) 5.4649857)) 1e-4))])
 
@@ -145,19 +139,19 @@
       recovered (ft/inverse-real (ft/forward signal))]
   recovered)
 
-(kind/test-last [(fn [v] (la/close? v (la/->real-tensor [1.0 2.0 3.0 4.0])))])
+(kind/test-last [(fn [v] (la/close? v (t/matrix [1.0 2.0 3.0 4.0])))])
 
 ;; ## Composing with dtype-next
 ;;
 ;; Since matrices are tensors, all dtype-next operations work.
 
-(dfn/sum (la/matrix [[1 2] [3 4]]))
+(la/sum (t/matrix [[1 2] [3 4]]))
 
 (kind/test-last [(fn [v] (= v 10.0))])
 
 ;; Element-wise operations preserve tensor structure:
 
-((la/scale (la/matrix [[1 2] [3 4]]) 2.0) 1 1)
+((la/scale (t/matrix [[1 2] [3 4]]) 2.0) 1 1)
 
 (kind/test-last [= 8.0])
 
@@ -165,38 +159,38 @@
 
 ;; Common SVD-based analyses are available as one-liners:
 
-(la/rank (la/matrix [[1 2] [2 4]]))
+(la/rank (t/matrix [[1 2] [2 4]]))
 
 (kind/test-last [= 1])
 
-(la/condition-number (la/matrix [[2 1] [1 3]]))
+(la/condition-number (t/matrix [[2 1] [1 3]]))
 
 (kind/test-last [(fn [v] (> v 1.0))])
 
 ;; Pseudoinverse:
 
-(la/close? (la/mmul (la/matrix [[2 1] [1 3]])
-                    (la/pinv (la/matrix [[2 1] [1 3]])))
-           (la/eye 2))
+(la/close? (la/mmul (t/matrix [[2 1] [1 3]])
+                    (la/pinv (t/matrix [[2 1] [1 3]])))
+           (t/eye 2))
 
 (kind/test-last [true?])
 
 ;; Matrix power:
 
-(la/mpow (la/matrix [[1 1] [0 1]]) 5)
+(la/mpow (t/matrix [[1 1] [0 1]]) 5)
 
-(kind/test-last [(fn [m] (la/close? m (la/matrix [[1 5] [0 1]])))])
+(kind/test-last [(fn [m] (la/close? m (t/matrix [[1 5] [0 1]])))])
 
 ;; ## Tagged literals
 ;;
 ;; La Linea tensors print as `#la/R` and `#la/C` tagged literals,
 ;; enabling round-trip through `pr-str` / `read-string`:
 
-(pr-str (la/matrix [[1 2] [3 4]]))
+(pr-str (t/matrix [[1 2] [3 4]]))
 
 (kind/test-last [(fn [s] (clojure.string/starts-with? s "#la/R"))])
 
-(pr-str (la/column [5 6 7]))
+(pr-str (t/column [5 6 7]))
 
 (kind/test-last [(fn [s] (clojure.string/starts-with? s "#la/R"))])
 
@@ -207,13 +201,13 @@
 
 (require '[scicloj.lalinea.elementwise :as elem])
 
-(elem/exp (la/column [0.0 1.0 2.0]))
+(elem/exp (t/column [0.0 1.0 2.0]))
 
-(kind/test-last [(fn [v] (la/close? v (la/column [1.0 (math/exp 1.0) (math/exp 2.0)])))])
+(kind/test-last [(fn [v] (la/close? v (t/column [1.0 (math/exp 1.0) (math/exp 2.0)])))])
 
-(elem/clip (la/column [-2 0.5 3]) -1 1)
+(elem/clip (t/column [-2 0.5 3]) -1 1)
 
-(kind/test-last [(fn [v] (la/close? v (la/column [-1 0.5 1])))])
+(kind/test-last [(fn [v] (la/close? v (t/column [-1 0.5 1])))])
 
 ;; ## Computation tape
 ;;
@@ -222,11 +216,11 @@
 (require '[scicloj.lalinea.tape :as tape])
 
 (let [{:keys [entries]} (tape/with-tape
-                          (la/mmul (la/matrix [[1 2] [3 4]])
-                                   (la/column [1 0])))]
+                          (la/mmul (t/matrix [[1 2] [3 4]])
+                                   (t/column [1 0])))]
   (mapv :op entries))
 
-(kind/test-last [(fn [ops] (= [:la/matrix :la/column :la/mmul] ops))])
+(kind/test-last [(fn [ops] (= [:t/matrix :t/column :la/mmul] ops))])
 
 ;; ## Automatic differentiation
 ;;
@@ -234,10 +228,10 @@
 
 (require '[scicloj.lalinea.grad :as grad])
 
-(let [A (la/matrix [[1 2] [3 4]])
+(let [A (t/matrix [[1 2] [3 4]])
       tape-result (tape/with-tape
                     (la/sum (la/sq (la/sub (la/mmul A A)
-                                           (la/matrix [[1 0] [0 1]])))))
+                                           (t/matrix [[1 0] [0 1]])))))
       grads (grad/grad tape-result (:result tape-result))]
   ((.get grads A) 0 0))
 

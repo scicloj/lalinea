@@ -102,11 +102,12 @@ Each chapter includes inline tests via
 ## API
 
 ```clojure
-(require '[scicloj.lalinea.linalg :as la])         ; matrix construction, arithmetic, decompositions, solve
+(require '[scicloj.lalinea.tensor :as t])           ; tensor construction, structural ops, EJML interop
+(require '[scicloj.lalinea.linalg :as la])          ; arithmetic, decompositions, solve
+(require '[scicloj.lalinea.elementwise :as elem])   ; element-wise math (sqrt, sin, exp, ...)
 (require '[scicloj.lalinea.complex :as cx])         ; complex tensor operations
-(require '[scicloj.lalinea.elementwise :as elem])   ; tape-aware element-wise functions
-(require '[scicloj.lalinea.transform :as ft])        ; FFT / DCT / DST / DHT bridge
-(require '[scicloj.lalinea.tape :as tape])          ; computation DAG recording, memory inspection
+(require '[scicloj.lalinea.transform :as ft])       ; FFT / DCT / DST / DHT bridge
+(require '[scicloj.lalinea.tape :as tape])          ; computation DAG recording
 (require '[scicloj.lalinea.grad :as grad])          ; reverse-mode automatic differentiation
 (require '[scicloj.lalinea.vis :as vis])            ; visualization helpers
 ```
@@ -126,7 +127,7 @@ The [book notebooks](https://scicloj.github.io/lalinea/) also use
 
 ```bash
 clojure -M:dev -m nrepl.cmdline   # start REPL
-./run_tests.sh                     # run tests (534 tests, 534 assertions)
+./run_tests.sh                     # run tests (521 tests, 521 assertions)
 clojure -T:build ci                # test + build JAR
 ```
 

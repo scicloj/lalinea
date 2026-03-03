@@ -19,7 +19,7 @@
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]
    [clojure.math :as math])
-  (:import [org.ejml.data DMatrixRMaj]))
+  (:import [org.ejml.djata DMatrixRMaj]))
 
 ;; ## dtype-next: typed numerical arrays
 ;;
@@ -31,7 +31,7 @@
 ;; code: they share a common interface for element access, type queries,
 ;; and functional transformations.
 ;;
-;; A [tensor](https://cnuernber.github.io/dtype-next/tech.v3.tensor.html)
+;; A [dtype-next tensor](https://cnuernber.github.io/dtype-next/tech.v3.tensor.html)
 ;; is a **multi-dimensional view** ([tensor](https://en.wikipedia.org/wiki/Tensor_(machine_learning))) over a buffer. Reshaping or slicing
 ;; a tensor creates a new view without copying data — the same backing
 ;; storage is simply indexed differently.

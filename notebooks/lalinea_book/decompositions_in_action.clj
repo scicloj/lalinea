@@ -10,14 +10,8 @@
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
-   [scicloj.lalinea.complex :as cx]
-   ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
-   [tech.v3.tensor :as tensor]
-   ;; Low-level buffer operations:
-   [tech.v3.datatype :as dtype]
-   ;; Element-wise array math:
-   [tech.v3.datatype.functional :as dfn]
-   ;; Tensor ↔ BufferedImage conversion:
+   [scicloj.lalinea.tensor :as t]
+   [scicloj.lalinea.complex :as cx]   ;; Tensor ↔ BufferedImage conversion:
    [tech.v3.libs.buffered-image :as bufimg]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
@@ -50,23 +44,23 @@
 (def img-size 100)
 
 (def test-image
-  (tensor/ensure-tensor
-   (dtype/clone
-    (tensor/compute-tensor [img-size img-size]
-                           (fn [r c]
-                             (let [x (/ (- c 50.0) 50.0)
-                                   y (/ (- r 50.0) 50.0)
-                                   circle (if (< (+ (* x x) (* y y)) 0.5) 200.0 50.0)
-                                   gradient (* 100.0 (+ 0.5 (* 0.5 (math/sin (* 3.0 x)))))]
-                               (+ (* 0.6 circle) (* 0.4 gradient))))
-                           :float64))))
+  (t/->tensor
+   (t/clone
+    (t/compute-tensor [img-size img-size]
+                      (fn [r c]
+                        (let [x (/ (- c 50.0) 50.0)
+                              y (/ (- r 50.0) 50.0)
+                              circle (if (< (+ (* x x) (* y y)) 0.5) 200.0 50.0)
+                              gradient (* 100.0 (+ 0.5 (* 0.5 (math/sin (* 3.0 x)))))]
+                          (+ (* 0.6 circle) (* 0.4 gradient))))
+                      :float64))))
 
 ;; Display the original:
 
-(let [t (tensor/compute-tensor [img-size img-size 3]
-                               (fn [r c _ch]
-                                 (int (max 0 (min 255 (test-image r c)))))
-                               :uint8)]
+(let [t (t/compute-tensor [img-size img-size 3]
+                          (fn [r c _ch]
+                            (int (max 0 (min 255 (test-image r c)))))
+                          :uint8)]
   (bufimg/tensor->image t))
 
 (kind/test-last
@@ -100,9 +94,9 @@
 (def reconstruct-rank-k
   (fn [svd-result k]
     (let [{:keys [U S Vt]} svd-result
-          Uk  (la/submatrix U :all (range k))
-          Sk  (la/diag (take k S))
-          Vtk (la/submatrix Vt (range k) :all)]
+          Uk  (t/submatrix U :all (range k))
+          Sk  (t/diag (take k S))
+          Vtk (t/submatrix Vt (range k) :all)]
       (la/mmul (la/mmul Uk Sk) Vtk))))
 
 ;; Compare rank 1, 5, 10, and 50 approximations:
@@ -178,20 +172,20 @@
                                   p2 (frand/grandom rng 0.0 0.8)]
                               [(+ (* cos-t p1) (* (- sin-t) p2))
                                (+ (* sin-t p1) (* cos-t p2))])))
-                  (dtype/make-container :float64))]
-    (tensor/reshape flat [n-points 2])))
+                  (t/make-container :float64))]
+    (t/reshape flat [n-points 2])))
 
 ;; ### Center the data
 
 (def X
-  (let [col0 (tensor/select data-tensor :all 0)
-        col1 (tensor/select data-tensor :all 1)
-        mean0 (/ (dfn/sum col0) n-points)
-        mean1 (/ (dfn/sum col1) n-points)
-        means (tensor/compute-tensor [n-points 2]
-                                     (fn [_i j] (if (zero? j) mean0 mean1))
-                                     :float64)]
-    (dtype/clone (la/sub data-tensor means))))
+  (let [col0 (t/select data-tensor :all 0)
+        col1 (t/select data-tensor :all 1)
+        mean0 (/ (la/sum col0) n-points)
+        mean1 (/ (la/sum col1) n-points)
+        means (t/compute-tensor [n-points 2]
+                                (fn [_i j] (if (zero? j) mean0 mean1))
+                                :float64)]
+    (t/clone (la/sub data-tensor means))))
 
 ;; ### Compute [covariance matrix](https://en.wikipedia.org/wiki/Covariance_matrix) and eigendecompose
 
@@ -201,7 +195,7 @@
 cov-matrix
 
 (kind/test-last
- [(fn [m] (= [2 2] (dtype/shape m)))])
+ [(fn [m] (= [2 2] (t/shape m)))])
 
 ;; A covariance matrix is always symmetric:
 
@@ -263,7 +257,7 @@ cov-matrix
       projected (la/mmul (la/mmul X ev1) (la/transpose ev1))
       ;; Fraction of variance explained
       variances (sort > reals)
-      explained (/ (first variances) (dfn/sum variances))]
+      explained (/ (first variances) (la/sum variances))]
   explained)
 
 ;; The first PC explains most of the variance:
@@ -282,9 +276,9 @@ cov-matrix
 ;; the diagonal entries.
 
 (def test-matrix
-  (la/matrix [[4 1 0]
-              [1 3 1]
-              [0 1 2]]))
+  (t/matrix [[4 1 0]
+             [1 3 1]
+             [0 1 2]]))
 
 ;; True eigenvalues for comparison:
 
@@ -307,7 +301,7 @@ true-eigenvalues
       (let [{:keys [Q R]} (la/qr A)
             A-next (la/mmul R Q)
             ;; Extract diagonal
-            diag (sort (la/diag A-next))
+            diag (sort (t/diag A-next))
             ;; Off-diagonal magnitude
             off-diag (math/sqrt
                       (+ (let [v (A-next 0 1)] (* v v))
@@ -340,8 +334,8 @@ true-eigenvalues
 
 (let [final (last qr-history)
       computed (sort [(:eig-1 final) (:eig-2 final) (:eig-3 final)])]
-  (la/close? (la/->real-tensor computed)
-             (la/->real-tensor true-eigenvalues) 1e-4))
+  (la/close? (t/->real-tensor computed)
+             (t/->real-tensor true-eigenvalues) 1e-4))
 
 (kind/test-last [true?])
 

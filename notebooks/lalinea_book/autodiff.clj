@@ -9,6 +9,7 @@
 
 (ns lalinea-book.autodiff
   (:require [scicloj.lalinea.linalg :as la]
+            [scicloj.lalinea.tensor :as t]
             [scicloj.lalinea.tape :as tape]
             [scicloj.lalinea.grad :as grad]
             [scicloj.kindly.v4.kind :as kind]))
@@ -36,8 +37,8 @@
 ;; The derivative of $\text{trace}(A^T A)$ with respect to $A$ is $2A$. Let us
 ;; verify this with automatic differentiation.
 
-(def A (la/matrix [[1 2]
-                   [3 4]]))
+(def A (t/matrix [[1 2]
+                  [3 4]]))
 
 (def tape-result
   (tape/with-tape
@@ -77,13 +78,13 @@
 ;; is $2A^T(Ax - b)$. This connects automatic differentiation to the
 ;; [normal equations](https://en.wikipedia.org/wiki/Ordinary_least_squares#Normal_equations): setting the gradient to zero gives $A^T A x = A^T b$.
 
-(def A2 (la/matrix [[1 0]
-                    [0 2]
-                    [1 1]]))
+(def A2 (t/matrix [[1 0]
+                   [0 2]
+                   [1 1]]))
 
-(def b (la/column [3 2 4]))
+(def b (t/column [3 2 4]))
 
-(def x (la/column [1 1]))
+(def x (t/column [1 1]))
 
 (def ls-tape
   (tape/with-tape
@@ -101,7 +102,7 @@
 grad-x
 
 (kind/test-last
- [(fn [g] (la/close? g (la/column [-8 -4])))])
+ [(fn [g] (la/close? g (t/column [-8 -4])))])
 
 ;; Verify against the analytic gradient $2A^T(Ax - b)$:
 
@@ -137,7 +138,7 @@ expected-grad
 grad-A2
 
 (kind/test-last
- [(fn [g] (la/close? g (la/matrix [[-4 -4] [0 0] [-4 -4]])))])
+ [(fn [g] (la/close? g (t/matrix [[-4 -4] [0 0] [-4 -4]])))])
 
 (def residual (la/sub (la/mmul A2 x) b))
 
@@ -158,7 +159,7 @@ expected-grad-A
 ;;
 ;; $\frac{\partial}{\partial A} \det(A) = \det(A) \cdot A^{-T}$
 
-(let [A (la/matrix [[2 1] [1 3]])
+(let [A (t/matrix [[2 1] [1 3]])
       tape-result (tape/with-tape (la/det A))
       grads (grad/grad tape-result (:result tape-result))
       grad-A (.get grads A)
@@ -174,7 +175,7 @@ expected-grad-A
 ;;
 ;; $\frac{\partial f}{\partial A} = -(A^{-T})^2$
 
-(let [A (la/matrix [[2 1] [1 3]])
+(let [A (t/matrix [[2 1] [1 3]])
       tape-result (tape/with-tape (la/trace (la/invert A)))
       grads (grad/grad tape-result (:result tape-result))
       grad-A (.get grads A)
@@ -188,7 +189,7 @@ expected-grad-A
 ;;
 ;; $\frac{\partial}{\partial A} \|A\|_F = \frac{A}{\|A\|_F}$
 
-(let [A (la/matrix [[3 0] [0 4]])
+(let [A (t/matrix [[3 0] [0 4]])
       tape-result (tape/with-tape (la/norm A))
       grads (grad/grad tape-result (:result tape-result))
       grad-A (.get grads A)

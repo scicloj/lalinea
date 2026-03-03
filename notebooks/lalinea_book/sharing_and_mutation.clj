@@ -10,33 +10,30 @@
 ;; demonstrates exactly when sharing happens and when it doesn't,
 ;; so you can make informed choices.
 ;;
-;; The rule of thumb: **if you didn't call `dtype/clone`, you might
+;; The rule of thumb: **if you didn't call `t/clone`, you might
 ;; be sharing memory.**
 
 (ns lalinea-book.sharing-and-mutation
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
+   [scicloj.lalinea.tensor :as t]
    ;; Complex tensors — interleaved [re im] layout:
    [scicloj.lalinea.complex :as cx]
-   ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
-   [tech.v3.tensor :as tensor]
-   ;; Low-level buffer operations:
-   [tech.v3.datatype :as dtype]
-   ;; Element-wise array math:
-   [tech.v3.datatype.functional :as dfn]
+   ;; Low-level tensor operations for memory demos:
+   [tech.v3.tensor :as dtt]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind])
   (:import [org.ejml.data DMatrixRMaj]))
 
 ;; ## Tensors share memory across reshapes
 
-;; `tensor/reshape` is zero-copy — the new tensor wraps the same
+;; `t/reshape` is zero-copy — the new tensor wraps the same
 ;; flat `double[]` in a different shape.
 
 (let [flat (double-array [1 2 3 4 5 6])
-      t1 (tensor/reshape (tensor/ensure-tensor flat) [2 3])
-      t2 (tensor/reshape (tensor/ensure-tensor flat) [3 2])
+      t1 (t/reshape (dtt/ensure-tensor flat) [2 3])
+      t2 (t/reshape (dtt/ensure-tensor flat) [3 2])
       _ (aset flat 0 99.0)
       result {:t1-00 (t1 0 0)
               :t2-00 (t2 0 0)}]
@@ -60,9 +57,9 @@
 ;; The idiomatic way — mutate through the tensor directly:
 
 (let [flat (double-array [1 2 3 4 5 6])
-      t1 (tensor/reshape (tensor/ensure-tensor flat) [2 3])
-      t2 (tensor/reshape (tensor/ensure-tensor flat) [3 2])]
-  (tensor/mset! t1 0 0 99.0)
+      t1 (t/reshape (dtt/ensure-tensor flat) [2 3])
+      t2 (t/reshape (dtt/ensure-tensor flat) [3 2])]
+  (t/mset! t1 0 0 99.0)
   {:t1-00 (t1 0 0)
    :t2-00 (t2 0 0)})
 
@@ -71,15 +68,15 @@
     (and (== 99.0 t1-00)
          (== 99.0 t2-00)))])
 
-;; ## tensor/select creates strided views
+;; ## t/select creates strided views
 
 ;; Selecting a row or column returns a **view** backed by the
 ;; same array, with a stride that skips over elements.
 
-(let [A (tensor/->tensor [[10 20 30]
-                          [40 50 60]] {:datatype :float64})
-      row0 (tensor/select A 0 :all)
-      arr (dtype/->double-array A)
+(let [A (t/matrix [[10 20 30]
+                   [40 50 60]])
+      row0 (t/select A 0 :all)
+      arr (t/->double-array A)
       _ (aset arr 0 999.0)
       result {:A-00 (A 0 0)
               :row0-0 (double (row0 0))}]
@@ -90,12 +87,12 @@
     (and (== 999.0 A-00)
          (== 999.0 row0-0)))])
 
-;; The row view saw the same mutation. Using `tensor/mset!`:
+;; The row view saw the same mutation. Using `t/mset!`:
 
-(let [A (tensor/->tensor [[10 20 30]
-                          [40 50 60]] {:datatype :float64})
-      row0 (tensor/select A 0 :all)]
-  (tensor/mset! A 0 0 999.0)
+(let [A (t/matrix [[10 20 30]
+                   [40 50 60]])
+      row0 (t/select A 0 :all)]
+  (t/mset! A 0 0 999.0)
   {:A-00 (A 0 0)
    :row0-0 (double (row0 0))})
 
@@ -109,17 +106,17 @@
 ;; `tensor->dmat` and `dmat->tensor` share the same `double[]`.
 ;; This is how La Linea achieves zero-overhead interop with EJML.
 
-(let [M (la/matrix [[1 2] [3 4]])
-      dm (la/tensor->dmat M)]
-  (identical? (dtype/->double-array M)
+(let [M (t/matrix [[1 2] [3 4]])
+      dm (t/tensor->dmat M)]
+  (identical? (t/->double-array M)
               (.data dm)))
 
 (kind/test-last [true?])
 
 ;; Mutating the DMatrixRMaj is visible in the tensor:
 
-(let [M (la/matrix [[1 2] [3 4]])
-      dm (la/tensor->dmat M)
+(let [M (t/matrix [[1 2] [3 4]])
+      dm (t/tensor->dmat M)
       _ (.set dm 0 0 -1.0)]
   {:M-00 (M 0 0)
    :dm-00 (.get dm 0 0)})
@@ -131,42 +128,42 @@
 
 ;; And the other direction — mutating the tensor is visible in EJML:
 
-(let [M (la/matrix [[1 2] [3 4]])
-      dm (la/tensor->dmat M)]
-  (tensor/mset! M 1 1 99.0)
+(let [M (t/matrix [[1 2] [3 4]])
+      dm (t/tensor->dmat M)]
+  (t/mset! M 1 1 99.0)
   (.get dm 1 1))
 
 (kind/test-last [(fn [v] (== 99.0 v))])
 
 ;; ## Extracting the backing double[]
 
-;; `dtype/->double-array` is the idiomatic way to get a `double[]`
+;; `t/->double-array` is the idiomatic way to get a `double[]`
 ;; from a tensor. It is **zero-copy when possible, copying only
 ;; when necessary**:
 ;;
 ;; - Contiguous, full-array-backed tensor → returns the same `double[]`
 ;; - Subview or lazy tensor → allocates and copies
 
-;; A matrix built with `la/matrix` is backed by a contiguous array.
-;; `dtype/->double-array` returns the same object — zero-copy:
+;; A matrix built with `t/matrix` is backed by a contiguous array.
+;; `t/->double-array` returns the same object — zero-copy:
 
-(let [M (la/matrix [[1 2] [3 4]])
-      arr (dtype/->double-array M)]
+(let [M (t/matrix [[1 2] [3 4]])
+      arr (t/->double-array M)]
   (aset arr 0 99.0)
   (M 0 0))
 
 (kind/test-last [(fn [v] (== 99.0 v))])
 
-;; A row selected with `tensor/select` is a strided view —
+;; A row selected with `t/select` is a strided view —
 ;; contiguous within the parent array, but not spanning all of it.
-;; `dtype/->double-array` correctly returns a copy:
+;; `t/->double-array` correctly returns a copy:
 
-(let [M (la/matrix [[1 2 3] [4 5 6]])
-      row0 (tensor/select M 0 :all)
-      arr (dtype/->double-array row0)]
+(let [M (t/matrix [[1 2 3] [4 5 6]])
+      row0 (t/select M 0 :all)
+      arr (t/->double-array row0)]
   {:length (alength arr)
    :values (seq arr)
-   :shares-memory? (identical? arr (dtype/->double-array M))})
+   :shares-memory? (identical? arr (t/->double-array M))})
 
 (kind/test-last
  [(fn [{:keys [length values shares-memory?]}]
@@ -174,15 +171,15 @@
          (= [1.0 2.0 3.0] values)
          (not shares-memory?)))])
 
-;; A lazy tensor (from `dfn/+` or `tensor/compute-tensor`) has
-;; no backing array at all — `dtype/->double-array` allocates one:
+;; A lazy tensor (from `la/add` or `t/compute-tensor`) has
+;; no backing array at all — `t/->double-array` allocates one:
 
-(let [a (la/matrix [[1 2] [3 4]])
-      b (la/matrix [[10 20] [30 40]])
-      lazy-sum (dfn/+ a b)
-      arr (dtype/->double-array lazy-sum)]
+(let [a (t/matrix [[1 2] [3 4]])
+      b (t/matrix [[10 20] [30 40]])
+      lazy-sum (la/add a b)
+      arr (t/->double-array lazy-sum)]
   {:values (seq arr)
-   :has-array-buffer? (some? (dtype/as-array-buffer lazy-sum))})
+   :has-array-buffer? (some? (t/array-buffer lazy-sum))})
 
 (kind/test-last
  [(fn [{:keys [values has-array-buffer?]}]
@@ -190,11 +187,11 @@
          (not has-array-buffer?)))])
 
 ;; `cx/->double-array` follows the same convention for
-;; ComplexTensors — it delegates to `dtype/->double-array`
+;; ComplexTensors — it delegates to `t/->double-array`
 ;; on the underlying `[... 2]` tensor:
 
 (let [ct (cx/complex-tensor
-          (tensor/->tensor [[1 2] [3 4] [5 6]] {:datatype :float64}))
+          (t/matrix [[1 2] [3 4] [5 6]]))
       arr (cx/->double-array ct)]
   (aset arr 0 99.0)
   (cx/re (ct 0)))
@@ -206,28 +203,28 @@
 ;; A ComplexTensor wraps an `[... 2]` real tensor. The `cx/->tensor`
 ;; accessor exposes the backing tensor, and they share memory.
 
-(let [ct-data (tensor/->tensor [[1 2] [3 4] [5 6]] {:datatype :float64})
+(let [ct-data (t/matrix [[1 2] [3 4] [5 6]])
       ct (cx/complex-tensor ct-data)]
-  (identical? ct-data (cx/->tensor ct)))
+  (identical? (t/->tensor ct-data) (cx/->tensor ct)))
 
 (kind/test-last [true?])
 
 ;; Mutating through the backing tensor changes the ComplexTensor:
 
-(let [ct-data (tensor/->tensor [[1 2] [3 4] [5 6]] {:datatype :float64})
+(let [ct-data (t/matrix [[1 2] [3 4] [5 6]])
       ct (cx/complex-tensor ct-data)
-      arr (dtype/->double-array ct-data)
+      arr (t/->double-array ct-data)
       _ (aset arr 1 99.0)]
   (cx/im (ct 0)))
 
 (kind/test-last [(fn [v] (== 99.0 v))])
 
 ;; The imaginary part of the first element changed to 99.
-;; Using `tensor/mset!` on the backing tensor:
+;; Using `t/mset!` on the backing tensor:
 
-(let [ct-data (tensor/->tensor [[1 2] [3 4] [5 6]] {:datatype :float64})
+(let [ct-data (t/matrix [[1 2] [3 4] [5 6]])
       ct (cx/complex-tensor ct-data)]
-  (tensor/mset! ct-data 0 1 99.0)
+  (t/mset! ct-data 0 1 99.0)
   (cx/im (ct 0)))
 
 (kind/test-last [(fn [v] (== 99.0 v))])
@@ -238,36 +235,36 @@
 ;; They share the same backing memory.
 
 (let [ct (cx/complex-tensor
-          (tensor/->tensor [[10 40] [20 50] [30 60]] {:datatype :float64}))
+          (t/matrix [[10 40] [20 50] [30 60]]))
       re-view (cx/re ct)
-      arr (dtype/->double-array (cx/->tensor ct))
+      arr (t/->double-array (cx/->tensor ct))
       _ (aset arr 0 -10.0)]
   (double (re-view 0)))
 
 (kind/test-last [(fn [v] (== -10.0 v))])
 
 ;; Mutating the backing array was immediately visible in the `re` view.
-;; Using `tensor/mset!`:
+;; Using `t/mset!`:
 
 (let [ct (cx/complex-tensor
-          (tensor/->tensor [[10 40] [20 50] [30 60]] {:datatype :float64}))
+          (t/matrix [[10 40] [20 50] [30 60]]))
       re-view (cx/re ct)]
-  (tensor/mset! (cx/->tensor ct) 0 0 -10.0)
+  (t/mset! (cx/->tensor ct) 0 0 -10.0)
   (double (re-view 0)))
 
 (kind/test-last [(fn [v] (== -10.0 v))])
 
 ;; ## Lazy operations: no new memory, no new mutation handle
 
-;; `dfn/+`, `dfn/*`, etc. return **lazy noncaching readers**.
+;; `la/add`, `la/mul`, etc. return **lazy noncaching readers**.
 ;; They allocate no new memory — they recompute on every access,
 ;; reading through to the original source buffers. This means
 ;; they don't create a new mutable handle, but they still
 ;; depend on the source data.
 
-(let [x (tensor/->tensor [1 2 3] {:datatype :float64})
-      y (tensor/->tensor [10 20 30] {:datatype :float64})
-      lazy-sum (dfn/+ x y)]
+(let [x (t/matrix [1 2 3])
+      y (t/matrix [10 20 30])
+      lazy-sum (la/add x y)]
   (seq lazy-sum))
 
 (kind/test-last [(fn [v] (= [11.0 22.0 33.0] v))])
@@ -275,22 +272,22 @@
 ;; Mutating `x` changes what `lazy-sum` computes — it reads from `x`
 ;; on every access:
 
-(let [x (tensor/->tensor [1 2 3] {:datatype :float64})
-      y (tensor/->tensor [10 20 30] {:datatype :float64})
-      lazy-sum (dfn/+ x y)
-      arr (dtype/->double-array x)
+(let [x (t/matrix [1 2 3])
+      y (t/matrix [10 20 30])
+      lazy-sum (la/add x y)
+      arr (t/->double-array x)
       _ (aset arr 0 100.0)]
   (seq lazy-sum))
 
 (kind/test-last [(fn [v] (= [110.0 22.0 33.0] v))])
 
 ;; A lazy reader doesn't have its own array to mutate.
-;; It always reads through to the source. Using `tensor/mset!`:
+;; It always reads through to the source. Using `t/mset!`:
 
-(let [x (tensor/->tensor [1 2 3] {:datatype :float64})
-      y (tensor/->tensor [10 20 30] {:datatype :float64})
-      lazy-sum (dfn/+ x y)]
-  (tensor/mset! x 0 100.0)
+(let [x (t/matrix [1 2 3])
+      y (t/matrix [10 20 30])
+      lazy-sum (la/add x y)]
+  (t/mset! x 0 100.0)
   (seq lazy-sum))
 
 (kind/test-last [(fn [v] (= [110.0 22.0 33.0] v))])
@@ -298,12 +295,12 @@
 ;; ## Complex arithmetic: lazy results
 
 ;; `cx/add`, `cx/sub`, `cx/scale` return lazy ComplexTensors.
-;; Like `dfn/+`, they read through to the source on every access.
+;; Like `la/add`, they read through to the source on every access.
 
 (let [ca (cx/complex-tensor
-          (tensor/->tensor [[1 3] [2 4]] {:datatype :float64}))
+          (t/matrix [[1 3] [2 4]]))
       cb (cx/complex-tensor
-          (tensor/->tensor [[10 30] [20 40]] {:datatype :float64}))
+          (t/matrix [[10 30] [20 40]]))
       lazy-sum (cx/add ca cb)]
   {:re (seq (cx/re lazy-sum))
    :im (seq (cx/im lazy-sum))})
@@ -316,45 +313,45 @@
 ;; Mutating `ca`'s backing array propagates through the lazy result:
 
 (let [ca (cx/complex-tensor
-          (tensor/->tensor [[1 3] [2 4]] {:datatype :float64}))
+          (t/matrix [[1 3] [2 4]]))
       cb (cx/complex-tensor
-          (tensor/->tensor [[10 30] [20 40]] {:datatype :float64}))
+          (t/matrix [[10 30] [20 40]]))
       lazy-sum (cx/add ca cb)
-      arr (dtype/->double-array (cx/->tensor ca))
+      arr (t/->double-array (cx/->tensor ca))
       _ (aset arr 0 100.0)]
   (seq (cx/re lazy-sum)))
 
 (kind/test-last [(fn [v] (= [110.0 22.0] v))])
 
-;; Using `tensor/mset!`:
+;; Using `t/mset!`:
 
 (let [ca (cx/complex-tensor
-          (tensor/->tensor [[1 3] [2 4]] {:datatype :float64}))
+          (t/matrix [[1 3] [2 4]]))
       cb (cx/complex-tensor
-          (tensor/->tensor [[10 30] [20 40]] {:datatype :float64}))
+          (t/matrix [[10 30] [20 40]]))
       lazy-sum (cx/add ca cb)]
-  (tensor/mset! (cx/->tensor ca) 0 0 100.0)
+  (t/mset! (cx/->tensor ca) 0 0 100.0)
   (seq (cx/re lazy-sum)))
 
 (kind/test-last [(fn [v] (= [110.0 22.0] v))])
 
-;; ## dtype/clone breaks sharing
+;; ## t/clone breaks sharing
 
-;; `dtype/clone` is the standard way to get an independent copy.
+;; `t/clone` is the standard way to get an independent copy.
 ;; After cloning, the two objects have separate backing arrays.
 
-(let [original (la/matrix [[1 2] [3 4]])
-      cloned (dtype/clone original)]
-  (identical? (dtype/->double-array original)
-              (dtype/->double-array cloned)))
+(let [original (t/matrix [[1 2] [3 4]])
+      cloned (t/clone original)]
+  (identical? (t/->double-array original)
+              (t/->double-array cloned)))
 
 (kind/test-last [false?])
 
 ;; Mutating the original does not affect the clone:
 
-(let [original (la/matrix [[1 2] [3 4]])
-      cloned (dtype/clone original)
-      arr (dtype/->double-array original)
+(let [original (t/matrix [[1 2] [3 4]])
+      cloned (t/clone original)
+      arr (t/->double-array original)
       _ (aset arr 0 -999.0)]
   {:original-00 (original 0 0)
    :cloned-00 (cloned 0 0)})
@@ -364,11 +361,11 @@
     (and (== -999.0 original-00)
          (== 1.0 cloned-00)))])
 
-;; Using `tensor/mset!`:
+;; Using `t/mset!`:
 
-(let [original (la/matrix [[1 2] [3 4]])
-      cloned (dtype/clone original)]
-  (tensor/mset! original 0 0 -999.0)
+(let [original (t/matrix [[1 2] [3 4]])
+      cloned (t/clone original)]
+  (t/mset! original 0 0 -999.0)
   {:original-00 (original 0 0)
    :cloned-00 (cloned 0 0)})
 
@@ -377,15 +374,15 @@
     (and (== -999.0 original-00)
          (== 1.0 cloned-00)))])
 
-;; ## dtype/clone on ComplexTensors
+;; ## t/clone on ComplexTensors
 
 ;; Cloning a ComplexTensor produces an independent ComplexTensor
 ;; with its own backing array.
 
 (let [ct-orig (cx/complex-tensor
-               (tensor/->tensor [[1 4] [2 5] [3 6]] {:datatype :float64}))
-      ct-clone (dtype/clone ct-orig)
-      orig-arr (dtype/->double-array (cx/->tensor ct-orig))
+               (t/matrix [[1 4] [2 5] [3 6]]))
+      ct-clone (t/clone ct-orig)
+      orig-arr (t/->double-array (cx/->tensor ct-orig))
       _ (aset orig-arr 0 -1.0)]
   {:orig-re (cx/re (ct-orig 0))
    :clone-re (cx/re (ct-clone 0))})
@@ -395,12 +392,12 @@
     (and (== -1.0 orig-re)
          (== 1.0 clone-re)))])
 
-;; Using `tensor/mset!`:
+;; Using `t/mset!`:
 
 (let [ct-orig (cx/complex-tensor
-               (tensor/->tensor [[1 4] [2 5] [3 6]] {:datatype :float64}))
-      ct-clone (dtype/clone ct-orig)]
-  (tensor/mset! (cx/->tensor ct-orig) 0 0 -1.0)
+               (t/matrix [[1 4] [2 5] [3 6]]))
+      ct-clone (t/clone ct-orig)]
+  (t/mset! (cx/->tensor ct-orig) 0 0 -1.0)
   {:orig-re (cx/re (ct-orig 0))
    :clone-re (cx/re (ct-clone 0))})
 
@@ -416,24 +413,24 @@
 ;; of the sources.
 
 (let [p (cx/complex-tensor
-         (tensor/->tensor [[1 3] [2 4]] {:datatype :float64}))
+         (t/matrix [[1 3] [2 4]]))
       q (cx/complex-tensor
-         (tensor/->tensor [[10 30] [20 40]] {:datatype :float64}))
+         (t/matrix [[10 30] [20 40]]))
       lazy-pq (cx/add p q)
-      materialized-pq (dtype/clone lazy-pq)]
-  (some? (dtype/as-array-buffer (cx/->tensor materialized-pq))))
+      materialized-pq (t/clone lazy-pq)]
+  (some? (t/array-buffer (cx/->tensor materialized-pq))))
 
 (kind/test-last [true?])
 
 ;; Mutating `p` affects the lazy result but not the materialized copy:
 
 (let [p (cx/complex-tensor
-         (tensor/->tensor [[1 3] [2 4]] {:datatype :float64}))
+         (t/matrix [[1 3] [2 4]]))
       q (cx/complex-tensor
-         (tensor/->tensor [[10 30] [20 40]] {:datatype :float64}))
+         (t/matrix [[10 30] [20 40]]))
       lazy-pq (cx/add p q)
-      materialized-pq (dtype/clone lazy-pq)
-      arr (dtype/->double-array (cx/->tensor p))
+      materialized-pq (t/clone lazy-pq)
+      arr (t/->double-array (cx/->tensor p))
       _ (aset arr 0 999.0)]
   {:lazy-re (seq (cx/re lazy-pq))
    :materialized-re (seq (cx/re materialized-pq))})
@@ -443,15 +440,15 @@
     (and (= [1009.0 22.0] lazy-re)
          (= [11.0 22.0] materialized-re)))])
 
-;; Using `tensor/mset!`:
+;; Using `t/mset!`:
 
 (let [p (cx/complex-tensor
-         (tensor/->tensor [[1 3] [2 4]] {:datatype :float64}))
+         (t/matrix [[1 3] [2 4]]))
       q (cx/complex-tensor
-         (tensor/->tensor [[10 30] [20 40]] {:datatype :float64}))
+         (t/matrix [[10 30] [20 40]]))
       lazy-pq (cx/add p q)
-      materialized-pq (dtype/clone lazy-pq)]
-  (tensor/mset! (cx/->tensor p) 0 0 999.0)
+      materialized-pq (t/clone lazy-pq)]
+  (t/mset! (cx/->tensor p) 0 0 999.0)
   {:lazy-re (seq (cx/re lazy-pq))
    :materialized-re (seq (cx/re materialized-pq))})
 
@@ -460,15 +457,15 @@
     (and (= [1009.0 22.0] lazy-re)
          (= [11.0 22.0] materialized-re)))])
 
-;; ## la/submatrix clones
+;; ## t/submatrix clones
 
-;; `la/submatrix` always returns a contiguous, independent copy.
-;; This is necessary because `tensor/select` returns non-contiguous
+;; `t/submatrix` always returns a contiguous, independent copy.
+;; This is necessary because `t/select` returns non-contiguous
 ;; views that EJML cannot use directly.
 
-(let [big (la/matrix [[1 2 3] [4 5 6] [7 8 9]])
-      sub (la/submatrix big (range 2) (range 2))
-      arr (dtype/->double-array big)
+(let [big (t/matrix [[1 2 3] [4 5 6] [7 8 9]])
+      sub (t/submatrix big (range 2) (range 2))
+      arr (t/->double-array big)
       _ (aset arr 0 -1.0)]
   {:big-00 (big 0 0)
    :sub-00 (sub 0 0)})
@@ -478,11 +475,11 @@
     (and (== -1.0 big-00)
          (== 1.0 sub-00)))])
 
-;; Using `tensor/mset!`:
+;; Using `t/mset!`:
 
-(let [big (la/matrix [[1 2 3] [4 5 6] [7 8 9]])
-      sub (la/submatrix big (range 2) (range 2))]
-  (tensor/mset! big 0 0 -1.0)
+(let [big (t/matrix [[1 2 3] [4 5 6] [7 8 9]])
+      sub (t/submatrix big (range 2) (range 2))]
+  (t/mset! big 0 0 -1.0)
   {:big-00 (big 0 0)
    :sub-00 (sub 0 0)})
 
@@ -491,28 +488,28 @@
     (and (== -1.0 big-00)
          (== 1.0 sub-00)))])
 
-;; ## la/column and la/row wrap without copying
+;; ## t/column and t/row wrap without copying
 
-;; `la/column` and `la/row` wrap their input as a `[n 1]` or `[1 n]`
+;; `t/column` and `t/row` wrap their input as a `[n 1]` or `[1 n]`
 ;; tensor without copying. When the input is a `double[]` or a
 ;; float64 tensor, the result shares the same backing memory:
 
 (let [arr (double-array [1 2 3])
-      col (la/column arr)]
+      col (t/column arr)]
   (aset arr 0 99.0)
   (col 0 0))
 
 (kind/test-last [(fn [v] (== 99.0 v))])
 
-;; A lazy dfn result stays lazy through `la/column` — no copy,
+;; A lazy dfn result stays lazy through `t/column` — no copy,
 ;; no materialization:
 
-(let [a (tensor/->tensor [1 2 3] {:datatype :float64})
-      b (tensor/->tensor [10 20 30] {:datatype :float64})
-      col (la/column (dfn/+ a b))]
-  {:shape (dtype/shape col)
-   :contiguous? (some? (dtype/as-array-buffer col))
-   :values (seq (la/flatten col))})
+(let [a (t/matrix [1 2 3])
+      b (t/matrix [10 20 30])
+      col (t/column (la/add a b))]
+  {:shape (t/shape col)
+   :contiguous? (some? (t/array-buffer col))
+   :values (seq (t/flatten col))})
 
 (kind/test-last
  [(fn [{:keys [shape contiguous? values]}]
@@ -523,21 +520,21 @@
 ;; Copies are deferred to the EJML boundary — `la/mmul` and
 ;; other decompositions copy when they need to:
 
-(let [col (la/column (dfn/+ (tensor/->tensor [1 0] {:datatype :float64})
-                            (tensor/->tensor [0 1] {:datatype :float64})))
-      A (la/matrix [[2 0] [0 3]])]
+(let [col (t/column (la/add (t/matrix [1 0])
+                            (t/matrix [0 1])))
+      A (t/matrix [[2 0] [0 3]])]
   (la/mmul A col))
 
 (kind/test-last [(fn [r] (and (== 2.0 (r 0 0))
                               (== 3.0 (r 1 0))))])
 
-;; ## la/matrix passes through existing tensors
+;; ## t/matrix passes through existing tensors
 
 ;; When the input is already a float64 rank-2 tensor,
-;; `la/matrix` returns it unchanged:
+;; `t/matrix` returns it unchanged:
 
-(let [A (la/matrix [[1 2] [3 4]])
-      B (la/matrix A)]
+(let [A (t/matrix [[1 2] [3 4]])
+      B (t/matrix A)]
   (identical? A B))
 
 (kind/test-last [true?])
@@ -545,8 +542,8 @@
 ;; For nested sequences or non-float64 data, it allocates
 ;; as usual:
 
-(let [A (la/matrix [[1 2] [3 4]])]
-  (identical? A (la/matrix [[1 2] [3 4]])))
+(let [A (t/matrix [[1 2] [3 4]])]
+  (identical? A (t/matrix [[1 2] [3 4]])))
 
 (kind/test-last [false?])
 
@@ -556,28 +553,28 @@
 ;; same backing memory. Mutating the original changes
 ;; the transpose:
 
-(let [E (la/matrix [[1 2] [3 4]])
+(let [E (t/matrix [[1 2] [3 4]])
       Et (la/transpose E)]
-  (tensor/mset! E 0 1 99.0)
+  (t/mset! E 0 1 99.0)
   (Et 1 0))
 
 (kind/test-last [(fn [v] (== 99.0 v))])
 
 ;; And vice versa — mutating the transpose changes the original:
 
-(let [E (la/matrix [[1 2] [3 4]])
+(let [E (t/matrix [[1 2] [3 4]])
       Et (la/transpose E)]
-  (tensor/mset! Et 0 0 -1.0)
+  (t/mset! Et 0 0 -1.0)
   (E 0 0))
 
 (kind/test-last [(fn [v] (== -1.0 v))])
 
-;; This is consistent with `tensor/reshape` and `tensor/select` —
-;; views share memory. Use `dtype/clone` to get an independent copy:
+;; This is consistent with `t/reshape` and `t/select` —
+;; views share memory. Use `t/clone` to get an independent copy:
 
-(let [E (la/matrix [[1 2] [3 4]])
-      Et (dtype/clone (la/transpose E))]
-  (tensor/mset! E 0 0 -1.0)
+(let [E (t/matrix [[1 2] [3 4]])
+      Et (t/clone (la/transpose E))]
+  (t/mset! E 0 0 -1.0)
   (Et 0 0))
 
 (kind/test-last [(fn [v] (== 1.0 v))])
@@ -588,33 +585,33 @@
 ;; allocate new result matrices. The output does not share memory
 ;; with the input.
 
-(let [E (la/matrix [[1 2] [3 4]])
+(let [E (t/matrix [[1 2] [3 4]])
       P (la/mmul E E)]
-  (tensor/mset! E 0 0 -1.0)
+  (t/mset! E 0 0 -1.0)
   (P 0 0))
 
 (kind/test-last [(fn [v] (== 7.0 v))])
 
 ;; ## Noncaching tensors from compute-tensor
 ;;
-;; `tensor/compute-tensor` returns a **lazy, noncaching** tensor.
+;; `t/compute-tensor` returns a **lazy, noncaching** tensor.
 ;; Each time you read an element, it calls the function again.
 ;; With a pure function this is fine — but with a mutable RNG,
 ;; reading the *same* tensor twice produces different values.
 ;; The tensor is not even close to itself:
 
 (let [rng (java.util.Random. 42)
-      t (tensor/compute-tensor [4 4] (fn [_ _] (.nextGaussian rng)) :float64)]
+      t (t/compute-tensor [4 4] (fn [_ _] (.nextGaussian rng)) :float64)]
   (la/close? t t))
 
 (kind/test-last [false?])
 
-;; `dtype/clone` materializes the lazy tensor into a contiguous
+;; `t/clone` materializes the lazy tensor into a contiguous
 ;; array, fixing this problem:
 
 (let [rng (java.util.Random. 42)
-      t (dtype/clone
-         (tensor/compute-tensor [4 4] (fn [_ _] (.nextGaussian rng)) :float64))]
+      t (t/clone
+         (t/compute-tensor [4 4] (fn [_ _] (.nextGaussian rng)) :float64))]
   (la/close? t t))
 
 (kind/test-last [true?])
@@ -630,13 +627,13 @@
 (let [make-random-tensor
       (fn []
         (let [rng (java.util.Random. 42)]
-          (dtype/clone
-           (tensor/compute-tensor [100 100] (fn [_ _] (.nextGaussian rng)) :float64))))]
+          (t/clone
+           (t/compute-tensor [100 100] (fn [_ _] (.nextGaussian rng)) :float64))))]
   (la/close? (make-random-tensor) (make-random-tensor)))
 
 (kind/test-last [false?])
 
-;; `dtype/clone` fixed the noncaching issue but cannot fix this —
+;; `t/clone` fixed the noncaching issue but cannot fix this —
 ;; the scrambling happens *during* evaluation, before `clone`
 ;; sees the result.
 ;;
@@ -647,48 +644,48 @@
       (fn []
         (let [rng (java.util.Random. 42)]
           (->> (repeatedly (* 4 4) #(.nextGaussian rng))
-               (dtype/make-container :float64)
-               (tensor/reshape [4 4]))))]
+               (t/make-container :float64)
+               (t/reshape [4 4]))))]
   (la/close? (make-random-tensor) (make-random-tensor)))
 
 (kind/test-last [true?])
 
 ;; **Rule of thumb**: never pass mutable state into `compute-tensor`.
 ;; Generate values sequentially (e.g., with `repeatedly`), materialize
-;; with `dtype/make-container`, then reshape.
+;; with `t/make-container`, then reshape.
 
 ;; ## Summary
 ;;
 ;; | Operation | New allocation? | Mutable handle? | Notes |
 ;; |:----------|:----------------|:----------------|:------|
-;; | `tensor/reshape` | No | Yes — same `double[]` | Different shape, same backing |
-;; | `tensor/select` | No | Yes — strided view | View into same `double[]` |
+;; | `t/reshape` | No | Yes — same `double[]` | Different shape, same backing |
+;; | `t/select` | No | Yes — strided view | View into same `double[]` |
 ;; | `tensor->dmat` / `dmat->tensor` | No | Yes — same `double[]` | Zero-copy EJML interop |
 ;; | `cx/complex-tensor` (1-arity wrap) | No | Yes — wraps tensor | Shares the interleaved array |
 ;; | `cx/re` / `cx/im` | No | Yes — strided view | Views into interleaved layout |
-;; | `dfn/+`, `dfn/*`, etc. | No | No — lazy reader | Reads through to sources |
+;; | `la/add`, `la/mul`, etc. | No | No — lazy reader | Reads through to sources |
 ;; | `cx/add`, `cx/sub`, `cx/scale` | No | No — lazy reader | Lazy ComplexTensors |
-;; | `tensor/compute-tensor` | No | No — lazy, noncaching | May evaluate out of element order |
-;; | `dtype/clone` | Yes | Yes — independent | Breaks all links to source |
-;; | `la/submatrix` | Yes | Yes — independent | Always clones |
-;; | `la/column`, `la/row` | No | Yes — wraps input | Zero-copy for arrays/buffers; lazy for seqs |
-;; | `la/matrix` | Only for nested seqs | Yes | Pass-through for existing float64 tensors |
+;; | `t/compute-tensor` | No | No — lazy, noncaching | May evaluate out of element order |
+;; | `t/clone` | Yes | Yes — independent | Breaks all links to source |
+;; | `t/submatrix` | Yes | Yes — independent | Always clones |
+;; | `t/column`, `t/row` | No | Yes — wraps input | Zero-copy for arrays/buffers; lazy for seqs |
+;; | `t/matrix` | Only for nested seqs | Yes | Pass-through for existing float64 tensors |
 ;; | `la/transpose` (real) | No | Yes — strided view | Zero-copy, shares memory with input |
 ;; | `la/mmul`, `la/invert`, etc. | Yes | Yes — independent | EJML allocates new result |
-;; | `dtype/->double-array` | Only if needed | N/A — raw `double[]` | Zero-copy when contiguous; copies for subviews/lazy |
+;; | `t/->double-array` | Only if needed | N/A — raw `double[]` | Zero-copy when contiguous; copies for subviews/lazy |
 ;; | `cx/->double-array` | Only if needed | N/A — raw `double[]` | Same convention, on ComplexTensor |
 ;;
 ;; Lazy readers have no array of their own, but they **read through**
 ;; to the source arrays — mutating a source changes what the lazy
-;; reader computes. Use `dtype/clone` to materialize and break the link.
+;; reader computes. Use `t/clone` to materialize and break the link.
 ;;
 ;; **The guideline**: treat all data as immutable. When you need to
 ;; mutate (e.g., in a performance-critical inner loop), use
-;; `dtype/clone` first to ensure you own the backing array.
+;; `t/clone` first to ensure you own the backing array.
 ;;
 ;; That said, sharing and mutation can be a **deliberate technique**
-;; when used with care. `tensor/mset!` lets you mutate a tensor
-;; element in place, and `dtype/clone` ensures you own the backing
+;; when used with care. `t/mset!` lets you mutate a tensor
+;; element in place, and `t/clone` ensures you own the backing
 ;; array when you need to. The key is to keep the mutable scope
 ;; small and focused, so that nothing outside the function can
 ;; mutate the result.

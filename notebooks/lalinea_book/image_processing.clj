@@ -2,20 +2,15 @@
 ;;
 ;; An image is a tensor — a 3D array of shape `[height width channels]`.
 ;; This chapter builds image processing tools using dtype-next tensors,
-;; element-wise `dfn` operations, and `la/matrix` for convolution kernels.
+;; element-wise `dfn` operations, and `t/matrix` for convolution kernels.
 ;; All images are synthetic: no external files needed.
 
 (ns lalinea-book.image-processing
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
-   ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
-   [tech.v3.tensor :as tensor]
-   ;; Low-level buffer operations:
-   [tech.v3.datatype :as dtype]
-   ;; Element-wise array math:
-   [tech.v3.datatype.functional :as dfn]
-   ;; Tensor ↔ BufferedImage conversion:
+   [scicloj.lalinea.tensor :as t]
+   [scicloj.lalinea.elementwise :as elem]   ;; Tensor ↔ BufferedImage conversion:
    [tech.v3.libs.buffered-image :as bufimg]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]
@@ -25,19 +20,19 @@
 
 ;; ## Synthetic test images
 ;;
-;; `tensor/compute-tensor` creates a tensor by calling a function
+;; `t/compute-tensor` creates a tensor by calling a function
 ;; at every position — the image equivalent of `make-reader`.
 
 ;; ### Color gradient
 
 (def gradient
-  (tensor/compute-tensor [200 200 3]
-                         (fn [r c ch]
-                           (case (int ch)
-                             0 (int (* 255 (/ r 200.0)))   ;; red: top→bottom
-                             1 (int (* 255 (/ c 200.0)))   ;; green: left→right
-                             2 128))                        ;; blue: constant
-                         :uint8))
+  (t/compute-tensor [200 200 3]
+                    (fn [r c ch]
+                      (case (int ch)
+                        0 (int (* 255 (/ r 200.0)))   ;; red: top→bottom
+                        1 (int (* 255 (/ c 200.0)))   ;; green: left→right
+                        2 128))                        ;; blue: constant
+                    :uint8))
 
 (bufimg/tensor->image gradient)
 
@@ -48,10 +43,10 @@
 
 (def checkerboard
   (let [size 200 sq 25]
-    (tensor/compute-tensor [size size 3]
-                           (fn [r c _ch]
-                             (if (even? (+ (quot r sq) (quot c sq))) 240 30))
-                           :uint8)))
+    (t/compute-tensor [size size 3]
+                      (fn [r c _ch]
+                        (if (even? (+ (quot r sq) (quot c sq))) 240 30))
+                      :uint8)))
 
 (bufimg/tensor->image checkerboard)
 
@@ -62,17 +57,17 @@
 
 (def circle-img
   (let [size 200 cx 100 cy 100 radius 60]
-    (tensor/compute-tensor [size size 3]
-                           (fn [r c ch]
-                             (let [dr (- r cy) dc (- c cx)
-                                   dist (math/sqrt (+ (* dr dr) (* dc dc)))]
-                               (if (<= dist radius)
-                                 (case (int ch)
-                                   0 50             ;; dark red
-                                   1 180            ;; bright green
-                                   2 220)           ;; bright blue
-                                 20)))              ;; dark background
-                           :uint8)))
+    (t/compute-tensor [size size 3]
+                      (fn [r c ch]
+                        (let [dr (- r cy) dc (- c cx)
+                              dist (math/sqrt (+ (* dr dr) (* dc dc)))]
+                          (if (<= dist radius)
+                            (case (int ch)
+                              0 50             ;; dark red
+                              1 180            ;; bright green
+                              2 220)           ;; bright blue
+                            20)))              ;; dark background
+                      :uint8)))
 
 (bufimg/tensor->image circle-img)
 
@@ -81,7 +76,7 @@
 
 ;; ## Channel manipulation
 ;;
-;; Tensors support zero-copy slicing. `tensor/select` extracts
+;; Tensors support zero-copy slicing. `t/select` extracts
 ;; a slice along any axis without copying data.
 
 ;; ### Extract individual channels
@@ -96,7 +91,7 @@
 
 ;; The red channel of the gradient increases top to bottom:
 
-(let [ch (tensor/select gradient :all :all 0)]
+(let [ch (t/select gradient :all :all 0)]
   [(int (ch 0 0))
    (int (ch 199 0))])
 
@@ -108,12 +103,12 @@
 ;; Rearranging the last axis swaps colors:
 
 (def swapped
-  (let [[h w _c] (dtype/shape gradient)]
-    (tensor/compute-tensor [h w 3]
-                           (fn [r c ch]
+  (let [[h w _c] (t/shape gradient)]
+    (t/compute-tensor [h w 3]
+                      (fn [r c ch]
         ;; Swap R↔B
-                             (int (gradient r c (case (int ch) 0 2 2 0 ch))))
-                           :uint8)))
+                        (int (gradient r c (case (int ch) 0 2 2 0 ch))))
+                      :uint8)))
 
 (bufimg/tensor->image swapped)
 
@@ -133,13 +128,13 @@
 (def brighten
   (fn [img]
     (-> img
-        (dtype/elemwise-cast :int16)
-        (dfn/* 1.5)
-        (dfn/max 0)
-        (dfn/min 255)
-        (dtype/elemwise-cast :uint8)
-        tensor/ensure-tensor
-        (tensor/reshape (dtype/shape img)))))
+        (t/elemwise-cast :int16)
+        (la/mul 1.5)
+        (elem/max 0)
+        (elem/min 255)
+        (t/elemwise-cast :uint8)
+        t/->tensor
+        (t/reshape (t/shape img)))))
 
 (bufimg/tensor->image (brighten circle-img))
 
@@ -157,18 +152,18 @@
 
 (def to-grayscale
   (fn [img]
-    (let [[h w _c] (dtype/shape img)
+    (let [[h w _c] (t/shape img)
           n (* h w)
-          pixels (tensor/reshape (tensor/ensure-tensor
-                                  (dtype/elemwise-cast img :float64))
-                                 [n 3])
-          weights (la/column [0.299 0.587 0.114])
+          pixels (t/reshape (t/->tensor
+                             (t/elemwise-cast img :float64))
+                            [n 3])
+          weights (t/column [0.299 0.587 0.114])
           gray-flat (la/mmul pixels weights)]
-      (tensor/compute-tensor [h w 3]
-                             (fn [r c _ch]
-                               (let [idx (+ (* r w) c)]
-                                 (int (max 0 (min 255 (gray-flat idx 0))))))
-                             :uint8))))
+      (t/compute-tensor [h w 3]
+                        (fn [r c _ch]
+                          (let [idx (+ (* r w) c)]
+                            (int (max 0 (min 255 (gray-flat idx 0))))))
+                        :uint8))))
 
 (bufimg/tensor->image (to-grayscale gradient))
 
@@ -179,27 +174,27 @@
 ;;
 ;; [Image convolution](https://en.wikipedia.org/wiki/Kernel_(image_processing))
 ;; slides a small matrix (kernel) over the image, computing a
-;; weighted sum at each position. We define kernels as `la/matrix`
+;; weighted sum at each position. We define kernels as `t/matrix`
 ;; and apply them by direct computation.
 
 ;; ### Kernel definitions
 
 (def blur-kernel
-  (la/scale (la/matrix [[1 1 1] [1 1 1] [1 1 1]]) (/ 1.0 9.0)))
+  (la/scale (t/matrix [[1 1 1] [1 1 1] [1 1 1]]) (/ 1.0 9.0)))
 
 (def sharpen-kernel
-  (la/matrix [[0 -1  0]
-              [-1  5 -1]
-              [0 -1  0]]))
+  (t/matrix [[0 -1  0]
+             [-1  5 -1]
+             [0 -1  0]]))
 
 (def edge-kernel
-  (la/matrix [[-1 -1 -1]
-              [-1  8 -1]
-              [-1 -1 -1]]))
+  (t/matrix [[-1 -1 -1]
+             [-1  8 -1]
+             [-1 -1 -1]]))
 
 ;; Edge detection kernels sum to zero (no DC response):
 
-(dfn/sum edge-kernel)
+(la/sum edge-kernel)
 
 (kind/test-last [(fn [v] (== 0.0 v))])
 
@@ -212,9 +207,9 @@
 
 (def apply-kernel
   (fn [gray-img kernel]
-    (let [[h w _c] (dtype/shape gray-img)
-          k-arr (dtype/->double-array kernel)
-          ch0   (dtype/->double-array (tensor/select gray-img :all :all 0))
+    (let [[h w _c] (t/shape gray-img)
+          k-arr (t/->double-array kernel)
+          ch0   (t/->double-array (t/select gray-img :all :all 0))
           out   (double-array (* h w))]
       (dotimes [r (- h 2)]
         (dotimes [c (- w 2)]
@@ -230,10 +225,10 @@
                                                       (aget ch0 (+ (* (+ r kr) w)
                                                                    (+ c kc)))))))))))]
             (aset out (+ (* ri w) ci) val))))
-      (tensor/compute-tensor [h w 3]
-                             (fn [r c _ch]
-                               (int (max 0 (min 255 (aget out (+ (* r w) c))))))
-                             :uint8))))
+      (t/compute-tensor [h w 3]
+                        (fn [r c _ch]
+                          (int (max 0 (min 255 (aget out (+ (* r w) c))))))
+                        :uint8))))
 
 ;; ### Box blur
 
@@ -270,17 +265,17 @@
 ;; $G = \sqrt{G_x^2 + G_y^2}$
 
 (def sobel-x
-  (la/matrix [[-1 0 1] [-2 0 2] [-1 0 1]]))
+  (t/matrix [[-1 0 1] [-2 0 2] [-1 0 1]]))
 
 (def sobel-y
-  (la/matrix [[-1 -2 -1] [0 0 0] [1 2 1]]))
+  (t/matrix [[-1 -2 -1] [0 0 0] [1 2 1]]))
 
 (def sobel-edges
   (fn [gray-img]
-    (let [[h w _c] (dtype/shape gray-img)
-          sx-arr (dtype/->double-array sobel-x)
-          sy-arr (dtype/->double-array sobel-y)
-          ch0    (dtype/->double-array (tensor/select gray-img :all :all 0))
+    (let [[h w _c] (t/shape gray-img)
+          sx-arr (t/->double-array sobel-x)
+          sy-arr (t/->double-array sobel-y)
+          ch0    (t/->double-array (t/select gray-img :all :all 0))
           out    (double-array (* h w))]
       (dotimes [r (- h 2)]
         (dotimes [c (- w 2)]
@@ -305,10 +300,10 @@
                                                                   (+ c kc)))))))))))
                 mag (math/sqrt (+ (* gx gx) (* gy gy)))]
             (aset out (+ (* ri w) ci) mag))))
-      (tensor/compute-tensor [h w 3]
-                             (fn [r c _ch]
-                               (int (min 255 (aget out (+ (* r w) c)))))
-                             :uint8))))
+      (t/compute-tensor [h w 3]
+                        (fn [r c _ch]
+                          (int (min 255 (aget out (+ (* r w) c)))))
+                        :uint8))))
 
 (bufimg/tensor->image (sobel-edges circle-img))
 

@@ -9,11 +9,12 @@
    linalg requires tape requires complex, and grad needs both tape
    and linalg."
   (:require [scicloj.lalinea.linalg :as la]
+            [scicloj.lalinea.tensor :as t]
             [scicloj.lalinea.tape :as tape]
             [scicloj.lalinea.impl.real-tensor :as rt]
             [tech.v3.datatype :as dtype]
             [tech.v3.datatype.functional :as dfn]
-            [tech.v3.tensor :as tensor])
+            [tech.v3.tensor :as dtt])
   (:import [java.util IdentityHashMap]))
 
 ;; ---------------------------------------------------------------------------
@@ -43,26 +44,23 @@
                     (dfn/* g a)])
    :la/trace     (fn [g [a] _out]
                    (let [n (first (dtype/shape a))]
-                     [(la/scale (la/eye n) (double g))]))
+                     [(la/scale (t/eye n) (double g))]))
    :la/sq        (fn [g [a] _out]
                    [(dfn/* g (dfn/* 2.0 a))])
    :la/sum       (fn [g [a] _out]
                    (let [shape (dtype/shape a)]
                      [(dtype/clone
-                       (tensor/compute-tensor
+                       (dtt/compute-tensor
                         shape
                         (fn [& _] (double g))
                         :float64))]))
    :la/det       (fn [g [a] out]
-                   ;; d/dA det(A) = det(A) * A^{-T}
                    [(la/scale (la/transpose (la/invert a))
                               (* (double g) (double out)))])
    :la/invert    (fn [g [_a] out]
-                   ;; d/dA A^{-1} = -A^{-T} g A^{-T}
                    (let [inv-t (la/transpose out)]
                      [(la/scale (la/mmul inv-t (la/mmul g inv-t)) -1.0)]))
    :la/norm      (fn [g [a] out]
-                   ;; d/dA ||A||_F = A / ||A||_F
                    [(la/scale a (/ (double g) (double out)))])
    :la/dot       (fn [g [u v] _out]
                    [(dfn/* (double g) v)
@@ -78,7 +76,7 @@
   [existing new-grad]
   (let [new-grad (ensure-tensor new-grad)]
     (if (nil? existing)
-      (if (tensor/tensor? new-grad)
+      (if (dtt/tensor? new-grad)
         (dtype/clone new-grad)
         new-grad)
       (dtype/clone (dfn/+ existing new-grad)))))
@@ -94,19 +92,15 @@
    `target`      — the scalar output value (must be tracked on the tape)
 
    Returns an IdentityHashMap from input tensors to their gradients.
-   Keys are identity-matched to the original input tensors.
-
-   Only external inputs (tensors not produced by a recorded op)
-   appear in the result.
 
    Example:
    ```clojure
-   (let [A (la/matrix [[1 2] [3 4]])
-         b (la/column [5 6])
+   (let [A (t/matrix [[1 2] [3 4]])
+         b (t/column [5 6])
          tape-result (tape/with-tape
                        (la/sum (la/sq (la/sub (la/mmul A A) b))))
          grads (grad/grad tape-result (:result tape-result))]
-     (.get grads A))  ;; gradient of loss w.r.t. A
+     (.get grads A))
    ```"
   [tape-result target]
   (let [^IdentityHashMap registry (:registry tape-result)
@@ -115,10 +109,8 @@
         target-id (.get registry target)]
     (when (nil? target-id)
       (throw (ex-info "Target value not found on tape" {})))
-    (let [;; Adjoint map: entry-id -> gradient
-          adjoints (java.util.HashMap.)
+    (let [adjoints (java.util.HashMap.)
           _ (.put adjoints target-id 1.0)
-          ;; Walk entries in reverse (tape order = topological order)
           rev-entries (rseq (vec entries))]
       (doseq [entry rev-entries]
         (let [entry-id (:id entry)
@@ -133,8 +125,6 @@
                     (when-let [ref-id (:id (nth input-refs i))]
                       (.put adjoints ref-id
                             (add-grad (.get adjoints ref-id) ig))))))))))
-      ;; Collect gradients for external inputs.
-      ;; External tensors have x-prefixed IDs and no tape entry.
       (let [result (IdentityHashMap.)]
         (doseq [^java.util.Map$Entry me (.entrySet registry)]
           (let [tensor-obj (.getKey me)

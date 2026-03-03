@@ -7,7 +7,7 @@
    This namespace wraps EJML's CommonOps into Clojure functions."
   (:require [scicloj.lalinea.impl.tensor :as bt]
             [scicloj.lalinea.complex :as cx]
-            [tech.v3.tensor :as tensor]
+            [tech.v3.tensor :as dtt]
             [tech.v3.datatype :as dtype])
   (:import [org.ejml.data DMatrixRMaj ZMatrixRMaj Complex_F64]
            [org.ejml.dense.row CommonOps_DDRM MatrixFeatures_DDRM]
@@ -100,7 +100,7 @@
             Vt (.getV svd nil true)
             S (.getSingularValues svd)]
         {:U U
-         :S (tensor/ensure-tensor S)
+         :S (dtt/ensure-tensor S)
          :Vt Vt}))))
 
 (defn dqr
@@ -151,7 +151,7 @@
   (let [r (.numRows zm)
         c (.numCols zm)
         arr (.data zm)]
-    (cx/complex-tensor (tensor/reshape (tensor/ensure-tensor arr) [r c 2]))))
+    (cx/complex-tensor (dtt/reshape (dtt/ensure-tensor arr) [r c 2]))))
 
 ;; ---------------------------------------------------------------------------
 ;; Complex matrix arithmetic

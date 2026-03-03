@@ -11,15 +11,10 @@
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
+   [scicloj.lalinea.tensor :as t]
+   [scicloj.lalinea.elementwise :as elem]
    ;; Complex tensors — interleaved [re im] layout:
-   [scicloj.lalinea.complex :as cx]
-   ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
-   [tech.v3.tensor :as tensor]
-   ;; Low-level buffer operations:
-   [tech.v3.datatype :as dtype]
-   ;; Element-wise array math:
-   [tech.v3.datatype.functional :as dfn]
-   ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
+   [scicloj.lalinea.complex :as cx]   ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]
    ;; Arrow diagrams for 2D vectors:
    [scicloj.lalinea.vis :as vis]))
@@ -63,9 +58,9 @@
 ;; Consider:
 
 (def A-eig
-  (la/matrix [[4 1 2]
-              [0 3 1]
-              [0 0 2]]))
+  (t/matrix [[4 1 2]
+             [0 3 1]
+             [0 0 2]]))
 
 ;; This upper-triangular matrix has eigenvalues on the diagonal:
 ;; 4, 3, and 2.
@@ -116,7 +111,7 @@
 
 (def eig-reals (cx/re (:eigenvalues eig-result)))
 
-(< (abs (- (la/trace A-eig) (dfn/sum eig-reals))) 1e-10)
+(< (abs (- (la/trace A-eig) (la/sum eig-reals))) 1e-10)
 
 (kind/test-last [true?])
 
@@ -152,8 +147,8 @@
 ;; Consider:
 
 (def A-diag
-  (la/matrix [[2 1]
-              [0 3]]))
+  (t/matrix [[2 1]
+             [0 3]]))
 
 ;; Eigenvalues are 2 and 3. Build $P$ from the eigenvectors:
 
@@ -163,7 +158,7 @@
   (let [evecs (:eigenvectors eig-diag)
         sorted-idx (sort-by (fn [i] (cx/re ((:eigenvalues eig-diag) i)))
                             (range 2))]
-    (la/hstack (mapv #(nth evecs %) sorted-idx))))
+    (t/hstack (mapv #(nth evecs %) sorted-idx))))
 
 ;; The similarity transform yields a diagonal matrix:
 
@@ -193,9 +188,9 @@ D-result
 
 (def A-diag-sq-via-eigen
   (let [Pinv (la/invert P-cols)
-        D2 (la/diag (dtype/make-reader :float64 2
-                                       (let [lam (D-result idx idx)]
-                                         (* lam lam))))]
+        D2 (t/diag (t/make-reader :float64 2
+                                  (let [lam (D-result idx idx)]
+                                    (* lam lam))))]
     (la/mmul P-cols (la/mmul D2 Pinv))))
 
 (la/close? A-diag-sq A-diag-sq-via-eigen)
@@ -222,9 +217,9 @@ D-result
 ;; 3. **The matrix can always be diagonalised** (by an orthogonal matrix)
 
 (def S-sym
-  (la/matrix [[4 2 0]
-              [2 5 1]
-              [0 1 3]]))
+  (t/matrix [[4 2 0]
+             [2 5 1]
+             [0 1 3]]))
 
 ;; Verify symmetry:
 
@@ -236,7 +231,7 @@ D-result
 
 ;; All eigenvalues are real (imaginary parts zero):
 
-(< (dfn/reduce-max (dfn/abs (cx/im (:eigenvalues eig-S)))) 1e-10)
+(< (elem/reduce-max (elem/abs (cx/im (:eigenvalues eig-S)))) 1e-10)
 
 (kind/test-last [true?])
 
@@ -244,11 +239,11 @@ D-result
 ;; and check $Q^T Q = I$:
 
 (def Q-eig
-  (la/hstack (:eigenvectors eig-S)))
+  (t/hstack (:eigenvectors eig-S)))
 
 (def QtQ (la/mmul (la/transpose Q-eig) Q-eig))
 
-(la/norm (la/sub QtQ (la/eye 3)))
+(la/norm (la/sub QtQ (t/eye 3)))
 
 (kind/test-last
  [(fn [d] (< d 1e-10))])
@@ -303,8 +298,8 @@ D-result
 ;; stretches each direction.
 
 (def A-svd
-  (la/matrix [[1 0 1]
-              [0 1 1]]))
+  (t/matrix [[1 0 1]
+             [0 1 1]]))
 
 (def svd-A (la/svd A-svd))
 
@@ -337,8 +332,8 @@ D-result
 ;; reduction, image compression, and latent semantic analysis.
 
 (def A-lr
-  (la/matrix [[3 2 2]
-              [2 3 -2]]))
+  (t/matrix [[3 2 2]
+             [2 3 -2]]))
 
 (def svd-lr (la/svd A-lr))
 
@@ -354,8 +349,8 @@ sigmas
 ;; Rank-1 approximation — keep only $\sigma_1$:
 
 (def A-rank1
-  (la/scale (la/mmul (la/submatrix (:U svd-lr) :all [0])
-                     (la/submatrix (:Vt svd-lr) [0] :all)) (first sigmas)))
+  (la/scale (la/mmul (t/submatrix (:U svd-lr) :all [0])
+                     (t/submatrix (:Vt svd-lr) [0] :all)) (first sigmas)))
 
 ;; The approximation error equals $\sigma_2$:
 
@@ -405,14 +400,14 @@ sigmas
 ;; and is the standard method for solving PD systems.
 
 (def spd-mat
-  (la/add (la/mmul (la/transpose A-eig) A-eig) (la/eye 3)))
+  (la/add (la/mmul (la/transpose A-eig) A-eig) (t/eye 3)))
 
 (def chol-L (la/cholesky spd-mat))
 
 chol-L
 
 (kind/test-last
- [(fn [L] (let [[r c] (dtype/shape L)]
+ [(fn [L] (let [[r c] (t/shape L)]
             (and (= r c)
                  ;; upper triangle is zero (lower triangular)
                  (every? (fn [i] (every? (fn [j] (< (abs (L i j)) 1e-10))
@@ -428,7 +423,7 @@ chol-L
 
 ;; Non-positive-definite matrices have no Cholesky factor:
 
-(la/cholesky (la/matrix [[1 2] [2 1]]))
+(la/cholesky (t/matrix [[1 2] [2 1]]))
 
 (kind/test-last [nil?])
 
@@ -443,9 +438,9 @@ chol-L
 ;; we have developed.
 
 (def A-final
-  (la/matrix [[2 1 0]
-              [1 3 1]
-              [0 1 2]]))
+  (t/matrix [[2 1 0]
+             [1 3 1]
+             [0 1 2]]))
 
 ;; This matrix is:
 ;;
@@ -474,7 +469,7 @@ final-eigenvalues
 ;; ### Trace = sum of eigenvalues
 
 (< (abs (- (la/trace A-final)
-           (dfn/sum final-eigenvalues)))
+           (la/sum final-eigenvalues)))
    1e-10)
 
 (kind/test-last [true?])
@@ -495,16 +490,16 @@ final-eigenvalues
 
 (def final-svd (la/svd A-final))
 
-(< (dfn/reduce-max
-    (dfn/abs (dfn/- (sort (:S final-svd))
-                    final-eigenvalues)))
+(< (elem/reduce-max
+    (elem/abs (la/sub (sort (:S final-svd))
+                      final-eigenvalues)))
    1e-10)
 
 (kind/test-last [true?])
 
 ;; ### Full rank — invertible
 
-(long (dfn/sum (dfn/> (:S final-svd) 1e-10)))
+(long (la/sum (elem/gt (:S final-svd) 1e-10)))
 
 (kind/test-last
  [(fn [r] (= r 3))])
@@ -514,9 +509,9 @@ final-eigenvalues
 A-inv
 
 (kind/test-last
- [(fn [m] (= [3 3] (dtype/shape m)))])
+ [(fn [m] (= [3 3] (t/shape m)))])
 
-(la/close? (la/mmul A-final A-inv) (la/eye 3))
+(la/close? (la/mmul A-final A-inv) (t/eye 3))
 
 (kind/test-last [true?])
 

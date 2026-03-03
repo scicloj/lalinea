@@ -1,5 +1,6 @@
 {"Getting Started" ["quickstart"]
- "Core Concepts" ["tensors_and_ejml"
+ "Core Concepts" ["dtype_next_background"
+                  "tensors"
                   "complex_tensors"
                   "fourier_transform"
                   "sharing_and_mutation"

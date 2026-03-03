@@ -15,14 +15,8 @@
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
-   [scicloj.lalinea.complex :as cx]
-   ;; Tensor creation and indexing (https://github.com/cnuernber/dtype-next):
-   [tech.v3.tensor :as tensor]
-   ;; Low-level buffer operations:
-   [tech.v3.datatype :as dtype]
-   ;; Element-wise array math:
-   [tech.v3.datatype.functional :as dfn]
-   ;; Arg-reduction operations (argmax, argmin, etc.):
+   [scicloj.lalinea.tensor :as t]
+   [scicloj.lalinea.complex :as cx]   ;; Arg-reduction operations (argmax, argmin, etc.):
    [tech.v3.datatype.argops :as argops]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
@@ -49,9 +43,9 @@
 ;; | R    | 0.2 | 0.3 | 0.5 |
 
 (def P
-  (la/matrix [[0.7 0.2 0.1]
-              [0.3 0.4 0.3]
-              [0.2 0.3 0.5]]))
+  (t/matrix [[0.7 0.2 0.1]
+             [0.3 0.4 0.3]
+             [0.2 0.3 0.5]]))
 
 ;; The transition structure as a directed graph:
 
@@ -69,10 +63,10 @@
 
 ;; Each row sums to 1:
 
-(la/mmul P (la/column (repeat 3 1.0)))
+(la/mmul P (t/column (repeat 3 1.0)))
 
 (kind/test-last
- [(fn [sums] (< (la/norm (la/sub sums (la/column (repeat 3 1.0)))) 1e-10))])
+ [(fn [sums] (< (la/norm (la/sub sums (t/column (repeat 3 1.0)))) 1e-10))])
 
 ;; ## Simulating a random walk
 ;;
@@ -85,7 +79,7 @@
 ;; This is purely functional — we use `iterate` to generate
 ;; the sequence of state distributions.
 
-(def initial-state (la/row [1.0 0.0 0.0]))
+(def initial-state (t/row [1.0 0.0 0.0]))
 
 (def walk-history
   (let [states (iterate (fn [s] (la/mmul s P)) initial-state)]
@@ -144,13 +138,13 @@
         idx (first (sort-by (fn [i] (abs (- (double (reals i)) 1.0)))
                             (range (count eigenvectors))))
         ev (nth eigenvectors idx)
-        total (dfn/sum (la/flatten ev))]
-    (la/flatten (la/scale ev (/ 1.0 total)))))
+        total (la/sum (t/flatten ev))]
+    (t/flatten (la/scale ev (/ 1.0 total)))))
 
 stationary-eigen
 
 (kind/test-last
- [(fn [v] (and (< (abs (- (dfn/sum v) 1.0)) 1e-10)
+ [(fn [v] (and (< (abs (- (la/sum v) 1.0)) 1e-10)
                (every? pos? v)))])
 
 ;; The stationary distribution from eigendecomposition should
@@ -158,7 +152,7 @@ stationary-eigen
 
 (let [s (last walk-history)]
   (la/close? stationary-eigen
-             (la/->real-tensor [(:sunny s) (:cloudy s) (:rainy s)])
+             (t/matrix [(:sunny s) (:cloudy s) (:rainy s)])
              1e-4))
 
 (kind/test-last [true?])
@@ -173,13 +167,13 @@ stationary-eigen
 
 (def power-iteration-history
   (let [n 3 iters 40]
-    (loop [pi (la/row [0.333 0.334 0.333])
+    (loop [pi (t/row [0.333 0.334 0.333])
            k  0
            history []]
       (if (>= k iters)
         history
         (let [new-pi (la/mmul pi P)
-              new-pi (la/scale new-pi (/ 1.0 (dfn/sum new-pi)))
+              new-pi (la/scale new-pi (/ 1.0 (la/sum new-pi)))
               change (la/norm (la/sub new-pi pi))]
           (recur new-pi (inc k)
                  (conj history {:iteration (inc k)
@@ -258,14 +252,14 @@ stationary-eigen
 ;; is $1 / \text{(number of outbound links)}$.
 
 (def H
-  (la/matrix [[0    1    0    0    0    0    0    0]   ;; Calculus → LA
-              [1/2  0    1/2  0    0    0    0    0]   ;; LA → Calc, Stats
-              [1/2  1/2  0    0    0    0    0    0]   ;; Stats → Calc, LA
-              [0    0    0    0    1    0    0    0]   ;; IntroP → DS
-              [0    0    0    1/2  0    0    1/2  0]   ;; DS → IntroP, DB
-              [0    1/4  1/4  1/4  0    0    0    1/4]   ;; ML → LA, Stats, IntroP, AI
-              [0    0    0    1/3  1/3  1/3  0    0]   ;; DB → DS, IntroP, ML
-              [0    1/4  1/4  0    1/4  1/4  0    0]]));; AI → LA, Stats, DS, ML
+  (t/matrix [[0    1    0    0    0    0    0    0]   ;; Calculus → LA
+             [1/2  0    1/2  0    0    0    0    0]   ;; LA → Calc, Stats
+             [1/2  1/2  0    0    0    0    0    0]   ;; Stats → Calc, LA
+             [0    0    0    0    1    0    0    0]   ;; IntroP → DS
+             [0    0    0    1/2  0    0    1/2  0]   ;; DS → IntroP, DB
+             [0    1/4  1/4  1/4  0    0    0    1/4]   ;; ML → LA, Stats, IntroP, AI
+             [0    0    0    1/3  1/3  1/3  0    0]   ;; DB → DS, IntroP, ML
+             [0    1/4  1/4  0    1/4  1/4  0    0]]));; AI → LA, Stats, DS, ML
 
 ;; The Google matrix with damping factor $d = 0.85$:
 ;;
@@ -274,41 +268,41 @@ stationary-eigen
 (def damping 0.85)
 
 (def google-matrix
-  (la/add (la/scale (la/matrix (repeat n-pages (repeat n-pages 1.0)))
+  (la/add (la/scale (t/matrix (repeat n-pages (repeat n-pages 1.0)))
                     (/ (- 1.0 damping) n-pages))
           (la/scale H damping)))
 
 ;; Verify that each row sums to 1:
 
-(la/mmul google-matrix (la/column (repeat n-pages 1.0)))
+(la/mmul google-matrix (t/column (repeat n-pages 1.0)))
 
 (kind/test-last
- [(fn [sums] (< (la/norm (la/sub sums (la/column (repeat n-pages 1.0)))) 1e-10))])
+ [(fn [sums] (< (la/norm (la/sub sums (t/column (repeat n-pages 1.0)))) 1e-10))])
 
 ;; Find PageRank via power iteration:
 
 (def pagerank
   (let [iters 50]
-    (loop [pi (la/scale (la/row (repeat n-pages 1.0)) (/ 1.0 n-pages))
+    (loop [pi (la/scale (t/row (repeat n-pages 1.0)) (/ 1.0 n-pages))
            k  0]
       (if (>= k iters)
         pi
         (let [new-pi (la/mmul pi google-matrix)
-              new-pi (la/scale new-pi (/ 1.0 (dfn/sum new-pi)))]
+              new-pi (la/scale new-pi (/ 1.0 (la/sum new-pi)))]
           (recur new-pi (inc k)))))))
 
 ;; Foundational courses rank highest — they are referenced across
 ;; many syllabi:
 
 (-> (tc/dataset {:course course-names
-                 :rank (dtype/->reader pagerank)})
+                 :rank (t/->reader pagerank)})
     (plotly/base {:=x :course :=y :rank})
     (plotly/layer-bar)
     plotly/plot)
 
 ;; PageRank values sum to 1:
 
-(dfn/sum pagerank)
+(la/sum pagerank)
 
 (kind/test-last [(fn [s] (< (abs (- s 1.0)) 1e-10))])
 

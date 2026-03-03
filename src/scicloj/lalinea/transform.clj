@@ -7,7 +7,7 @@
    provides zero-copy wrappers around Fastmath's transform API."
   (:require [scicloj.lalinea.complex :as cx]
             [fastmath.transform :as ft]
-            [tech.v3.tensor :as tensor]
+            [tech.v3.tensor :as dtt]
             [tech.v3.datatype :as dtype]
             [scicloj.lalinea.impl.real-tensor :as rt]))
 
@@ -32,7 +32,7 @@
    The output is a ComplexTensor of shape [n] where n = length of input."
   [signal]
   (let [result (ft/forward-1d @fft-complex* signal)]
-    (cx/complex-tensor (tensor/reshape (tensor/ensure-tensor result)
+    (cx/complex-tensor (dtt/reshape (dtt/ensure-tensor result)
                                        [(/ (count result) 2) 2]))))
 
 (defn inverse
@@ -40,7 +40,7 @@
   [^scicloj.lalinea.complex.ComplexTensor spectrum]
   (let [arr (cx/->double-array spectrum)
         result (ft/reverse-1d @fft-complex-io* arr)]
-    (cx/complex-tensor (tensor/reshape (tensor/ensure-tensor result)
+    (cx/complex-tensor (dtt/reshape (dtt/ensure-tensor result)
                                        [(/ (count result) 2) 2]))))
 
 (defn inverse-real
@@ -59,7 +59,7 @@
   [^scicloj.lalinea.complex.ComplexTensor signal]
   (let [arr (cx/->double-array signal)
         result (ft/forward-1d @fft-complex-io* arr)]
-    (cx/complex-tensor (tensor/reshape (tensor/ensure-tensor result)
+    (cx/complex-tensor (dtt/reshape (dtt/ensure-tensor result)
                                        [(/ (count result) 2) 2]))))
 
 ;; ---------------------------------------------------------------------------
@@ -69,29 +69,29 @@
 (defn dct-forward
   "Forward Discrete Cosine Transform. Real -> real."
   [signal]
-  (rt/->real-tensor (tensor/ensure-tensor (ft/forward-1d @dct* signal))))
+  (rt/->real-tensor (dtt/ensure-tensor (ft/forward-1d @dct* signal))))
 
 (defn dct-inverse
   "Inverse Discrete Cosine Transform. Real -> real."
   [spectrum]
-  (rt/->real-tensor (tensor/ensure-tensor (ft/reverse-1d @dct* spectrum))))
+  (rt/->real-tensor (dtt/ensure-tensor (ft/reverse-1d @dct* spectrum))))
 
 (defn dst-forward
   "Forward Discrete Sine Transform. Real -> real."
   [signal]
-  (rt/->real-tensor (tensor/ensure-tensor (ft/forward-1d @dst* signal))))
+  (rt/->real-tensor (dtt/ensure-tensor (ft/forward-1d @dst* signal))))
 
 (defn dst-inverse
   "Inverse Discrete Sine Transform. Real -> real."
   [spectrum]
-  (rt/->real-tensor (tensor/ensure-tensor (ft/reverse-1d @dst* spectrum))))
+  (rt/->real-tensor (dtt/ensure-tensor (ft/reverse-1d @dst* spectrum))))
 
 (defn dht-forward
   "Forward Discrete Hartley Transform. Real -> real."
   [signal]
-  (rt/->real-tensor (tensor/ensure-tensor (ft/forward-1d @dht* signal))))
+  (rt/->real-tensor (dtt/ensure-tensor (ft/forward-1d @dht* signal))))
 
 (defn dht-inverse
   "Inverse Discrete Hartley Transform. Real -> real."
   [spectrum]
-  (rt/->real-tensor (tensor/ensure-tensor (ft/reverse-1d @dht* spectrum))))
+  (rt/->real-tensor (dtt/ensure-tensor (ft/reverse-1d @dht* spectrum))))
