@@ -211,7 +211,7 @@
 ;; ---------------------------------------------------------------------------
 
 (defn abs
-  "Element-wise absolute value (magnitude for complex)."
+  "Element-wise absolute value (magnitude for complex). Returns a RealTensor."
   [a]
   (tape/record! :elem/abs [a]
                 (let [a (ensure-tensor a)]

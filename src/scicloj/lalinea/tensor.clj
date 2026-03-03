@@ -282,7 +282,7 @@
   (->rt (dtype/make-container datatype n-or-data)))
 
 (defn elemwise-cast
-  "Cast a tensor or buffer to a different element type."
+  "Cast a tensor or buffer to a different element type. Returns a raw dtype-next buffer."
   [a datatype]
   (dtype/elemwise-cast (ensure-tensor a) datatype))
 
@@ -323,8 +323,8 @@
   (bt/tensor->dmat (ensure-tensor tensor)))
 
 (defn dmat->tensor
-  "Zero-copy: convert an EJML `DMatrixRMaj` to a `[r c]` tensor sharing
-   the same `double[]`."
+  "Zero-copy: convert an EJML `DMatrixRMaj` to a raw `[r c]` dtype-next tensor
+   sharing the same `double[]`. Wrap with `->real-tensor` if needed."
   [^DMatrixRMaj dm]
   (bt/dmat->tensor dm))
 

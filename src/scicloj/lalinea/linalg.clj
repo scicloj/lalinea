@@ -164,7 +164,7 @@
                     (double (dfn/sum a))))))
 
 (defn prod
-  "Product of all elements. Returns a double."
+  "Product of all elements. Returns a double. Real only."
   [a]
   (tape/record! :la/prod [a]
                 (let [a (ensure-tensor a)]
@@ -252,7 +252,7 @@
 
 (defn solve
   "Solve $AX = B$ for $X$. Returns nil if singular.
-   $A$ is `[n n]`, $B$ is `[n m]`. Returns $X$ as tensor or ComplexTensor."
+   $A$ is `[n n]`, $B$ is `[n m]`. Returns $X$ as a RealTensor or ComplexTensor."
   [a b]
   (tape/record! :la/solve [a b]
                 (let [a (ensure-tensor a) b (ensure-tensor b)]
@@ -307,7 +307,7 @@
     (->rt (dtt/ensure-tensor arr))))
 
 (defn svd
-  "Singular value decomposition: $A = U \\Sigma V^T$.
+  "Singular value decomposition of a real matrix: $A = U \\Sigma V^T$.
    Returns a map with `:U`, `:S` (singular values), `:Vt`."
   [a]
   (tape/record! :la/svd [a]

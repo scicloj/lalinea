@@ -18,9 +18,10 @@
 (defn tensor->dmat
   "Zero-copy: [r c] tensor -> DMatrixRMaj sharing the same double[].
 
-   The tensor must be rank 2 with :float64 datatype and contiguous
-   row-major storage. Mutations through either view are visible
-   in the other."
+   The tensor must be rank 2 with :float64 datatype. Contiguous
+   tensors share the same array; lazy or strided tensors are copied.
+   Mutations through the returned DMatrixRMaj are visible in the
+   original for contiguous tensors."
   ^DMatrixRMaj [tensor]
   (let [shape (dtype/shape tensor)
         _ (when-not (= 2 (count shape))
