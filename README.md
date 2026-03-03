@@ -67,7 +67,7 @@ Round-trip through `pr-str` / `read-string`.
 
 ### Computation tape
 
-- Record `la/`, `cx/`, and `elem/` operations as a DAG with `tape/with-tape`
+- Record `la/`, `t/`, and `elem/` operations as a DAG with `tape/with-tape`
 - Inspect memory status: `:contiguous`, `:strided`, or `:lazy`
 - Detect shared backing arrays between tensors
 - Visualize computation graphs as Mermaid flowcharts
@@ -105,7 +105,6 @@ Each chapter includes inline tests via
 (require '[scicloj.lalinea.tensor :as t])           ; tensor construction, structural ops, EJML interop
 (require '[scicloj.lalinea.linalg :as la])          ; arithmetic, decompositions, solve
 (require '[scicloj.lalinea.elementwise :as elem])   ; element-wise math (sqrt, sin, exp, ...)
-(require '[scicloj.lalinea.complex :as cx])         ; complex tensor operations
 (require '[scicloj.lalinea.transform :as ft])       ; FFT / DCT / DST / DHT bridge
 (require '[scicloj.lalinea.tape :as tape])          ; computation DAG recording
 (require '[scicloj.lalinea.grad :as grad])          ; reverse-mode automatic differentiation
