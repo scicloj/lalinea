@@ -165,6 +165,93 @@
 
 (kind/test-last [(fn [t] (not (t/real-tensor? t)))])
 
+(kind/doc #'t/compute-tensor)
+
+(t/compute-tensor [2 3] (fn [i j] (+ (* 10.0 i) j)) :float64)
+
+(kind/test-last [(fn [m] (and (= [2 3] (t/shape m))
+                              (== 12.0 (m 1 2))))])
+
+(kind/doc #'t/shape)
+
+(t/shape (t/matrix [[1 2 3] [4 5 6]]))
+
+(kind/test-last [(fn [s] (= [2 3] s))])
+
+(kind/doc #'t/reshape)
+
+(t/reshape (t/matrix [[1 2] [3 4]]) [4])
+
+(kind/test-last [(fn [v] (= [1.0 2.0 3.0 4.0] v))])
+
+(kind/doc #'t/select)
+
+;; Row 0 of a matrix:
+(t/select (t/matrix [[1 2] [3 4] [5 6]]) 0 :all)
+
+(kind/test-last [(fn [v] (= [1.0 2.0] v))])
+
+(kind/doc #'t/clone)
+
+;; Materialize a lazy result:
+(t/clone (la/add (t/matrix [[1 2] [3 4]])
+                 (t/matrix [[10 20] [30 40]])))
+
+(kind/test-last [(fn [m] (= [[11.0 22.0] [33.0 44.0]] m))])
+
+(kind/doc #'t/make-reader)
+
+(t/make-reader :float64 5 (* idx idx))
+
+(kind/test-last [(fn [r] (= 16.0 (r 4)))])
+
+(kind/doc #'t/make-container)
+
+(t/make-container :float64 4)
+
+(kind/test-last [(fn [c] (= 4 (count c)))])
+
+(kind/doc #'t/elemwise-cast)
+
+(t/elemwise-cast (t/matrix [[1 2] [3 4]]) :int32)
+
+(kind/test-last [(fn [m] (= :int32 (tech.v3.datatype/elemwise-datatype m)))])
+
+(kind/doc #'t/mset!)
+
+(let [m (t/clone (t/matrix [[1 2] [3 4]]))]
+  (t/mset! m 0 0 99.0)
+  (m 0 0))
+
+(kind/test-last [(fn [v] (== 99.0 v))])
+
+(kind/doc #'t/set-value!)
+
+(let [buf (t/make-container :float64 3)]
+  (t/set-value! buf 1 42.0)
+  (buf 1))
+
+(kind/test-last [(fn [v] (== 42.0 v))])
+
+(kind/doc #'t/->double-array)
+
+(let [arr (t/->double-array (t/matrix [[1 2] [3 4]]))]
+  (alength arr))
+
+(kind/test-last [(fn [n] (= 4 n))])
+
+(kind/doc #'t/->reader)
+
+(let [rdr (t/->reader (t/column [10 20 30]))]
+  (rdr 2))
+
+(kind/test-last [(fn [v] (== 30.0 v))])
+
+(kind/doc #'t/array-buffer)
+
+(some? (t/array-buffer (t/clone (t/eye 3))))
+
+(kind/test-last [true?])
 ;; ## `scicloj.lalinea.linalg`
 
 (kind/doc #'la/add)
@@ -871,6 +958,30 @@
 (t/flatten (elem/clip (t/column [-2 0.5 3]) -1 1))
 
 (kind/test-last [(fn [v] (= [-1.0 0.5 1.0] v))])
+
+(kind/doc #'elem/div)
+
+(elem/div (t/column [10 20 30]) (t/column [2 4 5]))
+
+(kind/test-last [(fn [v] (= [5.0 5.0 6.0] (t/flatten v)))])
+
+(kind/doc #'elem/gt)
+
+(elem/gt (t/column [1 5 3]) (t/column [2 4 3]))
+
+(kind/test-last [(fn [v] (= [0.0 1.0 0.0] (t/flatten v)))])
+
+(kind/doc #'elem/reduce-max)
+
+(elem/reduce-max (t/column [3 7 2 9 1]))
+
+(kind/test-last [(fn [v] (== 9.0 v))])
+
+(kind/doc #'elem/reduce-min)
+
+(elem/reduce-min (t/column [3 7 2 9 1]))
+
+(kind/test-last [(fn [v] (== 1.0 v))])
 
 ;; ## `scicloj.lalinea.grad`
 ;;
