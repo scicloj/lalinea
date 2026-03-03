@@ -21,18 +21,6 @@
 ;; VJP rules
 ;; ---------------------------------------------------------------------------
 
-(defn- ensure-tensor
-  "Unwrap RealTensor to bare tensor; pass through everything else."
-  [x]
-  (if (rt/real-tensor? x) (rt/->tensor x) x))
-
-(defn- ->rt
-  "Wrap a bare tensor in RealTensor. Returns scalars/nil as-is."
-  [t]
-  (if (or (nil? t) (number? t))
-    t
-    (rt/->real-tensor t)))
-
 (def ^:private vjp-rules
   "VJP rules: op keyword -> fn of [adjoint, inputs, output] -> vector of
    input adjoints (nil for non-differentiable inputs like scalars)."
@@ -81,7 +69,7 @@
   "Accumulate gradient: existing + new. If existing is nil, returns new.
    Materializes lazy tensors to avoid deep nesting."
   [existing new-grad]
-  (let [new-grad (ensure-tensor new-grad)]
+  (let [new-grad (rt/ensure-tensor new-grad)]
     (if (nil? existing)
       (if (dtt/tensor? new-grad)
         (dtype/clone new-grad)
@@ -124,9 +112,9 @@
               g (.get adjoints entry-id)]
           (when (some? g)
             (when-let [rule (get vjp-rules (:op entry))]
-              (let [input-tensors (mapv ensure-tensor (:input-tensors entry))
+              (let [input-tensors (mapv rt/ensure-tensor (:input-tensors entry))
                     input-refs (:inputs entry)
-                    input-grads (rule (ensure-tensor g) input-tensors (ensure-tensor (:output entry)))]
+                    input-grads (rule (rt/ensure-tensor g) input-tensors (rt/ensure-tensor (:output entry)))]
                 (dotimes [i (count input-refs)]
                   (when-let [ig (nth input-grads i nil)]
                     (when-let [ref-id (:id (nth input-refs i))]
@@ -139,5 +127,5 @@
             (when (and (.startsWith id "x")
                        (not (contains? idx id)))
               (when-let [g (.get adjoints id)]
-                (.put result tensor-obj (->rt g))))))
+                (.put result tensor-obj (rt/->rt g))))))
         result))))

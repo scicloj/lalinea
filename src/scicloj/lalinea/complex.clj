@@ -1,5 +1,5 @@
 (ns scicloj.lalinea.complex
-  "Complex tensors backed by dtype-next.
+  "Complex tensors: constructors, arithmetic, and reader.
 
    A ComplexTensor wraps a real tensor whose last dimension is 2
    (interleaved re/im pairs). The `re` and `im` functions always
@@ -11,117 +11,36 @@
      [r c 2]   complex r×c matrix
      [... 2]   arbitrary rank
 
-   Adapted from scicloj.harmonica.linalg.complex."
+   For the ComplexTensor deftype and structural accessors, see
+   `scicloj.lalinea.impl.complex-tensor`."
   (:refer-clojure :exclude [abs conj])
-  (:require [scicloj.lalinea.impl.real-tensor]
+  (:require [scicloj.lalinea.impl.complex-tensor :as ct]
+            [scicloj.lalinea.impl.real-tensor :as rt]
             [tech.v3.tensor :as dtt]
             [tech.v3.datatype :as dtype]
-            [tech.v3.datatype.functional :as dfn]
-            [tech.v3.datatype.protocols :as dtype-proto]))
+            [tech.v3.datatype.functional :as dfn])
+  (:import [scicloj.lalinea.impl.complex_tensor ComplexTensor]))
 
 ;; ---------------------------------------------------------------------------
-(defn- unwrap-rt
-  "Unwrap RealTensor to bare tensor; pass through everything else."
+;; Re-export type-level API from impl/complex_tensor
+;; ---------------------------------------------------------------------------
+
+(def complex?      "True if x is a ComplexTensor." ct/complex?)
+(def scalar?       "True if this ComplexTensor represents a scalar." ct/scalar?)
+(def ->tensor      "Access the underlying [... 2] tensor." ct/->tensor)
+(def ->double-array "Access the underlying interleaved double[]." ct/->double-array)
+(def wrap-tensor   "Wrap a raw interleaved [... 2] tensor as a ComplexTensor." ct/wrap-tensor)
+(def complex-shape "The complex shape (underlying shape without trailing 2)." ct/complex-shape)
+
+(defn re
+  "Real part(s). Returns a RealTensor view or a double for scalars."
   [x]
-  (if (instance? scicloj.lalinea.impl.real_tensor.RealTensor x)
-    (.tensor ^scicloj.lalinea.impl.real_tensor.RealTensor x)
-    x))
+  (ct/re x))
 
-;; Protocol
-;; ---------------------------------------------------------------------------
-
-(defprotocol PComplex
-  (re [x] "Real part(s). Returns a tensor view (last dim removed) or a double for scalars.")
-  (im [x] "Imaginary part(s). Returns a tensor view (last dim removed) or a double for scalars."))
-
-;; ---------------------------------------------------------------------------
-;; Internal helpers
-;; ---------------------------------------------------------------------------
-
-(defn- select-part
-  "Select real (idx=0) or imaginary (idx=1) part from a tensor whose last dim is 2."
-  [tensor idx]
-  (let [ndims (count (dtype/shape tensor))]
-    (apply dtt/select tensor
-           (concat (repeat (dec ndims) :all) [idx]))))
-
-;; ---------------------------------------------------------------------------
-;; ComplexTensor deftype
-;; ---------------------------------------------------------------------------
-
-(def ^:private ->rt-fn (delay (requiring-resolve 'scicloj.lalinea.impl.real-tensor/->real-tensor)))
-
-(declare ->ComplexTensor)
-
-(deftype ComplexTensor [tensor]
-  dtype-proto/PElemwiseDatatype
-  (elemwise-datatype [_ct] :float64)
-
-  dtype-proto/PECount
-  (ecount [ct] (dtype/ecount tensor))
-
-  dtype-proto/PShape
-  (shape [ct] (dtype/shape tensor))
-
-  dtype-proto/PClone
-  (clone [ct] (->ComplexTensor (dtype/clone tensor)))
-
-  dtype-proto/PToReader
-  (convertible-to-reader? [_ct] true)
-  (->reader [ct] (dtype/->reader tensor))
-
-  PComplex
-  (re [_]
-    (if (= 1 (count (dtype/shape tensor)))
-      (double (tensor 0))
-      (@@->rt-fn (select-part tensor 0))))
-  (im [_]
-    (if (= 1 (count (dtype/shape tensor)))
-      (double (tensor 1))
-      (@@->rt-fn (select-part tensor 1))))
-
-  clojure.lang.Counted
-  (count [_]
-    (let [s (dtype/shape tensor)]
-      (if (<= (count s) 1)
-        0
-        (long (first s)))))
-
-  clojure.lang.Indexed
-  (nth [_ i]
-    (->ComplexTensor (tensor i)))
-  (nth [this i not-found]
-    (if (and (>= i 0) (< i (.count this)))
-      (.nth this i)
-      not-found))
-
-  clojure.lang.IFn
-  (invoke [this i]
-    (.nth this (int i)))
-  (applyTo [this args]
-    (let [n (clojure.lang.RT/boundedLength args 1)]
-      (case n
-        1 (.invoke this (first args))
-        (throw (clojure.lang.ArityException. n (str (class this)))))))
-
-  clojure.lang.Seqable
-  (seq [this]
-    (when (pos? (.count this))
-      (map #(.nth this %) (range (.count this)))))
-
-  clojure.lang.IHashEq
-  (hasheq [_] (.hasheq ^clojure.lang.IHashEq tensor))
-
-  Object
-  (equals [_ other]
-    (and (instance? ComplexTensor other)
-         (.equiv ^clojure.lang.IHashEq tensor (.-tensor ^ComplexTensor other))))
-  (hashCode [_] (.hashCode tensor))
-  (toString [_]
-    (let [complex-shape (vec (butlast (dtype/shape tensor)))]
-      (format "ComplexTensor<float64>%s" (str complex-shape)))))
-
-;; print-method installed by impl/print.clj (loaded via linalg.clj)
+(defn im
+  "Imaginary part(s). Returns a RealTensor view or a double for scalars."
+  [x]
+  (ct/im x))
 
 ;; ---------------------------------------------------------------------------
 ;; Tape recording (lazy resolution to avoid circular dep with tape ns)
@@ -159,20 +78,20 @@
              (instance? ComplexTensor tensor-or-re)
              (.-tensor ^ComplexTensor tensor-or-re)
              :else
-             (dtt/ensure-tensor (unwrap-rt tensor-or-re)))
+             (dtt/ensure-tensor (rt/ensure-tensor tensor-or-re)))
          shape (vec (dtype/shape t))
          result (if (= 2 (last shape))
-                  (->ComplexTensor t)
+                  (ComplexTensor. t)
                   ;; Flat input — reshape to [n/2, 2]
                   (let [n (long (reduce * shape))]
                     (when-not (even? n)
                       (throw (ex-info (str "Cannot interpret odd-length data as complex: " n)
                                       {:shape shape :n n})))
-                    (->ComplexTensor (dtt/reshape t [(/ n 2) 2]))))]
+                    (ComplexTensor. (dtt/reshape t [(/ n 2) 2]))))]
      (tape-record! :cx/complex-tensor [tensor-or-re] result)))
   ([re-data im-data]
-   (let [re-t (dtt/ensure-tensor (unwrap-rt re-data))
-         im-t (dtt/ensure-tensor (unwrap-rt im-data))
+   (let [re-t (dtt/ensure-tensor (rt/ensure-tensor re-data))
+         im-t (dtt/ensure-tensor (rt/ensure-tensor im-data))
          re-shape (vec (dtype/shape re-t))
          im-shape (vec (dtype/shape im-t))]
      (when-not (= re-shape im-shape)
@@ -186,13 +105,13 @@
                                             (double (re-flat (quot idx 2)))
                                             (double (im-flat (quot idx 2)))))
            full-shape (clojure.core/conj re-shape 2)
-           result (->ComplexTensor (dtt/reshape interleaved full-shape))]
+           result (ComplexTensor. (dtt/reshape interleaved full-shape))]
        (tape-record! :cx/complex-tensor [re-data im-data] result)))))
 
 (defn complex-tensor-real
   "Create a ComplexTensor from real data only (imaginary parts = 0)."
   [re-data]
-  (let [re-t (dtt/ensure-tensor (unwrap-rt re-data))
+  (let [re-t (dtt/ensure-tensor (rt/ensure-tensor re-data))
         re-shape (vec (dtype/shape re-t))
         n (long (reduce * re-shape))
         re-flat (dtype/->reader (dtt/reshape re-t [n]))
@@ -201,47 +120,8 @@
                                          (double (re-flat (quot idx 2)))
                                          0.0))
         full-shape (clojure.core/conj re-shape 2)
-        result (->ComplexTensor (dtt/reshape interleaved full-shape))]
+        result (ComplexTensor. (dtt/reshape interleaved full-shape))]
     (tape-record! :cx/complex-tensor-real [re-data] result)))
-
-;; ---------------------------------------------------------------------------
-;; Accessors
-;; ---------------------------------------------------------------------------
-
-(defn ->tensor
-  "Access the underlying [... 2] tensor."
-  [^ComplexTensor ct]
-  (.-tensor ct))
-
-(defn ->double-array
-  "Access the underlying interleaved double[].
-   Zero-copy when the tensor is backed by a contiguous array;
-   falls back to copying otherwise."
-  ^doubles [^ComplexTensor ct]
-  (dtype/->double-array (.-tensor ct)))
-
-(defn wrap-tensor
-  "Wrap a raw interleaved [... 2] tensor as a ComplexTensor.
-   Inverse of `->tensor`."
-  [t]
-  (let [s (dtype/shape t)]
-    (assert (= 2 (last s)) "Last dimension must be 2 for complex interleaved layout")
-    (ComplexTensor. t)))
-
-(defn complex-shape
-  "The complex shape (underlying shape without trailing 2)."
-  [^ComplexTensor ct]
-  (vec (butlast (dtype/shape (.-tensor ct)))))
-
-(defn complex?
-  "True if x is a ComplexTensor."
-  [x]
-  (instance? ComplexTensor x))
-
-(defn scalar?
-  "True if this ComplexTensor represents a scalar complex number."
-  [^ComplexTensor ct]
-  (= 1 (count (dtype/shape (.-tensor ct)))))
 
 ;; ---------------------------------------------------------------------------
 ;; Complex arithmetic
@@ -253,7 +133,7 @@
   (let [arr (double-array 2)]
     (aset arr 0 (double re))
     (aset arr 1 (double im))
-    (->ComplexTensor (dtt/ensure-tensor arr))))
+    (ComplexTensor. (dtt/ensure-tensor arr))))
 
 (defn mul
   "Pointwise complex multiply: (a+bi)(c+di) = (ac-bd) + (ad+bc)i"
@@ -267,7 +147,7 @@
           (let [a-flat (dtype/->reader (->tensor a))
                 b-flat (dtype/->reader (->tensor b))
                 n (dtype/ecount (->tensor a))]
-            (->ComplexTensor
+            (ComplexTensor.
              (dtt/reshape
               (dtype/make-reader :float64 n
                                  (let [base (-> idx (quot 2) (* 2))
@@ -287,7 +167,7 @@
   (let [t (->tensor ct)
         flat (dtype/->reader t)
         n (dtype/ecount t)
-        result (->ComplexTensor
+        result (ComplexTensor.
                 (dtt/reshape
                  (dtype/make-reader :float64 n
                                     (let [v (double (flat idx))]
@@ -299,7 +179,7 @@
   "Scale by a real scalar."
   [^ComplexTensor ct alpha]
   (let [t (->tensor ct)
-        result (->ComplexTensor (dfn/* (double alpha) t))]
+        result (ComplexTensor. (dfn/* (double alpha) t))]
     (tape-record! :cx/scale [ct alpha] result)))
 
 (defn abs
@@ -311,7 +191,7 @@
                  (dfn/sqrt (dfn/+ (dfn/* r r) (dfn/* i i)))
                  (let [r (dtt/ensure-tensor r)
                        i (dtt/ensure-tensor i)]
-                   (@@->rt-fn (dfn/sqrt (dfn/+ (dfn/* r r) (dfn/* i i))))))]
+                   (rt/->real-tensor (dfn/sqrt (dfn/+ (dfn/* r r) (dfn/* i i))))))]
     (tape-record! :cx/abs [ct] result)))
 
 (defn dot
@@ -342,7 +222,7 @@
           (complex (+ (double (re a)) (double (re b)))
                    (+ (double (im a)) (double (im b))))
           (let [ta (->tensor a)]
-            (->ComplexTensor (dfn/+ ta (->tensor b)))))]
+            (ComplexTensor. (dfn/+ ta (->tensor b)))))]
     (tape-record! :cx/add [a b] result)))
 
 (defn sub
@@ -353,7 +233,7 @@
           (complex (- (double (re a)) (double (re b)))
                    (- (double (im a)) (double (im b))))
           (let [ta (->tensor a)]
-            (->ComplexTensor (dfn/- ta (->tensor b)))))]
+            (ComplexTensor. (dfn/- ta (->tensor b)))))]
     (tape-record! :cx/sub [a b] result)))
 
 (defn sum
@@ -422,4 +302,3 @@
             im-arr (double-array (mapv second all-pairs))]
         (complex-tensor (dtt/reshape (dtt/ensure-tensor re-arr) shape)
                         (dtt/reshape (dtt/ensure-tensor im-arr) shape))))))
-

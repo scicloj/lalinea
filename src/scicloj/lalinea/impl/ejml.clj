@@ -1,18 +1,48 @@
 (ns scicloj.lalinea.impl.ejml
-  "EJML operations for real and complex matrices.
+  "EJML operations and interop for real and complex matrices.
 
-   Real matrices: DMatrixRMaj ↔ dtype-next [r c] tensor (zero-copy)
-   Complex matrices: ZMatrixRMaj ↔ ComplexTensor [r c 2] (zero-copy)
-
-   This namespace wraps EJML's CommonOps into Clojure functions."
-  (:require [scicloj.lalinea.impl.tensor :as bt]
-            [scicloj.lalinea.complex :as cx]
+   Includes zero-copy conversion between dtype-next tensors and
+   EJML types (DMatrixRMaj, ZMatrixRMaj), plus all EJML-backed
+   computation: multiply, transpose, solve, decompose, etc."
+  (:require [scicloj.lalinea.complex :as cx]
             [tech.v3.tensor :as dtt]
             [tech.v3.datatype :as dtype])
   (:import [org.ejml.data DMatrixRMaj ZMatrixRMaj Complex_F64]
            [org.ejml.dense.row CommonOps_DDRM MatrixFeatures_DDRM]
            [org.ejml.dense.row CommonOps_ZDRM NormOps_ZDRM MatrixFeatures_ZDRM]
            [org.ejml.dense.row.factory DecompositionFactory_DDRM DecompositionFactory_ZDRM]))
+;; ---------------------------------------------------------------------------
+;; Zero-copy interop: dtype-next tensor ↔ DMatrixRMaj
+;; ---------------------------------------------------------------------------
+
+(defn tensor->dmat
+  "Zero-copy: [r c] tensor -> DMatrixRMaj sharing the same double[].
+
+   The tensor must be rank 2 with :float64 datatype. Contiguous
+   tensors share the same array; lazy or strided tensors are copied.
+   Mutations through the returned DMatrixRMaj are visible in the
+   original for contiguous tensors."
+  ^DMatrixRMaj [tensor]
+  (let [shape (dtype/shape tensor)
+        _ (when-not (= 2 (count shape))
+            (throw (ex-info (str "Expected rank-2 tensor, got shape " (vec shape))
+                            {:shape (vec shape)})))
+        [r c] shape
+        arr (dtype/->double-array tensor)
+        dm (DMatrixRMaj. (int r) (int c))]
+    (.setData dm arr)
+    dm))
+
+(defn dmat->tensor
+  "Zero-copy: DMatrixRMaj -> [r c] tensor sharing the same double[].
+
+   Mutations through either view are visible in the other."
+  [^DMatrixRMaj dm]
+  (let [r (.numRows dm)
+        c (.numCols dm)
+        arr (.data dm)]
+    (dtt/reshape (dtt/ensure-tensor arr) [r c])))
+
 
 ;; ===========================================================================
 ;; Real matrix operations (DMatrixRMaj)

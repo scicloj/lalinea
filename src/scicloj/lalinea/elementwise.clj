@@ -16,18 +16,6 @@
 ;; Internal helpers
 ;; ---------------------------------------------------------------------------
 
-(defn- ensure-tensor
-  "Unwrap RealTensor to bare tensor; pass through everything else."
-  [x]
-  (if (rt/real-tensor? x) (rt/->tensor x) x))
-
-(defn- ->rt
-  "Wrap a bare tensor result in RealTensor. Returns scalars as-is."
-  [t]
-  (if (or (nil? t) (number? t))
-    t
-    (rt/->real-tensor t)))
-
 (defn- unsupported-complex! [op]
   (throw (ex-info (str op " is not supported for complex input")
                   {:op op})))
@@ -57,16 +45,16 @@
   "Element-wise square."
   [a]
   (tape/record! :elem/sq [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     (cx/mul a a)
-                    (->rt (dfn/sq a))))))
+                    (rt/->rt (dfn/sq a))))))
 
 (defn sqrt
   "Element-wise square root."
   [a]
   (tape/record! :elem/sqrt [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     ;; sqrt(z) = sqrt(|z|) * e^(i*theta/2)
                     (complex-unary a (fn [x y]
@@ -74,25 +62,25 @@
                                              theta (/ (Math/atan2 y x) 2.0)]
                                          [(* r (Math/cos theta))
                                           (* r (Math/sin theta))])))
-                    (->rt (dfn/sqrt a))))))
+                    (rt/->rt (dfn/sqrt a))))))
 
 (defn pow
   "Element-wise power. Real only."
   [a exponent]
   (tape/record! :elem/pow [a exponent]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/pow)
-                    (->rt (dfn/pow a (double exponent)))))))
+                    (rt/->rt (dfn/pow a (double exponent)))))))
 
 (defn cbrt
   "Element-wise cube root. Real only."
   [a]
   (tape/record! :elem/cbrt [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/cbrt)
-                    (->rt (dfn/cbrt a))))))
+                    (rt/->rt (dfn/cbrt a))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Exponential and logarithmic
@@ -102,35 +90,35 @@
   "Element-wise exponential."
   [a]
   (tape/record! :elem/exp [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     ;; exp(x+iy) = e^x * (cos y + i sin y)
                     (complex-unary a (fn [x y]
                                        (let [ex (Math/exp x)]
                                          [(* ex (Math/cos y))
                                           (* ex (Math/sin y))])))
-                    (->rt (dfn/exp a))))))
+                    (rt/->rt (dfn/exp a))))))
 
 (defn log
   "Element-wise natural logarithm."
   [a]
   (tape/record! :elem/log [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     ;; log(z) = ln|z| + i*arg(z)
                     (complex-unary a (fn [x y]
                                        [(Math/log (Math/sqrt (+ (* x x) (* y y))))
                                         (Math/atan2 y x)]))
-                    (->rt (dfn/log a))))))
+                    (rt/->rt (dfn/log a))))))
 
 (defn log10
   "Element-wise base-10 logarithm. Real only."
   [a]
   (tape/record! :elem/log10 [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/log10)
-                    (->rt (dfn/log10 a))))))
+                    (rt/->rt (dfn/log10 a))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Trigonometric
@@ -140,34 +128,34 @@
   "Element-wise sine."
   [a]
   (tape/record! :elem/sin [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     ;; sin(x+iy) = sin(x)cosh(y) + i*cos(x)sinh(y)
                     (complex-unary a (fn [x y]
                                        [(* (Math/sin x) (Math/cosh y))
                                         (* (Math/cos x) (Math/sinh y))]))
-                    (->rt (dfn/sin a))))))
+                    (rt/->rt (dfn/sin a))))))
 
 (defn cos
   "Element-wise cosine."
   [a]
   (tape/record! :elem/cos [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     ;; cos(x+iy) = cos(x)cosh(y) - i*sin(x)sinh(y)
                     (complex-unary a (fn [x y]
                                        [(* (Math/cos x) (Math/cosh y))
                                         (- (* (Math/sin x) (Math/sinh y)))]))
-                    (->rt (dfn/cos a))))))
+                    (rt/->rt (dfn/cos a))))))
 
 (defn tan
   "Element-wise tangent. Real only."
   [a]
   (tape/record! :elem/tan [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/tan)
-                    (->rt (dfn/tan a))))))
+                    (rt/->rt (dfn/tan a))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Hyperbolic
@@ -177,34 +165,34 @@
   "Element-wise hyperbolic sine."
   [a]
   (tape/record! :elem/sinh [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     ;; sinh(x+iy) = sinh(x)cos(y) + i*cosh(x)sin(y)
                     (complex-unary a (fn [x y]
                                        [(* (Math/sinh x) (Math/cos y))
                                         (* (Math/cosh x) (Math/sin y))]))
-                    (->rt (dfn/sinh a))))))
+                    (rt/->rt (dfn/sinh a))))))
 
 (defn cosh
   "Element-wise hyperbolic cosine."
   [a]
   (tape/record! :elem/cosh [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     ;; cosh(x+iy) = cosh(x)cos(y) + i*sinh(x)sin(y)
                     (complex-unary a (fn [x y]
                                        [(* (Math/cosh x) (Math/cos y))
                                         (* (Math/sinh x) (Math/sin y))]))
-                    (->rt (dfn/cosh a))))))
+                    (rt/->rt (dfn/cosh a))))))
 
 (defn tanh
   "Element-wise hyperbolic tangent. Real only."
   [a]
   (tape/record! :elem/tanh [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/tanh)
-                    (->rt (dfn/tanh a))))))
+                    (rt/->rt (dfn/tanh a))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Absolute value
@@ -214,10 +202,10 @@
   "Element-wise absolute value (magnitude for complex). Returns a RealTensor."
   [a]
   (tape/record! :elem/abs [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
-                    (->rt (cx/abs a))
-                    (->rt (dfn/abs a))))))
+                    (rt/->rt (cx/abs a))
+                    (rt/->rt (dfn/abs a))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Reductions
@@ -227,7 +215,7 @@
   "Sum of all elements. Returns double for real, scalar ComplexTensor for complex."
   [a]
   (tape/record! :elem/sum [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     (cx/sum a)
                     (double (dfn/sum a))))))
@@ -236,7 +224,7 @@
   "Mean of all elements. Real only."
   [a]
   (tape/record! :elem/mean [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/mean)
                     (double (dfn/mean a))))))
@@ -249,45 +237,45 @@
   "Element-wise floor. Real only."
   [a]
   (tape/record! :elem/floor [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/floor)
-                    (->rt (dfn/floor a))))))
+                    (rt/->rt (dfn/floor a))))))
 
 (defn ceil
   "Element-wise ceiling. Real only."
   [a]
   (tape/record! :elem/ceil [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/ceil)
-                    (->rt (dfn/ceil a))))))
+                    (rt/->rt (dfn/ceil a))))))
 
 (defn min
   "Element-wise minimum. Real only."
   [a b]
   (tape/record! :elem/min [a b]
-                (let [a (ensure-tensor a) b (ensure-tensor b)]
+                (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/min)
-                    (->rt (dfn/min a b))))))
+                    (rt/->rt (dfn/min a b))))))
 
 (defn max
   "Element-wise maximum. Real only."
   [a b]
   (tape/record! :elem/max [a b]
-                (let [a (ensure-tensor a) b (ensure-tensor b)]
+                (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/max)
-                    (->rt (dfn/max a b))))))
+                    (rt/->rt (dfn/max a b))))))
 (defn div
   "Element-wise division. Real only."
   [a b]
   (tape/record! :elem/div [a b]
-                (let [a (ensure-tensor a) b (ensure-tensor b)]
+                (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
                   (if (or (cx/complex? a) (cx/complex? b))
                     (unsupported-complex! :elem/div)
-                    (->rt (dfn// a b))))))
+                    (rt/->rt (dfn// a b))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Inverse trigonometric (real only)
@@ -297,28 +285,28 @@
   "Element-wise arcsine. Real only."
   [a]
   (tape/record! :elem/asin [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/asin)
-                    (->rt (dfn/asin a))))))
+                    (rt/->rt (dfn/asin a))))))
 
 (defn acos
   "Element-wise arccosine. Real only."
   [a]
   (tape/record! :elem/acos [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/acos)
-                    (->rt (dfn/acos a))))))
+                    (rt/->rt (dfn/acos a))))))
 
 (defn atan
   "Element-wise arctangent. Real only."
   [a]
   (tape/record! :elem/atan [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/atan)
-                    (->rt (dfn/atan a))))))
+                    (rt/->rt (dfn/atan a))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Additional exponential/logarithmic (real only)
@@ -328,19 +316,19 @@
   "Element-wise log(1 + x), accurate for small x. Real only."
   [a]
   (tape/record! :elem/log1p [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/log1p)
-                    (->rt (dfn/log1p a))))))
+                    (rt/->rt (dfn/log1p a))))))
 
 (defn expm1
   "Element-wise exp(x) - 1, accurate for small x. Real only."
   [a]
   (tape/record! :elem/expm1 [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/expm1)
-                    (->rt (dfn/expm1 a))))))
+                    (rt/->rt (dfn/expm1 a))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Additional rounding/clipping (real only)
@@ -350,21 +338,21 @@
   "Element-wise rounding to nearest integer. Real only."
   [a]
   (tape/record! :elem/round [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/round)
-                    (->rt (dfn/rint a))))))
+                    (rt/->rt (dfn/rint a))))))
 
 (defn clip
   "Element-wise clipping to [lo, hi]. Real only."
   [a lo hi]
   (tape/record! :elem/clip [a lo hi]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/clip)
                     (let [lo (double lo)
                           hi (double hi)]
-                      (->rt (dfn/min (dfn/max a lo) hi)))))))
+                      (rt/->rt (dfn/min (dfn/max a lo) hi)))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Reductions (additional)
@@ -374,7 +362,7 @@
   "Maximum element value. Returns double. Real only."
   [a]
   (tape/record! :elem/reduce-max [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/reduce-max)
                     (double (dfn/reduce-max a))))))
@@ -383,7 +371,7 @@
   "Minimum element value. Returns double. Real only."
   [a]
   (tape/record! :elem/reduce-min [a]
-                (let [a (ensure-tensor a)]
+                (let [a (rt/ensure-tensor a)]
                   (if (cx/complex? a)
                     (unsupported-complex! :elem/reduce-min)
                     (double (dfn/reduce-min a))))))
@@ -396,7 +384,7 @@
   "Element-wise greater-than. Returns a RealTensor of 0.0/1.0. Real only."
   [a b]
   (tape/record! :elem/gt [a b]
-                (let [a (ensure-tensor a) b (ensure-tensor b)]
+                (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
                   (if (or (cx/complex? a) (cx/complex? b))
                     (unsupported-complex! :elem/gt)
-                    (->rt (dtype/elemwise-cast (dfn/> a b) :float64))))))
+                    (rt/->rt (dtype/elemwise-cast (dfn/> a b) :float64))))))

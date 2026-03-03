@@ -10,7 +10,7 @@
             [scicloj.lalinea.impl.real-tensor :as rt]
             [scicloj.lalinea.complex :as cx])
   (:import [scicloj.lalinea.impl.real_tensor RealTensor]
-           [scicloj.lalinea.complex ComplexTensor]))
+           [scicloj.lalinea.impl.complex_tensor ComplexTensor]))
 
 (def ^:dynamic *print-threshold*
   "Maximum number of elements per dimension before truncating.

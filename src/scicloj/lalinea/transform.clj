@@ -37,7 +37,7 @@
 
 (defn inverse
   "Inverse FFT from a ComplexTensor spectrum back to a ComplexTensor signal."
-  [^scicloj.lalinea.complex.ComplexTensor spectrum]
+  [^scicloj.lalinea.impl.complex_tensor.ComplexTensor spectrum]
   (let [arr (cx/->double-array spectrum)
         result (ft/reverse-1d @fft-complex-io* arr)]
     (cx/complex-tensor (dtt/reshape (dtt/ensure-tensor result)
@@ -56,7 +56,7 @@
 
 (defn forward-complex
   "Forward FFT of a ComplexTensor signal. Returns a ComplexTensor spectrum."
-  [^scicloj.lalinea.complex.ComplexTensor signal]
+  [^scicloj.lalinea.impl.complex_tensor.ComplexTensor signal]
   (let [arr (cx/->double-array signal)
         result (ft/forward-1d @fft-complex-io* arr)]
     (cx/complex-tensor (dtt/reshape (dtt/ensure-tensor result)

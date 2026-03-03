@@ -113,6 +113,16 @@
   [t]
   (if (instance? RealTensor t) t (->RealTensor t)))
 
+(defn ensure-tensor
+  "Unwrap RealTensor to bare tensor; pass through everything else."
+  [x]
+  (if (instance? RealTensor x) (->tensor x) x))
+
+(defn ->rt
+  "Wrap a bare tensor in RealTensor. Returns nil/numbers as-is."
+  [t]
+  (if (or (nil? t) (number? t)) t (->real-tensor t)))
+
 ;; hamf protocol extensions — deftype body implements the Java interfaces,
 ;; but ham-fisted dispatch also needs explicit extension for these protocols.
 (hamf/extend-type RealTensor
@@ -149,3 +159,54 @@
       (if (dtype-proto/convertible-to-buffer? t)
         (dtype-proto/->buffer t)
         (dtype-proto/->buffer (dtype-proto/->reader t))))))
+
+;; ---------------------------------------------------------------------------
+;; Raw tensor construction helpers
+;; ---------------------------------------------------------------------------
+
+(defn matrix
+  "Create a raw [r c] tensor from nested sequences or pass through
+   an existing float64 rank-2 tensor unchanged.
+   For nested sequences, allocates a contiguous double[]."
+  [rows]
+  (if (and (dtt/tensor? rows)
+           (= :float64 (dtype/elemwise-datatype rows))
+           (= 2 (count (dtype/shape rows))))
+    rows
+    (dtt/->tensor rows {:datatype :float64})))
+
+(defn- ->float64-reader
+  "Coerce to a float64 reader. Zero-copy for arrays/buffers/tensors;
+   realizes seqs into a container (seqs have no backing to view)."
+  [xs]
+  (if (dtype/as-reader xs)
+    (dtype/->reader xs :float64)
+    (dtype/make-container :float64 xs)))
+
+(defn row-vector
+  "Create a raw [1 c] tensor from a flat sequence.
+   Zero-copy when the input is already a float64 buffer or array."
+  [xs]
+  (let [r (->float64-reader xs)
+        n (dtype/ecount r)]
+    (dtt/reshape (dtt/ensure-tensor r) [1 n])))
+
+(defn col-vector
+  "Create a raw [r 1] tensor from a flat sequence.
+   Zero-copy when the input is already a float64 buffer or array."
+  [xs]
+  (let [r (->float64-reader xs)
+        n (dtype/ecount r)]
+    (dtt/reshape (dtt/ensure-tensor r) [n 1])))
+
+(defn eye
+  "Create a raw n x n identity matrix as a tensor."
+  [n]
+  (dtt/compute-tensor [n n]
+                      (fn [i j] (if (== i j) 1.0 0.0))
+                      :float64))
+
+(defn zeros
+  "Create a raw r x c zero matrix as a tensor."
+  [r c]
+  (dtt/compute-tensor [r c] (fn [_ _] 0.0) :float64))
