@@ -423,8 +423,3 @@
         (complex-tensor (dtt/reshape (dtt/ensure-tensor re-arr) shape)
                         (dtt/reshape (dtt/ensure-tensor im-arr) shape))))))
 
-;; ---------------------------------------------------------------------------
-;; dtype-next protocol extensions
-;; ---------------------------------------------------------------------------
-
-;; dtype-next protocol implementations moved into deftype (v11 compatibility)
