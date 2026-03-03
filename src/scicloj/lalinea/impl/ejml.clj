@@ -4,7 +4,7 @@
    Includes zero-copy conversion between dtype-next tensors and
    EJML types (DMatrixRMaj, ZMatrixRMaj), plus all EJML-backed
    computation: multiply, transpose, solve, decompose, etc."
-  (:require [scicloj.lalinea.complex :as cx]
+  (:require [scicloj.lalinea.impl.complex-tensor :as ct]
             [tech.v3.tensor :as dtt]
             [tech.v3.datatype :as dtype])
   (:import [org.ejml.data DMatrixRMaj ZMatrixRMaj Complex_F64]
@@ -165,12 +165,12 @@
    For a vector ComplexTensor [n], creates an n×1 column vector.
    For a scalar ComplexTensor [], creates a 1×1 matrix."
   ^ZMatrixRMaj [ct]
-  (let [shape (cx/complex-shape ct)
+  (let [shape (ct/complex-shape ct)
         [r c] (case (count shape)
                 0 [1 1]
                 1 [(first shape) 1]
                 shape)
-        arr (cx/->double-array ct)
+        arr (ct/->double-array ct)
         zm (ZMatrixRMaj. (int r) (int c))]
     (.setData zm arr)
     zm))
@@ -181,7 +181,7 @@
   (let [r (.numRows zm)
         c (.numCols zm)
         arr (.data zm)]
-    (cx/complex-tensor (dtt/reshape (dtt/ensure-tensor arr) [r c 2]))))
+    (ct/complex-tensor (dtt/reshape (dtt/ensure-tensor arr) [r c 2]))))
 
 ;; ---------------------------------------------------------------------------
 ;; Complex matrix arithmetic

@@ -21,7 +21,6 @@
    [scicloj.lalinea.tensor :as t]
    [scicloj.lalinea.elementwise :as elem]
    ;; Complex tensors — interleaved [re im] layout:
-   [scicloj.lalinea.complex :as cx]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
@@ -33,46 +32,46 @@
 
 ;; ### From separate real and imaginary parts
 
-(cx/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0])
+(t/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0])
 
-(kind/test-last [(fn [v] (= [3] (cx/complex-shape v)))])
+(kind/test-last [(fn [v] (= [3] (t/complex-shape v)))])
 
-(let [ct (cx/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0])]
-  {:re (cx/re ct)
-   :im (cx/im ct)})
+(let [ct (t/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0])]
+  {:re (la/re ct)
+   :im (la/im ct)})
 
 (kind/test-last [(fn [v] (and (= (:re v) [1.0 2.0 3.0])
                               (= (:im v) [4.0 5.0 6.0])))])
 
 ;; ### Wrapping an existing tensor (zero-copy)
 
-(cx/complex-tensor (t/matrix [[1.0 2.0] [3.0 4.0]]))
+(t/complex-tensor (t/matrix [[1.0 2.0] [3.0 4.0]]))
 
-(kind/test-last [(fn [v] (and (= [2] (cx/complex-shape v))
-                              (= [1.0 3.0] (cx/re v))))])
+(kind/test-last [(fn [v] (and (= [2] (t/complex-shape v))
+                              (= [1.0 3.0] (la/re v))))])
 
 ;; ### Real-only construction
 
-(cx/complex-tensor-real [5.0 6.0 7.0])
+(t/complex-tensor-real [5.0 6.0 7.0])
 
-(kind/test-last [(fn [v] (= [0.0 0.0 0.0] (cx/im v)))])
+(kind/test-last [(fn [v] (= [0.0 0.0 0.0] (la/im v)))])
 
 ;; ### Scalar complex numbers
 
-(cx/complex 3.0 4.0)
+(t/complex 3.0 4.0)
 
-(kind/test-last [(fn [v] (cx/scalar? v))])
+(kind/test-last [(fn [v] (t/scalar? v))])
 
-[(cx/re (cx/complex 3.0 4.0)) (cx/im (cx/complex 3.0 4.0))]
+[(la/re (t/complex 3.0 4.0)) (la/im (t/complex 3.0 4.0))]
 
 (kind/test-last [= [3.0 4.0]])
 
 ;; ### Matrix construction
 
-(cx/complex-tensor [[1.0 2.0] [3.0 4.0]]
+(t/complex-tensor [[1.0 2.0] [3.0 4.0]]
                    [[5.0 6.0] [7.0 8.0]])
 
-(kind/test-last [(fn [v] (= [2 2] (cx/complex-shape v)))])
+(kind/test-last [(fn [v] (= [2 2] (t/complex-shape v)))])
 
 ;; ## Element access
 ;;
@@ -80,24 +79,24 @@
 
 ;; Indexing a vector returns a scalar:
 
-(let [ct (cx/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0])]
-  [(cx/re (ct 0)) (cx/im (ct 0))])
+(let [ct (t/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0])]
+  [(la/re (ct 0)) (la/im (ct 0))])
 
 (kind/test-last [= [1.0 4.0]])
 
 ;; Indexing a matrix returns a vector (one row):
 
-(let [ct (cx/complex-tensor [[1.0 2.0] [3.0 4.0]]
+(let [ct (t/complex-tensor [[1.0 2.0] [3.0 4.0]]
                             [[5.0 6.0] [7.0 8.0]])]
-  (cx/re (ct 0)))
+  (la/re (ct 0)))
 
 (kind/test-last [= [1.0 2.0]])
 
 ;; Nested access reaches scalars:
 
-(let [ct (cx/complex-tensor [[1.0 2.0] [3.0 4.0]]
+(let [ct (t/complex-tensor [[1.0 2.0] [3.0 4.0]]
                             [[5.0 6.0] [7.0 8.0]])]
-  [(cx/re ((ct 1) 1)) (cx/im ((ct 1) 1))])
+  [(la/re ((ct 1) 1)) (la/im ((ct 1) 1))])
 
 (kind/test-last [= [4.0 8.0]])
 
@@ -107,10 +106,10 @@
 ;;
 ;; $(a+bi)(c+di) = (ac - bd) + (ad + bc)i$
 
-(let [a (cx/complex-tensor [1.0 2.0] [3.0 4.0])
-      b (cx/complex-tensor [5.0 6.0] [7.0 8.0])]
-  {:re (cx/re (la/mul a b))
-   :im (cx/im (la/mul a b))})
+(let [a (t/complex-tensor [1.0 2.0] [3.0 4.0])
+      b (t/complex-tensor [5.0 6.0] [7.0 8.0])]
+  {:re (la/re (la/mul a b))
+   :im (la/im (la/mul a b))})
 
 ;; $(1+3i)(5+7i) = -16 + 22i$, $(2+4i)(6+8i) = -20 + 40i$
 
@@ -132,9 +131,9 @@
 
 ;; ### Conjugate
 
-(let [ct (cx/conj (cx/complex-tensor [1.0 2.0] [3.0 -4.0]))]
-  {:re (cx/re ct)
-   :im (cx/im ct)})
+(let [ct (la/conj (t/complex-tensor [1.0 2.0] [3.0 -4.0]))]
+  {:re (la/re ct)
+   :im (la/im ct)})
 
 (kind/test-last [(fn [v] (= (:im v) [-3.0 4.0]))])
 
@@ -149,7 +148,7 @@
       plotly/plot))
 ;; ### Magnitude
 
-(let [m (la/abs (cx/complex-tensor [3.0 0.0] [4.0 1.0]))]
+(let [m (la/abs (t/complex-tensor [3.0 0.0] [4.0 1.0]))]
   [(double (m 0)) (double (m 1))])
 
 ;; $|3+4i| = 5$, $|0+i| = 1$
@@ -161,9 +160,9 @@
 ;;
 ;; $\langle a, b \rangle_H = \sum_i a_i \cdot \overline{b_i}$
 
-(let [a (cx/complex-tensor [3.0 1.0] [4.0 2.0])
+(let [a (t/complex-tensor [3.0 1.0] [4.0 2.0])
       d (la/dot a a)]
-  {:norm-sq (double (cx/re d)) :im-part (double (cx/im d))})
+  {:norm-sq (double (la/re d)) :im-part (double (la/im d))})
 
 ;; $|3+4i|^2 + |1+2i|^2 = 25 + 5 = 30$
 
@@ -177,43 +176,43 @@
 
 ;; Matrix multiply:
 
-(la/mmul (cx/complex-tensor [[1.0 0.0] [0.0 1.0]]
+(la/mmul (t/complex-tensor [[1.0 0.0] [0.0 1.0]]
                             [[0.0 0.0] [0.0 0.0]])
-         (cx/complex-tensor [[0.0 1.0] [1.0 0.0]]
+         (t/complex-tensor [[0.0 1.0] [1.0 0.0]]
                             [[0.0 0.0] [0.0 0.0]]))
 
-(kind/test-last [(fn [ct] (and (= [2 2] (cx/complex-shape ct))
-                               (= (cx/re ct) [[0.0 1.0] [1.0 0.0]])
-                               (= (cx/im ct) [[0.0 0.0] [0.0 0.0]])))])
+(kind/test-last [(fn [ct] (and (= [2 2] (t/complex-shape ct))
+                               (= (la/re ct) [[0.0 1.0] [1.0 0.0]])
+                               (= (la/im ct) [[0.0 0.0] [0.0 0.0]])))])
 
 ;; Conjugate transpose (Hermitian adjoint):
 
-(la/transpose (cx/complex-tensor [[1.0 2.0] [3.0 4.0]]
+(la/transpose (t/complex-tensor [[1.0 2.0] [3.0 4.0]]
                                  [[5.0 6.0] [7.0 8.0]]))
 
 ;; Re is transposed; Im is negated and transposed:
 
-(kind/test-last [(fn [ct] (and (= (cx/re ct) [[1.0 3.0] [2.0 4.0]])
-                               (= (cx/im ct) [[-5.0 -7.0] [-6.0 -8.0]])))])
+(kind/test-last [(fn [ct] (and (= (la/re ct) [[1.0 3.0] [2.0 4.0]])
+                               (= (la/im ct) [[-5.0 -7.0] [-6.0 -8.0]])))])
 
 ;; Determinant:
 
-(la/det (cx/complex-tensor [[1.0 3.0] [5.0 7.0]]
+(la/det (t/complex-tensor [[1.0 3.0] [5.0 7.0]]
                            [[2.0 4.0] [6.0 8.0]]))
 
 ;; $\det(A) = (1+2i)(7+8i) - (3+4i)(5+6i) = -16i$
 
-(kind/test-last [(fn [d] (and (< (abs (cx/re d)) 1e-10)
-                              (< (abs (- (cx/im d) -16.0)) 1e-10)))])
+(kind/test-last [(fn [d] (and (< (abs (la/re d)) 1e-10)
+                              (< (abs (- (la/im d) -16.0)) 1e-10)))])
 
 ;; Inverse:
 
-(let [A (cx/complex-tensor [[1.0 2.0] [3.0 4.0]]
+(let [A (t/complex-tensor [[1.0 2.0] [3.0 4.0]]
                            [[0.5 1.0] [1.5 2.5]])
       Ainv (la/invert A)
       product (la/mmul A Ainv)
-      re-part (cx/re product)
-      im-part (cx/im product)]
+      re-part (la/re product)
+      im-part (la/im product)]
   (and (< (elem/reduce-max (elem/abs (la/sub re-part (t/eye 2)))) 1e-10)
        (< (elem/reduce-max (elem/abs im-part)) 1e-10)))
 

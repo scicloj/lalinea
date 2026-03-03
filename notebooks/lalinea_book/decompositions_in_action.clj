@@ -11,7 +11,6 @@
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.tensor :as t]
-   [scicloj.lalinea.complex :as cx]
    ;; Tensor ↔ BufferedImage conversion:
    [tech.v3.libs.buffered-image :as bufimg]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
@@ -221,7 +220,7 @@ cov-matrix
 ;; of the corresponding eigenvalue.
 
 (let [{:keys [eigenvalues eigenvectors]} pca-eigen
-      reals (cx/re eigenvalues)
+      reals (la/re eigenvalues)
       sorted-idx (sort-by (fn [i] (- (double (reals i)))) (range (count eigenvectors)))
       lam1 (double (reals (first sorted-idx)))
       ev1 (nth eigenvectors (first sorted-idx))
@@ -251,7 +250,7 @@ cov-matrix
 ;; Projection is a matrix multiply: $X_{\text{proj}} = X \cdot v_1 \cdot v_1^T$
 
 (let [{:keys [eigenvalues eigenvectors]} pca-eigen
-      reals (cx/re eigenvalues)
+      reals (la/re eigenvalues)
       sorted-idx (sort-by (fn [i] (- (double (reals i)))) (range (count eigenvectors)))
       ev1 (nth eigenvectors (first sorted-idx))
       ;; Project: X * v1 * v1^T

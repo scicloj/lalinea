@@ -11,7 +11,6 @@
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.tensor :as t]
    ;; Complex tensors — interleaved [re im] layout:
-   [scicloj.lalinea.complex :as cx]
    ;; FFT bridge — Fastmath transforms ↔ ComplexTensor:
    [scicloj.lalinea.transform :as ft]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
@@ -110,17 +109,17 @@
 ;; ComplexTensors wrap a dtype-next tensor whose last dimension is 2
 ;; (interleaved re/im pairs).
 
-(cx/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0])
+(t/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0])
 
-(kind/test-last [(fn [ct] (= [3] (cx/complex-shape ct)))])
+(kind/test-last [(fn [ct] (= [3] (t/complex-shape ct)))])
 
 ;; Complex matrix multiply through the same `mmul`:
 
-(let [A (cx/complex-tensor [[1.0 0.0] [0.0 1.0]]
+(let [A (t/complex-tensor [[1.0 0.0] [0.0 1.0]]
                            [[0.0 0.0] [0.0 0.0]])]
   (la/mmul A A))
 
-(kind/test-last [(fn [ct] (= [2 2] (cx/complex-shape ct)))])
+(kind/test-last [(fn [ct] (= [2 2] (t/complex-shape ct)))])
 
 ;; ## FFT bridge
 ;;
@@ -131,8 +130,8 @@
 
 ;; $\hat{f} = [2, 0, 2, 0]$ — a signal with energy at DC and Nyquist.
 
-(kind/test-last [(fn [ct] (and (= [4] (cx/complex-shape ct))
-                               (< (abs (- (cx/re (ct 0)) 2.0)) 1e-10)))])
+(kind/test-last [(fn [ct] (and (= [4] (t/complex-shape ct))
+                               (< (abs (- (la/re (ct 0)) 2.0)) 1e-10)))])
 
 ;; Round-trip:
 

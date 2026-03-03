@@ -1,15 +1,16 @@
 (ns scicloj.lalinea.tensor
   "Tensor construction, structural operations, and low-level buffer access.
 
-   This namespace provides La Linea's tensor layer: creating matrices and
-   vectors, reshaping, slicing, cloning, and bridging to raw dtype-next
-   buffers and EJML matrices.
+   This namespace provides La Linea's tensor layer: creating real and
+   complex matrices and vectors, reshaping, slicing, cloning, and bridging
+   to raw dtype-next buffers and EJML matrices.
 
-   All construction functions return RealTensors (printed as `#la/R`).
+   Real construction functions return RealTensors (printed as `#la/R`).
+   Complex construction functions return ComplexTensors (printed as `#la/C`).
    Structural operations preserve the RealTensor/ComplexTensor type."
   (:refer-clojure :exclude [flatten reshape select clone])
   (:require [scicloj.lalinea.impl.real-tensor :as rt]
-            [scicloj.lalinea.complex :as cx]
+            [scicloj.lalinea.impl.complex-tensor :as ct]
             [scicloj.lalinea.impl.ejml :as ejml]
             [scicloj.lalinea.tape :as tape]
             [tech.v3.tensor :as dtt]
@@ -23,7 +24,7 @@
 ;; ---------------------------------------------------------------------------
 
 ;; ---------------------------------------------------------------------------
-;; Construction
+;; Real construction
 ;; ---------------------------------------------------------------------------
 
 (defn matrix
@@ -98,6 +99,58 @@
                                              :float64))))
 
 ;; ---------------------------------------------------------------------------
+;; Complex construction
+;; ---------------------------------------------------------------------------
+
+(defn complex-tensor
+  "Create a ComplexTensor.
+
+   Arities:
+     (complex-tensor tensor)       — wrap an existing tensor with last dim = 2
+     (complex-tensor re-data im-data) — from separate real and imaginary parts
+
+   re-data and im-data can be: double arrays, seqs, dtype readers, or tensors.
+   They must have the same shape."
+  ([tensor-or-re]
+   (tape/record! :t/complex-tensor [tensor-or-re]
+                 (ct/complex-tensor tensor-or-re)))
+  ([re-data im-data]
+   (tape/record! :t/complex-tensor [re-data im-data]
+                 (ct/complex-tensor re-data im-data))))
+
+(defn complex-tensor-real
+  "Create a ComplexTensor from real data only (imaginary parts = 0)."
+  [re-data]
+  (tape/record! :t/complex-tensor-real [re-data]
+                (ct/complex-tensor-real re-data)))
+
+(defn complex
+  "Create a scalar ComplexTensor from real and imaginary parts."
+  [re im]
+  (ct/complex re im))
+
+;; ---------------------------------------------------------------------------
+;; Complex type API
+;; ---------------------------------------------------------------------------
+
+(def complex?
+  "True if x is a ComplexTensor."
+  ct/complex?)
+
+(def scalar?
+  "True if this ComplexTensor represents a scalar complex number."
+  ct/scalar?)
+
+(def complex-shape
+  "The complex shape (underlying shape without trailing 2)."
+  ct/complex-shape)
+
+(def wrap-tensor
+  "Wrap a raw interleaved [... 2] tensor as a ComplexTensor.
+   Inverse of `->tensor` on ComplexTensors."
+  ct/wrap-tensor)
+
+;; ---------------------------------------------------------------------------
 ;; Structural operations
 ;; ---------------------------------------------------------------------------
 
@@ -112,8 +165,8 @@
   [a new-shape]
   (tape/record! :t/reshape [a new-shape]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
-                    (cx/wrap-tensor (dtt/reshape (cx/->tensor a)
+                  (if (ct/complex? a)
+                    (ct/wrap-tensor (dtt/reshape (ct/->tensor a)
                                                  (conj (vec new-shape) 2)))
                     (rt/->rt (dtt/reshape a new-shape))))))
 
@@ -124,9 +177,9 @@
   [a & args]
   (tape/record! :t/select (into [a] args)
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
-                    (cx/complex-tensor
-                     (dtype/clone (apply dtt/select (cx/->tensor a)
+                  (if (ct/complex? a)
+                    (ct/complex-tensor
+                     (dtype/clone (apply dtt/select (ct/->tensor a)
                                          (concat args [:all]))))
                     (let [result (apply dtt/select a args)]
                       (if (number? result)
@@ -141,9 +194,9 @@
   [m rows cols]
   (tape/record! :t/submatrix [m rows cols]
                 (let [m (rt/ensure-tensor m)]
-                  (if (cx/complex? m)
-                    (cx/complex-tensor
-                     (dtype/clone (dtt/select (cx/->tensor m) rows cols :all)))
+                  (if (ct/complex? m)
+                    (ct/complex-tensor
+                     (dtype/clone (dtt/select (ct/->tensor m) rows cols :all)))
                     (rt/->rt (dtype/clone (dtt/select m rows cols)))))))
 
 (defn flatten
@@ -153,10 +206,10 @@
   [a]
   (tape/record! :t/flatten [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
-                    (let [raw (cx/->tensor a)
-                          n (apply * (cx/complex-shape a))]
-                      (cx/wrap-tensor (dtt/reshape raw [n 2])))
+                  (if (ct/complex? a)
+                    (let [raw (ct/->tensor a)
+                          n (apply * (ct/complex-shape a))]
+                      (ct/wrap-tensor (dtt/reshape raw [n 2])))
                     (let [n (dtype/ecount a)]
                       (rt/->rt (dtt/reshape a [n])))))))
 
@@ -190,9 +243,9 @@
   [a reduce-fn axis]
   (tape/record! :t/reduce-axis [a reduce-fn axis]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
-                    (cx/wrap-tensor
-                     (dtt/reduce-axis (cx/->tensor a) reduce-fn (int axis)))
+                  (if (ct/complex? a)
+                    (ct/wrap-tensor
+                     (dtt/reduce-axis (ct/->tensor a) reduce-fn (int axis)))
                     (rt/->rt (dtt/reduce-axis a reduce-fn (int axis)))))))
 
 ;; ---------------------------------------------------------------------------
@@ -206,8 +259,8 @@
   [a]
   (tape/record! :t/clone [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
-                    (cx/wrap-tensor (dtype/clone (cx/->tensor a)))
+                  (if (ct/complex? a)
+                    (ct/wrap-tensor (dtype/clone (ct/->tensor a)))
                     (rt/->rt (dtype/clone a))))))
 
 (defn mset!
@@ -231,9 +284,12 @@
 
 (defn ->double-array
   "Get the backing `double[]` of a tensor. Zero-copy when the tensor
-   is backed by a contiguous array; copies for subviews or lazy tensors."
+   is backed by a contiguous array; copies for subviews or lazy tensors.
+   Works for both RealTensors and ComplexTensors."
   ^doubles [a]
-  (dtype/->double-array (rt/ensure-tensor a)))
+  (if (ct/complex? a)
+    (ct/->double-array a)
+    (dtype/->double-array (rt/ensure-tensor a))))
 
 (defn ->reader
   "Get a read-only indexed view of a tensor's elements."
@@ -289,10 +345,13 @@
   (rt/->real-tensor t))
 
 (defn ->tensor
-  "Extract the underlying dtype-next tensor from a RealTensor.
-   Returns x unchanged if it is not a RealTensor."
+  "Extract the underlying dtype-next tensor from a RealTensor or ComplexTensor.
+   Returns x unchanged if it is neither."
   [x]
-  (rt/ensure-tensor x))
+  (cond
+    (rt/real-tensor? x) (rt/->tensor x)
+    (ct/complex? x)     (ct/->tensor x)
+    :else               x))
 
 (defn real-tensor?
   "True if x is a RealTensor."

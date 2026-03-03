@@ -14,7 +14,6 @@
    [scicloj.lalinea.tensor :as t]
    [scicloj.lalinea.elementwise :as elem]
    ;; Complex tensors — interleaved [re im] layout:
-   [scicloj.lalinea.complex :as cx]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]
    ;; Arrow diagrams for 2D vectors:
@@ -90,7 +89,7 @@
 ;; $A\mathbf{v} - \lambda\mathbf{v}$ should be zero:
 
 (every? (fn [i]
-          (let [lam (cx/re ((:eigenvalues eig-result) i))
+          (let [lam (la/re ((:eigenvalues eig-result) i))
                 ev (nth (:eigenvectors eig-result) i)]
             (< (la/norm (la/sub (la/mmul A-eig ev)
                                 (la/scale ev lam)))
@@ -110,7 +109,7 @@
 ;;
 ;; Let us verify the trace and determinant connections:
 
-(def eig-reals (cx/re (:eigenvalues eig-result)))
+(def eig-reals (la/re (:eigenvalues eig-result)))
 
 (< (abs (- (la/trace A-eig) (la/sum eig-reals))) 1e-10)
 
@@ -157,7 +156,7 @@
 
 (def P-cols
   (let [evecs (:eigenvectors eig-diag)
-        sorted-idx (sort-by (fn [i] (cx/re ((:eigenvalues eig-diag) i)))
+        sorted-idx (sort-by (fn [i] (la/re ((:eigenvalues eig-diag) i)))
                             (range 2))]
     (t/hstack (mapv #(nth evecs %) sorted-idx))))
 
@@ -232,7 +231,7 @@ D-result
 
 ;; All eigenvalues are real (imaginary parts zero):
 
-(< (elem/reduce-max (elem/abs (cx/im (:eigenvalues eig-S)))) 1e-10)
+(< (elem/reduce-max (elem/abs (la/im (:eigenvalues eig-S)))) 1e-10)
 
 (kind/test-last [true?])
 
@@ -387,7 +386,7 @@ sigmas
 
 (def ATA (la/mmul (la/transpose A-svd) A-svd))
 
-(every? #(>= % -1e-10) (cx/re (:eigenvalues (la/eigen ATA))))
+(every? #(>= % -1e-10) (la/re (:eigenvalues (la/eigen ATA))))
 
 (kind/test-last [true?])
 

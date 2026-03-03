@@ -4,7 +4,6 @@
   [scicloj.lalinea.linalg :as la]
   [scicloj.lalinea.tensor :as t]
   [scicloj.lalinea.elementwise :as elem]
-  [scicloj.lalinea.complex :as cx]
   [tech.v3.libs.buffered-image :as bufimg]
   [scicloj.kindly.v4.kind :as kind]
   [clojure.math :as math]
@@ -12,12 +11,12 @@
 
 
 (def
- v3_l36
+ v3_l35
  (def
   complex-grid
   (fn
    [re-min re-max im-min im-max h w]
-   (cx/complex-tensor
+   (t/complex-tensor
     (t/compute-tensor
      [h w 2]
      (fn
@@ -30,16 +29,16 @@
 
 
 (def
- v5_l48
+ v5_l47
  (let
-  [g (complex-grid -2.0 1.0 -1.5 1.5 3 3) raw (cx/->tensor g)]
-  {:shape (cx/complex-shape g),
+  [g (complex-grid -2.0 1.0 -1.5 1.5 3 3) raw (t/->tensor g)]
+  {:shape (t/complex-shape g),
    :top-left-re (raw 0 0 0),
    :bottom-right-im (raw 2 2 1)}))
 
 
 (deftest
- t6_l54
+ t6_l53
  (is
   ((fn
     [v]
@@ -47,11 +46,11 @@
      (= (:shape v) [3 3])
      (= (:top-left-re v) -2.0)
      (= (:bottom-right-im v) 1.5)))
-   v5_l48)))
+   v5_l47)))
 
 
 (def
- v8_l71
+ v8_l70
  (def
   mandelbrot-counts
   (fn
@@ -62,7 +61,7 @@
      counts
      (int-array (* h w) 0)
      zero-grid
-     (cx/complex-tensor
+     (t/complex-tensor
       (t/compute-tensor [h w 2] (fn [_ _ _] 0.0) :float64))]
     (loop
      [z zero-grid k 0]
@@ -84,7 +83,7 @@
 
 
 (def
- v10_l96
+ v10_l95
  (def
   counts->image
   (fn
@@ -119,7 +118,7 @@
 
 
 (def
- v12_l111
+ v12_l110
  (def
   mandelbrot-img
   (let
@@ -134,16 +133,16 @@
    (counts->image counts h w max-iter))))
 
 
-(def v13_l116 (bufimg/tensor->image mandelbrot-img))
+(def v13_l115 (bufimg/tensor->image mandelbrot-img))
 
 
 (deftest
- t14_l118
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v13_l116)))
+ t14_l117
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v13_l115)))
 
 
 (def
- v16_l126
+ v16_l125
  (def
   mandelbrot-zoom
   (let
@@ -158,16 +157,16 @@
    (counts->image counts h w max-iter))))
 
 
-(def v17_l131 (bufimg/tensor->image mandelbrot-zoom))
+(def v17_l130 (bufimg/tensor->image mandelbrot-zoom))
 
 
 (deftest
- t18_l133
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v17_l131)))
+ t18_l132
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v17_l130)))
 
 
 (def
- v20_l142
+ v20_l141
  (def
   julia-counts
   (fn
@@ -176,7 +175,7 @@
     [z0
      (complex-grid re-min re-max im-min im-max h w)
      c-grid
-     (cx/complex-tensor
+     (t/complex-tensor
       (t/compute-tensor
        [h w 2]
        (fn [_ _ part] (if (zero? part) c-re c-im))
@@ -203,7 +202,7 @@
 
 
 (def
- v22_l168
+ v22_l167
  (def
   julia-dendrite
   (let
@@ -218,16 +217,16 @@
    (counts->image counts h w max-iter))))
 
 
-(def v23_l173 (bufimg/tensor->image julia-dendrite))
+(def v23_l172 (bufimg/tensor->image julia-dendrite))
 
 
 (deftest
- t24_l175
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v23_l173)))
+ t24_l174
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v23_l172)))
 
 
 (def
- v26_l180
+ v26_l179
  (def
   julia-connected
   (let
@@ -242,16 +241,16 @@
    (counts->image counts h w max-iter))))
 
 
-(def v27_l185 (bufimg/tensor->image julia-connected))
+(def v27_l184 (bufimg/tensor->image julia-connected))
 
 
 (deftest
- t28_l187
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v27_l185)))
+ t28_l186
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v27_l184)))
 
 
 (def
- v30_l192
+ v30_l191
  (def
   julia-rabbit
   (let
@@ -266,55 +265,55 @@
    (counts->image counts h w max-iter))))
 
 
-(def v31_l197 (bufimg/tensor->image julia-rabbit))
+(def v31_l196 (bufimg/tensor->image julia-rabbit))
 
 
 (deftest
- t32_l199
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v31_l197)))
+ t32_l198
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v31_l196)))
 
 
 (def
- v34_l230
+ v34_l229
  (def
   complex-div
   (fn
    [a b]
    (let
     [ar
-     (t/->tensor (cx/re a))
+     (t/->tensor (la/re a))
      ai
-     (t/->tensor (cx/im a))
+     (t/->tensor (la/im a))
      br
-     (t/->tensor (cx/re b))
+     (t/->tensor (la/re b))
      bi
-     (t/->tensor (cx/im b))
+     (t/->tensor (la/im b))
      denom
      (la/add (la/mul br br) (la/mul bi bi))]
-    (cx/complex-tensor
+    (t/complex-tensor
      (elem/div (la/add (la/mul ar br) (la/mul ai bi)) denom)
      (elem/div (la/sub (la/mul ai br) (la/mul ar bi)) denom))))))
 
 
 (def
- v36_l241
+ v36_l240
  (let
   [a
-   (cx/complex-tensor (t/matrix [[3]]) (t/matrix [[4]]))
+   (t/complex-tensor (t/matrix [[3]]) (t/matrix [[4]]))
    b
-   (cx/complex-tensor (t/matrix [[1]]) (t/matrix [[2]]))
+   (t/complex-tensor (t/matrix [[1]]) (t/matrix [[2]]))
    result
    (complex-div a b)]
   (and
-   (< (abs (- ((cx/re result) 0 0) 2.2)) 1.0E-10)
-   (< (abs (- ((cx/im result) 0 0) -0.4)) 1.0E-10))))
+   (< (abs (- ((la/re result) 0 0) 2.2)) 1.0E-10)
+   (< (abs (- ((la/im result) 0 0) -0.4)) 1.0E-10))))
 
 
-(deftest t37_l247 (is (true? v36_l241)))
+(deftest t37_l246 (is (true? v36_l240)))
 
 
 (def
- v39_l251
+ v39_l250
  (def
   newton-roots
   (fn
@@ -323,17 +322,17 @@
     [z0
      (complex-grid re-min re-max im-min im-max h w)
      one
-     (cx/complex-tensor
+     (t/complex-tensor
       (t/compute-tensor
        [h w 2]
        (fn [_ _ part] (if (zero? part) 1.0 0.0))
        :float64))
      roots
-     [(cx/complex 1.0 0.0)
-      (cx/complex
+     [(t/complex 1.0 0.0)
+      (t/complex
        (math/cos (/ (* 2.0 math/PI) 3.0))
        (math/sin (/ (* 2.0 math/PI) 3.0)))
-      (cx/complex
+      (t/complex
        (math/cos (/ (* 4.0 math/PI) 3.0))
        (math/sin (/ (* 4.0 math/PI) 3.0)))]
      root-idx
@@ -352,9 +351,9 @@
           [idx
            (+ (* r w) c)
            zr
-           ((cx/->tensor z-final) r c 0)
+           ((t/->tensor z-final) r c 0)
            zi
-           ((cx/->tensor z-final) r c 1)
+           ((t/->tensor z-final) r c 1)
            best
            (reduce
             (fn
@@ -363,17 +362,17 @@
               [root
                (nth roots i)
                dr
-               (- zr (double (cx/re root)))
+               (- zr (double (la/re root)))
                di
-               (- zi (double (cx/im root)))
+               (- zi (double (la/im root)))
                d
                (+ (* dr dr) (* di di))
                root-best
                (nth roots best-i)
                dbr
-               (- zr (double (cx/re root-best)))
+               (- zr (double (la/re root-best)))
                dbi
-               (- zi (double (cx/im root-best)))
+               (- zi (double (la/im root-best)))
                db
                (+ (* dbr dbr) (* dbi dbi))]
               (if (< d db) i best-i)))
@@ -395,11 +394,11 @@
        (recur z-next (inc k)))))))))
 
 
-(def v41_l303 (def root-colors [[230 50 50] [50 180 50] [50 80 220]]))
+(def v41_l302 (def root-colors [[230 50 50] [50 180 50] [50 80 220]]))
 
 
 (def
- v42_l308
+ v42_l307
  (def
   roots->image
   (fn
@@ -415,7 +414,7 @@
 
 
 (def
- v44_l319
+ v44_l318
  (def
   newton-img
   (let
@@ -430,16 +429,16 @@
    (roots->image root-idx h w))))
 
 
-(def v45_l324 (bufimg/tensor->image newton-img))
+(def v45_l323 (bufimg/tensor->image newton-img))
 
 
 (deftest
- t46_l326
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v45_l324)))
+ t46_l325
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v45_l323)))
 
 
 (def
- v48_l334
+ v48_l333
  (def
   newton-zoom
   (let
@@ -454,9 +453,9 @@
    (roots->image root-idx h w))))
 
 
-(def v49_l339 (bufimg/tensor->image newton-zoom))
+(def v49_l338 (bufimg/tensor->image newton-zoom))
 
 
 (deftest
- t50_l341
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v49_l339)))
+ t50_l340
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v49_l338)))

@@ -15,7 +15,6 @@
    [scicloj.lalinea.tensor :as t]
    [scicloj.lalinea.elementwise :as elem]
    ;; Complex tensors — interleaved [re im] layout:
-   [scicloj.lalinea.complex :as cx]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]
    [clojure.math :as math]))
@@ -400,7 +399,7 @@
 ;; ### Eigenvalue equation: $Av = \lambda v$
 
 (let [{:keys [eigenvalues eigenvectors]} (la/eigen A)
-      reals (cx/re eigenvalues)]
+      reals (la/re eigenvalues)]
   (every? (fn [[i evec]]
             (when evec
               (let [Av (la/mmul A evec)
@@ -413,7 +412,7 @@
 ;; ### Trace equals sum of eigenvalues: $\operatorname{tr}(A) = \sum \lambda_i$
 
 (let [{:keys [eigenvalues]} (la/eigen A)
-      eig-sum (la/sum (cx/re eigenvalues))]
+      eig-sum (la/sum (la/re eigenvalues))]
   (la/close-scalar? (la/trace A) eig-sum))
 
 (kind/test-last [true?])
@@ -421,7 +420,7 @@
 ;; ### Determinant equals product of eigenvalues: $\det(A) = \prod \lambda_i$
 
 (let [{:keys [eigenvalues]} (la/eigen A)
-      eig-prod (la/prod (cx/re eigenvalues))]
+      eig-prod (la/prod (la/re eigenvalues))]
   (la/close-scalar? (la/det A) eig-prod))
 
 (kind/test-last [true?])
@@ -526,8 +525,8 @@
 ;; Element-wise complex operations satisfy the same algebraic
 ;; rules as scalar complex arithmetic.
 
-(def ca (cx/complex-tensor [1.0 -2.0 3.0] [4.0 5.0 -6.0]))
-(def cb (cx/complex-tensor [-3.0 0.5 2.0] [1.0 -1.5 7.0]))
+(def ca (t/complex-tensor [1.0 -2.0 3.0] [4.0 5.0 -6.0]))
+(def cb (t/complex-tensor [-3.0 0.5 2.0] [1.0 -1.5 7.0]))
 
 ;; ### Commutativity: $a \cdot b = b \cdot a$
 
@@ -537,14 +536,14 @@
 
 ;; ### Conjugate is an involution: $\overline{\overline{a}} = a$
 
-(la/close? (cx/conj (cx/conj ca)) ca)
+(la/close? (la/conj (la/conj ca)) ca)
 
 (kind/test-last [true?])
 
 ;; ### Conjugate distributes: $\overline{a \cdot b} = \bar{a} \cdot \bar{b}$
 
-(la/close? (cx/conj (la/mul ca cb))
-           (la/mul (cx/conj ca) (cx/conj cb)))
+(la/close? (la/conj (la/mul ca cb))
+           (la/mul (la/conj ca) (la/conj cb)))
 
 (kind/test-last [true?])
 
@@ -560,10 +559,10 @@
 ;; ### [Cauchy-Schwarz](https://en.wikipedia.org/wiki/Cauchy%E2%80%93Schwarz_inequality): $|\langle a, b \rangle_H|^2 \leq \langle a, a \rangle_H \cdot \langle b, b \rangle_H$
 
 (let [d-ab (la/dot ca cb)
-      re-ab (double (cx/re d-ab))
-      im-ab (double (cx/im d-ab))
-      re-aa (double (cx/re (la/dot ca ca)))
-      re-bb (double (cx/re (la/dot cb cb)))]
+      re-ab (double (la/re d-ab))
+      im-ab (double (la/im d-ab))
+      re-aa (double (la/re (la/dot ca ca)))
+      re-bb (double (la/re (la/dot cb cb)))]
   (<= (- (+ (* re-ab re-ab) (* im-ab im-ab)) 1e-10)
       (* re-aa re-bb)))
 
@@ -578,9 +577,9 @@
 ;;
 ;; ### Complex multiplication is associative
 
-(let [CA (cx/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
-      CB (cx/complex-tensor [[2 0] [1 3]] [[1 -1] [0 2]])
-      CC (cx/complex-tensor [[0 1] [2 -1]] [[3 0] [1 1]])]
+(let [CA (t/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
+      CB (t/complex-tensor [[2 0] [1 3]] [[1 -1] [0 2]])
+      CC (t/complex-tensor [[0 1] [2 -1]] [[3 0] [1 1]])]
   (< (la/norm (la/sub (la/mmul (la/mmul CA CB) CC)
                       (la/mmul CA (la/mmul CB CC))))
      1e-10))
@@ -589,7 +588,7 @@
 
 ;; ### $A A^\dagger$ is Hermitian (equals its own conjugate transpose)
 
-(let [CA (cx/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
+(let [CA (t/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
       AAdag (la/mmul CA (la/transpose CA))]
   (< (la/norm (la/sub AAdag (la/transpose AAdag))) 1e-10))
 
@@ -597,8 +596,8 @@
 
 ;; ### Complex determinant is multiplicative
 
-(let [CA (cx/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
-      CB (cx/complex-tensor [[2 0] [1 3]] [[1 -1] [0 2]])
+(let [CA (t/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
+      CB (t/complex-tensor [[2 0] [1 3]] [[1 -1] [0 2]])
       det-AB (la/det (la/mmul CA CB))
       det-A (la/det CA)
       det-B (la/det CB)
@@ -609,8 +608,8 @@
 
 ;; ### Complex solve: $Ax = b$ verified
 
-(let [CA (cx/complex-tensor [[2 1] [1 3]] [[1 0] [0 1]])
-      Cb (cx/complex-tensor [[1] [2]] [[1] [0]])
+(let [CA (t/complex-tensor [[2 1] [1 3]] [[1 0] [0 1]])
+      Cb (t/complex-tensor [[1] [2]] [[1] [0]])
       Cx (la/solve CA Cb)]
   (< (la/norm (la/sub (la/mmul CA Cx) Cb)) 1e-10))
 
@@ -618,8 +617,8 @@
 
 ;; ### Complex inverse: $A A^{-1} = I$
 
-(let [CA (cx/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
-      CI (cx/complex-tensor [[1 0] [0 1]] [[0 0] [0 0]])]
+(let [CA (t/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
+      CI (t/complex-tensor [[1 0] [0 1]] [[0 0] [0 0]])]
   (< (la/norm (la/sub (la/mmul CA (la/invert CA)) CI)) 1e-10))
 
 (kind/test-last [true?])

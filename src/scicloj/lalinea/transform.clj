@@ -5,7 +5,7 @@
    returns an interleaved double[] with [re₀ im₀ re₁ im₁ ...] —
    exactly the memory layout of ComplexTensor. This namespace
    provides zero-copy wrappers around Fastmath's transform API."
-  (:require [scicloj.lalinea.complex :as cx]
+  (:require [scicloj.lalinea.impl.complex-tensor :as ct]
             [fastmath.transform :as ft]
             [tech.v3.tensor :as dtt]
             [tech.v3.datatype :as dtype]
@@ -32,15 +32,15 @@
    The output is a ComplexTensor of shape [n] where n = length of input."
   [signal]
   (let [result (ft/forward-1d @fft-complex* signal)]
-    (cx/complex-tensor (dtt/reshape (dtt/ensure-tensor result)
+    (ct/complex-tensor (dtt/reshape (dtt/ensure-tensor result)
                                        [(/ (count result) 2) 2]))))
 
 (defn inverse
   "Inverse FFT from a ComplexTensor spectrum back to a ComplexTensor signal."
   [^scicloj.lalinea.impl.complex_tensor.ComplexTensor spectrum]
-  (let [arr (cx/->double-array spectrum)
+  (let [arr (ct/->double-array spectrum)
         result (ft/reverse-1d @fft-complex-io* arr)]
-    (cx/complex-tensor (dtt/reshape (dtt/ensure-tensor result)
+    (ct/complex-tensor (dtt/reshape (dtt/ensure-tensor result)
                                        [(/ (count result) 2) 2]))))
 
 (defn inverse-real
@@ -48,7 +48,7 @@
    Useful when you know the result should be purely real."
   [spectrum]
   (let [ct (inverse spectrum)]
-    (rt/->real-tensor (cx/re ct))))
+    (rt/->real-tensor (ct/re ct))))
 
 ;; ---------------------------------------------------------------------------
 ;; Complex-to-complex transforms
@@ -57,9 +57,9 @@
 (defn forward-complex
   "Forward FFT of a ComplexTensor signal. Returns a ComplexTensor spectrum."
   [^scicloj.lalinea.impl.complex_tensor.ComplexTensor signal]
-  (let [arr (cx/->double-array signal)
+  (let [arr (ct/->double-array signal)
         result (ft/forward-1d @fft-complex-io* arr)]
-    (cx/complex-tensor (dtt/reshape (dtt/ensure-tensor result)
+    (ct/complex-tensor (dtt/reshape (dtt/ensure-tensor result)
                                        [(/ (count result) 2) 2]))))
 
 ;; ---------------------------------------------------------------------------

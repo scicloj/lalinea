@@ -11,7 +11,7 @@
    `memory-relation` for standalone inspection."
   (:require [tech.v3.datatype :as dtype]
             [tech.v3.tensor :as dtt]
-            [scicloj.lalinea.complex :as cx]
+            [scicloj.lalinea.impl.complex-tensor :as ct]
             [scicloj.lalinea.impl.real-tensor :as rt]
             [scicloj.kindly.v4.kind :as kind])
   (:import [java.util IdentityHashMap]))
@@ -21,14 +21,14 @@
 ;; ---------------------------------------------------------------------------
 
 (def ^:dynamic *tape*
-  "When bound to a tape object, `la/`, `cx/`, and `elem/` functions record operations.
+  "When bound to a tape object, `la/`, `t/`, and `elem/` functions record operations.
    nil by default — no recording, negligible overhead."
   nil)
 
 (def ^:dynamic *inside-record*
   "True when inside a `record!` body. Prevents nested recording —
-   e.g., `la/add` on ComplexTensors delegates to `cx/add`, but only
-   the outermost operation is recorded."
+   Prevents nested recording when operations delegate internally.
+   The outermost caller wins."
   false)
 
 ;; ---------------------------------------------------------------------------
@@ -41,7 +41,7 @@
    strided views (via .buffer → as-array-buffer).
    Returns nil for lazy tensors."
   [t]
-  (let [t (cond (cx/complex? t) (cx/->tensor t)
+  (let [t (cond (ct/complex? t) (ct/->tensor t)
                 (rt/real-tensor? t) (rt/->tensor t)
                 :else t)]
     (if-let [ab (dtype/as-array-buffer t)]
@@ -61,7 +61,7 @@
 
    Works on both real tensors and ComplexTensors."
   [t]
-  (let [raw (cond (cx/complex? t) (cx/->tensor t)
+  (let [raw (cond (ct/complex? t) (ct/->tensor t)
                   (rt/real-tensor? t) (rt/->tensor t)
                   :else t)]
     (cond
@@ -95,7 +95,7 @@
 
 (defn- tensor-shape [x]
   (cond
-    (cx/complex? x) (cx/complex-shape x)
+    (ct/complex? x) (ct/complex-shape x)
     (rt/real-tensor? x) (vec (dtype/shape x))
     (dtt/tensor? x) (vec (dtype/shape x))
     (map? x) :map
@@ -108,7 +108,7 @@
   [^IdentityHashMap registry ^clojure.lang.Atom counter input]
   (if-let [id (.get registry input)]
     {:id id}
-    (if (or (dtt/tensor? input) (cx/complex? input) (rt/real-tensor? input))
+    (if (or (dtt/tensor? input) (ct/complex? input) (rt/real-tensor? input))
       (let [id (str "x" (swap! counter inc))]
         (.put registry input id)
         {:id id :external true})
@@ -129,7 +129,7 @@
                    :input-tensors inputs
                    :output        result
                    :shape         (tensor-shape result)
-                   :complex?      (cx/complex? result)}]
+                   :complex?      (ct/complex? result)}]
         (swap! (:entries tape) conj entry)
         (.put registry result id))))
   result)

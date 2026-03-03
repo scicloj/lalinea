@@ -19,7 +19,6 @@
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.tensor :as t]
    ;; Complex tensors — interleaved [re im] layout:
-   [scicloj.lalinea.complex :as cx]
    ;; Low-level tensor operations for memory demos:
    [tech.v3.tensor :as dtt]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
@@ -189,36 +188,36 @@
     (and (= [11.0 22.0 33.0 44.0] values)
          (not has-array-buffer?)))])
 
-;; `cx/->double-array` follows the same convention for
+;; `t/->double-array` follows the same convention for
 ;; ComplexTensors — it delegates to `t/->double-array`
 ;; on the underlying `[... 2]` tensor:
 
-(let [ct (cx/complex-tensor
+(let [ct (t/complex-tensor
           (t/matrix [[1 2] [3 4] [5 6]]))
-      arr (cx/->double-array ct)]
+      arr (t/->double-array ct)]
   (aset arr 0 99.0)
-  (cx/re (ct 0)))
+  (la/re (ct 0)))
 
 (kind/test-last [(fn [v] (== 99.0 v))])
 
 ;; ## ComplexTensor wraps a real tensor
 
-;; A ComplexTensor wraps an `[... 2]` real tensor. The `cx/->tensor`
+;; A ComplexTensor wraps an `[... 2]` real tensor. The `t/->tensor`
 ;; accessor exposes the backing tensor, and they share memory.
 
 (let [ct-data (t/matrix [[1 2] [3 4] [5 6]])
-      ct (cx/complex-tensor ct-data)]
-  (identical? (t/->tensor ct-data) (cx/->tensor ct)))
+      ct (t/complex-tensor ct-data)]
+  (identical? (t/->tensor ct-data) (t/->tensor ct)))
 
 (kind/test-last [true?])
 
 ;; Mutating through the backing tensor changes the ComplexTensor:
 
 (let [ct-data (t/matrix [[1 2] [3 4] [5 6]])
-      ct (cx/complex-tensor ct-data)
+      ct (t/complex-tensor ct-data)
       arr (t/->double-array ct-data)
       _ (aset arr 1 99.0)]
-  (cx/im (ct 0)))
+  (la/im (ct 0)))
 
 (kind/test-last [(fn [v] (== 99.0 v))])
 
@@ -226,21 +225,21 @@
 ;; Using `t/mset!` on the backing tensor:
 
 (let [ct-data (t/matrix [[1 2] [3 4] [5 6]])
-      ct (cx/complex-tensor ct-data)]
+      ct (t/complex-tensor ct-data)]
   (t/mset! ct-data 0 1 99.0)
-  (cx/im (ct 0)))
+  (la/im (ct 0)))
 
 (kind/test-last [(fn [v] (== 99.0 v))])
 
 ;; ## re and im are strided views
 
-;; `cx/re` and `cx/im` return views into the interleaved layout.
+;; `la/re` and `la/im` return views into the interleaved layout.
 ;; They share the same backing memory.
 
-(let [ct (cx/complex-tensor
+(let [ct (t/complex-tensor
           (t/matrix [[10 40] [20 50] [30 60]]))
-      re-view (cx/re ct)
-      arr (t/->double-array (cx/->tensor ct))
+      re-view (la/re ct)
+      arr (t/->double-array (t/->tensor ct))
       _ (aset arr 0 -10.0)]
   (double (re-view 0)))
 
@@ -249,10 +248,10 @@
 ;; Mutating the backing array was immediately visible in the `re` view.
 ;; Using `t/mset!`:
 
-(let [ct (cx/complex-tensor
+(let [ct (t/complex-tensor
           (t/matrix [[10 40] [20 50] [30 60]]))
-      re-view (cx/re ct)]
-  (t/mset! (cx/->tensor ct) 0 0 -10.0)
+      re-view (la/re ct)]
+  (t/mset! (t/->tensor ct) 0 0 -10.0)
   (double (re-view 0)))
 
 (kind/test-last [(fn [v] (== -10.0 v))])
@@ -297,16 +296,16 @@
 
 ;; ## Complex arithmetic: lazy results
 
-;; `cx/add`, `cx/sub`, `cx/scale` return lazy ComplexTensors.
+;; `la/add`, `la/sub`, `la/scale` return lazy ComplexTensors.
 ;; Like `la/add`, they read through to the source on every access.
 
-(let [ca (cx/complex-tensor
+(let [ca (t/complex-tensor
           (t/matrix [[1 3] [2 4]]))
-      cb (cx/complex-tensor
+      cb (t/complex-tensor
           (t/matrix [[10 30] [20 40]]))
-      lazy-sum (cx/add ca cb)]
-  {:re (seq (cx/re lazy-sum))
-   :im (seq (cx/im lazy-sum))})
+      lazy-sum (la/add ca cb)]
+  {:re (seq (la/re lazy-sum))
+   :im (seq (la/im lazy-sum))})
 
 (kind/test-last
  [(fn [{:keys [re im]}]
@@ -315,26 +314,26 @@
 
 ;; Mutating `ca`'s backing array propagates through the lazy result:
 
-(let [ca (cx/complex-tensor
+(let [ca (t/complex-tensor
           (t/matrix [[1 3] [2 4]]))
-      cb (cx/complex-tensor
+      cb (t/complex-tensor
           (t/matrix [[10 30] [20 40]]))
-      lazy-sum (cx/add ca cb)
-      arr (t/->double-array (cx/->tensor ca))
+      lazy-sum (la/add ca cb)
+      arr (t/->double-array (t/->tensor ca))
       _ (aset arr 0 100.0)]
-  (seq (cx/re lazy-sum)))
+  (seq (la/re lazy-sum)))
 
 (kind/test-last [(fn [v] (= [110.0 22.0] v))])
 
 ;; Using `t/mset!`:
 
-(let [ca (cx/complex-tensor
+(let [ca (t/complex-tensor
           (t/matrix [[1 3] [2 4]]))
-      cb (cx/complex-tensor
+      cb (t/complex-tensor
           (t/matrix [[10 30] [20 40]]))
-      lazy-sum (cx/add ca cb)]
-  (t/mset! (cx/->tensor ca) 0 0 100.0)
-  (seq (cx/re lazy-sum)))
+      lazy-sum (la/add ca cb)]
+  (t/mset! (t/->tensor ca) 0 0 100.0)
+  (seq (la/re lazy-sum)))
 
 (kind/test-last [(fn [v] (= [110.0 22.0] v))])
 
@@ -382,13 +381,13 @@
 ;; Cloning a ComplexTensor produces an independent ComplexTensor
 ;; with its own backing array.
 
-(let [ct-orig (cx/complex-tensor
+(let [ct-orig (t/complex-tensor
                (t/matrix [[1 4] [2 5] [3 6]]))
       ct-clone (t/clone ct-orig)
-      orig-arr (t/->double-array (cx/->tensor ct-orig))
+      orig-arr (t/->double-array (t/->tensor ct-orig))
       _ (aset orig-arr 0 -1.0)]
-  {:orig-re (cx/re (ct-orig 0))
-   :clone-re (cx/re (ct-clone 0))})
+  {:orig-re (la/re (ct-orig 0))
+   :clone-re (la/re (ct-clone 0))})
 
 (kind/test-last
  [(fn [{:keys [orig-re clone-re]}]
@@ -397,12 +396,12 @@
 
 ;; Using `t/mset!`:
 
-(let [ct-orig (cx/complex-tensor
+(let [ct-orig (t/complex-tensor
                (t/matrix [[1 4] [2 5] [3 6]]))
       ct-clone (t/clone ct-orig)]
-  (t/mset! (cx/->tensor ct-orig) 0 0 -1.0)
-  {:orig-re (cx/re (ct-orig 0))
-   :clone-re (cx/re (ct-clone 0))})
+  (t/mset! (t/->tensor ct-orig) 0 0 -1.0)
+  {:orig-re (la/re (ct-orig 0))
+   :clone-re (la/re (ct-clone 0))})
 
 (kind/test-last
  [(fn [{:keys [orig-re clone-re]}]
@@ -411,32 +410,32 @@
 
 ;; ## Clone also materializes lazy results
 
-;; Cloning a lazy ComplexTensor (from `cx/add`, `cx/scale`, etc.)
+;; Cloning a lazy ComplexTensor (from `la/add`, `la/scale`, etc.)
 ;; materializes it into a contiguous array. The result is independent
 ;; of the sources.
 
-(let [p (cx/complex-tensor
+(let [p (t/complex-tensor
          (t/matrix [[1 3] [2 4]]))
-      q (cx/complex-tensor
+      q (t/complex-tensor
          (t/matrix [[10 30] [20 40]]))
-      lazy-pq (cx/add p q)
+      lazy-pq (la/add p q)
       materialized-pq (t/clone lazy-pq)]
-  (some? (t/array-buffer (cx/->tensor materialized-pq))))
+  (some? (t/array-buffer (t/->tensor materialized-pq))))
 
 (kind/test-last [true?])
 
 ;; Mutating `p` affects the lazy result but not the materialized copy:
 
-(let [p (cx/complex-tensor
+(let [p (t/complex-tensor
          (t/matrix [[1 3] [2 4]]))
-      q (cx/complex-tensor
+      q (t/complex-tensor
          (t/matrix [[10 30] [20 40]]))
-      lazy-pq (cx/add p q)
+      lazy-pq (la/add p q)
       materialized-pq (t/clone lazy-pq)
-      arr (t/->double-array (cx/->tensor p))
+      arr (t/->double-array (t/->tensor p))
       _ (aset arr 0 999.0)]
-  {:lazy-re (seq (cx/re lazy-pq))
-   :materialized-re (seq (cx/re materialized-pq))})
+  {:lazy-re (seq (la/re lazy-pq))
+   :materialized-re (seq (la/re materialized-pq))})
 
 (kind/test-last
  [(fn [{:keys [lazy-re materialized-re]}]
@@ -445,15 +444,15 @@
 
 ;; Using `t/mset!`:
 
-(let [p (cx/complex-tensor
+(let [p (t/complex-tensor
          (t/matrix [[1 3] [2 4]]))
-      q (cx/complex-tensor
+      q (t/complex-tensor
          (t/matrix [[10 30] [20 40]]))
-      lazy-pq (cx/add p q)
+      lazy-pq (la/add p q)
       materialized-pq (t/clone lazy-pq)]
-  (t/mset! (cx/->tensor p) 0 0 999.0)
-  {:lazy-re (seq (cx/re lazy-pq))
-   :materialized-re (seq (cx/re materialized-pq))})
+  (t/mset! (t/->tensor p) 0 0 999.0)
+  {:lazy-re (seq (la/re lazy-pq))
+   :materialized-re (seq (la/re materialized-pq))})
 
 (kind/test-last
  [(fn [{:keys [lazy-re materialized-re]}]
@@ -664,10 +663,10 @@
 ;; | `t/reshape` | No | Yes — same `double[]` | Different shape, same backing |
 ;; | `t/select` | No | Yes — strided view | View into same `double[]` |
 ;; | `tensor->dmat` / `dmat->tensor` | No | Yes — same `double[]` | Zero-copy EJML interop |
-;; | `cx/complex-tensor` (1-arity wrap) | No | Yes — wraps tensor | Shares the interleaved array |
-;; | `cx/re` / `cx/im` | No | Yes — strided view | Views into interleaved layout |
+;; | `t/complex-tensor` (1-arity wrap) | No | Yes — wraps tensor | Shares the interleaved array |
+;; | `la/re` / `la/im` | No | Yes — strided view | Views into interleaved layout |
 ;; | `la/add`, `la/mul`, etc. | No | No — lazy reader | Reads through to sources |
-;; | `cx/add`, `cx/sub`, `cx/scale` | No | No — lazy reader | Lazy ComplexTensors |
+;; | `la/add`, `la/sub`, `la/scale` | No | No — lazy reader | Lazy ComplexTensors |
 ;; | `t/compute-tensor` | No | No — lazy, noncaching | May evaluate out of element order |
 ;; | `t/clone` | Yes | Yes — independent | Breaks all links to source |
 ;; | `t/submatrix` | Yes | Yes — independent | Always clones |
@@ -676,7 +675,7 @@
 ;; | `la/transpose` (real) | No | Yes — strided view | Zero-copy, shares memory with input |
 ;; | `la/mmul`, `la/invert`, etc. | Yes | Yes — independent | EJML allocates new result |
 ;; | `t/->double-array` | Only if needed | N/A — raw `double[]` | Zero-copy when contiguous; copies for subviews/lazy |
-;; | `cx/->double-array` | Only if needed | N/A — raw `double[]` | Same convention, on ComplexTensor |
+;; | `t/->double-array` | Only if needed | N/A — raw `double[]` | Same convention, on ComplexTensor |
 ;;
 ;; Lazy readers have no array of their own, but they **read through**
 ;; to the source arrays — mutating a source changes what the lazy

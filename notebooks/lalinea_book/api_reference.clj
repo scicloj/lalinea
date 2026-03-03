@@ -4,7 +4,7 @@
 ;;
 ;; - `scicloj.lalinea.tensor` — tensor construction, structural operations, EJML interop
 ;; - `scicloj.lalinea.linalg` — arithmetic, decompositions, solve
-;; - `scicloj.lalinea.complex` — complex tensors
+;; - Complex tensor construction and type API are in `t/`
 ;; - `scicloj.lalinea.transform` — FFT and real-valued transforms
 ;; - `scicloj.lalinea.tape` — computation tape and memory inspection
 ;; - `scicloj.lalinea.elementwise` — tape-aware element-wise functions
@@ -17,7 +17,6 @@
   (:require
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.tensor :as t]
-   [scicloj.lalinea.complex :as cx]
    [scicloj.lalinea.transform :as ft]
    [scicloj.lalinea.tape :as tape]
    [scicloj.lalinea.elementwise :as elem]
@@ -124,7 +123,7 @@
 
 (kind/doc #'t/complex-tensor->zmat)
 
-(let [ct (cx/complex-tensor [1.0 2.0] [3.0 4.0])
+(let [ct (t/complex-tensor [1.0 2.0] [3.0 4.0])
       zm (t/complex-tensor->zmat ct)]
   (= org.ejml.data.ZMatrixRMaj (type zm)))
 
@@ -132,9 +131,9 @@
 
 (kind/doc #'t/zmat->complex-tensor)
 
-(let [zm (t/complex-tensor->zmat (cx/complex-tensor [1.0 2.0] [3.0 4.0]))
+(let [zm (t/complex-tensor->zmat (t/complex-tensor [1.0 2.0] [3.0 4.0]))
       ct (t/zmat->complex-tensor zm)]
-  (cx/complex? ct))
+  (t/complex? ct))
 
 (kind/test-last [true?])
 
@@ -382,7 +381,7 @@
 
 (let [result (la/eigen (t/matrix [[2 1] [1 2]]))]
   [(count (:eigenvectors result))
-   (cx/complex-shape (:eigenvalues result))])
+   (t/complex-shape (:eigenvalues result))])
 
 (kind/test-last [(fn [[n-evecs ev-shape]]
                    (and (= 2 n-evecs)
@@ -484,162 +483,140 @@
   (my-sqrt (t/column [4 9 16])))
 
 (kind/test-last [(fn [v] (la/close-scalar? (v 0 0) 2.0))])
-
-;; ## `scicloj.lalinea.complex`
+;; ## Complex tensors
 ;;
 ;; A ComplexTensor wraps a dtype-next tensor whose last dimension
 ;; is 2 (interleaved real/imaginary pairs).
 
-(kind/doc #'cx/complex-tensor)
+(kind/doc #'t/complex-tensor)
 
-(cx/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0])
+(t/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0])
 
-(kind/test-last [(fn [ct] (= [3] (cx/complex-shape ct)))])
+(kind/test-last [(fn [ct] (= [3] (t/complex-shape ct)))])
 
-(kind/doc #'cx/complex-tensor-real)
+(kind/doc #'t/complex-tensor-real)
 
-(cx/complex-tensor-real [5.0 6.0 7.0])
+(t/complex-tensor-real [5.0 6.0 7.0])
 
-(kind/test-last [(fn [ct] (every? zero? (cx/im ct)))])
+(kind/test-last [(fn [ct] (every? zero? (la/im ct)))])
 
-(kind/doc #'cx/complex)
+(kind/doc #'t/complex)
 
-(cx/complex 3.0 4.0)
+(t/complex 3.0 4.0)
 
-(kind/test-last [(fn [ct] (and (cx/scalar? ct)
-                               (== 3.0 (cx/re ct))
-                               (== 4.0 (cx/im ct))))])
+(kind/test-last [(fn [ct] (and (t/scalar? ct)
+                               (== 3.0 (la/re ct))
+                               (== 4.0 (la/im ct))))])
 
-(kind/doc #'cx/re)
+(kind/doc #'la/re)
 
-(cx/re (cx/complex-tensor [1.0 2.0] [3.0 4.0]))
+(la/re (t/complex-tensor [1.0 2.0] [3.0 4.0]))
 
 (kind/test-last [= [1.0 2.0]])
 
-(kind/doc #'cx/im)
+(kind/doc #'la/im)
 
-(cx/im (cx/complex-tensor [1.0 2.0] [3.0 4.0]))
+(la/im (t/complex-tensor [1.0 2.0] [3.0 4.0]))
 
 (kind/test-last [= [3.0 4.0]])
 
-(kind/doc #'cx/complex-shape)
+(kind/doc #'t/complex-shape)
 
-(cx/complex-shape (cx/complex-tensor [[1.0 2.0] [3.0 4.0]]
-                                     [[5.0 6.0] [7.0 8.0]]))
+(t/complex-shape (t/complex-tensor [[1.0 2.0] [3.0 4.0]]
+                                   [[5.0 6.0] [7.0 8.0]]))
 
 (kind/test-last [= [2 2]])
 
-(kind/doc #'cx/scalar?)
+(kind/doc #'t/scalar?)
 
-(cx/scalar? (cx/complex 3.0 4.0))
-
-(kind/test-last [true?])
-
-(kind/doc #'cx/complex?)
-
-(cx/complex? (cx/complex 3.0 4.0))
+(t/scalar? (t/complex 3.0 4.0))
 
 (kind/test-last [true?])
 
-(cx/complex? (t/eye 2))
+(kind/doc #'t/complex?)
+
+(t/complex? (t/complex 3.0 4.0))
+
+(kind/test-last [true?])
+
+(t/complex? (t/eye 2))
 
 (kind/test-last [false?])
 
-(kind/doc #'cx/->tensor)
+(kind/doc #'t/->tensor)
 
-(t/shape (cx/->tensor (cx/complex-tensor [1.0 2.0] [3.0 4.0])))
+(t/shape (t/->tensor (t/complex-tensor [1.0 2.0] [3.0 4.0])))
 
 (kind/test-last [= [2 2]])
 
-(kind/doc #'cx/->double-array)
+(kind/doc #'t/->double-array)
 
-(let [ct (cx/complex-tensor [1.0 2.0] [3.0 4.0])]
-  (seq (cx/->double-array ct)))
+(let [ct (t/complex-tensor [1.0 2.0] [3.0 4.0])]
+  (seq (t/->double-array ct)))
 
 (kind/test-last [= [1.0 3.0 2.0 4.0]])
 
-(kind/doc #'cx/wrap-tensor)
+(kind/doc #'t/wrap-tensor)
 
 (let [raw (t/matrix [[1.0 2.0] [3.0 4.0]])
-      ct (cx/wrap-tensor raw)]
-  [(cx/complex? ct) (cx/complex-shape ct)])
+      ct (t/wrap-tensor raw)]
+  [(t/complex? ct) (t/complex-shape ct)])
 
 (kind/test-last [(fn [[c? shape]] (and c? (= [2] shape)))])
 
-(kind/doc #'cx/add)
+;; The `la/` functions are polymorphic — they work on both real and complex inputs.
+;; Here are examples with complex tensors.
 
-(let [a (cx/complex-tensor [1.0 2.0] [3.0 4.0])
-      b (cx/complex-tensor [10.0 20.0] [30.0 40.0])]
-  (cx/re (cx/add a b)))
+;; Complex addition:
+
+(let [a (t/complex-tensor [1.0 2.0] [3.0 4.0])
+      b (t/complex-tensor [10.0 20.0] [30.0 40.0])]
+  (la/re (la/add a b)))
 
 (kind/test-last [= [11.0 22.0]])
 
-(kind/doc #'cx/sub)
+;; Complex multiplication: $(1+3i)(2+4i) = -10 + 10i$
 
-(let [a (cx/complex-tensor [10.0 20.0] [30.0 40.0])
-      b (cx/complex-tensor [1.0 2.0] [3.0 4.0])]
-  (cx/re (cx/sub a b)))
-
-(kind/test-last [= [9.0 18.0]])
-
-(kind/doc #'cx/scale)
-
-(let [ct (cx/scale (cx/complex-tensor [1.0 2.0] [3.0 4.0]) 2.0)]
-  [(cx/re ct) (cx/im ct)])
-
-(kind/test-last [= [[2.0 4.0] [6.0 8.0]]])
-
-(kind/doc #'cx/mul)
-
-;; $(1+3i)(2+4i) = (2-12) + (4+6)i = -10 + 10i$
-(let [a (cx/complex-tensor [1.0] [3.0])
-      b (cx/complex-tensor [2.0] [4.0])
-      c (cx/mul a b)]
-  [(cx/re (c 0)) (cx/im (c 0))])
+(let [a (t/complex-tensor [1.0] [3.0])
+      b (t/complex-tensor [2.0] [4.0])
+      c (la/mul a b)]
+  [(la/re (c 0)) (la/im (c 0))])
 
 (kind/test-last [= [-10.0 10.0]])
 
-(kind/doc #'cx/conj)
+;; Complex conjugate:
 
-(let [ct (cx/conj (cx/complex-tensor [1.0 2.0] [3.0 -4.0]))]
-  (cx/im ct))
+(kind/doc #'la/conj)
+
+(let [ct (la/conj (t/complex-tensor [1.0 2.0] [3.0 -4.0]))]
+  (la/im ct))
 
 (kind/test-last [= [-3.0 4.0]])
 
-(kind/doc #'cx/abs)
+;; Hermitian inner product: $\langle a, a \rangle = \|a\|^2$.
 
-;; $|3+4i| = 5$
-(let [m (cx/abs (cx/complex-tensor [3.0] [4.0]))]
+(kind/doc #'la/dot-conj)
+
+(let [a (t/complex-tensor [3.0 1.0] [4.0 2.0])
+      result (la/dot-conj a a)]
+  (la/close-scalar? (la/re result) 30.0))
+
+(kind/test-last [true?])
+
+;; Complex magnitude: $|3+4i| = 5$
+
+(let [m (la/abs (t/complex-tensor [3.0] [4.0]))]
   (la/close-scalar? (double (m 0)) 5.0))
 
 (kind/test-last [true?])
 
-(kind/doc #'cx/dot)
+;; Complex sum:
 
-(let [a (cx/complex-tensor [1.0 0.0] [0.0 1.0])
-      b (cx/complex-tensor [0.0 1.0] [1.0 0.0])
-      result (cx/dot a b)]
-  (la/close-scalar? (cx/im result) 2.0))
-
-(kind/test-last [true?])
-
-(kind/doc #'cx/dot-conj)
-
-;; Hermitian inner product: $\langle a, a \rangle = \|a\|^2$.
-(let [a (cx/complex-tensor [3.0 1.0] [4.0 2.0])
-      result (cx/dot-conj a a)]
-  (la/close-scalar? (cx/re result) 30.0))
-
-(kind/test-last [true?])
-
-(kind/doc #'cx/sum)
-
-(let [ct (cx/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0])
-      s (cx/sum ct)]
-  [(cx/re s) (cx/im s)])
+(let [ct (t/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0])
+      s (la/sum ct)]
+  [(la/re s) (la/im s)])
 
 (kind/test-last [= [6.0 15.0]])
-
 ;; ## `scicloj.lalinea.transform`
 ;;
 ;; Bridge between Fastmath transforms and La Linea tensors.
@@ -649,7 +626,7 @@
 
 (let [signal [1.0 0.0 0.0 0.0]
       spectrum (ft/forward signal)]
-  (cx/complex-shape spectrum))
+  (t/complex-shape spectrum))
 
 (kind/test-last [= [4]])
 
@@ -657,7 +634,7 @@
 
 (let [spectrum (ft/forward [1.0 2.0 3.0 4.0])
       roundtrip (ft/inverse spectrum)]
-  (la/close-scalar? (cx/re (roundtrip 0)) 1.0))
+  (la/close-scalar? (la/re (roundtrip 0)) 1.0))
 
 (kind/test-last [true?])
 
@@ -671,9 +648,9 @@
 
 (kind/doc #'ft/forward-complex)
 
-(let [ct (cx/complex-tensor-real [1.0 0.0 0.0 0.0])
+(let [ct (t/complex-tensor-real [1.0 0.0 0.0 0.0])
       spectrum (ft/forward-complex ct)]
-  (cx/complex-shape spectrum))
+  (t/complex-shape spectrum))
 
 (kind/test-last [= [4]])
 
@@ -796,7 +773,7 @@
 ;;
 ;; Tape-aware element-wise operations with complex dispatch.
 ;; Each function records on the tape (when active) and dispatches
-;; on `cx/complex?`.
+;; on `t/complex?` for dispatch.
 
 (kind/doc #'elem/sq)
 

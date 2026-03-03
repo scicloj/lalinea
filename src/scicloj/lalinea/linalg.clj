@@ -7,9 +7,9 @@
 
    For tensor construction and structural operations, see
    `scicloj.lalinea.tensor`."
-  (:refer-clojure :exclude [abs])
+  (:refer-clojure :exclude [abs conj])
   (:require [scicloj.lalinea.impl.real-tensor :as rt]
-            [scicloj.lalinea.complex :as cx]
+            [scicloj.lalinea.impl.complex-tensor :as ct]
             [scicloj.lalinea.impl.ejml :as ejml]
             [scicloj.lalinea.tape :as tape]
             [scicloj.lalinea.tensor :as t]
@@ -18,10 +18,6 @@
             [tech.v3.datatype.functional :as dfn])
   (:import [java.util Arrays]
            [org.ejml.data DMatrixRMaj ZMatrixRMaj]))
-
-;; ---------------------------------------------------------------------------
-;; RealTensor helpers
-;; ---------------------------------------------------------------------------
 
 ;; ---------------------------------------------------------------------------
 ;; Matrix multiply
@@ -35,7 +31,7 @@
   [a b]
   (tape/record! :la/mmul [a b]
                 (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (let [za (ejml/ct->zmat a)
                           zb (ejml/ct->zmat b)
                           zc (ejml/zmul za zb)]
@@ -77,7 +73,7 @@
   [a]
   (tape/record! :la/transpose [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (let [za (ejml/ct->zmat a)]
                       (ejml/zmat->ct (ejml/ztranspose-conj za)))
                     (rt/->rt (dtt/transpose a [1 0]))))))
@@ -91,8 +87,8 @@
   [a b]
   (tape/record! :la/add [a b]
                 (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
-                  (if (cx/complex? a)
-                    (cx/add a b)
+                  (if (ct/complex? a)
+                    (ct/ct-add a b)
                     (rt/->rt (dfn/+ a b))))))
 
 (defn sub
@@ -100,8 +96,8 @@
   [a b]
   (tape/record! :la/sub [a b]
                 (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
-                  (if (cx/complex? a)
-                    (cx/sub a b)
+                  (if (ct/complex? a)
+                    (ct/ct-sub a b)
                     (rt/->rt (dfn/- a b))))))
 
 (defn scale
@@ -109,8 +105,8 @@
   [a alpha]
   (tape/record! :la/scale [a alpha]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
-                    (cx/scale a alpha)
+                  (if (ct/complex? a)
+                    (ct/ct-scale a alpha)
                     (rt/->rt (dfn/* a (double alpha)))))))
 
 (defn mul
@@ -118,8 +114,8 @@
   [a b]
   (tape/record! :la/mul [a b]
                 (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
-                  (if (cx/complex? a)
-                    (cx/mul a b)
+                  (if (ct/complex? a)
+                    (ct/ct-mul a b)
                     (rt/->rt (dfn/* a b))))))
 
 (defn abs
@@ -127,8 +123,8 @@
   [a]
   (tape/record! :la/abs [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
-                    (rt/->rt (cx/abs a))
+                  (if (ct/complex? a)
+                    (rt/->rt (ct/ct-abs a))
                     (rt/->rt (dfn/abs a))))))
 
 (defn sq
@@ -136,8 +132,8 @@
   [a]
   (tape/record! :la/sq [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
-                    (cx/mul a a)
+                  (if (ct/complex? a)
+                    (ct/ct-mul a a)
                     (rt/->rt (dfn/* a a))))))
 
 (defn sum
@@ -146,8 +142,8 @@
   [a]
   (tape/record! :la/sum [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
-                    (cx/sum a)
+                  (if (ct/complex? a)
+                    (ct/ct-sum a)
                     (double (dfn/sum a))))))
 
 (defn prod
@@ -156,6 +152,38 @@
   (tape/record! :la/prod [a]
                 (let [a (rt/ensure-tensor a)]
                   (reduce * (dtype/->reader a :float64)))))
+
+;; ---------------------------------------------------------------------------
+;; Complex-specific operations (polymorphic)
+;; ---------------------------------------------------------------------------
+
+(defn re
+  "Real part(s). For complex: returns a RealTensor view (or double for scalars).
+   For real: returns the input unchanged."
+  [a]
+  (tape/record! :la/re [a]
+                (if (ct/complex? a)
+                  (ct/re a)
+                  a)))
+
+(defn im
+  "Imaginary part(s). For complex: returns a RealTensor view (or double for scalars).
+   For real: returns zeros matching the input shape."
+  [a]
+  (tape/record! :la/im [a]
+                (if (ct/complex? a)
+                  (ct/im a)
+                  (let [shape (dtype/shape (rt/ensure-tensor a))]
+                    (rt/->rt (dtt/compute-tensor (vec shape) (fn [& _] 0.0) :float64))))))
+
+(defn conj
+  "Complex conjugate. For complex: negates imaginary parts.
+   For real: returns the input unchanged."
+  [a]
+  (tape/record! :la/conj [a]
+                (if (ct/complex? a)
+                  (ct/ct-conj a)
+                  a)))
 
 ;; ---------------------------------------------------------------------------
 ;; Scalar properties
@@ -167,9 +195,9 @@
   [a]
   (tape/record! :la/trace [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (let [[re im] (ejml/ztrace (ejml/ct->zmat a))]
-                      (cx/complex re im))
+                      (ct/complex re im))
                     (let [shape (dtype/shape a)
                           n (min (long (first shape)) (long (second shape)))]
                       (double (dfn/sum (dtype/make-reader :float64 n
@@ -181,9 +209,9 @@
   [a]
   (tape/record! :la/det [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (let [[re im] (ejml/zdet (ejml/ct->zmat a))]
-                      (cx/complex re im))
+                      (ct/complex re im))
                     (ejml/ddet (ejml/tensor->dmat a))))))
 
 (defn norm
@@ -191,7 +219,7 @@
   [a]
   (tape/record! :la/norm [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (ejml/znorm-f (ejml/ct->zmat a))
                     (Math/sqrt (double (dfn/sum (dfn/* a a))))))))
 
@@ -202,8 +230,19 @@
   [u v]
   (tape/record! :la/dot [u v]
                 (let [u (rt/ensure-tensor u) v (rt/ensure-tensor v)]
-                  (if (cx/complex? u)
-                    (cx/dot-conj u v)
+                  (if (ct/complex? u)
+                    (ct/ct-dot-conj u v)
+                    (double (dfn/sum (dfn/* u v)))))))
+
+(defn dot-conj
+  "Hermitian inner product: $\\sum u_i \\overline{v_i}$.
+   For real vectors: same as `dot` ($\\sum u_i v_i$).
+   For complex vectors: $\\sum u_i \\overline{v_i}$ (returns scalar ComplexTensor)."
+  [u v]
+  (tape/record! :la/dot-conj [u v]
+                (let [u (rt/ensure-tensor u) v (rt/ensure-tensor v)]
+                  (if (ct/complex? u)
+                    (ct/ct-dot-conj u v)
                     (double (dfn/sum (dfn/* u v)))))))
 
 ;; ---------------------------------------------------------------------------
@@ -231,7 +270,7 @@
   [a]
   (tape/record! :la/invert [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (when-let [inv (ejml/zinvert (ejml/ct->zmat a))]
                       (ejml/zmat->ct inv))
                     (when-let [inv (ejml/dinvert (ejml/tensor->dmat a))]
@@ -243,7 +282,7 @@
   [a b]
   (tape/record! :la/solve [a b]
                 (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (let [za (ejml/ct->zmat a)
                           zb (ejml/ct->zmat b)]
                       (when-let [zx (ejml/zsolve za zb)]
@@ -262,7 +301,7 @@
    `:eigenvalues`  — ComplexTensor of shape `[n]` (complex vector)
    `:eigenvectors` — vector of column eigenvectors as real tensors (or nil)
 
-   Use `(cx/re (:eigenvalues result))` for the real parts, or
+   Use `(la/re (:eigenvalues result))` for the real parts, or
    `real-eigenvalues` for a sorted real tensor."
   [a]
   (tape/record! :la/eigen [a]
@@ -276,7 +315,7 @@
                         (let [[re im] (nth pairs i)]
                           (aset arr (* 2 i) (double re))
                           (aset arr (inc (* 2 i)) (double im))))
-                      (cond-> {:eigenvalues (cx/complex-tensor
+                      (cond-> {:eigenvalues (ct/complex-tensor
                                              (dtt/reshape (dtt/ensure-tensor arr) [n 2]))}
                         (:eigenvectors result)
                         (assoc :eigenvectors
@@ -289,7 +328,7 @@
    Returns a real `[n]` tensor, sorted ascending."
   [a]
   (let [evals (:eigenvalues (eigen a))
-        arr (dtype/->double-array (cx/re evals))]
+        arr (dtype/->double-array (ct/re evals))]
     (Arrays/sort arr)
     (rt/->rt (dtt/ensure-tensor arr))))
 
@@ -311,7 +350,7 @@
   [a]
   (tape/record! :la/qr [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (let [result (ejml/zqr (ejml/ct->zmat a))]
                       (when result
                         {:Q (ejml/zmat->ct (:Q result))
@@ -327,7 +366,7 @@
   [a]
   (tape/record! :la/cholesky [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (when-let [L (ejml/zcholesky (ejml/ct->zmat a))]
                       (ejml/zmat->ct L))
                     (when-let [L (ejml/dcholesky (ejml/tensor->dmat a))]
@@ -422,7 +461,7 @@
   "Unwrap RealTensor or ComplexTensor to bare tensor."
   [x]
   (cond (rt/real-tensor? x) (rt/->tensor x)
-        (cx/complex? x)     (cx/->tensor x)
+        (ct/complex? x)     (ct/->tensor x)
         :else               x))
 
 (defn- rewrap-result
@@ -431,11 +470,11 @@
   (if-not (or (dtt/tensor? result) (dtype/reader? result))
     result
     (let [had-real?    (some rt/real-tensor? orig-args)
-          had-complex? (and (some cx/complex? orig-args) (not had-real?))
+          had-complex? (and (some ct/complex? orig-args) (not had-real?))
           rshape       (dtype/shape result)]
       (cond
         (and had-complex? (= 2 (last rshape)))
-        (cx/wrap-tensor result)
+        (ct/wrap-tensor result)
 
         :else
         (let [r (if (and ref-shape
@@ -450,7 +489,7 @@
   [args]
   (some (fn [a]
           (cond (rt/real-tensor? a) (vec (dtype/shape (rt/->tensor a)))
-                (cx/complex? a)     (vec (dtype/shape (cx/->tensor a)))
+                (ct/complex? a)     (vec (dtype/shape (ct/->tensor a)))
                 :else               nil))
         args))
 

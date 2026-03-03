@@ -8,7 +8,7 @@
             [tech.v3.datatype :as dtype]
             [tech.v3.tensor :as dtt]
             [scicloj.lalinea.impl.real-tensor :as rt]
-            [scicloj.lalinea.complex :as cx])
+            [scicloj.lalinea.impl.complex-tensor :as ct])
   (:import [scicloj.lalinea.impl.real_tensor RealTensor]
            [scicloj.lalinea.impl.complex_tensor ComplexTensor]))
 
@@ -130,8 +130,8 @@
 (defn- print-complex-tensor
   "Print a ComplexTensor in #la/C [:float64 [shape] data] format."
   [^ComplexTensor ct ^java.io.Writer w]
-  (let [raw    (cx/->tensor ct)
-        cshape (cx/complex-shape ct)
+  (let [raw    (ct/->tensor ct)
+        cshape (ct/complex-shape ct)
         ndims  (count cshape)
         rdr    (dtype/->reader raw :float64)]
     (.write w "#la/C [:float64 ")

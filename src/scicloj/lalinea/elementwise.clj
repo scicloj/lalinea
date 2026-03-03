@@ -2,12 +2,12 @@
   "Tape-aware element-wise operations with complex dispatch.
 
    Each function records on the tape (when active) and dispatches
-   on `cx/complex?`. Functions without meaningful complex analogues
+   on `ct/complex?`. Functions without meaningful complex analogues
    throw on complex input."
   (:refer-clojure :exclude [abs min max])
   (:require [scicloj.lalinea.tape :as tape]
             [scicloj.lalinea.impl.real-tensor :as rt]
-            [scicloj.lalinea.complex :as cx]
+            [scicloj.lalinea.impl.complex-tensor :as ct]
             [tech.v3.datatype :as dtype]
             [tech.v3.datatype.functional :as dfn]
             [tech.v3.tensor :as dtt]))
@@ -24,10 +24,10 @@
   "Apply a unary function element-wise to a ComplexTensor.
    f takes (re, im) and returns [new-re, new-im]."
   [ct f]
-  (let [t (cx/->tensor ct)
+  (let [t (ct/->tensor ct)
         flat (dtype/->reader t)
         n (dtype/ecount t)]
-    (cx/complex-tensor
+    (ct/complex-tensor
      (dtt/reshape
       (dtype/make-reader :float64 n
                          (let [base (-> idx (quot 2) (* 2))
@@ -46,8 +46,8 @@
   [a]
   (tape/record! :elem/sq [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
-                    (cx/mul a a)
+                  (if (ct/complex? a)
+                    (ct/ct-mul a a)
                     (rt/->rt (dfn/sq a))))))
 
 (defn sqrt
@@ -55,7 +55,7 @@
   [a]
   (tape/record! :elem/sqrt [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     ;; sqrt(z) = sqrt(|z|) * e^(i*theta/2)
                     (complex-unary a (fn [x y]
                                        (let [r (Math/sqrt (Math/sqrt (+ (* x x) (* y y))))
@@ -69,7 +69,7 @@
   [a exponent]
   (tape/record! :elem/pow [a exponent]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (unsupported-complex! :elem/pow)
                     (rt/->rt (dfn/pow a (double exponent)))))))
 
@@ -78,7 +78,7 @@
   [a]
   (tape/record! :elem/cbrt [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (unsupported-complex! :elem/cbrt)
                     (rt/->rt (dfn/cbrt a))))))
 
@@ -91,7 +91,7 @@
   [a]
   (tape/record! :elem/exp [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     ;; exp(x+iy) = e^x * (cos y + i sin y)
                     (complex-unary a (fn [x y]
                                        (let [ex (Math/exp x)]
@@ -104,7 +104,7 @@
   [a]
   (tape/record! :elem/log [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     ;; log(z) = ln|z| + i*arg(z)
                     (complex-unary a (fn [x y]
                                        [(Math/log (Math/sqrt (+ (* x x) (* y y))))
@@ -116,7 +116,7 @@
   [a]
   (tape/record! :elem/log10 [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (unsupported-complex! :elem/log10)
                     (rt/->rt (dfn/log10 a))))))
 
@@ -129,7 +129,7 @@
   [a]
   (tape/record! :elem/sin [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     ;; sin(x+iy) = sin(x)cosh(y) + i*cos(x)sinh(y)
                     (complex-unary a (fn [x y]
                                        [(* (Math/sin x) (Math/cosh y))
@@ -141,7 +141,7 @@
   [a]
   (tape/record! :elem/cos [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     ;; cos(x+iy) = cos(x)cosh(y) - i*sin(x)sinh(y)
                     (complex-unary a (fn [x y]
                                        [(* (Math/cos x) (Math/cosh y))
@@ -153,7 +153,7 @@
   [a]
   (tape/record! :elem/tan [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (unsupported-complex! :elem/tan)
                     (rt/->rt (dfn/tan a))))))
 
@@ -166,7 +166,7 @@
   [a]
   (tape/record! :elem/sinh [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     ;; sinh(x+iy) = sinh(x)cos(y) + i*cosh(x)sin(y)
                     (complex-unary a (fn [x y]
                                        [(* (Math/sinh x) (Math/cos y))
@@ -178,7 +178,7 @@
   [a]
   (tape/record! :elem/cosh [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     ;; cosh(x+iy) = cosh(x)cos(y) + i*sinh(x)sin(y)
                     (complex-unary a (fn [x y]
                                        [(* (Math/cosh x) (Math/cos y))
@@ -190,7 +190,7 @@
   [a]
   (tape/record! :elem/tanh [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (unsupported-complex! :elem/tanh)
                     (rt/->rt (dfn/tanh a))))))
 
@@ -203,8 +203,8 @@
   [a]
   (tape/record! :elem/abs [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
-                    (rt/->rt (cx/abs a))
+                  (if (ct/complex? a)
+                    (rt/->rt (ct/ct-abs a))
                     (rt/->rt (dfn/abs a))))))
 
 ;; ---------------------------------------------------------------------------
@@ -216,8 +216,8 @@
   [a]
   (tape/record! :elem/sum [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
-                    (cx/sum a)
+                  (if (ct/complex? a)
+                    (ct/ct-sum a)
                     (double (dfn/sum a))))))
 
 (defn mean
@@ -225,7 +225,7 @@
   [a]
   (tape/record! :elem/mean [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (unsupported-complex! :elem/mean)
                     (double (dfn/mean a))))))
 
@@ -238,7 +238,7 @@
   [a]
   (tape/record! :elem/floor [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (unsupported-complex! :elem/floor)
                     (rt/->rt (dfn/floor a))))))
 
@@ -247,7 +247,7 @@
   [a]
   (tape/record! :elem/ceil [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (unsupported-complex! :elem/ceil)
                     (rt/->rt (dfn/ceil a))))))
 
@@ -256,7 +256,7 @@
   [a b]
   (tape/record! :elem/min [a b]
                 (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (unsupported-complex! :elem/min)
                     (rt/->rt (dfn/min a b))))))
 
@@ -265,7 +265,7 @@
   [a b]
   (tape/record! :elem/max [a b]
                 (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (unsupported-complex! :elem/max)
                     (rt/->rt (dfn/max a b))))))
 (defn div
@@ -273,7 +273,7 @@
   [a b]
   (tape/record! :elem/div [a b]
                 (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
-                  (if (or (cx/complex? a) (cx/complex? b))
+                  (if (or (ct/complex? a) (ct/complex? b))
                     (unsupported-complex! :elem/div)
                     (rt/->rt (dfn// a b))))))
 
@@ -286,7 +286,7 @@
   [a]
   (tape/record! :elem/asin [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (unsupported-complex! :elem/asin)
                     (rt/->rt (dfn/asin a))))))
 
@@ -295,7 +295,7 @@
   [a]
   (tape/record! :elem/acos [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (unsupported-complex! :elem/acos)
                     (rt/->rt (dfn/acos a))))))
 
@@ -304,7 +304,7 @@
   [a]
   (tape/record! :elem/atan [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (unsupported-complex! :elem/atan)
                     (rt/->rt (dfn/atan a))))))
 
@@ -317,7 +317,7 @@
   [a]
   (tape/record! :elem/log1p [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (unsupported-complex! :elem/log1p)
                     (rt/->rt (dfn/log1p a))))))
 
@@ -326,7 +326,7 @@
   [a]
   (tape/record! :elem/expm1 [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (unsupported-complex! :elem/expm1)
                     (rt/->rt (dfn/expm1 a))))))
 
@@ -339,7 +339,7 @@
   [a]
   (tape/record! :elem/round [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (unsupported-complex! :elem/round)
                     (rt/->rt (dfn/rint a))))))
 
@@ -348,7 +348,7 @@
   [a lo hi]
   (tape/record! :elem/clip [a lo hi]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (unsupported-complex! :elem/clip)
                     (let [lo (double lo)
                           hi (double hi)]
@@ -363,7 +363,7 @@
   [a]
   (tape/record! :elem/reduce-max [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (unsupported-complex! :elem/reduce-max)
                     (double (dfn/reduce-max a))))))
 
@@ -372,7 +372,7 @@
   [a]
   (tape/record! :elem/reduce-min [a]
                 (let [a (rt/ensure-tensor a)]
-                  (if (cx/complex? a)
+                  (if (ct/complex? a)
                     (unsupported-complex! :elem/reduce-min)
                     (double (dfn/reduce-min a))))))
 
@@ -385,6 +385,6 @@
   [a b]
   (tape/record! :elem/gt [a b]
                 (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
-                  (if (or (cx/complex? a) (cx/complex? b))
+                  (if (or (ct/complex? a) (ct/complex? b))
                     (unsupported-complex! :elem/gt)
                     (rt/->rt (dtype/elemwise-cast (dfn/> a b) :float64))))))

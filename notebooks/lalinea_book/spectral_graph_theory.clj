@@ -19,7 +19,6 @@
    [scicloj.lalinea.tensor :as t]
    [scicloj.lalinea.elementwise :as elem]
    ;; Complex tensors — interleaved [re im] layout:
-   [scicloj.lalinea.complex :as cx]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
@@ -156,7 +155,7 @@ fiedler-value
 ;; a spectral bisection of the graph.
 
 (def sorted-eig-indices
-  (let [vals (cx/re (:eigenvalues eig))]
+  (let [vals (la/re (:eigenvalues eig))]
     (sort-by (fn [i] (double (vals i))) (range (count (:eigenvalues eig))))))
 
 (def fiedler-eigvec
@@ -419,7 +418,7 @@ comm-eigenvalues
 ;; smallest eigenvalues:
 
 (def sorted-comm-indices
-  (let [vals (cx/re (:eigenvalues comm-eig))]
+  (let [vals (la/re (:eigenvalues comm-eig))]
     (sort-by (fn [i] (double (vals i))) (range (count (:eigenvalues comm-eig))))))
 
 ;; The spectral embedding — each vertex gets coordinates from

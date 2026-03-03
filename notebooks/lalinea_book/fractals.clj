@@ -19,7 +19,6 @@
    [scicloj.lalinea.tensor :as t]
    [scicloj.lalinea.elementwise :as elem]
    ;; Complex tensors — interleaved [re im] layout:
-   [scicloj.lalinea.complex :as cx]
    ;; Tensor ↔ BufferedImage conversion:
    [tech.v3.libs.buffered-image :as bufimg]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
@@ -35,7 +34,7 @@
 
 (def complex-grid
   (fn [re-min re-max im-min im-max h w]
-    (cx/complex-tensor
+    (t/complex-tensor
      (t/compute-tensor [h w 2]
                        (fn [r c part]
                          (if (zero? part)
@@ -46,8 +45,8 @@
 ;; A small test grid — the four corners should span the range:
 
 (let [g (complex-grid -2.0 1.0 -1.5 1.5 3 3)
-      raw (cx/->tensor g)]
-  {:shape (cx/complex-shape g)
+      raw (t/->tensor g)]
+  {:shape (t/complex-shape g)
    :top-left-re (raw 0 0 0)
    :bottom-right-im (raw 2 2 1)})
 
@@ -72,7 +71,7 @@
   (fn [re-min re-max im-min im-max h w max-iter]
     (let [c (complex-grid re-min re-max im-min im-max h w)
           counts (int-array (* h w) 0)
-          zero-grid (cx/complex-tensor
+          zero-grid (t/complex-tensor
                      (t/compute-tensor [h w 2]
                                        (fn [_ _ _] 0.0) :float64))]
       (loop [z zero-grid k 0]
@@ -142,7 +141,7 @@
 (def julia-counts
   (fn [c-re c-im re-min re-max im-min im-max h w max-iter]
     (let [z0 (complex-grid re-min re-max im-min im-max h w)
-          c-grid (cx/complex-tensor
+          c-grid (t/complex-tensor
                   (t/compute-tensor [h w 2]
                                     (fn [_ _ part] (if (zero? part) c-re c-im))
                                     :float64))
@@ -229,20 +228,20 @@
 
 (def complex-div
   (fn [a b]
-    (let [ar (t/->tensor (cx/re a)) ai (t/->tensor (cx/im a))
-          br (t/->tensor (cx/re b)) bi (t/->tensor (cx/im b))
+    (let [ar (t/->tensor (la/re a)) ai (t/->tensor (la/im a))
+          br (t/->tensor (la/re b)) bi (t/->tensor (la/im b))
           denom (la/add (la/mul br br) (la/mul bi bi))]
-      (cx/complex-tensor
+      (t/complex-tensor
        (elem/div (la/add (la/mul ar br) (la/mul ai bi)) denom)
        (elem/div (la/sub (la/mul ai br) (la/mul ar bi)) denom)))))
 
 ;;  Verify: (3+4i)/(1+2i) = (11-2i)/5 = 2.2-0.4i
 
-(let [a (cx/complex-tensor (t/matrix [[3]]) (t/matrix [[4]]))
-      b (cx/complex-tensor (t/matrix [[1]]) (t/matrix [[2]]))
+(let [a (t/complex-tensor (t/matrix [[3]]) (t/matrix [[4]]))
+      b (t/complex-tensor (t/matrix [[1]]) (t/matrix [[2]]))
       result (complex-div a b)]
-  (and (< (abs (- ((cx/re result) 0 0) 2.2)) 1e-10)
-       (< (abs (- ((cx/im result) 0 0) -0.4)) 1e-10)))
+  (and (< (abs (- ((la/re result) 0 0) 2.2)) 1e-10)
+       (< (abs (- ((la/im result) 0 0) -0.4)) 1e-10)))
 
 (kind/test-last [true?])
 
@@ -252,15 +251,15 @@
   (fn [re-min re-max im-min im-max h w max-iter]
     (let [z0 (complex-grid re-min re-max im-min im-max h w)
           ;; Constant grid of 1 + 0i
-          one (cx/complex-tensor
+          one (t/complex-tensor
                (t/compute-tensor [h w 2]
                                  (fn [_ _ part] (if (zero? part) 1.0 0.0))
                                  :float64))
           ;; The three cube roots of unity
-          roots [(cx/complex 1.0 0.0)
-                 (cx/complex (math/cos (/ (* 2.0 math/PI) 3.0))
+          roots [(t/complex 1.0 0.0)
+                 (t/complex (math/cos (/ (* 2.0 math/PI) 3.0))
                              (math/sin (/ (* 2.0 math/PI) 3.0)))
-                 (cx/complex (math/cos (/ (* 4.0 math/PI) 3.0))
+                 (t/complex (math/cos (/ (* 4.0 math/PI) 3.0))
                              (math/sin (/ (* 4.0 math/PI) 3.0)))]
           root-idx (int-array (* h w) -1)]
       ;; Iterate Newton's method
@@ -271,16 +270,16 @@
             (dotimes [r h]
               (dotimes [c w]
                 (let [idx (+ (* r w) c)
-                      zr ((cx/->tensor z-final) r c 0)
-                      zi ((cx/->tensor z-final) r c 1)
+                      zr ((t/->tensor z-final) r c 0)
+                      zi ((t/->tensor z-final) r c 1)
                       best (reduce (fn [best-i i]
                                      (let [root (nth roots i)
-                                           dr (- zr (double (cx/re root)))
-                                           di (- zi (double (cx/im root)))
+                                           dr (- zr (double (la/re root)))
+                                           di (- zi (double (la/im root)))
                                            d (+ (* dr dr) (* di di))
                                            root-best (nth roots best-i)
-                                           dbr (- zr (double (cx/re root-best)))
-                                           dbi (- zi (double (cx/im root-best)))
+                                           dbr (- zr (double (la/re root-best)))
+                                           dbi (- zi (double (la/im root-best)))
                                            db (+ (* dbr dbr) (* dbi dbi))]
                                        (if (< d db) i best-i)))
                                    0 [1 2])]

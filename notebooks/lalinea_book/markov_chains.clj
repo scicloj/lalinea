@@ -16,7 +16,6 @@
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.tensor :as t]
-   [scicloj.lalinea.complex :as cx]
    ;; Arg-reduction operations (argmax, argmin, etc.):
    [tech.v3.datatype.argops :as argops]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
@@ -135,7 +134,7 @@
 
 (def stationary-eigen
   (let [{:keys [eigenvalues eigenvectors]} eigen-result
-        reals (cx/re eigenvalues)
+        reals (la/re eigenvalues)
         idx (first (sort-by (fn [i] (abs (- (double (reals i)) 1.0)))
                             (range (count eigenvectors))))
         ev (nth eigenvectors idx)

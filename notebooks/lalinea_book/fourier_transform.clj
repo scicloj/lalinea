@@ -13,7 +13,6 @@
    [scicloj.lalinea.tensor :as t]
    [scicloj.lalinea.elementwise :as elem]
    ;; Complex tensors — interleaved [re im] layout:
-   [scicloj.lalinea.complex :as cx]
    ;; FFT bridge — Fastmath transforms ↔ ComplexTensor:
    [scicloj.lalinea.transform :as ft]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
@@ -32,7 +31,7 @@
 
 ;; The DC component ($k=0$) is $\sum x_n = 0$.
 
-(kind/test-last [(fn [ct] (< (abs (double (cx/re (ct 0)))) 1e-10))])
+(kind/test-last [(fn [ct] (< (abs (double (la/re (ct 0)))) 1e-10))])
 
 ;; ## Round-trip
 ;;
@@ -74,8 +73,8 @@
       lhs (ft/forward combined)
       rhs (la/add (la/scale (ft/forward x) alpha)
                   (la/scale (ft/forward y) beta))]
-  (and (< (elem/reduce-max (elem/abs (la/sub (cx/re lhs) (cx/re rhs)))) 1e-10)
-       (< (elem/reduce-max (elem/abs (la/sub (cx/im lhs) (cx/im rhs)))) 1e-10)))
+  (and (< (elem/reduce-max (elem/abs (la/sub (la/re lhs) (la/re rhs)))) 1e-10)
+       (< (elem/reduce-max (elem/abs (la/sub (la/im lhs) (la/im rhs)))) 1e-10)))
 
 (kind/test-last [true?])
 
@@ -156,7 +155,7 @@
 ;; with all other bins zero.
 
 (let [spectrum (ft/forward [3.0 3.0 3.0 3.0])]
-  {:dc (cx/re (spectrum 0))
+  {:dc (la/re (spectrum 0))
    :others [(la/abs (spectrum 1)) (la/abs (spectrum 2)) (la/abs (spectrum 3))]})
 
 (kind/test-last [(fn [v] (and (< (abs (- (double (:dc v)) 12.0)) 1e-10)
@@ -166,7 +165,7 @@
 
 (let [spectrum (ft/forward [1.0 -1.0 1.0 -1.0])]
   {:dc (double (la/abs (spectrum 0)))
-   :nyquist (double (cx/re (spectrum 2)))})
+   :nyquist (double (la/re (spectrum 2)))})
 
 (kind/test-last [(fn [v] (and (< (:dc v) 1e-10)
                               (< (abs (- (:nyquist v) 4.0)) 1e-10)))])
@@ -175,11 +174,11 @@
 ;;
 ;; When the input is already complex, use `forward-complex`.
 
-(let [signal (cx/complex-tensor [1.0 0.0] [0.0 1.0])
+(let [signal (t/complex-tensor [1.0 0.0] [0.0 1.0])
       spectrum (ft/forward-complex signal)
       recovered (ft/inverse spectrum)]
-  (and (< (elem/reduce-max (elem/abs (la/sub (cx/re recovered) (cx/re signal)))) 1e-10)
-       (< (elem/reduce-max (elem/abs (la/sub (cx/im recovered) (cx/im signal)))) 1e-10)))
+  (and (< (elem/reduce-max (elem/abs (la/sub (la/re recovered) (la/re signal)))) 1e-10)
+       (< (elem/reduce-max (elem/abs (la/sub (la/im recovered) (la/im signal)))) 1e-10)))
 
 (kind/test-last [true?])
 
