@@ -13,7 +13,8 @@
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.tensor :as t]
-   [scicloj.lalinea.elementwise :as elem]   ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
+   [scicloj.lalinea.elementwise :as elem]
+   ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
    [scicloj.tableplot.v1.plotly :as plotly]
@@ -48,8 +49,8 @@
 
 (def noise-linear
   (t/matrix [0.343 0.276 -0.285 -0.332 0.084 0.205 -0.245 -0.419
-                    -0.057 0.446 0.241 -0.036 0.423 -0.192 -0.363 0.106
-                    -0.147 0.165 -0.361 0.096]))
+             -0.057 0.446 0.241 -0.036 0.423 -0.192 -0.363 0.106
+             -0.147 0.165 -0.361 0.096]))
 
 (def y-linear
   (la/add (la/add 2.0 (la/mul 3.0 x-data)) noise-linear))
@@ -138,9 +139,9 @@ rms-linear
 
 (def noise-poly
   (t/matrix [0.132 -0.541  0.269  0.370  0.067  0.284 -0.096 -0.651
-                    -0.228  0.055  0.483 -0.301  0.088 -0.104  0.612  0.073
-                    -0.318  0.247 -0.428  0.518 -0.092  0.146 -0.190  0.398
-                    0.031 -0.263  0.195 -0.416  0.347  0.010]))
+             -0.228  0.055  0.483 -0.301  0.088 -0.104  0.612  0.073
+             -0.318  0.247 -0.428  0.518 -0.092  0.146 -0.190  0.398
+             0.031 -0.263  0.195 -0.416  0.347  0.010]))
 
 (def y-poly
   (la/add (la/add 1.0 (la/mul -2.0 x-poly))
@@ -292,10 +293,10 @@ S-svd
 
 (def noise-trig
   (t/matrix [-0.058  0.218 -0.109  0.034  0.192 -0.277  0.138  0.065
-                    -0.193  0.145 -0.044  0.291 -0.180  0.077  0.253 -0.116
-                    0.162 -0.207  0.098 -0.151  0.184 -0.023  0.211 -0.138
-                    0.073 -0.246  0.119  0.047 -0.183  0.264 -0.091  0.156
-                    -0.228  0.103  0.189 -0.144  0.268 -0.076  0.131 -0.201]))
+             -0.193  0.145 -0.044  0.291 -0.180  0.077  0.253 -0.116
+             0.162 -0.207  0.098 -0.151  0.184 -0.023  0.211 -0.138
+             0.073 -0.246  0.119  0.047 -0.183  0.264 -0.091  0.156
+             -0.228  0.103  0.189 -0.144  0.268 -0.076  0.131 -0.201]))
 
 (def y-trig
   (la/add (la/add 3.0 (la/mul 2.0 (elem/cos x-trig)))

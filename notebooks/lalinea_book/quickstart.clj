@@ -13,7 +13,8 @@
    ;; Complex tensors — interleaved [re im] layout:
    [scicloj.lalinea.complex :as cx]
    ;; FFT bridge — Fastmath transforms ↔ ComplexTensor:
-   [scicloj.lalinea.transform :as ft]   ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
+   [scicloj.lalinea.transform :as ft]
+   ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]
    [clojure.math :as math]))
 

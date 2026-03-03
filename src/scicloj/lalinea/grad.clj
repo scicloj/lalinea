@@ -26,6 +26,13 @@
   [x]
   (if (rt/real-tensor? x) (rt/->tensor x) x))
 
+(defn- ->rt
+  "Wrap a bare tensor in RealTensor. Returns scalars/nil as-is."
+  [t]
+  (if (or (nil? t) (number? t))
+    t
+    (rt/->real-tensor t)))
+
 (def ^:private vjp-rules
   "VJP rules: op keyword -> fn of [adjoint, inputs, output] -> vector of
    input adjoints (nil for non-differentiable inputs like scalars)."
@@ -132,5 +139,5 @@
             (when (and (.startsWith id "x")
                        (not (contains? idx id)))
               (when-let [g (.get adjoints id)]
-                (.put result tensor-obj g)))))
+                (.put result tensor-obj (->rt g))))))
         result))))

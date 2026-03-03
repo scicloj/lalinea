@@ -27,9 +27,12 @@
   (:import [org.ejml.data DMatrixRMaj]))
 
 ;; ## Tensors share memory across reshapes
-
+;;
 ;; `t/reshape` is zero-copy — the new tensor wraps the same
-;; flat `double[]` in a different shape.
+;; flat `double[]` in a different shape. We use `dtt/ensure-tensor`
+;; (from dtype-next) to wrap a raw array as a tensor without copying —
+;; La Linea's `t/matrix` always copies, so we drop to the underlying
+;; library here.
 
 (let [flat (double-array [1 2 3 4 5 6])
       t1 (t/reshape (dtt/ensure-tensor flat) [2 3])

@@ -10,138 +10,138 @@
   [clojure.test :refer [deftest is]]))
 
 
-(def v3_l25 (t/matrix [[1 2 3] [4 5 6]]))
+(def v3_l26 (t/matrix [[1 2 3] [4 5 6]]))
 
 
-(deftest t4_l28 (is ((fn [m] (= [2 3] (t/shape m))) v3_l25)))
+(deftest t4_l29 (is ((fn [m] (= [2 3] (t/shape m))) v3_l26)))
 
 
-(def v6_l32 (t/eye 3))
+(def v6_l33 (t/eye 3))
 
 
-(deftest t7_l34 (is ((fn [m] (= 1.0 (m 1 1))) v6_l32)))
+(deftest t7_l35 (is ((fn [m] (= 1.0 (m 1 1))) v6_l33)))
 
 
-(def v8_l36 (t/zeros 2 3))
+(def v8_l37 (t/zeros 2 3))
 
 
-(deftest t9_l38 (is ((fn [m] (= 0.0 (m 0 0))) v8_l36)))
+(deftest t9_l39 (is ((fn [m] (= 0.0 (m 0 0))) v8_l37)))
 
 
-(def v11_l42 (t/diag [1 2 3]))
+(def v11_l43 (t/diag [1 2 3]))
 
 
 (deftest
- t12_l44
- (is ((fn [m] (and (= [3 3] (t/shape m)) (= 2.0 (m 1 1)))) v11_l42)))
+ t12_l45
+ (is ((fn [m] (and (= [3 3] (t/shape m)) (= 2.0 (m 1 1)))) v11_l43)))
 
 
 (def
- v14_l51
+ v14_l52
  (la/mmul (t/matrix [[1 2] [3 4]]) (t/matrix [[5 6] [7 8]])))
 
 
-(deftest t16_l56 (is ((fn [m] (= 19.0 (m 0 0))) v14_l51)))
+(deftest t16_l57 (is ((fn [m] (= 19.0 (m 0 0))) v14_l52)))
 
 
-(def v17_l58 (la/transpose (t/matrix [[1 2] [3 4]])))
+(def v17_l59 (la/transpose (t/matrix [[1 2] [3 4]])))
 
 
-(deftest t18_l60 (is ((fn [m] (= 3.0 (m 0 1))) v17_l58)))
+(deftest t18_l61 (is ((fn [m] (= 3.0 (m 0 1))) v17_l59)))
 
 
-(def v20_l64 (la/det (t/matrix [[1 2] [3 4]])))
+(def v20_l65 (la/det (t/matrix [[1 2] [3 4]])))
 
 
-(deftest t21_l66 (is ((fn [v] (< (abs (- v -2.0)) 1.0E-10)) v20_l64)))
+(deftest t21_l67 (is ((fn [v] (< (abs (- v -2.0)) 1.0E-10)) v20_l65)))
 
 
-(def v22_l68 (la/trace (t/matrix [[1 2] [3 4]])))
+(def v22_l69 (la/trace (t/matrix [[1 2] [3 4]])))
 
 
-(deftest t23_l70 (is ((fn [v] (= v 5.0)) v22_l68)))
+(deftest t23_l71 (is ((fn [v] (= v 5.0)) v22_l69)))
 
 
-(def v24_l72 (la/norm (t/matrix [[1 2] [3 4]])))
-
-
-(deftest
- t25_l74
- (is ((fn [v] (< (abs (- v 5.477225575051661)) 1.0E-10)) v24_l72)))
-
-
-(def v27_l82 (la/solve (t/matrix [[2 1] [1 3]]) (t/matrix [[5] [10]])))
+(def v24_l73 (la/norm (t/matrix [[1 2] [3 4]])))
 
 
 (deftest
- t29_l87
+ t25_l75
+ (is ((fn [v] (< (abs (- v 5.477225575051661)) 1.0E-10)) v24_l73)))
+
+
+(def v27_l83 (la/solve (t/matrix [[2 1] [1 3]]) (t/matrix [[5] [10]])))
+
+
+(deftest
+ t29_l88
  (is
   ((fn
     [x]
     (and
      (< (abs (- (x 0 0) 1.0)) 1.0E-10)
      (< (abs (- (x 1 0) 3.0)) 1.0E-10)))
-   v27_l82)))
+   v27_l83)))
 
 
-(def v31_l94 (la/real-eigenvalues (t/matrix [[2 1] [1 2]])))
+(def v31_l95 (la/real-eigenvalues (t/matrix [[2 1] [1 2]])))
 
 
 (deftest
- t33_l98
+ t33_l99
  (is
   ((fn
     [evs]
     (and
      (< (abs (- (first evs) 1.0)) 1.0E-10)
      (< (abs (- (second evs) 3.0)) 1.0E-10)))
-   v31_l94)))
+   v31_l95)))
 
 
-(def v35_l103 (:S (la/svd (t/matrix [[1 2] [3 4]]))))
-
-
-(deftest
- t36_l105
- (is ((fn [S] (< (abs (- (first S) 5.4649857)) 1.0E-4)) v35_l103)))
-
-
-(def v38_l112 (cx/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0]))
+(def v35_l104 (:S (la/svd (t/matrix [[1 2] [3 4]]))))
 
 
 (deftest
- t39_l114
- (is ((fn [ct] (= [3] (cx/complex-shape ct))) v38_l112)))
+ t36_l106
+ (is ((fn [S] (< (abs (- (first S) 5.4649857)) 1.0E-4)) v35_l104)))
+
+
+(def v38_l113 (cx/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0]))
+
+
+(deftest
+ t39_l115
+ (is ((fn [ct] (= [3] (cx/complex-shape ct))) v38_l113)))
 
 
 (def
- v41_l118
+ v41_l119
  (let
   [A (cx/complex-tensor [[1.0 0.0] [0.0 1.0]] [[0.0 0.0] [0.0 0.0]])]
   (la/mmul A A)))
 
 
 (deftest
- t42_l122
- (is ((fn [ct] (= [2 2] (cx/complex-shape ct))) v41_l118)))
+ t42_l123
+ (is ((fn [ct] (= [2 2] (cx/complex-shape ct))) v41_l119)))
 
 
-(def v44_l129 (ft/forward [1.0 0.0 1.0 0.0]))
+(def v44_l130 (ft/forward [1.0 0.0 1.0 0.0]))
 
 
 (deftest
- t46_l133
+ t46_l134
  (is
   ((fn
     [ct]
     (and
      (= [4] (cx/complex-shape ct))
      (< (abs (- (cx/re (ct 0)) 2.0)) 1.0E-10)))
-   v44_l129)))
+   v44_l130)))
 
 
 (def
- v48_l138
+ v48_l139
  (let
   [signal
    [1.0 2.0 3.0 4.0]
@@ -151,96 +151,96 @@
 
 
 (deftest
- t49_l142
- (is ((fn [v] (la/close? v (t/matrix [1.0 2.0 3.0 4.0]))) v48_l138)))
+ t49_l143
+ (is ((fn [v] (la/close? v (t/matrix [1.0 2.0 3.0 4.0]))) v48_l139)))
 
 
-(def v51_l148 (la/sum (t/matrix [[1 2] [3 4]])))
+(def v51_l149 (la/sum (t/matrix [[1 2] [3 4]])))
 
 
-(deftest t52_l150 (is ((fn [v] (= v 10.0)) v51_l148)))
+(deftest t52_l151 (is ((fn [v] (= v 10.0)) v51_l149)))
 
 
-(def v54_l154 ((la/scale (t/matrix [[1 2] [3 4]]) 2.0) 1 1))
+(def v54_l155 ((la/scale (t/matrix [[1 2] [3 4]]) 2.0) 1 1))
 
 
-(deftest t55_l156 (is (= v54_l154 8.0)))
+(deftest t55_l157 (is (= v54_l155 8.0)))
 
 
-(def v57_l162 (la/rank (t/matrix [[1 2] [2 4]])))
+(def v57_l163 (la/rank (t/matrix [[1 2] [2 4]])))
 
 
-(deftest t58_l164 (is (= v57_l162 1)))
+(deftest t58_l165 (is (= v57_l163 1)))
 
 
-(def v59_l166 (la/condition-number (t/matrix [[2 1] [1 3]])))
+(def v59_l167 (la/condition-number (t/matrix [[2 1] [1 3]])))
 
 
-(deftest t60_l168 (is ((fn [v] (> v 1.0)) v59_l166)))
+(deftest t60_l169 (is ((fn [v] (> v 1.0)) v59_l167)))
 
 
 (def
- v62_l172
+ v62_l173
  (la/close?
   (la/mmul (t/matrix [[2 1] [1 3]]) (la/pinv (t/matrix [[2 1] [1 3]])))
   (t/eye 2)))
 
 
-(deftest t63_l176 (is (true? v62_l172)))
+(deftest t63_l177 (is (true? v62_l173)))
 
 
-(def v65_l180 (la/mpow (t/matrix [[1 1] [0 1]]) 5))
-
-
-(deftest
- t66_l182
- (is ((fn [m] (la/close? m (t/matrix [[1 5] [0 1]]))) v65_l180)))
-
-
-(def v68_l189 (pr-str (t/matrix [[1 2] [3 4]])))
+(def v65_l181 (la/mpow (t/matrix [[1 1] [0 1]]) 5))
 
 
 (deftest
- t69_l191
- (is ((fn [s] (clojure.string/starts-with? s "#la/R")) v68_l189)))
+ t66_l183
+ (is ((fn [m] (la/close? m (t/matrix [[1 5] [0 1]]))) v65_l181)))
 
 
-(def v70_l193 (pr-str (t/column [5 6 7])))
-
-
-(deftest
- t71_l195
- (is ((fn [s] (clojure.string/starts-with? s "#la/R")) v70_l193)))
-
-
-(def v73_l202 (require '[scicloj.lalinea.elementwise :as elem]))
-
-
-(def v74_l204 (elem/exp (t/column [0.0 1.0 2.0])))
+(def v68_l190 (pr-str (t/matrix [[1 2] [3 4]])))
 
 
 (deftest
- t75_l206
+ t69_l192
+ (is ((fn [s] (clojure.string/starts-with? s "#la/R")) v68_l190)))
+
+
+(def v70_l194 (pr-str (t/column [5 6 7])))
+
+
+(deftest
+ t71_l196
+ (is ((fn [s] (clojure.string/starts-with? s "#la/R")) v70_l194)))
+
+
+(def v73_l203 (require '[scicloj.lalinea.elementwise :as elem]))
+
+
+(def v74_l205 (elem/exp (t/column [0.0 1.0 2.0])))
+
+
+(deftest
+ t75_l207
  (is
   ((fn
     [v]
     (la/close? v (t/column [1.0 (math/exp 1.0) (math/exp 2.0)])))
-   v74_l204)))
+   v74_l205)))
 
 
-(def v76_l208 (elem/clip (t/column [-2 0.5 3]) -1 1))
+(def v76_l209 (elem/clip (t/column [-2 0.5 3]) -1 1))
 
 
 (deftest
- t77_l210
- (is ((fn [v] (la/close? v (t/column [-1 0.5 1]))) v76_l208)))
+ t77_l211
+ (is ((fn [v] (la/close? v (t/column [-1 0.5 1]))) v76_l209)))
 
 
-(def v79_l216 (require '[scicloj.lalinea.tape :as tape]))
+(def v79_l217 (require '[scicloj.lalinea.tape :as tape]))
 
 
 (def
- v80_l218
+ v80_l219
  (let
   [{:keys [entries]}
    (tape/with-tape
@@ -249,15 +249,15 @@
 
 
 (deftest
- t81_l223
- (is ((fn [ops] (= [:t/matrix :t/column :la/mmul] ops)) v80_l218)))
+ t81_l224
+ (is ((fn [ops] (= [:t/matrix :t/column :la/mmul] ops)) v80_l219)))
 
 
-(def v83_l229 (require '[scicloj.lalinea.grad :as grad]))
+(def v83_l230 (require '[scicloj.lalinea.grad :as grad]))
 
 
 (def
- v84_l231
+ v84_l232
  (let
   [A
    (t/matrix [[1 2] [3 4]])
@@ -269,4 +269,4 @@
   ((.get grads A) 0 0)))
 
 
-(deftest t85_l238 (is ((fn [v] (number? v)) v84_l231)))
+(deftest t85_l239 (is ((fn [v] (number? v)) v84_l232)))

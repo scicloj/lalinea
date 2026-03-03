@@ -9,17 +9,17 @@
   [clojure.test :refer [deftest is]]))
 
 
-(def v3_l58 (def n 20))
+(def v3_l59 (def n 20))
 
 
-(def v4_l60 (def T-left 100.0))
+(def v4_l61 (def T-left 100.0))
 
 
-(def v5_l61 (def T-right 0.0))
+(def v5_l62 (def T-right 0.0))
 
 
 (def
- v7_l66
+ v7_l67
  (def
   A-heat
   (t/clone
@@ -29,14 +29,14 @@
     :float64))))
 
 
-(def v8_l76 A-heat)
+(def v8_l77 A-heat)
 
 
-(deftest t9_l78 (is ((fn [m] (= [n n] (t/shape m))) v8_l76)))
+(deftest t9_l79 (is ((fn [m] (= [n n] (t/shape m))) v8_l77)))
 
 
 (def
- v11_l84
+ v11_l85
  (def
   b-heat
   (t/column
@@ -46,23 +46,23 @@
     (cond (== idx 0) T-left (== idx (dec n)) T-right :else 0.0)))))
 
 
-(def v12_l90 b-heat)
+(def v12_l91 b-heat)
 
 
-(deftest t13_l92 (is ((fn [b] (= [n 1] (t/shape b))) v12_l90)))
+(deftest t13_l93 (is ((fn [b] (= [n 1] (t/shape b))) v12_l91)))
 
 
-(def v15_l97 (def T-direct (la/solve A-heat b-heat)))
+(def v15_l98 (def T-direct (la/solve A-heat b-heat)))
 
 
-(def v16_l99 T-direct)
+(def v16_l100 T-direct)
 
 
-(deftest t17_l101 (is ((fn [t] (some? t)) v16_l99)))
+(deftest t17_l102 (is ((fn [t] (some? t)) v16_l100)))
 
 
 (def
- v19_l106
+ v19_l107
  (let
   [xs
    (t/make-reader :float64 n (/ (double (inc idx)) (double (inc n))))
@@ -72,11 +72,11 @@
   (la/close? T-direct expected)))
 
 
-(deftest t20_l110 (is (true? v19_l106)))
+(deftest t20_l111 (is (true? v19_l107)))
 
 
 (def
- v22_l118
+ v22_l119
  (def
   x-interior
   (t/->real-tensor
@@ -88,7 +88,7 @@
 
 
 (def
- v23_l123
+ v23_l124
  (->
   (tc/dataset
    {:x x-interior, :T (t/->reader (t/select T-direct :all 0))})
@@ -98,20 +98,20 @@
   plotly/plot))
 
 
-(def v25_l134 (T-direct 0 0))
+(def v25_l135 (T-direct 0 0))
 
 
-(deftest t26_l136 (is ((fn [t] (> t 90.0)) v25_l134)))
+(deftest t26_l137 (is ((fn [t] (> t 90.0)) v25_l135)))
 
 
-(def v27_l138 (T-direct (dec n) 0))
+(def v27_l139 (T-direct (dec n) 0))
 
 
-(deftest t28_l140 (is ((fn [t] (< t 10.0)) v27_l138)))
+(deftest t28_l141 (is ((fn [t] (< t 10.0)) v27_l139)))
 
 
 (def
- v30_l180
+ v30_l181
  (def
   gs-result
   (let
@@ -150,7 +150,7 @@
 
 
 (def
- v32_l206
+ v32_l207
  (let
   [snapshots
    [1 2 5 10 50 200 500]
@@ -173,7 +173,7 @@
 
 
 (def
- v34_l222
+ v34_l223
  (->
   (tc/dataset (:history gs-result))
   (plotly/base {:=x :iteration, :=y :residual})
@@ -181,17 +181,17 @@
   plotly/plot))
 
 
-(def v36_l229 (-> gs-result :history last :residual))
+(def v36_l230 (-> gs-result :history last :residual))
 
 
-(deftest t37_l231 (is ((fn [r] (< r 0.001)) v36_l229)))
+(deftest t37_l232 (is ((fn [r] (< r 0.001)) v36_l230)))
 
 
 (def
- v39_l239
+ v39_l240
  (let
   [x-iter (t/column (:x-final gs-result))]
   (la/norm (la/sub x-iter T-direct))))
 
 
-(deftest t40_l242 (is ((fn [d] (< d 0.01)) v39_l239)))
+(deftest t40_l243 (is ((fn [d] (< d 0.01)) v39_l240)))

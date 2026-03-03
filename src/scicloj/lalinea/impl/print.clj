@@ -121,8 +121,8 @@
 (defn- format-complex-tokens
   "Format a single complex number as '3.000 + 4.000 i' or '1.000 - 2.000 i'."
   ^String [re im]
-  (let [re (double re)
-        im (double im)]
+  (let [re (+ 0.0 (double re))   ;; normalize -0.0 → 0.0
+        im (+ 0.0 (double im))]
     (if (neg? im)
       (str (format-num re) " - " (format-num (Math/abs im)) " i")
       (str (format-num re) " + " (format-num im) " i"))))

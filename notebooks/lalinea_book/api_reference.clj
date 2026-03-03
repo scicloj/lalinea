@@ -72,7 +72,6 @@
 
 (kind/test-last [(fn [v] (= [1 3] (t/shape v)))])
 
-
 (kind/doc #'t/compute-matrix)
 
 (t/compute-matrix 3 3 (fn [i j] (if (== i j) 1.0 0.0)))

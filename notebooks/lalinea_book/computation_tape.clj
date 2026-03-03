@@ -171,8 +171,8 @@
 (def seq-tape
   (tape/with-tape
     (let [M (t/matrix (for [i (range 3)]
-                         (for [j (range 3)]
-                           (* (inc i) (inc j)))))
+                        (for [j (range 3)]
+                          (* (inc i) (inc j)))))
           v (t/column (repeat 3 1.0))]
       (la/mmul M v))))
 
@@ -307,11 +307,11 @@
 (def pipeline-result
   (tape/with-tape
     (let [data (t/matrix [[1 0 2]
-                           [0 3 0]
-                           [4 0 5]])
+                          [0 3 0]
+                          [4 0 5]])
           centered (la/sub data (la/scale (t/matrix [[1 1 1]
-                                                      [1 1 1]
-                                                      [1 1 1]])
+                                                     [1 1 1]
+                                                     [1 1 1]])
                                           (/ (double (la/trace data)) 3.0)))
           {:keys [U S Vt]} (la/svd centered)
           projection (la/mmul (la/transpose Vt) (t/column [1 0 0]))]

@@ -11,7 +11,8 @@
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.tensor :as t]
-   [scicloj.lalinea.complex :as cx]   ;; Tensor ↔ BufferedImage conversion:
+   [scicloj.lalinea.complex :as cx]
+   ;; Tensor ↔ BufferedImage conversion:
    [tech.v3.libs.buffered-image :as bufimg]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
@@ -141,8 +142,6 @@
     (plotly/layer-line)
     plotly/plot)
 
-;; ## Principal Component Analysis
-
 ;; Error decreases monotonically as rank increases:
 
 (let [errors (mapv (fn [k] (la/norm (la/sub test-image (reconstruct-rank-k svd-result k))))
@@ -150,6 +149,8 @@
   (every? (fn [[a b]] (> a b)) (partition 2 1 errors)))
 
 (kind/test-last [true?])
+
+;; ## Principal Component Analysis
 ;;
 ;; [PCA](https://en.wikipedia.org/wiki/Principal_component_analysis)
 ;; finds the directions of maximum variance in data.
