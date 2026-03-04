@@ -1,5 +1,9 @@
 ;; # Spectral Graph Theory
 ;;
+;; *Prerequisites: [graphs](https://en.wikipedia.org/wiki/Graph_(discrete_mathematics))
+;; and [eigenvalues](https://en.wikipedia.org/wiki/Eigenvalues_and_eigenvectors)
+;; (covered in the [Eigenvalues and Decompositions](eigenvalues_and_decompositions.html) chapter).*
+;;
 ;; A graph is a set of vertices connected by edges.
 ;; The *spectrum* — the eigenvalues of matrices derived from a graph
 ;; — reveals structural properties: how many connected

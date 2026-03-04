@@ -113,6 +113,9 @@
 ;;
 ;; Let us verify each one on our concrete vectors
 ;; $\mathbf{u} = [3,1]^T$, $\mathbf{v} = [1,2]^T$ in the plane.
+;;
+;; In La Linea, `la/add` and `la/scale` are the concrete
+;; implementations of vector addition and scalar multiplication.
 ;; These are not proofs — the axioms hold by the definition of
 ;; entry-wise addition and scaling — but checking them builds
 ;; intuition for what each rule says.

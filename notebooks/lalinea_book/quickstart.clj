@@ -108,6 +108,9 @@
 ;;
 ;; ComplexTensors wrap a dtype-next tensor whose last dimension is 2
 ;; (interleaved re/im pairs).
+;;
+;; The same `la/` functions work for both real and complex inputs — `la/add`,
+;; `la/mmul`, `la/transpose` are polymorphic over the number field.
 
 (t/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0])
 
@@ -196,7 +199,10 @@
 
 ;; ## Element-wise functions
 ;;
-;; `scicloj.lalinea.elementwise` provides tape-aware wrappers
+;; `la/` covers linear algebra; `elem/` covers element-wise math — both
+;; are tape-aware and work with both real and complex inputs.
+;;
+;; `scicloj.lalinea.elementwise` provides wrappers
 ;; around `dfn/` with complex dispatch:
 
 (require '[scicloj.lalinea.elementwise :as elem])

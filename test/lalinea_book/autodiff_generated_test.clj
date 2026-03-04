@@ -9,139 +9,164 @@
   [clojure.test :refer [deftest is]]))
 
 
-(def v3_l40 (def A (t/matrix [[1 2] [3 4]])))
+(def
+ v3_l87
+ (let
+  [a
+   (t/matrix [3.0])
+   b
+   (t/matrix [2.0])
+   tape-result
+   (tape/with-tape (la/sum (la/mul (la/sq a) b)))
+   grads
+   (grad/grad tape-result (:result tape-result))]
+  {:grad-a ((.get grads a) 0), :grad-b ((.get grads b) 0)}))
+
+
+(deftest
+ t4_l95
+ (is
+  ((fn
+    [{:keys [grad-a grad-b]}]
+    (and
+     (< (abs (- grad-a 12.0)) 1.0E-10)
+     (< (abs (- grad-b 9.0)) 1.0E-10)))
+   v3_l87)))
+
+
+(def v6_l171 (def A (t/matrix [[1 2] [3 4]])))
 
 
 (def
- v4_l43
+ v7_l174
  (def
   tape-result
   (tape/with-tape (la/trace (la/mmul (la/transpose A) A)))))
 
 
-(def v5_l47 (:result tape-result))
+(def v8_l178 (:result tape-result))
 
 
-(deftest t6_l49 (is ((fn [v] (== 30.0 v)) v5_l47)))
+(deftest t9_l180 (is ((fn [v] (== 30.0 v)) v8_l178)))
 
 
-(def v8_l54 (mapv :op (:entries tape-result)))
+(def v11_l185 (mapv :op (:entries tape-result)))
 
 
-(deftest t9_l56 (is (= v8_l54 [:la/transpose :la/mmul :la/trace])))
+(deftest t12_l187 (is (= v11_l185 [:la/transpose :la/mmul :la/trace])))
 
 
-(def v11_l61 (def grads (grad/grad tape-result (:result tape-result))))
+(def v14_l192 (def grads (grad/grad tape-result (:result tape-result))))
 
 
-(def v12_l63 (def grad-A (.get grads A)))
+(def v15_l194 (def grad-A (.get grads A)))
 
 
-(def v14_l67 (la/close? grad-A (la/scale A 2)))
+(def v17_l198 (la/close? grad-A (la/scale A 2)))
 
 
-(deftest t15_l69 (is (true? v14_l67)))
+(deftest t18_l200 (is (true? v17_l198)))
 
 
-(def v17_l73 (tape/mermaid tape-result (:result tape-result)))
+(def v20_l204 (tape/mermaid tape-result (:result tape-result)))
 
 
-(def v19_l81 (def A2 (t/matrix [[1 0] [0 2] [1 1]])))
+(def v22_l212 (def A2 (t/matrix [[1 0] [0 2] [1 1]])))
 
 
-(def v20_l85 (def b (t/column [3 2 4])))
+(def v23_l216 (def b (t/column [3 2 4])))
 
 
-(def v21_l87 (def x (t/column [1 1])))
+(def v24_l218 (def x (t/column [1 1])))
 
 
 (def
- v22_l89
+ v25_l220
  (def
   ls-tape
   (tape/with-tape (la/sum (la/sq (la/sub (la/mmul A2 x) b))))))
 
 
-(def v23_l93 (:result ls-tape))
+(def v26_l224 (:result ls-tape))
 
 
-(deftest t24_l95 (is ((fn [v] (== 8.0 v)) v23_l93)))
+(deftest t27_l226 (is ((fn [v] (== 8.0 v)) v26_l224)))
 
 
-(def v25_l98 (def ls-grads (grad/grad ls-tape (:result ls-tape))))
+(def v28_l229 (def ls-grads (grad/grad ls-tape (:result ls-tape))))
 
 
-(def v26_l100 (def grad-x (.get ls-grads x)))
+(def v29_l231 (def grad-x (.get ls-grads x)))
 
 
-(def v27_l102 grad-x)
+(def v30_l233 grad-x)
 
 
 (deftest
- t28_l104
- (is ((fn [g] (la/close? g (t/column [-8 -4]))) v27_l102)))
+ t31_l235
+ (is ((fn [g] (la/close? g (t/column [-8 -4]))) v30_l233)))
 
 
 (def
- v30_l109
+ v33_l240
  (def
   expected-grad
   (la/scale (la/mmul (la/transpose A2) (la/sub (la/mmul A2 x) b)) 2)))
 
 
-(def v31_l114 expected-grad)
+(def v34_l245 expected-grad)
 
 
-(def v32_l116 (la/close? grad-x expected-grad))
+(def v35_l247 (la/close? grad-x expected-grad))
 
 
-(deftest t33_l118 (is (true? v32_l116)))
+(deftest t36_l249 (is (true? v35_l247)))
 
 
-(def v35_l122 (tape/mermaid ls-tape (:result ls-tape)))
+(def v38_l253 (tape/mermaid ls-tape (:result ls-tape)))
 
 
 (def
- v37_l130
+ v40_l261
  (def
   ls-tape-A
   (tape/with-tape (la/sum (la/sq (la/sub (la/mmul A2 x) b))))))
 
 
-(def v38_l134 (def grads-A (grad/grad ls-tape-A (:result ls-tape-A))))
+(def v41_l265 (def grads-A (grad/grad ls-tape-A (:result ls-tape-A))))
 
 
-(def v39_l136 (def grad-A2 (.get grads-A A2)))
+(def v42_l267 (def grad-A2 (.get grads-A A2)))
 
 
-(def v40_l138 grad-A2)
+(def v43_l269 grad-A2)
 
 
 (deftest
- t41_l140
+ t44_l271
  (is
-  ((fn [g] (la/close? g (t/matrix [[-4 -4] [0 0] [-4 -4]]))) v40_l138)))
+  ((fn [g] (la/close? g (t/matrix [[-4 -4] [0 0] [-4 -4]]))) v43_l269)))
 
 
-(def v42_l143 (def residual (la/sub (la/mmul A2 x) b)))
+(def v45_l274 (def residual (la/sub (la/mmul A2 x) b)))
 
 
 (def
- v43_l145
+ v46_l276
  (def expected-grad-A (la/scale (la/mmul residual (la/transpose x)) 2)))
 
 
-(def v44_l147 expected-grad-A)
+(def v47_l278 expected-grad-A)
 
 
-(def v45_l149 (la/close? grad-A2 expected-grad-A))
+(def v48_l280 (la/close? grad-A2 expected-grad-A))
 
 
-(deftest t46_l151 (is (true? v45_l149)))
+(deftest t49_l282 (is (true? v48_l280)))
 
 
 (def
- v48_l162
+ v51_l293
  (let
   [A
    (t/matrix [[2 1] [1 3]])
@@ -156,11 +181,11 @@
   (la/close? grad-A expected)))
 
 
-(deftest t49_l170 (is (true? v48_l162)))
+(deftest t52_l301 (is (true? v51_l293)))
 
 
 (def
- v51_l178
+ v54_l309
  (let
   [A
    (t/matrix [[2 1] [1 3]])
@@ -177,11 +202,11 @@
   (la/close? grad-A expected)))
 
 
-(deftest t52_l186 (is (true? v51_l178)))
+(deftest t55_l317 (is (true? v54_l309)))
 
 
 (def
- v54_l192
+ v57_l323
  (let
   [A
    (t/matrix [[3 0] [0 4]])
@@ -196,4 +221,4 @@
   (la/close? grad-A expected)))
 
 
-(deftest t55_l199 (is (true? v54_l192)))
+(deftest t58_l330 (is (true? v57_l323)))

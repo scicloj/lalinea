@@ -1,5 +1,8 @@
 ;; # Inner Products and Orthogonality
 ;;
+;; *Prerequisites: [vectors](https://en.wikipedia.org/wiki/Euclidean_vector)
+;; and the [dot product](https://en.wikipedia.org/wiki/Dot_product).*
+;;
 ;; A vector space gives us addition and scaling, but nothing more.
 ;; There is no built-in notion of **length**, **angle**, or
 ;; **perpendicularity** — these require extra structure. An
@@ -97,6 +100,10 @@
 (la/close-scalar? (la/dot (t/column [0 0 0]) (t/column [0 0 0])) 0.0)
 
 (kind/test-last [true?])
+;;
+;; `la/dot` computes one particular inner product — the standard
+;; Euclidean inner product on $\mathbb{R}^n$. For complex vectors,
+;; `la/dot` computes the [Hermitian inner product](https://en.wikipedia.org/wiki/Inner_product_space#Hermitian_inner_product).
 
 ;; ### A different inner product: weighted dot product
 ;;

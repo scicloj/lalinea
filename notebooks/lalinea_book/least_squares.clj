@@ -1,5 +1,9 @@
 ;; # Least Squares and Curve Fitting
 ;;
+;; *Prerequisites: [matrix multiplication](https://en.wikipedia.org/wiki/Matrix_multiplication)
+;; and [linear systems](https://en.wikipedia.org/wiki/System_of_linear_equations)
+;; (covered in the [Linear Systems](linear_systems.html) chapter).*
+;;
 ;; Given noisy data, how do we find the "best" curve that fits it?
 ;; **[Least squares](https://en.wikipedia.org/wiki/Least_squares)** minimises the sum of squared residuals.
 ;; The solution is a linear algebra problem.

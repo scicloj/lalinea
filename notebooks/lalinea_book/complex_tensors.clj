@@ -1,5 +1,12 @@
 ;; # Complex Tensors
 ;;
+;; La Linea's computation API (`la/`) is polymorphic over the
+;; [number field](https://en.wikipedia.org/wiki/Field_(mathematics)). Functions like `la/add`, `la/mul`, `la/dot`, `la/mmul`,
+;; and `la/transpose` work uniformly on both real tensors and
+;; ComplexTensors. Field-aware operations like `la/re`, `la/im`,
+;; `la/conj` are identity on reals and meaningful on complex. You
+;; construct in the appropriate field with `t/`, then compute with `la/`.
+;;
 ;; **ComplexTensor** wraps a dtype-next tensor whose last dimension
 ;; is 2 — interleaved [complex number](https://en.wikipedia.org/wiki/Complex_number) pairs (real/imaginary). The `re` and `im`
 ;; functions always slice the last axis, returning **zero-copy**

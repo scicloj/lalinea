@@ -1,5 +1,8 @@
 ;; # Eigenvalues and Decompositions
 ;;
+;; *Prerequisites: [matrix multiplication](https://en.wikipedia.org/wiki/Matrix_multiplication)
+;; and [determinants](https://en.wikipedia.org/wiki/Determinant).*
+;;
 ;; Some vectors survive a matrix transformation with only a change
 ;; in scale — these **[eigenvectors](https://en.wikipedia.org/wiki/Eigenvalues_and_eigenvectors)** and their **eigenvalues** reveal
 ;; the natural axes of a linear map. This chapter builds from
@@ -74,6 +77,9 @@
 ;; are real (e.g., for symmetric matrices), `la/real-eigenvalues`
 ;; is a convenience that extracts the real parts and returns them
 ;; as a sorted real tensor:
+;;
+;; Since `la/` functions are polymorphic, you can use `la/re`, `la/im`,
+;; `la/abs`, and `la/sum` directly on these ComplexTensor eigenvalues.
 
 (la/real-eigenvalues A-eig)
 

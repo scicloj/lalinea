@@ -253,6 +253,10 @@
 
 (kind/test-last [true?])
 ;; ## `scicloj.lalinea.linalg`
+;;
+;; Most `la/` functions are polymorphic — they accept both real tensors
+;; and ComplexTensors. Operations like `la/re`, `la/im`, `la/conj` are
+;; identity on real inputs and meaningful on complex inputs.
 
 (kind/doc #'la/add)
 
@@ -771,9 +775,9 @@
 
 ;; ## `scicloj.lalinea.elementwise`
 ;;
-;; Tape-aware element-wise operations with complex dispatch.
-;; Each function records on the tape (when active) and dispatches
-;; on `t/complex?` for dispatch.
+;; Element-wise mathematical functions, complementing `la/` (linear algebra).
+;; All functions are tape-aware and dispatch
+;; on `t/complex?` for complex inputs.
 
 (kind/doc #'elem/sq)
 

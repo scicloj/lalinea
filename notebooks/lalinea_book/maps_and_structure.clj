@@ -72,7 +72,8 @@
 ;; the **columns** of $A$, weighted by the entries of $\mathbf{x}$.
 ;; This column view is often the more illuminating one — it
 ;; says "the output lives in the span of $A$'s columns."
-;; In La Linea, matrix–vector multiplication is `la/mmul`.
+;; In La Linea, `la/mmul` is the concrete realisation of applying
+;; a linear map (represented as a matrix) to a vector.
 
 ;; ### Example: rotation
 ;;

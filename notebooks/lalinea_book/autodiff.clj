@@ -1,9 +1,10 @@
 ;; # Automatic Differentiation
-
-;; The computation tape records a DAG of operations. [Reverse-mode](https://en.wikipedia.org/wiki/Automatic_differentiation#Forward_and_reverse_accumulation)
-;; [automatic differentiation](https://en.wikipedia.org/wiki/Automatic_differentiation) walks this DAG backwards to compute
-;; gradients — the derivative of a scalar output with respect to
-;; each input tensor.
+;;
+;; This chapter assumes familiarity with [partial derivatives](https://en.wikipedia.org/wiki/Derivative)
+;; and the [chain rule](https://en.wikipedia.org/wiki/Chain_rule).
+;; For a broader introduction to autodiff, the
+;; [JAX autodiff cookbook](https://docs.jax.dev/en/latest/notebooks/autodiff_cookbook.html)
+;; is an excellent companion resource.
 
 ;; ## Setup
 
@@ -14,28 +15,158 @@
             [scicloj.lalinea.grad :as grad]
             [scicloj.kindly.v4.kind :as kind]))
 
-;; ## How it works
-
-;; Each `la/` operation has a [VJP](https://en.wikipedia.org/wiki/Automatic_differentiation#Reverse_accumulation) (vector-Jacobian product) rule that
-;; describes how gradients flow backwards through it. For example:
+;; ## What is autodiff?
 ;;
-;; | Operation | Gradient rule |
-;; |-----------|--------------|
-;; | `add(a,b)` | $\bar{g}, \bar{g}$ |
-;; | `sub(a,b)` | $\bar{g}, -\bar{g}$ |
-;; | `mmul(A,B)` | $\bar{g}B^T,\; A^T\bar{g}$ |
+;; Given a function $f$ composed from elementary operations, how
+;; do we compute its derivatives?
+;;
+;; Three approaches:
+;;
+;; - **Finite differences**: approximate $f'(x) \approx \frac{f(x+h) - f(x)}{h}$.
+;;   Simple, but noisy (rounding errors) and slow: computing the gradient
+;;   of $f : \mathbb{R}^n \to \mathbb{R}$ requires $n$ evaluations.
+;; - **Symbolic differentiation**: apply differentiation rules to the
+;;   expression tree. Exact, but expressions swell exponentially
+;;   for deep compositions.
+;; - **[Automatic differentiation](https://en.wikipedia.org/wiki/Automatic_differentiation)**:
+;;   decompose the computation into elementary steps and apply
+;;   the chain rule at each step. Exact, efficient, and mechanical.
+;;
+;; Autodiff gets the best of both worlds — exact like symbolic
+;; differentiation, efficient like finite differences. La Linea
+;; implements the **reverse mode** of autodiff.
+;;
+;; ## Forward vs reverse mode
+;;
+;; The chain rule decomposes the derivative of a composition into
+;; a product of [Jacobians](https://en.wikipedia.org/wiki/Jacobian_matrix_and_determinant).
+;; The two modes differ in which direction they multiply this chain:
+;;
+;; - **Forward mode** (JVP — Jacobian-vector product): propagates
+;;   tangent vectors forward through the computation. Efficient
+;;   when there are **few inputs** and many outputs.
+;; - **[Reverse mode](https://en.wikipedia.org/wiki/Automatic_differentiation#Reverse_accumulation)** (VJP — vector-Jacobian product): propagates
+;;   cotangent vectors backward through the computation. Efficient
+;;   when there are many inputs and **few outputs**.
+;;
+;; In machine learning and optimisation, we typically have a loss
+;; function $f : \mathbb{R}^n \to \mathbb{R}$ — many parameters, one scalar
+;; output. Reverse mode computes the full gradient $\nabla f$ in
+;; **one backward pass**, regardless of $n$. This is why La Linea
+;; implements reverse mode.
+;;
+;; ## The VJP
+;;
+;; Given a function $f : \mathbb{R}^n \to \mathbb{R}^m$, the Jacobian
+;; $J$ is the $m \times n$ matrix of partial derivatives:
+;;
+;; $$J_{ij} = \frac{\partial f_i}{\partial x_j}$$
+;;
+;; The **vector-Jacobian product** (VJP) takes a cotangent vector
+;; $\bar{v} \in \mathbb{R}^m$ (the same shape as the output) and returns
+;; $\bar{v}^T J \in \mathbb{R}^n$ (the same shape as the input).
+;;
+;; For a scalar function ($m = 1$), the Jacobian is just the gradient
+;; row vector $\nabla f^T$. Setting $\bar{v} = 1$ gives:
+;;
+;; $$\bar{v}^T J = 1 \cdot \nabla f^T = \nabla f^T$$
+;;
+;; So for scalar outputs, the VJP with $\bar{v} = 1$ **is** the gradient.
+;;
+;; ### A concrete example
+;;
+;; Consider $f(a, b) = a^2 b$. The Jacobian has one row (scalar output):
+;;
+;; $$J = \begin{bmatrix} 2ab & a^2 \end{bmatrix}$$
+;;
+;; The VJP with $\bar{v} = 1$ gives the gradient $[2ab, \; a^2]$.
+;; At $a = 3, b = 2$: gradient is $[12, \; 9]$.
+;;
+;; We can verify this with La Linea:
+
+(let [a (t/matrix [3.0])
+      b (t/matrix [2.0])
+      tape-result (tape/with-tape
+                    (la/sum (la/mul (la/sq a) b)))
+      grads (grad/grad tape-result (:result tape-result))]
+  {:grad-a ((.get grads a) 0)
+   :grad-b ((.get grads b) 0)})
+
+(kind/test-last
+ [(fn [{:keys [grad-a grad-b]}]
+    (and (< (abs (- grad-a 12.0)) 1e-10)
+         (< (abs (- grad-b 9.0)) 1e-10)))])
+
+;; ## VJP rules in La Linea
+;;
+;; Each elementary operation has a VJP rule that describes how
+;; cotangents (gradients) flow backward through it. Given the
+;; cotangent $\bar{g}$ of the output, the rule computes the
+;; cotangents of the inputs.
+;;
+;; | Operation | VJP: cotangent of each input |
+;; |-----------|---------------------------|
+;; | `add(a,b)` | $\bar{g}, \; \bar{g}$ |
+;; | `sub(a,b)` | $\bar{g}, \; -\bar{g}$ |
+;; | `scale(a,\alpha)` | $\alpha \bar{g}$ |
+;; | `mul(a,b)` | $\bar{g} \odot b, \; \bar{g} \odot a$ |
+;; | `mmul(A,B)` | $\bar{g} B^T, \; A^T \bar{g}$ |
 ;; | `transpose(A)` | $\bar{g}^T$ |
 ;; | `trace(A)` | $\bar{g} \cdot I$ |
 ;; | `sq(a)` | $2a \odot \bar{g}$ |
 ;; | `sum(a)` | broadcast $\bar{g}$ |
+;; | `dot(u,v)` | $\bar{g} \cdot v, \; \bar{g} \cdot u$ |
+;; | `det(A)` | $\bar{g} \cdot \det(A) \cdot A^{-T}$ |
+;; | `invert(A)` | $-A^{-T} \bar{g} A^{-T}$ |
+;; | `norm(A)` | $\bar{g} \cdot A / \|A\|_F$ |
 ;;
-;; `grad/grad` takes a tape result and a scalar target value, then
-;; walks entries in reverse to accumulate gradients for each input.
+;; ### Why these rules work
+;;
+;; Consider `add(a,b) = a + b`. The Jacobian with respect to each
+;; input is the identity $I$. So the VJP is $\bar{g}^T I = \bar{g}$
+;; for both inputs.
+;;
+;; For `mmul(A,B) = AB`, the derivative with respect to $A$ is
+;; $\bar{g} B^T$ (apply the cotangent to the right factor's transpose)
+;; and with respect to $B$ is $A^T \bar{g}$ (apply the left factor's
+;; transpose to the cotangent).
+;;
+;; For `scale(a, \alpha) = \alpha a`, the derivative with respect to $a$
+;; is $\alpha \bar{g}$. The scalar $\alpha$ is not differentiated.
+;;
+;; ## How La Linea implements it
+;;
+;; The implementation has two phases:
+;;
+;; **Forward pass** — `tape/with-tape` records each `la/`, `t/`, and
+;; `elem/` operation as an entry in a DAG (directed acyclic graph).
+;; Each entry stores:
+;;
+;; - The operation keyword (e.g. `:la/mmul`)
+;; - References to the input values (tracked by identity)
+;; - The output value
+;;
+;; **Backward pass** — `grad/grad` walks the tape entries in reverse
+;; order, starting from the target scalar. For each entry that has a
+;; VJP rule, it:
+;;
+;; 1. Looks up the cotangent of the output (initially 1.0 for the target)
+;; 2. Applies the VJP rule to get cotangents for each input
+;; 3. Accumulates these into the inputs' cotangent slots (additive, because
+;;    a value used by multiple operations receives gradient contributions
+;;    from each)
+;;
+;; The result is an `IdentityHashMap` mapping each input tensor to
+;; its gradient.
 
 ;; ## Example: derivative of $\text{trace}(A^T A)$
 
-;; The derivative of $\text{trace}(A^T A)$ with respect to $A$ is $2A$. Let us
-;; verify this with automatic differentiation.
+;; The derivative of $\text{trace}(A^T A)$ with respect to $A$ is $2A$.
+;; The VJP rules compose:
+;; trace → identity scaled by cotangent,
+;; mmul → cotangent times each factor's transpose,
+;; transpose → transpose of cotangent.
+;; Together they yield $2A$.
 
 (def A (t/matrix [[1 2]
                   [3 4]]))
@@ -153,7 +284,7 @@ expected-grad-A
 ;; ## Gradients of det, invert, and norm
 ;;
 ;; The determinant, inverse, and Frobenius norm all have known
-;; VJP rules. Let's verify them.
+;; VJP rules (see the table above). Let's verify them.
 
 ;; ### Determinant
 ;;
@@ -210,6 +341,7 @@ expected-grad-A
 ;; - `la/trace` — matrix trace
 ;; - `la/sq` — element-wise square
 ;; - `la/sum` — sum of all elements
+;; - `la/dot` — inner product
 ;; - `la/det` — matrix determinant
 ;; - `la/invert` — matrix inverse
 ;; - `la/norm` — Frobenius norm

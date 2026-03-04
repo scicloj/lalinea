@@ -15,6 +15,20 @@ row-major `double[]` memory layout, enabling **zero-copy** interop.
 |License |[MIT](https://github.com/scicloj/lalinea/blob/main/LICENSE)|
 |Status |🛠alpha🛠|
 
+## Design
+
+Two namespaces cover most usage:
+
+- **`t/`** (`scicloj.lalinea.tensor`) — construct tensors in either field (real or complex)
+- **`la/`** (`scicloj.lalinea.linalg`) — compute with them (polymorphic over the field)
+
+`la/add`, `la/mmul`, `la/transpose`, `la/dot`, and most other functions work
+uniformly on both real tensors and ComplexTensors. Field-aware operations like
+`la/re`, `la/im`, `la/conj` are identity on reals and meaningful on complex.
+
+Supporting namespaces: `elem/` (element-wise math), `tape/` (computation recording),
+`grad/` (autodiff), `ft/` (FFT bridge), `vis/` (visualization helpers).
+
 ## Features
 
 ### Real matrices
