@@ -22,16 +22,13 @@
   "graph LR\n  S[\"Sunny\"] -->|0.7| S\n  S -->|0.2| C[\"Cloudy\"]\n  S -->|0.1| R[\"Rainy\"]\n  C -->|0.3| S\n  C -->|0.4| C\n  C -->|0.3| R\n  R -->|0.2| S\n  R -->|0.3| C\n  R -->|0.5| R"))
 
 
-(def v7_l73 (la/mmul P (t/column (repeat 3 1.0))))
+(def v7_l73 (la/mmul P (t/ones 3 1)))
 
 
 (deftest
  t8_l75
  (is
-  ((fn
-    [sums]
-    (< (la/norm (el/- sums (t/column (repeat 3 1.0)))) 1.0E-10))
-   v7_l73)))
+  ((fn [sums] (< (la/norm (el/- sums (t/ones 3 1))) 1.0E-10)) v7_l73)))
 
 
 (def v10_l89 (def initial-state (t/row [1.0 0.0 0.0])))
@@ -224,21 +221,17 @@
  (def
   google-matrix
   (el/+
-   (el/scale
-    (t/matrix (repeat n-pages (repeat n-pages 1.0)))
-    (/ (- 1.0 damping) n-pages))
+   (el/scale (t/ones n-pages n-pages) (/ (- 1.0 damping) n-pages))
    (el/scale H damping))))
 
 
-(def v43_l282 (la/mmul google-matrix (t/column (repeat n-pages 1.0))))
+(def v43_l282 (la/mmul google-matrix (t/ones n-pages 1)))
 
 
 (deftest
  t44_l284
  (is
-  ((fn
-    [sums]
-    (< (la/norm (el/- sums (t/column (repeat n-pages 1.0)))) 1.0E-10))
+  ((fn [sums] (< (la/norm (el/- sums (t/ones n-pages 1))) 1.0E-10))
    v43_l282)))
 
 
@@ -249,7 +242,7 @@
   (let
    [iters 50]
    (loop
-    [pi (el/scale (t/row (repeat n-pages 1.0)) (/ 1.0 n-pages)) k 0]
+    [pi (el/scale (t/ones 1 n-pages) (/ 1.0 n-pages)) k 0]
     (if
      (>= k iters)
      pi

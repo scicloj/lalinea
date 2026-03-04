@@ -70,10 +70,10 @@
 
 ;; Each row sums to 1:
 
-(la/mmul P (t/column (repeat 3 1.0)))
+(la/mmul P (t/ones 3 1))
 
 (kind/test-last
- [(fn [sums] (< (la/norm (el/- sums (t/column (repeat 3 1.0)))) 1e-10))])
+ [(fn [sums] (< (la/norm (el/- sums (t/ones 3 1))) 1e-10))])
 
 ;; ## Propagating state distributions
 ;;
@@ -273,22 +273,22 @@ stationary-eigen
 (def damping 0.85)
 
 (def google-matrix
-  (el/+ (el/scale (t/matrix (repeat n-pages (repeat n-pages 1.0)))
-                    (/ (- 1.0 damping) n-pages))
-          (el/scale H damping)))
+  (el/+ (el/scale (t/ones n-pages n-pages)
+                  (/ (- 1.0 damping) n-pages))
+        (el/scale H damping)))
 
 ;; Verify that each row sums to 1:
 
-(la/mmul google-matrix (t/column (repeat n-pages 1.0)))
+(la/mmul google-matrix (t/ones n-pages 1))
 
 (kind/test-last
- [(fn [sums] (< (la/norm (el/- sums (t/column (repeat n-pages 1.0)))) 1e-10))])
+ [(fn [sums] (< (la/norm (el/- sums (t/ones n-pages 1))) 1e-10))])
 
 ;; Find PageRank via power iteration:
 
 (def pagerank
   (let [iters 50]
-    (loop [pi (el/scale (t/row (repeat n-pages 1.0)) (/ 1.0 n-pages))
+    (loop [pi (el/scale (t/ones 1 n-pages) (/ 1.0 n-pages))
            k  0]
       (if (>= k iters)
         pi
