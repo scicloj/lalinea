@@ -36,11 +36,6 @@
 ;; Standalone utilities (no tape needed)
 ;; ---------------------------------------------------------------------------
 
-(defn- backing-array
-  "Extract the backing double[] from a tensor, if any."
-  [t]
-  (buf/backing-array t))
-
 (defn memory-status
   "Classify a tensor's memory backing.
 
@@ -56,7 +51,7 @@
                   :else t)]
     (cond
       (dtype/as-array-buffer raw) :contiguous
-      (backing-array raw)         :strided
+      (buf/backing-array raw)         :strided
       :else                       :lazy)))
 
 (defn memory-relation
@@ -72,8 +67,8 @@
    dtype-next does not expose this dependency chain. Use the tape
    (`detect-memory-status`) for the full picture."
   [a b]
-  (let [arr-a (backing-array a)
-        arr-b (backing-array b)]
+  (let [arr-a (buf/backing-array a)
+        arr-b (buf/backing-array b)]
     (cond
       (and arr-a arr-b (identical? arr-a arr-b)) :shared
       (and arr-a arr-b)                          :independent
@@ -171,10 +166,10 @@
    - `:reads-through` — output has no backing array; reads from inputs on access"
   [entry]
   (let [result (:output entry)
-        result-arr (backing-array result)]
+        result-arr (buf/backing-array result)]
     (if (nil? result-arr)
       :reads-through
-      (let [input-arrs (keep backing-array (:input-tensors entry))]
+      (let [input-arrs (keep buf/backing-array (:input-tensors entry))]
         (if (some #(identical? result-arr %) input-arrs)
           :shared
           :independent)))))
@@ -184,13 +179,13 @@
    Requires the full entries-by-id index to resolve input references."
   [entry idx]
   (let [result (:output entry)
-        result-arr (backing-array result)]
+        result-arr (buf/backing-array result)]
     (if (nil? result-arr)
       :reads-through
       (let [input-arrs (keep (fn [inp-ref]
                                (when-let [id (:id inp-ref)]
                                  (when-let [inp-entry (get idx id)]
-                                   (backing-array (:output inp-entry)))))
+                                   (buf/backing-array (:output inp-entry)))))
                              (:inputs entry))]
         (if (some #(identical? result-arr %) input-arrs)
           :shared
