@@ -274,7 +274,7 @@ cov-matrix
 ;; ## QR algorithm for eigenvalues
 ;;
 ;; The [QR algorithm](https://en.wikipedia.org/wiki/QR_algorithm)
-;; is the workhorse method for computing eigenvalues. It repeatedly
+;; is the standard method for computing eigenvalues. It repeatedly
 ;; decomposes $A = QR$ and forms $A' = RQ$. The diagonal of $A'$
 ;; converges to the eigenvalues.
 ;;
