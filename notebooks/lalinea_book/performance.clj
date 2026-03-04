@@ -22,6 +22,7 @@
    [tech.v3.tensor :as dtt]
    [criterium.core :as crit]
    [scicloj.kindly.v4.kind :as kind]
+   [clojure.math :as math]
    ;; Fractal implementations from the previous chapter:
    [lalinea-book.fractals :as fractals]))
 
@@ -193,19 +194,19 @@
         raw-ms   (median-ms bench-raw-array)]
     [{:layer "La Linea functional"
       :description "ComplexTensor, la/mul, la/add, t/clone"
-      :median-ms (Math/round func-ms)
+      :median-ms (math/round func-ms)
       :vs-raw-array (format "%.0f×" (/ func-ms raw-ms))}
      {:layer "Raw dtype-next"
       :description "dfn/*, dfn/+, dtype/copy!"
-      :median-ms (Math/round dtype-ms)
+      :median-ms (math/round dtype-ms)
       :vs-raw-array (format "%.0f×" (/ dtype-ms raw-ms))}
      {:layer "La Linea imperative"
       :description "t/backing-array, aset/aget"
-      :median-ms (Math/round imp-ms)
+      :median-ms (math/round imp-ms)
       :vs-raw-array (format "%.0f×" (/ imp-ms raw-ms))}
      {:layer "Raw double-array"
       :description "^doubles, aset/aget, single-pass"
-      :median-ms (Math/round raw-ms)
+      :median-ms (math/round raw-ms)
       :vs-raw-array "1×"}]))
 
 (kind/table results)
@@ -300,9 +301,9 @@
       dtype-ms (median-ms bench-raw-dtype)
       raw-ms (median-ms bench-raw-array)
       imp-ms (median-ms bench-imperative)]
-  {:allocation-and-complex-ms (Math/round (- func-ms dtype-ms))
-   :reader-dispatch-ms (Math/round (- dtype-ms raw-ms))
-   :lalinea-wrapping-ms (Math/round (- imp-ms raw-ms))})
+  {:allocation-and-complex-ms (math/round (- func-ms dtype-ms))
+   :reader-dispatch-ms (math/round (- dtype-ms raw-ms))
+   :lalinea-wrapping-ms (math/round (- imp-ms raw-ms))})
 
 ;; ## What this means
 ;;

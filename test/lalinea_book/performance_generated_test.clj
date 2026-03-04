@@ -9,24 +9,25 @@
   [tech.v3.tensor :as dtt]
   [criterium.core :as crit]
   [scicloj.kindly.v4.kind :as kind]
+  [clojure.math :as math]
   [lalinea-book.fractals :as fractals]
   [clojure.test :refer [deftest is]]))
 
 
-(def v3_l33 (def bench-h 300))
+(def v3_l34 (def bench-h 300))
 
 
-(def v4_l34 (def bench-w 400))
+(def v4_l35 (def bench-w 400))
 
 
-(def v5_l35 (def bench-n (* bench-h bench-w)))
+(def v5_l36 (def bench-n (* bench-h bench-w)))
 
 
-(def v6_l36 (def bench-max-iter 50))
+(def v6_l37 (def bench-max-iter 50))
 
 
 (def
- v7_l38
+ v7_l39
  (defn
   median-ms
   "Extract the sample mean from a Criterium result, in milliseconds."
@@ -35,7 +36,7 @@
 
 
 (def
- v9_l50
+ v9_l51
  (def
   bench-functional
   (crit/quick-benchmark
@@ -51,7 +52,7 @@
 
 
 (def
- v11_l63
+ v11_l64
  (def
   bench-imperative
   (crit/quick-benchmark
@@ -67,7 +68,7 @@
 
 
 (def
- v13_l78
+ v13_l79
  (defn
   mandelbrot-raw-dtype
   [re-min re-max im-min im-max h w max-iter]
@@ -131,7 +132,7 @@
 
 
 (def
- v14_l116
+ v14_l117
  (def
   bench-raw-dtype
   (crit/quick-benchmark
@@ -147,7 +148,7 @@
 
 
 (def
- v16_l128
+ v16_l129
  (defn
   mandelbrot-raw-array
   [re-min re-max im-min im-max h w max-iter]
@@ -218,7 +219,7 @@
 
 
 (def
- v17_l166
+ v17_l167
  (def
   bench-raw-array
   (crit/quick-benchmark
@@ -234,7 +235,7 @@
 
 
 (def
- v19_l176
+ v19_l177
  (let
   [h
    50
@@ -264,11 +265,11 @@
    (la/close? f r 1.0E-10))))
 
 
-(deftest t20_l185 (is (true? v19_l176)))
+(deftest t20_l186 (is (true? v19_l177)))
 
 
 (def
- v22_l189
+ v22_l190
  (def
   results
   (let
@@ -282,27 +283,27 @@
     (median-ms bench-raw-array)]
    [{:layer "La Linea functional",
      :description "ComplexTensor, la/mul, la/add, t/clone",
-     :median-ms (Math/round func-ms),
+     :median-ms (math/round func-ms),
      :vs-raw-array (format "%.0f×" (/ func-ms raw-ms))}
     {:layer "Raw dtype-next",
      :description "dfn/*, dfn/+, dtype/copy!",
-     :median-ms (Math/round dtype-ms),
+     :median-ms (math/round dtype-ms),
      :vs-raw-array (format "%.0f×" (/ dtype-ms raw-ms))}
     {:layer "La Linea imperative",
      :description "t/backing-array, aset/aget",
-     :median-ms (Math/round imp-ms),
+     :median-ms (math/round imp-ms),
      :vs-raw-array (format "%.0f×" (/ imp-ms raw-ms))}
     {:layer "Raw double-array",
      :description "^doubles, aset/aget, single-pass",
-     :median-ms (Math/round raw-ms),
+     :median-ms (math/round raw-ms),
      :vs-raw-array "1×"}])))
 
 
-(def v23_l211 (kind/table results))
+(def v23_l212 (kind/table results))
 
 
 (deftest
- t25_l215
+ t25_l216
  (is
   ((fn
     [_]
@@ -312,11 +313,11 @@
       raw-ms
       (median-ms bench-raw-array)]
      (< (/ imp-ms raw-ms) 2.0)))
-   v23_l211)))
+   v23_l212)))
 
 
 (deftest
- t27_l224
+ t27_l225
  (is
   ((fn
     [_]
@@ -326,14 +327,14 @@
       raw-ms
       (median-ms bench-raw-array)]
      (< (abs (- (/ imp-ms raw-ms) 1.0)) 0.5)))
-   v23_l211)))
+   v23_l212)))
 
 
-(def v29_l238 (def micro-n bench-n))
+(def v29_l239 (def micro-n bench-n))
 
 
 (def
- v30_l240
+ v30_l241
  (def
   bench-add-raw
   (let
@@ -349,7 +350,7 @@
 
 
 (def
- v31_l249
+ v31_l250
  (def
   bench-add-copy
   (let
@@ -366,7 +367,7 @@
 
 
 (def
- v32_l257
+ v32_l258
  (let
   [raw-ns
    (* 1000000.0 (first (:sample-mean bench-add-raw)))
@@ -378,7 +379,7 @@
 
 
 (def
- v34_l269
+ v34_l270
  (def
   bench-add-lalinea
   (let
@@ -390,7 +391,7 @@
 
 
 (def
- v35_l276
+ v35_l277
  (let
   [la-ms
    (median-ms bench-add-lalinea)
@@ -402,16 +403,16 @@
 
 
 (deftest
- t37_l284
+ t37_l285
  (is
   ((fn
     [{:keys [lalinea-add-ms dtype-copy-ms]}]
     (< (/ lalinea-add-ms dtype-copy-ms) 2.0))
-   v35_l276)))
+   v35_l277)))
 
 
 (def
- v39_l299
+ v39_l300
  (let
   [func-ms
    (median-ms bench-functional)
@@ -421,6 +422,6 @@
    (median-ms bench-raw-array)
    imp-ms
    (median-ms bench-imperative)]
-  {:allocation-and-complex-ms (Math/round (- func-ms dtype-ms)),
-   :reader-dispatch-ms (Math/round (- dtype-ms raw-ms)),
-   :lalinea-wrapping-ms (Math/round (- imp-ms raw-ms))}))
+  {:allocation-and-complex-ms (math/round (- func-ms dtype-ms)),
+   :reader-dispatch-ms (math/round (- dtype-ms raw-ms)),
+   :lalinea-wrapping-ms (math/round (- imp-ms raw-ms))}))

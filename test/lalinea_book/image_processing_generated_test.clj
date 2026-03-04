@@ -136,7 +136,7 @@
    (->
     img
     (t/elemwise-cast :int16)
-    (la/mul 1.5)
+    (la/scale 1.5)
     (elem/max 0)
     (elem/min 255)
     (t/elemwise-cast :uint8)
