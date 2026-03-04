@@ -258,122 +258,7 @@
 
 
 (def
- v34_l197
- (def
-  mandelbrot-counts-imperative
-  (fn
-   [re-min re-max im-min im-max h w max-iter]
-   (let
-    [h
-     (long h)
-     w
-     (long w)
-     max-iter
-     (long max-iter)
-     n
-     (* h w)
-     cr-grid
-     (t/clone
-      (t/compute-tensor
-       [h w]
-       (fn
-        [r c]
-        (+
-         (double re-min)
-         (*
-          (- (double re-max) (double re-min))
-          (/ (double c) (double (dec w))))))
-       :float64))
-     ci-grid
-     (t/clone
-      (t/compute-tensor
-       [h w]
-       (fn
-        [r c]
-        (+
-         (double im-min)
-         (*
-          (- (double im-max) (double im-min))
-          (/ (double r) (double (dec h))))))
-       :float64))
-     cr
-     (t/backing-array cr-grid)
-     ci
-     (t/backing-array ci-grid)
-     cnt-grid
-     (t/clone (t/zeros h w))
-     cnt
-     (t/backing-array cnt-grid)
-     zr
-     (double-array n)
-     zi
-     (double-array n)]
-    (dotimes
-     [_ max-iter]
-     (dotimes
-      [k n]
-      (let
-       [r
-        (aget zr k)
-        i
-        (aget zi k)
-        new-r
-        (+ (- (* r r) (* i i)) (aget cr k))
-        new-i
-        (+ (* 2.0 r i) (aget ci k))]
-       (aset zr k new-r)
-       (aset zi k new-i)
-       (when
-        (<= (+ (* new-r new-r) (* new-i new-i)) 4.0)
-        (aset cnt k (+ (aget cnt k) 1.0))))))
-    cnt-grid))))
-
-
-(def
- v36_l237
- (let
-  [h
-   50
-   w
-   60
-   max-iter
-   30
-   f
-   (mandelbrot-counts -2.0 0.7 -1.2 1.2 h w max-iter)
-   i
-   (mandelbrot-counts-imperative -2.0 0.7 -1.2 1.2 h w max-iter)]
-  (la/close? f i 1.0E-10)))
-
-
-(deftest t37_l242 (is (true? v36_l237)))
-
-
-(def
- v39_l246
- (def
-  mandelbrot-imperative-img
-  (let
-   [h
-    300
-    w
-    400
-    max-iter
-    50
-    counts
-    (mandelbrot-counts-imperative -2.0 0.7 -1.2 1.2 h w max-iter)]
-   (counts->image counts h w max-iter))))
-
-
-(def v40_l251 (bufimg/tensor->image mandelbrot-imperative-img))
-
-
-(deftest
- t41_l253
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v40_l251)))
-
-
-(def
- v43_l277
+ v34_l208
  (def
   newton-roots
   (fn
@@ -446,11 +331,11 @@
          2.0)))))))))
 
 
-(def v45_l328 (def root-colors [[230 50 50] [50 180 50] [50 80 220]]))
+(def v36_l259 (def root-colors [[230 50 50] [50 180 50] [50 80 220]]))
 
 
 (def
- v46_l333
+ v37_l264
  (def
   roots->image
   (fn
@@ -466,7 +351,7 @@
 
 
 (def
- v48_l344
+ v39_l275
  (def
   newton-img
   (let
@@ -481,16 +366,16 @@
    (roots->image root-idx h w))))
 
 
-(def v49_l349 (bufimg/tensor->image newton-img))
+(def v40_l280 (bufimg/tensor->image newton-img))
 
 
 (deftest
- t50_l351
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v49_l349)))
+ t41_l282
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v40_l280)))
 
 
 (def
- v52_l358
+ v43_l289
  (def
   newton-zoom
   (let
@@ -505,9 +390,9 @@
    (roots->image root-idx h w))))
 
 
-(def v53_l363 (bufimg/tensor->image newton-zoom))
+(def v44_l294 (bufimg/tensor->image newton-zoom))
 
 
 (deftest
- t54_l365
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v53_l363)))
+ t45_l296
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v44_l294)))

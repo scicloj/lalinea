@@ -1,13 +1,12 @@
 ;; # Performance
 ;;
-;; **Prerequisites**: [Fractals](fractals.html) (defines the
-;; Mandelbrot functions used here).
+;; **Prerequisites**: [Fractals](fractals.html) (for the Mandelbrot
+;; set background).
 ;;
 ;; Where does the time go when we compute a Mandelbrot set?
 ;; This chapter benchmarks four approaches at different
-;; abstraction levels — from La Linea's functional API down
-;; to raw JVM primitive arrays — and identifies where
-;; overhead lives at each layer.
+;; abstraction levels and identifies where overhead lives
+;; at each layer.
 ;;
 ;; All benchmarks use [Criterium](https://github.com/hugoduncan/criterium)
 ;; for statistically sound measurements.
@@ -22,9 +21,7 @@
    [tech.v3.tensor :as dtt]
    [criterium.core :as crit]
    [scicloj.kindly.v4.kind :as kind]
-   [clojure.math :as math]
-   ;; Fractal implementations from the previous chapter:
-   [lalinea-book.fractals :as fractals]))
+   [clojure.math :as math]))
 
 ;; ## Setup
 ;;
@@ -41,40 +38,109 @@
   [bench-result]
   (* 1e3 (first (:sample-mean bench-result))))
 
+;; A helper to build a complex plane grid as separate real and
+;; imaginary tensors (used by the non-ComplexTensor layers):
+
+(defn real-imag-grids
+  [re-min re-max im-min im-max h w]
+  [(t/clone (t/compute-tensor [h w]
+                              (fn [r c]
+                                (+ (double re-min)
+                                   (* (- (double re-max) (double re-min))
+                                      (/ (double c) (double (dec w))))))
+                              :float64))
+   (t/clone (t/compute-tensor [h w]
+                              (fn [r c]
+                                (+ (double im-min)
+                                   (* (- (double im-max) (double im-min))
+                                      (/ (double r) (double (dec h))))))
+                              :float64))])
+
 ;; ## The four layers
 ;;
 ;; ### Layer 1: La Linea functional
 ;;
 ;; ComplexTensor arithmetic with `la/mul`, `la/add`, `elem/le`.
 ;; Each iteration allocates new tensors via `t/clone`.
+;; This is the code from the [Fractals](fractals.html) chapter.
+
+(def complex-grid
+  (fn [re-min re-max im-min im-max h w]
+    (t/complex-tensor
+     (t/compute-tensor [h w 2]
+                       (fn [r c part]
+                         (if (zero? part)
+                           (+ re-min (* (- re-max re-min) (/ c (double (dec w)))))
+                           (+ im-min (* (- im-max im-min) (/ r (double (dec h)))))))
+                       :float64))))
+
+(def mandelbrot-counts
+  (fn [re-min re-max im-min im-max h w max-iter]
+    (let [c (complex-grid re-min re-max im-min im-max h w)
+          zero-grid (t/complex-tensor
+                     (t/compute-tensor [h w 2]
+                                       (fn [_ _ _] 0.0) :float64))]
+      (loop [z zero-grid counts (t/zeros h w) k 0]
+        (if (>= k max-iter)
+          counts
+          (let [z2 (t/clone (la/add (la/mul z z) c))
+                mask (elem/le (la/abs z2) 2.0)]
+            (recur z2 (t/clone (la/add counts mask)) (inc k))))))))
 
 (def bench-functional
   (crit/quick-benchmark
-   (fractals/mandelbrot-counts -2.0 0.7 -1.2 1.2
-                               bench-h bench-w bench-max-iter)
+   (mandelbrot-counts -2.0 0.7 -1.2 1.2
+                      bench-h bench-w bench-max-iter)
    {}))
 
-;; ### Layer 2: La Linea imperative
+;; ### Layer 2: La Linea with `copy!`
 ;;
-;; Uses La Linea for grid construction (`t/compute-tensor`,
-;; `t/clone`) and result wrapping (`t/->real-tensor`), but
-;; drops to `t/backing-array` and raw `double[]` primitives
-;; for the inner loop. Zero allocation in the hot path.
+;; Same La Linea operations — `la/mul`, `la/add`, `la/sub`,
+;; `la/abs`, `elem/le` — but instead of allocating new tensors
+;; each iteration, we `dtype/copy!` into pre-allocated buffers.
+;; This isolates the **allocation cost** (Layer 1 vs Layer 2).
+;;
+;; We split real and imaginary parts into separate tensors
+;; and implement $z^2 + c$ component-wise:
+;; $\text{re}(z^2 + c) = z_r^2 - z_i^2 + c_r$,
+;; $\text{im}(z^2 + c) = 2 z_r z_i + c_i$.
 
-(def bench-imperative
+(defn mandelbrot-counts-copy
+  [re-min re-max im-min im-max h w max-iter]
+  (let [h (long h) w (long w) max-iter (long max-iter)
+        [cr ci] (real-imag-grids re-min re-max im-min im-max h w)
+        zr     (t/clone (t/zeros h w))
+        zi     (t/clone (t/zeros h w))
+        counts (t/clone (t/zeros h w))
+        tmp    (t/clone (t/zeros h w))]
+    (dotimes [_ max-iter]
+      ;; zr_new = zr² - zi² + cr
+      (dtype/copy! (t/->tensor (la/add (la/sub (la/mul zr zr) (la/mul zi zi)) cr))
+                   (t/->tensor tmp))
+      ;; zi_new = 2·zr·zi + ci
+      (dtype/copy! (t/->tensor (la/add (la/scale (la/mul zr zi) 2.0) ci))
+                   (t/->tensor zi))
+      (dtype/copy! (t/->tensor tmp) (t/->tensor zr))
+      ;; counts += (|z|² ≤ 4) mask
+      (let [mag2 (la/add (la/mul zr zr) (la/mul zi zi))
+            mask (elem/le mag2 4.0)]
+        (dtype/copy! (t/->tensor (la/add counts mask))
+                     (t/->tensor counts))))
+    counts))
+
+(def bench-copy
   (crit/quick-benchmark
-   (fractals/mandelbrot-counts-imperative
-    -2.0 0.7 -1.2 1.2
-    bench-h bench-w bench-max-iter)
+   (mandelbrot-counts-copy -2.0 0.7 -1.2 1.2
+                           bench-h bench-w bench-max-iter)
    {}))
 
-;; ### Layer 3: Raw dtype-next
+;; ### Layer 3: dtype-next with `copy!`
 ;;
 ;; No La Linea at all — pure dtype-next tensors with `dfn/*`,
-;; `dfn/+`, `dfn/-` and `dtype/copy!`. Separate `zr` and `zi`
-;; flat tensors, `tmp` buffer for the aliasing issue.
-;; This isolates whether La Linea adds overhead on top of
-;; dtype-next.
+;; `dfn/+`, `dfn/-` and `dtype/copy!`. This isolates the
+;; **La Linea dispatch cost** (Layer 2 vs Layer 3): tape check,
+;; `ensure-tensor` unwrapping, `complex?` type test,
+;; `RealTensor` wrapping.
 
 (defn mandelbrot-raw-dtype
   [re-min re-max im-min im-max h w max-iter]
@@ -125,27 +191,13 @@
 ;; Pure JVM primitives with `^doubles` type hints. A single
 ;; `dotimes` loop computes all the math for one pixel in one
 ;; pass — the CPU traverses memory only once per iteration.
+;; This isolates the **reader protocol cost** (Layer 3 vs Layer 4).
 
 (defn mandelbrot-raw-array
   [re-min re-max im-min im-max h w max-iter]
   (let [h (long h) w (long w) max-iter (long max-iter)
         n (* h w)
-        cr-grid (t/clone
-                 (t/compute-tensor
-                  [h w]
-                  (fn [r c]
-                    (+ (double re-min)
-                       (* (- (double re-max) (double re-min))
-                          (/ (double c) (double (dec w))))))
-                  :float64))
-        ci-grid (t/clone
-                 (t/compute-tensor
-                  [h w]
-                  (fn [r c]
-                    (+ (double im-min)
-                       (* (- (double im-max) (double im-min))
-                          (/ (double r) (double (dec h))))))
-                  :float64))
+        [cr-grid ci-grid] (real-imag-grids re-min re-max im-min im-max h w)
         ^doubles cr (t/backing-array cr-grid)
         ^doubles ci (t/backing-array ci-grid)
         cnt-grid (t/clone (t/zeros h w))
@@ -175,11 +227,11 @@
 ;; All four versions must produce the same counts.
 
 (let [h 50 w 60 max-iter 30
-      f (fractals/mandelbrot-counts -2.0 0.7 -1.2 1.2 h w max-iter)
-      i (fractals/mandelbrot-counts-imperative -2.0 0.7 -1.2 1.2 h w max-iter)
+      f (mandelbrot-counts -2.0 0.7 -1.2 1.2 h w max-iter)
+      c (mandelbrot-counts-copy -2.0 0.7 -1.2 1.2 h w max-iter)
       d (t/->real-tensor (mandelbrot-raw-dtype -2.0 0.7 -1.2 1.2 h w max-iter))
       r (mandelbrot-raw-array -2.0 0.7 -1.2 1.2 h w max-iter)]
-  (and (la/close? f i 1e-10)
+  (and (la/close? f c 1e-10)
        (la/close? f d 1e-10)
        (la/close? f r 1e-10)))
 
@@ -189,21 +241,21 @@
 
 (def results
   (let [func-ms  (median-ms bench-functional)
-        imp-ms   (median-ms bench-imperative)
+        copy-ms  (median-ms bench-copy)
         dtype-ms (median-ms bench-raw-dtype)
         raw-ms   (median-ms bench-raw-array)]
     [{:layer "La Linea functional"
       :description "ComplexTensor, la/mul, la/add, t/clone"
       :median-ms (math/round func-ms)
-      :vs-raw-array (format "%.0f×" (/ func-ms raw-ms))}
+      :vs-raw-array (format "%.1f×" (/ func-ms raw-ms))}
+     {:layer "La Linea with copy!"
+      :description "la/mul, la/add, dtype/copy!"
+      :median-ms (math/round copy-ms)
+      :vs-raw-array (format "%.1f×" (/ copy-ms raw-ms))}
      {:layer "Raw dtype-next"
       :description "dfn/*, dfn/+, dtype/copy!"
       :median-ms (math/round dtype-ms)
-      :vs-raw-array (format "%.0f×" (/ dtype-ms raw-ms))}
-     {:layer "La Linea imperative"
-      :description "t/backing-array, aset/aget"
-      :median-ms (math/round imp-ms)
-      :vs-raw-array (format "%.0f×" (/ imp-ms raw-ms))}
+      :vs-raw-array (format "%.1f×" (/ dtype-ms raw-ms))}
      {:layer "Raw double-array"
       :description "^doubles, aset/aget, single-pass"
       :median-ms (math/round raw-ms)
@@ -211,128 +263,34 @@
 
 (kind/table results)
 
-;; La Linea imperative and raw double-array should be within 2×:
-
-(kind/test-last
- [(fn [_]
-    (let [imp-ms (median-ms bench-imperative)
-          raw-ms (median-ms bench-raw-array)]
-      (< (/ imp-ms raw-ms) 2.0)))])
-
-;; La Linea imperative and raw double-array should be within 1.5×
-;; of each other — La Linea's setup/wrapping adds negligible overhead:
-
-(kind/test-last
- [(fn [_]
-    (let [imp-ms (median-ms bench-imperative)
-          raw-ms (median-ms bench-raw-array)]
-      (< (abs (- (/ imp-ms raw-ms) 1.0)) 0.5)))])
-
-;; ## Where the time goes
-;;
-;; ### Reader dispatch
-;;
-;; A single element-wise addition on 120,000 elements.
-;; The `dfn/+` path goes through dtype-next's reader protocol;
-;; the raw path uses direct primitive array access.
-
-(def micro-n bench-n)
-
-(def bench-add-raw
-  (let [a (double-array micro-n)
-        b (double-array micro-n)
-        c (double-array micro-n)]
-    (crit/quick-benchmark
-     (dotimes [k micro-n]
-       (aset c k (+ (aget a k) (aget b k))))
-     {})))
-
-(def bench-add-copy
-  (let [a (dtype/clone (dtt/->tensor (double-array micro-n) {:datatype :float64}))
-        b (dtype/clone (dtt/->tensor (double-array micro-n) {:datatype :float64}))
-        c (dtype/clone (dtt/->tensor (double-array micro-n) {:datatype :float64}))]
-    (crit/quick-benchmark
-     (dtype/copy! (dfn/+ a b) c)
-     {})))
-
-(let [raw-ns (* 1e6 (first (:sample-mean bench-add-raw)))
-      copy-ns (* 1e6 (first (:sample-mean bench-add-copy)))]
-  {:raw-per-element-ns (/ raw-ns micro-n)
-   :copy-per-element-ns (/ copy-ns micro-n)
-   :reader-overhead (format "%.0f×" (/ copy-ns raw-ns))})
-
-;; ### La Linea dispatch overhead
-;;
-;; `la/add` + `t/clone` versus raw `dfn/+` + `dtype/copy!`
-;; on the same data. The difference measures La Linea's dispatch
-;; layers: tape check, `ensure-tensor`, `complex?`, `RealTensor` wrap.
-
-(def bench-add-lalinea
-  (let [a (t/clone (t/zeros bench-h bench-w))
-        b (t/clone (t/zeros bench-h bench-w))]
-    (crit/quick-benchmark
-     (t/clone (la/add a b))
-     {})))
-
-(let [la-ms (median-ms bench-add-lalinea)
-      copy-ms (median-ms bench-add-copy)]
-  {:lalinea-add-ms la-ms
-   :dtype-copy-ms copy-ms
-   :ratio (format "%.2f×" (/ la-ms copy-ms))})
-
-;; The ratio should be close to 1.0 — La Linea adds negligible cost:
-
-(kind/test-last
- [(fn [{:keys [lalinea-add-ms dtype-copy-ms]}]
-    (< (/ lalinea-add-ms dtype-copy-ms) 2.0))])
-
-;; ### Overhead breakdown
-;;
-;; Comparing pairs of benchmarks isolates each overhead source:
-;;
-;; - **Allocation + ComplexTensor**: functional vs raw dtype-next
-;;   (both use lazy readers; functional also allocates per iteration)
-;; - **Reader dispatch + memory passes**: raw dtype-next vs raw array
-;;   (the core dtype-next per-element overhead)
-;; - **La Linea wrapping**: La Linea imperative vs raw array
-;;   (setup, `t/backing-array`, `t/->real-tensor`)
-
-(let [func-ms (median-ms bench-functional)
-      dtype-ms (median-ms bench-raw-dtype)
-      raw-ms (median-ms bench-raw-array)
-      imp-ms (median-ms bench-imperative)]
-  {:allocation-and-complex-ms (math/round (- func-ms dtype-ms))
-   :reader-dispatch-ms (math/round (- dtype-ms raw-ms))
-   :lalinea-wrapping-ms (math/round (- imp-ms raw-ms))})
-
 ;; ## What this means
 ;;
-;; **La Linea adds no measurable overhead on top of dtype-next.**
-;; The dispatch layers — tape recording check, `ensure-tensor`
-;; unwrapping, `complex?` type test, `RealTensor` wrapping —
-;; are constant-time per call and negligible compared to the
-;; per-element work.
+;; Comparing adjacent layers isolates specific costs:
 ;;
-;; **The dominant cost is dtype-next's reader protocol dispatch.**
-;; Each `dfn/*` or `dfn/+` wraps a lazy reader whose `.read(idx)`
-;; method goes through protocol dispatch on every element access.
-;; Raw `aget`/`aset` with `^doubles` hints compile to direct
-;; JVM bytecode — no dispatch, no boxing.
+;; - **Layer 1 vs 2** (functional vs copy!): the cost of
+;;   **allocation** — `t/clone` on every iteration vs reusing
+;;   pre-allocated buffers.
 ;;
-;; **Loop fusion matters.** The raw-array version does all the
-;; math for one pixel in a single loop body: read zr, zi, cr, ci;
-;; compute new values; write zr, zi, counts. One pass over memory.
-;; The `dtype/copy!` approach makes four separate passes per
-;; iteration (one per `copy!` call), loading and storing each
-;; array multiple times.
+;; - **Layer 2 vs 3** (La Linea copy! vs dtype-next copy!):
+;;   the cost of **La Linea's dispatch** — tape recording check,
+;;   `ensure-tensor` unwrapping, `complex?` type test, and
+;;   `RealTensor` wrapping. These are constant-time per call.
 ;;
-;; **When to drop to raw arrays.** La Linea's functional API is
-;; the right default — it's simple, correct, and the allocation
-;; overhead is modest. Drop to `t/backing-array` + raw primitives
-;; only for tight inner loops where profiling shows the per-element
-;; reader cost is the bottleneck. The pattern is:
+;; - **Layer 3 vs 4** (dtype-next copy! vs raw array): the cost
+;;   of **reader protocol dispatch** and **memory passes**.
+;;   Each `dfn/*` or `dfn/+` returns a lazy reader that is
+;;   materialized by `dtype/copy!` in parallel across cores.
+;;   The raw-array version fuses all operations into a single
+;;   pass over memory.
 ;;
-;; 1. Build grids with `t/compute-tensor`, `t/clone`
-;; 2. Get `^doubles` via `t/backing-array`
-;; 3. `dotimes` loop with `aget`/`aset`
-;; 4. Wrap result with `t/->real-tensor`
+;; On modern JVMs (Java 25+), the JIT compiler devirtualizes
+;; reader dispatch effectively — the per-element overhead of
+;; going through `DoubleReader.readDouble` is small.
+;; `dtype/copy!` also parallelizes across available cores,
+;; which can offset the multi-pass cost.
+;;
+;; **The right default is Layer 1** — La Linea's functional API.
+;; It is the simplest, most readable, and least error-prone.
+;; Drop to lower layers only when profiling identifies the
+;; inner loop as a bottleneck.
+
