@@ -108,7 +108,7 @@
           (.write w "]"))
         (when (< max-r (long r))
           (.write w "\n        ..."))
-        (.write w "]]")))))
+        (.write w "]]\n")))))
 
 (defmethod print-method RealTensor
   [^RealTensor t ^java.io.Writer w]
@@ -193,7 +193,7 @@
           (.write w "]"))
         (when (< max-r (long r))
           (.write w "\n        ..."))
-        (.write w "]]")))))
+        (.write w "]]\n")))))
 
 (defmethod print-method ComplexTensor
   [^ComplexTensor ct ^java.io.Writer w]
