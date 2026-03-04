@@ -964,11 +964,48 @@
 
 (kind/test-last [(fn [v] (= [5.0 5.0 6.0] (t/flatten v)))])
 
+;; Complex division:
+
+(elem/div (t/complex 3.0 4.0) (t/complex 1.0 2.0))
+
+(kind/test-last [(fn [v] (and (< (abs (- (la/re v) 2.2)) 1e-10)
+                              (< (abs (- (la/im v) -0.4)) 1e-10)))])
+
 (kind/doc #'elem/gt)
 
 (elem/gt (t/column [1 5 3]) (t/column [2 4 3]))
 
 (kind/test-last [(fn [v] (= [0.0 1.0 0.0] (t/flatten v)))])
+
+(kind/doc #'elem/lt)
+
+(elem/lt (t/column [1 5 3]) (t/column [2 4 3]))
+
+(kind/test-last [(fn [v] (= [1.0 0.0 0.0] (t/flatten v)))])
+
+(kind/doc #'elem/ge)
+
+(elem/ge (t/column [1 5 3]) (t/column [2 4 3]))
+
+(kind/test-last [(fn [v] (= [0.0 1.0 1.0] (t/flatten v)))])
+
+(kind/doc #'elem/le)
+
+(elem/le (t/column [1 5 3]) (t/column [2 4 3]))
+
+(kind/test-last [(fn [v] (= [1.0 0.0 1.0] (t/flatten v)))])
+
+(kind/doc #'elem/eq)
+
+(elem/eq (t/column [1 5 3]) (t/column [2 4 3]))
+
+(kind/test-last [(fn [v] (= [0.0 0.0 1.0] (t/flatten v)))])
+
+(kind/doc #'elem/ne)
+
+(elem/ne (t/column [1 5 3]) (t/column [2 4 3]))
+
+(kind/test-last [(fn [v] (= [1.0 1.0 0.0] (t/flatten v)))])
 
 (kind/doc #'elem/reduce-max)
 

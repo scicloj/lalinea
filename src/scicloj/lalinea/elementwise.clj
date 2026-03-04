@@ -4,7 +4,7 @@
    Each function records on the tape (when active) and dispatches
    on `ct/complex?`. Functions without meaningful complex analogues
    throw on complex input."
-  (:refer-clojure :exclude [abs min max])
+  (:refer-clojure :exclude [abs min max eq])
   (:require [scicloj.lalinea.tape :as tape]
             [scicloj.lalinea.impl.real-tensor :as rt]
             [scicloj.lalinea.impl.complex-tensor :as ct]
@@ -269,12 +269,12 @@
                     (unsupported-complex! :elem/max)
                     (rt/->rt (dfn/max a b))))))
 (defn div
-  "Element-wise division. Real only."
+  "Element-wise division. Supports both real and complex inputs."
   [a b]
   (tape/record! :elem/div [a b]
                 (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
                   (if (or (ct/complex? a) (ct/complex? b))
-                    (unsupported-complex! :elem/div)
+                    (ct/ct-div a b)
                     (rt/->rt (dfn// a b))))))
 
 ;; ---------------------------------------------------------------------------
@@ -388,3 +388,48 @@
                   (if (or (ct/complex? a) (ct/complex? b))
                     (unsupported-complex! :elem/gt)
                     (rt/->rt (dtype/elemwise-cast (dfn/> a b) :float64))))))
+
+(defn lt
+  "Element-wise less-than. Returns a RealTensor of 0.0/1.0. Real only."
+  [a b]
+  (tape/record! :elem/lt [a b]
+                (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
+                  (if (or (ct/complex? a) (ct/complex? b))
+                    (unsupported-complex! :elem/lt)
+                    (rt/->rt (dtype/elemwise-cast (dfn/< a b) :float64))))))
+
+(defn ge
+  "Element-wise greater-or-equal. Returns a RealTensor of 0.0/1.0. Real only."
+  [a b]
+  (tape/record! :elem/ge [a b]
+                (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
+                  (if (or (ct/complex? a) (ct/complex? b))
+                    (unsupported-complex! :elem/ge)
+                    (rt/->rt (dtype/elemwise-cast (dfn/>= a b) :float64))))))
+
+(defn le
+  "Element-wise less-or-equal. Returns a RealTensor of 0.0/1.0. Real only."
+  [a b]
+  (tape/record! :elem/le [a b]
+                (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
+                  (if (or (ct/complex? a) (ct/complex? b))
+                    (unsupported-complex! :elem/le)
+                    (rt/->rt (dtype/elemwise-cast (dfn/<= a b) :float64))))))
+
+(defn eq
+  "Element-wise equality. Returns a RealTensor of 0.0/1.0. Real only."
+  [a b]
+  (tape/record! :elem/eq [a b]
+                (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
+                  (if (or (ct/complex? a) (ct/complex? b))
+                    (unsupported-complex! :elem/eq)
+                    (rt/->rt (dtype/elemwise-cast (dfn/eq a b) :float64))))))
+
+(defn ne
+  "Element-wise not-equal. Returns a RealTensor of 0.0/1.0. Real only."
+  [a b]
+  (tape/record! :elem/ne [a b]
+                (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
+                  (if (or (ct/complex? a) (ct/complex? b))
+                    (unsupported-complex! :elem/ne)
+                    (rt/->rt (dtype/elemwise-cast (dfn/not-eq a b) :float64))))))

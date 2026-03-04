@@ -320,6 +320,32 @@
     (let [ta (->tensor a)]
       (ComplexTensor. (dfn/- ta (->tensor b))))))
 
+(defn ct-div
+  "Pointwise complex division: (a+bi)/(c+di) = ((ac+bd) + (bc-ad)i) / (c²+d²)"
+  [^ComplexTensor a ^ComplexTensor b]
+  (if (and (scalar? a) (scalar? b))
+    (let [ar (double (re a)) ai (double (im a))
+          br (double (re b)) bi (double (im b))
+          denom (+ (* br br) (* bi bi))]
+      (complex (/ (+ (* ar br) (* ai bi)) denom)
+               (/ (- (* ai br) (* ar bi)) denom)))
+    (let [a-flat (dtype/->reader (->tensor a))
+          b-flat (dtype/->reader (->tensor b))
+          n (dtype/ecount (->tensor a))]
+      (ComplexTensor.
+       (dtt/reshape
+        (dtype/make-reader :float64 n
+                           (let [base (-> idx (quot 2) (* 2))
+                                 ar (double (a-flat base))
+                                 ai (double (a-flat (unchecked-inc base)))
+                                 br (double (b-flat base))
+                                 bi (double (b-flat (unchecked-inc base)))
+                                 denom (+ (* br br) (* bi bi))]
+                             (if (even? idx)
+                               (/ (+ (* ar br) (* ai bi)) denom)
+                               (/ (- (* ai br) (* ar bi)) denom))))
+        (dtype/shape (->tensor a)))))))
+
 (defn ct-sum
   "Complex-aware summation. Returns a scalar ComplexTensor."
   [^ComplexTensor ct]
