@@ -19,7 +19,7 @@
    [scicloj.lalinea.tensor :as t]
    [scicloj.lalinea.transform :as ft]
    [scicloj.lalinea.tape :as tape]
-   [scicloj.lalinea.elementwise :as elem]
+   [scicloj.lalinea.elementwise :as el]
    [scicloj.lalinea.grad :as grad]
    [scicloj.lalinea.vis :as vis]   [tech.v3.libs.buffered-image :as bufimg]
    [scicloj.kindly.v4.kind :as kind]
@@ -81,7 +81,7 @@
 (kind/doc #'t/reduce-axis)
 
 ;; Row sums (axis 1) and column sums (axis 0):
-(t/reduce-axis (t/matrix [[1 2 3] [4 5 6]]) la/sum 1)
+(t/reduce-axis (t/matrix [[1 2 3] [4 5 6]]) el/sum 1)
 
 (kind/test-last [(fn [v] (and (= [2] (t/shape v))
                               (la/close-scalar? (v 0) 6.0)
@@ -272,7 +272,7 @@
 ;; ## `scicloj.lalinea.linalg`
 ;;
 ;; Most `la/` functions are polymorphic — they accept both real tensors
-;; and ComplexTensors. Operations like `la/re`, `la/im`, `la/conj` are
+;; and ComplexTensors. Operations like `el/re`, `el/im`, `el/conj` are
 ;; identity on real inputs and meaningful on complex inputs.
 
 (kind/doc #'la/add)
@@ -294,38 +294,6 @@
 (la/scale (t/matrix [[1 2] [3 4]]) 3.0)
 
 (kind/test-last [(fn [m] (== 6.0 (m 0 1)))])
-
-(kind/doc #'la/mul)
-
-(la/mul (t/matrix [[2 3] [4 5]])
-        (t/matrix [[10 20] [30 40]]))
-
-(kind/test-last [(fn [m] (and (== 20.0 (m 0 0))
-                              (== 60.0 (m 0 1))))])
-
-(kind/doc #'la/abs)
-
-(la/abs (t/matrix [[-3 2] [-1 4]]))
-
-(kind/test-last [(fn [m] (== 3.0 (m 0 0)))])
-
-(kind/doc #'la/sq)
-
-(la/sq (t/matrix [[2 3] [4 5]]))
-
-(kind/test-last [(fn [m] (== 4.0 (m 0 0)))])
-
-(kind/doc #'la/sum)
-
-(la/sum (t/matrix [[1 2] [3 4]]))
-
-(kind/test-last [(fn [v] (== 10.0 v))])
-
-(kind/doc #'la/prod)
-
-(la/prod (t/matrix [2 3 4]))
-
-(kind/test-last [(fn [v] (== 24.0 v))])
 
 (kind/doc #'la/mmul)
 
@@ -492,7 +460,7 @@
 (kind/doc #'la/lift)
 
 ;; One-shot bridge: unwrap, apply, re-wrap. Pass a Var for tape recording.
-(la/lift elem/sqrt (t/matrix [[4 9] [16 25]]))
+(la/lift el/sqrt (t/matrix [[4 9] [16 25]]))
 
 (kind/test-last [(fn [m] (and (la/close-scalar? (m 0 0) 2.0)
                               (la/close-scalar? (m 0 1) 3.0)))])
@@ -500,7 +468,7 @@
 (kind/doc #'la/lifted)
 
 ;; Curried version — returns a reusable function.
-(let [my-sqrt (la/lifted elem/sqrt)]
+(let [my-sqrt (la/lifted el/sqrt)]
   (my-sqrt (t/column [4 9 16])))
 
 (kind/test-last [(fn [v] (la/close-scalar? (v 0 0) 2.0))])
@@ -519,25 +487,25 @@
 
 (t/complex-tensor-real [5.0 6.0 7.0])
 
-(kind/test-last [(fn [ct] (every? zero? (la/im ct)))])
+(kind/test-last [(fn [ct] (every? zero? (el/im ct)))])
 
 (kind/doc #'t/complex)
 
 (t/complex 3.0 4.0)
 
 (kind/test-last [(fn [ct] (and (t/scalar? ct)
-                               (== 3.0 (la/re ct))
-                               (== 4.0 (la/im ct))))])
+                               (== 3.0 (el/re ct))
+                               (== 4.0 (el/im ct))))])
 
-(kind/doc #'la/re)
+(kind/doc #'el/re)
 
-(la/re (t/complex-tensor [1.0 2.0] [3.0 4.0]))
+(el/re (t/complex-tensor [1.0 2.0] [3.0 4.0]))
 
 (kind/test-last [= [1.0 2.0]])
 
-(kind/doc #'la/im)
+(kind/doc #'el/im)
 
-(la/im (t/complex-tensor [1.0 2.0] [3.0 4.0]))
+(el/im (t/complex-tensor [1.0 2.0] [3.0 4.0]))
 
 (kind/test-last [= [3.0 4.0]])
 
@@ -592,7 +560,7 @@
 
 (let [a (t/complex-tensor [1.0 2.0] [3.0 4.0])
       b (t/complex-tensor [10.0 20.0] [30.0 40.0])]
-  (la/re (la/add a b)))
+  (el/re (la/add a b)))
 
 (kind/test-last [= [11.0 22.0]])
 
@@ -600,17 +568,17 @@
 
 (let [a (t/complex-tensor [1.0] [3.0])
       b (t/complex-tensor [2.0] [4.0])
-      c (la/mul a b)]
-  [(la/re (c 0)) (la/im (c 0))])
+      c (el/mul a b)]
+  [(el/re (c 0)) (el/im (c 0))])
 
 (kind/test-last [= [-10.0 10.0]])
 
 ;; Complex conjugate:
 
-(kind/doc #'la/conj)
+(kind/doc #'el/conj)
 
-(let [ct (la/conj (t/complex-tensor [1.0 2.0] [3.0 -4.0]))]
-  (la/im ct))
+(let [ct (el/conj (t/complex-tensor [1.0 2.0] [3.0 -4.0]))]
+  (el/im ct))
 
 (kind/test-last [= [-3.0 4.0]])
 
@@ -620,13 +588,13 @@
 
 (let [a (t/complex-tensor [3.0 1.0] [4.0 2.0])
       result (la/dot-conj a a)]
-  (la/close-scalar? (la/re result) 30.0))
+  (la/close-scalar? (el/re result) 30.0))
 
 (kind/test-last [true?])
 
 ;; Complex magnitude: $|3+4i| = 5$
 
-(let [m (la/abs (t/complex-tensor [3.0] [4.0]))]
+(let [m (el/abs (t/complex-tensor [3.0] [4.0]))]
   (la/close-scalar? (double (m 0)) 5.0))
 
 (kind/test-last [true?])
@@ -634,8 +602,8 @@
 ;; Complex sum:
 
 (let [ct (t/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0])
-      s (la/sum ct)]
-  [(la/re s) (la/im s)])
+      s (el/sum ct)]
+  [(el/re s) (el/im s)])
 
 (kind/test-last [= [6.0 15.0]])
 ;; ## `scicloj.lalinea.transform`
@@ -655,7 +623,7 @@
 
 (let [spectrum (ft/forward [1.0 2.0 3.0 4.0])
       roundtrip (ft/inverse spectrum)]
-  (la/close-scalar? (la/re (roundtrip 0)) 1.0))
+  (la/close-scalar? (el/re (roundtrip 0)) 1.0))
 
 (kind/test-last [true?])
 
@@ -792,230 +760,280 @@
 
 ;; ## `scicloj.lalinea.elementwise`
 ;;
-;; Element-wise mathematical functions, complementing `la/` (linear algebra).
-;; All functions are tape-aware and dispatch
-;; on `t/complex?` for complex inputs.
+;; The canonical namespace for element-wise operations. All functions
+;; are tape-aware and dispatch on `t/complex?` for complex inputs.
+;; `el/add`, `el/sub`, and `el/scale` are also available
+;; as `la/add`, `la/sub`, `la/scale` — they share the same tape key.
 
-(kind/doc #'elem/sq)
+(kind/doc #'el/add)
 
-(elem/sq (t/column [2 3 4]))
+(el/add (t/column [1 2 3]) (t/column [10 20 30]))
+
+(kind/test-last [(fn [v] (== 11.0 (v 0 0)))])
+
+(kind/doc #'el/sub)
+
+(el/sub (t/column [10 20 30]) (t/column [1 2 3]))
+
+(kind/test-last [(fn [v] (== 9.0 (v 0 0)))])
+
+(kind/doc #'el/scale)
+
+(el/scale (t/column [2 3 4]) 5.0)
+
+(kind/test-last [(fn [v] (== 10.0 (v 0 0)))])
+
+(kind/doc #'el/mul)
+
+(el/mul (t/column [2 3 4]) (t/column [10 20 30]))
+
+(kind/test-last [(fn [v] (== 20.0 (v 0 0)))])
+
+(kind/doc #'el/re)
+
+(el/re (t/complex-tensor [1.0 2.0] [3.0 4.0]))
+
+(kind/test-last [= [1.0 2.0]])
+
+(kind/doc #'el/im)
+
+(el/im (t/complex-tensor [1.0 2.0] [3.0 4.0]))
+
+(kind/test-last [= [3.0 4.0]])
+
+(kind/doc #'el/conj)
+
+(let [z (t/complex 3.0 4.0)]
+  (el/im (el/conj z)))
+
+(kind/test-last [(fn [v] (la/close-scalar? v -4.0))])
+
+(kind/doc #'el/prod)
+
+(el/prod (t/column [2 3 4]))
+
+(kind/test-last [(fn [v] (== 24.0 v))])
+
+(kind/doc #'el/sq)
+
+(el/sq (t/column [2 3 4]))
 
 (kind/test-last [(fn [v] (la/close-scalar? (v 0 0) 4.0))])
 
-(kind/doc #'elem/sqrt)
+(kind/doc #'el/sqrt)
 
-(elem/sqrt (t/column [4 9 16]))
+(el/sqrt (t/column [4 9 16]))
 
 (kind/test-last [(fn [v] (la/close-scalar? (v 0 0) 2.0))])
 
-(kind/doc #'elem/exp)
+(kind/doc #'el/exp)
 
-(la/close-scalar? ((elem/exp (t/column [0])) 0 0) 1.0)
-
-(kind/test-last [true?])
-
-(kind/doc #'elem/log)
-
-(la/close-scalar? ((elem/log (t/column [math/E])) 0 0) 1.0)
+(la/close-scalar? ((el/exp (t/column [0])) 0 0) 1.0)
 
 (kind/test-last [true?])
 
-(kind/doc #'elem/log10)
+(kind/doc #'el/log)
 
-(la/close-scalar? ((elem/log10 (t/column [100])) 0 0) 2.0)
-
-(kind/test-last [true?])
-
-(kind/doc #'elem/sin)
-
-(la/close-scalar? ((elem/sin (t/column [(/ math/PI 2)])) 0 0) 1.0)
+(la/close-scalar? ((el/log (t/column [math/E])) 0 0) 1.0)
 
 (kind/test-last [true?])
 
-(kind/doc #'elem/cos)
+(kind/doc #'el/log10)
 
-(la/close-scalar? ((elem/cos (t/column [0])) 0 0) 1.0)
-
-(kind/test-last [true?])
-
-(kind/doc #'elem/tan)
-
-(la/close-scalar? ((elem/tan (t/column [(/ math/PI 4)])) 0 0) 1.0)
+(la/close-scalar? ((el/log10 (t/column [100])) 0 0) 2.0)
 
 (kind/test-last [true?])
 
-(kind/doc #'elem/sinh)
+(kind/doc #'el/sin)
 
-(la/close-scalar? ((elem/sinh (t/column [0])) 0 0) 0.0)
-
-(kind/test-last [true?])
-
-(kind/doc #'elem/cosh)
-
-(la/close-scalar? ((elem/cosh (t/column [0])) 0 0) 1.0)
+(la/close-scalar? ((el/sin (t/column [(/ math/PI 2)])) 0 0) 1.0)
 
 (kind/test-last [true?])
 
-(kind/doc #'elem/tanh)
+(kind/doc #'el/cos)
 
-(la/close-scalar? ((elem/tanh (t/column [0])) 0 0) 0.0)
+(la/close-scalar? ((el/cos (t/column [0])) 0 0) 1.0)
 
 (kind/test-last [true?])
 
-(kind/doc #'elem/abs)
+(kind/doc #'el/tan)
 
-((elem/abs (t/column [-5])) 0 0)
+(la/close-scalar? ((el/tan (t/column [(/ math/PI 4)])) 0 0) 1.0)
+
+(kind/test-last [true?])
+
+(kind/doc #'el/sinh)
+
+(la/close-scalar? ((el/sinh (t/column [0])) 0 0) 0.0)
+
+(kind/test-last [true?])
+
+(kind/doc #'el/cosh)
+
+(la/close-scalar? ((el/cosh (t/column [0])) 0 0) 1.0)
+
+(kind/test-last [true?])
+
+(kind/doc #'el/tanh)
+
+(la/close-scalar? ((el/tanh (t/column [0])) 0 0) 0.0)
+
+(kind/test-last [true?])
+
+(kind/doc #'el/abs)
+
+((el/abs (t/column [-5])) 0 0)
 
 (kind/test-last [(fn [v] (== 5.0 v))])
 
-(kind/doc #'elem/sum)
+(kind/doc #'el/sum)
 
-(elem/sum (t/column [1 2 3 4]))
+(el/sum (t/column [1 2 3 4]))
 
 (kind/test-last [(fn [v] (== 10.0 v))])
 
-(kind/doc #'elem/mean)
+(kind/doc #'el/mean)
 
-(elem/mean (t/column [2 4 6]))
+(el/mean (t/column [2 4 6]))
 
 (kind/test-last [(fn [v] (== 4.0 v))])
 
-(kind/doc #'elem/pow)
+(kind/doc #'el/pow)
 
-((elem/pow (t/column [2]) 3) 0 0)
+((el/pow (t/column [2]) 3) 0 0)
 
 (kind/test-last [(fn [v] (== 8.0 v))])
 
-(kind/doc #'elem/cbrt)
+(kind/doc #'el/cbrt)
 
-(la/close-scalar? ((elem/cbrt (t/column [27])) 0 0) 3.0)
+(la/close-scalar? ((el/cbrt (t/column [27])) 0 0) 3.0)
 
 (kind/test-last [true?])
 
-(kind/doc #'elem/floor)
+(kind/doc #'el/floor)
 
-((elem/floor (t/column [2.7])) 0 0)
+((el/floor (t/column [2.7])) 0 0)
 
 (kind/test-last [(fn [v] (== 2.0 v))])
 
-(kind/doc #'elem/ceil)
+(kind/doc #'el/ceil)
 
-((elem/ceil (t/column [2.3])) 0 0)
-
-(kind/test-last [(fn [v] (== 3.0 v))])
-
-(kind/doc #'elem/min)
-
-((elem/min (t/column [3]) (t/column [5])) 0 0)
+((el/ceil (t/column [2.3])) 0 0)
 
 (kind/test-last [(fn [v] (== 3.0 v))])
 
-(kind/doc #'elem/max)
+(kind/doc #'el/min)
 
-((elem/max (t/column [3]) (t/column [5])) 0 0)
+((el/min (t/column [3]) (t/column [5])) 0 0)
+
+(kind/test-last [(fn [v] (== 3.0 v))])
+
+(kind/doc #'el/max)
+
+((el/max (t/column [3]) (t/column [5])) 0 0)
 
 (kind/test-last [(fn [v] (== 5.0 v))])
 
-(kind/doc #'elem/asin)
+(kind/doc #'el/asin)
 
-((elem/asin (t/column [0.5])) 0 0)
+((el/asin (t/column [0.5])) 0 0)
 
 (kind/test-last [(fn [v] (la/close-scalar? v (math/asin 0.5)))])
 
-(kind/doc #'elem/acos)
+(kind/doc #'el/acos)
 
-((elem/acos (t/column [0.5])) 0 0)
+((el/acos (t/column [0.5])) 0 0)
 
 (kind/test-last [(fn [v] (la/close-scalar? v (math/acos 0.5)))])
 
-(kind/doc #'elem/atan)
+(kind/doc #'el/atan)
 
-((elem/atan (t/column [1.0])) 0 0)
+((el/atan (t/column [1.0])) 0 0)
 
 (kind/test-last [(fn [v] (la/close-scalar? v (math/atan 1.0)))])
 
-(kind/doc #'elem/log1p)
+(kind/doc #'el/log1p)
 
-((elem/log1p (t/column [0.0])) 0 0)
-
-(kind/test-last [(fn [v] (la/close-scalar? v 0.0))])
-
-(kind/doc #'elem/expm1)
-
-((elem/expm1 (t/column [0.0])) 0 0)
+((el/log1p (t/column [0.0])) 0 0)
 
 (kind/test-last [(fn [v] (la/close-scalar? v 0.0))])
 
-(kind/doc #'elem/round)
+(kind/doc #'el/expm1)
 
-((elem/round (t/column [2.7])) 0 0)
+((el/expm1 (t/column [0.0])) 0 0)
+
+(kind/test-last [(fn [v] (la/close-scalar? v 0.0))])
+
+(kind/doc #'el/round)
+
+((el/round (t/column [2.7])) 0 0)
 
 (kind/test-last [(fn [v] (== 3.0 v))])
 
-(kind/doc #'elem/clip)
+(kind/doc #'el/clip)
 
-(t/flatten (elem/clip (t/column [-2 0.5 3]) -1 1))
+(t/flatten (el/clip (t/column [-2 0.5 3]) -1 1))
 
 (kind/test-last [(fn [v] (= [-1.0 0.5 1.0] v))])
 
-(kind/doc #'elem/div)
+(kind/doc #'el/div)
 
-(elem/div (t/column [10 20 30]) (t/column [2 4 5]))
+(el/div (t/column [10 20 30]) (t/column [2 4 5]))
 
 (kind/test-last [(fn [v] (= [5.0 5.0 6.0] (t/flatten v)))])
 
 ;; Complex division:
 
-(elem/div (t/complex 3.0 4.0) (t/complex 1.0 2.0))
+(el/div (t/complex 3.0 4.0) (t/complex 1.0 2.0))
 
-(kind/test-last [(fn [v] (and (< (abs (- (la/re v) 2.2)) 1e-10)
-                              (< (abs (- (la/im v) -0.4)) 1e-10)))])
+(kind/test-last [(fn [v] (and (< (abs (- (el/re v) 2.2)) 1e-10)
+                              (< (abs (- (el/im v) -0.4)) 1e-10)))])
 
-(kind/doc #'elem/gt)
+(kind/doc #'el/>)
 
-(elem/gt (t/column [1 5 3]) (t/column [2 4 3]))
+(el/> (t/column [1 5 3]) (t/column [2 4 3]))
 
 (kind/test-last [(fn [v] (= [0.0 1.0 0.0] (t/flatten v)))])
 
-(kind/doc #'elem/lt)
+(kind/doc #'el/<)
 
-(elem/lt (t/column [1 5 3]) (t/column [2 4 3]))
+(el/< (t/column [1 5 3]) (t/column [2 4 3]))
 
 (kind/test-last [(fn [v] (= [1.0 0.0 0.0] (t/flatten v)))])
 
-(kind/doc #'elem/ge)
+(kind/doc #'el/>=)
 
-(elem/ge (t/column [1 5 3]) (t/column [2 4 3]))
+(el/>= (t/column [1 5 3]) (t/column [2 4 3]))
 
 (kind/test-last [(fn [v] (= [0.0 1.0 1.0] (t/flatten v)))])
 
-(kind/doc #'elem/le)
+(kind/doc #'el/<=)
 
-(elem/le (t/column [1 5 3]) (t/column [2 4 3]))
+(el/<= (t/column [1 5 3]) (t/column [2 4 3]))
 
 (kind/test-last [(fn [v] (= [1.0 0.0 1.0] (t/flatten v)))])
 
-(kind/doc #'elem/eq)
+(kind/doc #'el/eq)
 
-(elem/eq (t/column [1 5 3]) (t/column [2 4 3]))
+(el/eq (t/column [1 5 3]) (t/column [2 4 3]))
 
 (kind/test-last [(fn [v] (= [0.0 0.0 1.0] (t/flatten v)))])
 
-(kind/doc #'elem/ne)
+(kind/doc #'el/not-eq)
 
-(elem/ne (t/column [1 5 3]) (t/column [2 4 3]))
+(el/not-eq (t/column [1 5 3]) (t/column [2 4 3]))
 
 (kind/test-last [(fn [v] (= [1.0 1.0 0.0] (t/flatten v)))])
 
-(kind/doc #'elem/reduce-max)
+(kind/doc #'el/reduce-max)
 
-(elem/reduce-max (t/column [3 7 2 9 1]))
+(el/reduce-max (t/column [3 7 2 9 1]))
 
 (kind/test-last [(fn [v] (== 9.0 v))])
 
-(kind/doc #'elem/reduce-min)
+(kind/doc #'el/reduce-min)
 
-(elem/reduce-min (t/column [3 7 2 9 1]))
+(el/reduce-min (t/column [3 7 2 9 1]))
 
 (kind/test-last [(fn [v] (== 1.0 v))])
 

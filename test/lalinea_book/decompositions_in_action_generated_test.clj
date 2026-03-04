@@ -2,6 +2,7 @@
  lalinea-book.decompositions-in-action-generated-test
  (:require
   [scicloj.lalinea.linalg :as la]
+  [scicloj.lalinea.elementwise :as el]
   [scicloj.lalinea.tensor :as t]
   [tech.v3.libs.buffered-image :as bufimg]
   [tablecloth.api :as tc]
@@ -13,11 +14,11 @@
   [clojure.test :refer [deftest is]]))
 
 
-(def v3_l49 (def img-size 100))
+(def v3_l50 (def img-size 100))
 
 
 (def
- v4_l51
+ v4_l52
  (def
   test-image
   (t/->real-tensor
@@ -40,7 +41,7 @@
 
 
 (def
- v6_l65
+ v6_l66
  (let
   [t
    (t/compute-tensor
@@ -51,29 +52,29 @@
 
 
 (deftest
- t7_l71
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v6_l65)))
+ t7_l72
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v6_l66)))
 
 
-(def v9_l76 (def svd-result (la/svd test-image)))
+(def v9_l77 (def svd-result (la/svd test-image)))
 
 
-(def v11_l81 (:S svd-result))
+(def v11_l82 (:S svd-result))
 
 
 (deftest
- t12_l83
+ t12_l84
  (is
   ((fn
     [sv]
     (and
      (> (first sv) (nth sv 5) (nth sv 20))
      (> (first sv) (* 10 (nth sv 5)))))
-   v11_l81)))
+   v11_l82)))
 
 
 (def
- v13_l87
+ v13_l88
  (->
   (tc/dataset
    {:index (range (count (:S svd-result))),
@@ -84,7 +85,7 @@
 
 
 (def
- v15_l99
+ v15_l100
  (def
   reconstruct-rank-k
   (fn
@@ -102,40 +103,40 @@
 
 
 (def
- v17_l111
+ v17_l112
  (bufimg/tensor->image
   (vis/matrix->gray-image (reconstruct-rank-k svd-result 1))))
 
 
 (deftest
- t18_l113
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v17_l111)))
+ t18_l114
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v17_l112)))
 
 
 (def
- v20_l118
+ v20_l119
  (bufimg/tensor->image
   (vis/matrix->gray-image (reconstruct-rank-k svd-result 5))))
 
 
 (deftest
- t21_l120
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v20_l118)))
+ t21_l121
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v20_l119)))
 
 
 (def
- v23_l125
+ v23_l126
  (bufimg/tensor->image
   (vis/matrix->gray-image (reconstruct-rank-k svd-result 20))))
 
 
 (deftest
- t24_l127
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v23_l125)))
+ t24_l128
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v23_l126)))
 
 
 (def
- v26_l135
+ v26_l136
  (->
   (tc/dataset
    {:k [1 5 10 20 50],
@@ -158,7 +159,7 @@
 
 
 (def
- v28_l151
+ v28_l152
  (let
   [errors
    (mapv
@@ -169,14 +170,14 @@
   (every? (fn [[a b]] (> a b)) (partition 2 1 errors))))
 
 
-(deftest t29_l155 (is (true? v28_l151)))
+(deftest t29_l156 (is (true? v28_l152)))
 
 
-(def v31_l168 (def n-points 200))
+(def v31_l169 (def n-points 200))
 
 
 (def
- v32_l170
+ v32_l171
  (def
   data-tensor
   (let
@@ -203,7 +204,7 @@
 
 
 (def
- v34_l185
+ v34_l186
  (def
   X
   (let
@@ -212,9 +213,9 @@
     col1
     (t/select data-tensor :all 1)
     mean0
-    (/ (la/sum col0) n-points)
+    (/ (el/sum col0) n-points)
     mean1
-    (/ (la/sum col1) n-points)
+    (/ (el/sum col1) n-points)
     means
     (t/compute-tensor
      [n-points 2]
@@ -224,44 +225,44 @@
 
 
 (def
- v36_l197
+ v36_l198
  (def
   cov-matrix
   (la/scale (la/mmul (la/transpose X) X) (/ 1.0 (dec n-points)))))
 
 
-(def v37_l200 cov-matrix)
+(def v37_l201 cov-matrix)
 
 
-(deftest t38_l202 (is ((fn [m] (= [2 2] (t/shape m))) v37_l200)))
+(deftest t38_l203 (is ((fn [m] (= [2 2] (t/shape m))) v37_l201)))
 
 
-(def v40_l207 (la/close? cov-matrix (la/transpose cov-matrix)))
+(def v40_l208 (la/close? cov-matrix (la/transpose cov-matrix)))
 
 
-(deftest t41_l209 (is (true? v40_l207)))
+(deftest t41_l210 (is (true? v40_l208)))
 
 
-(def v42_l211 (def pca-eigen (la/eigen cov-matrix)))
+(def v42_l212 (def pca-eigen (la/eigen cov-matrix)))
 
 
-(def v44_l215 (reverse (la/real-eigenvalues cov-matrix)))
+(def v44_l216 (reverse (la/real-eigenvalues cov-matrix)))
 
 
 (deftest
- t45_l217
+ t45_l218
  (is
   ((fn [evs] (and (every? pos? evs) (> (first evs) (second evs))))
-   v44_l215)))
+   v44_l216)))
 
 
 (def
- v47_l227
+ v47_l228
  (let
   [{:keys [eigenvalues eigenvectors]}
    pca-eigen
    reals
-   (la/re eigenvalues)
+   (el/re eigenvalues)
    sorted-idx
    (sort-by
     (fn [i] (- (double (reals i))))
@@ -298,16 +299,16 @@
    plotly/plot)))
 
 
-(deftest t48_l250 (is ((fn [_] true) v47_l227)))
+(deftest t48_l251 (is ((fn [_] true) v47_l228)))
 
 
 (def
- v50_l257
+ v50_l258
  (let
   [{:keys [eigenvalues eigenvectors]}
    pca-eigen
    reals
-   (la/re eigenvalues)
+   (el/re eigenvalues)
    sorted-idx
    (sort-by
     (fn [i] (- (double (reals i))))
@@ -319,27 +320,27 @@
    variances
    (sort > reals)
    explained
-   (/ (first variances) (la/sum variances))]
+   (/ (first variances) (el/sum variances))]
   explained))
 
 
-(deftest t52_l270 (is ((fn [v] (> v 0.8)) v50_l257)))
+(deftest t52_l271 (is ((fn [v] (> v 0.8)) v50_l258)))
 
 
-(def v54_l282 (def test-matrix (t/matrix [[4 1 0] [1 3 1] [0 1 2]])))
+(def v54_l283 (def test-matrix (t/matrix [[4 1 0] [1 3 1] [0 1 2]])))
 
 
-(def v56_l289 (def true-eigenvalues (la/real-eigenvalues test-matrix)))
+(def v56_l290 (def true-eigenvalues (la/real-eigenvalues test-matrix)))
 
 
-(def v57_l292 true-eigenvalues)
+(def v57_l293 true-eigenvalues)
 
 
-(deftest t58_l294 (is ((fn [evs] (= 3 (count evs))) v57_l292)))
+(deftest t58_l295 (is ((fn [evs] (= 3 (count evs))) v57_l293)))
 
 
 (def
- v60_l299
+ v60_l300
  (def
   qr-history
   (loop
@@ -376,7 +377,7 @@
 
 
 (def
- v62_l327
+ v62_l328
  (->
   (tc/dataset qr-history)
   (plotly/base {:=x :iteration, :=y :off-diagonal})
@@ -384,14 +385,14 @@
   plotly/plot))
 
 
-(def v63_l332 (:off-diagonal (last qr-history)))
+(def v63_l333 (:off-diagonal (last qr-history)))
 
 
-(deftest t64_l334 (is ((fn [v] (< v 1.0E-6)) v63_l332)))
+(deftest t64_l335 (is ((fn [v] (< v 1.0E-6)) v63_l333)))
 
 
 (def
- v66_l339
+ v66_l340
  (let
   [final
    (last qr-history)
@@ -403,11 +404,11 @@
    1.0E-4)))
 
 
-(deftest t67_l344 (is (true? v66_l339)))
+(deftest t67_l345 (is (true? v66_l340)))
 
 
 (def
- v69_l348
+ v69_l349
  (->
   (tc/dataset
    (mapcat
@@ -422,4 +423,4 @@
   plotly/plot))
 
 
-(deftest t70_l357 (is ((fn [_] true) v69_l348)))
+(deftest t70_l358 (is ((fn [_] true) v69_l349)))

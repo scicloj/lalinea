@@ -9,6 +9,7 @@
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
+   [scicloj.lalinea.elementwise :as el]
    [scicloj.lalinea.tensor :as t]
    ;; FFT bridge — Fastmath transforms ↔ ComplexTensor:
    [scicloj.lalinea.transform :as ft]
@@ -133,7 +134,7 @@
 ;; $\hat{f} = [2, 0, 2, 0]$ — a signal with energy at DC and Nyquist.
 
 (kind/test-last [(fn [ct] (and (= [4] (t/complex-shape ct))
-                               (< (abs (- (la/re (ct 0)) 2.0)) 1e-10)))])
+                               (< (abs (- (el/re (ct 0)) 2.0)) 1e-10)))])
 
 ;; Round-trip:
 
@@ -147,7 +148,7 @@
 ;;
 ;; Since matrices are tensors, all dtype-next operations work.
 
-(la/sum (t/matrix [[1 2] [3 4]]))
+(el/sum (t/matrix [[1 2] [3 4]]))
 
 (kind/test-last [(fn [v] (= v 10.0))])
 
@@ -198,19 +199,17 @@
 
 ;; ## Element-wise functions
 ;;
-;; `la/` covers linear algebra; `elem/` covers element-wise math — both
+;; `la/` covers linear algebra; `el/` covers element-wise math — both
 ;; are tape-aware and work with both real and complex inputs.
 ;;
 ;; `scicloj.lalinea.elementwise` provides tape-aware
 ;; element-wise math functions (sqrt, sin, exp, ...):
 
-(require '[scicloj.lalinea.elementwise :as elem])
-
-(elem/exp (t/column [0.0 1.0 2.0]))
+(el/exp (t/column [0.0 1.0 2.0]))
 
 (kind/test-last [(fn [v] (la/close? v (t/column [1.0 (math/exp 1.0) (math/exp 2.0)])))])
 
-(elem/clip (t/column [-2 0.5 3]) -1 1)
+(el/clip (t/column [-2 0.5 3]) -1 1)
 
 (kind/test-last [(fn [v] (la/close? v (t/column [-1 0.5 1])))])
 
@@ -235,7 +234,7 @@
 
 (let [A (t/matrix [[1 2] [3 4]])
       tape-result (tape/with-tape
-                    (la/sum (la/sq (la/sub (la/mmul A A)
+                    (el/sum (el/sq (la/sub (la/mmul A A)
                                            (t/matrix [[1 0] [0 1]])))))]
   ((grad/grad tape-result (:result tape-result) A) 0 0))
 

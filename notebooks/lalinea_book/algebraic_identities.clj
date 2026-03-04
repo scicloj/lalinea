@@ -13,7 +13,7 @@
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.tensor :as t]
-   [scicloj.lalinea.elementwise :as elem]
+   [scicloj.lalinea.elementwise :as el]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]
    [clojure.math :as math]))
@@ -398,7 +398,7 @@
 ;; ### Eigenvalue equation: $Av = \lambda v$
 
 (let [{:keys [eigenvalues eigenvectors]} (la/eigen A)
-      reals (la/re eigenvalues)]
+      reals (el/re eigenvalues)]
   (every? (fn [[i evec]]
             (when evec
               (let [Av (la/mmul A evec)
@@ -411,7 +411,7 @@
 ;; ### Trace equals sum of eigenvalues: $\operatorname{tr}(A) = \sum \lambda_i$
 
 (let [{:keys [eigenvalues]} (la/eigen A)
-      eig-sum (la/sum (la/re eigenvalues))]
+      eig-sum (el/sum (el/re eigenvalues))]
   (la/close-scalar? (la/trace A) eig-sum))
 
 (kind/test-last [true?])
@@ -419,7 +419,7 @@
 ;; ### Determinant equals product of eigenvalues: $\det(A) = \prod \lambda_i$
 
 (let [{:keys [eigenvalues]} (la/eigen A)
-      eig-prod (la/prod (la/re eigenvalues))]
+      eig-prod (el/prod (el/re eigenvalues))]
   (la/close-scalar? (la/det A) eig-prod))
 
 (kind/test-last [true?])
@@ -458,7 +458,7 @@
 
 (let [{:keys [S]} (la/svd A)
       AtA-eigs (la/real-eigenvalues (la/mmul (la/transpose A) A))
-      sv-squared (sort > (la/sq S))]
+      sv-squared (sort > (el/sq S))]
   (la/close? (t/->real-tensor sv-squared)
              (t/->real-tensor (reverse AtA-eigs)) 1e-8))
 
@@ -467,7 +467,7 @@
 ;; ### [Frobenius norm](https://en.wikipedia.org/wiki/Matrix_norm#Frobenius_norm) from singular values: $\|A\|_F = \sqrt{\sum \sigma_i^2}$
 
 (let [{:keys [S]} (la/svd A)
-      sv-norm (math/sqrt (la/sum (la/mul S S)))]
+      sv-norm (math/sqrt (el/sum (el/mul S S)))]
   (la/close-scalar? (la/norm A) sv-norm))
 
 (kind/test-last [true?])
@@ -529,28 +529,28 @@
 
 ;; ### Commutativity: $a \cdot b = b \cdot a$
 
-(la/close? (la/mul ca cb) (la/mul cb ca))
+(la/close? (el/mul ca cb) (el/mul cb ca))
 
 (kind/test-last [true?])
 
 ;; ### Conjugate is an involution: $\overline{\overline{a}} = a$
 
-(la/close? (la/conj (la/conj ca)) ca)
+(la/close? (el/conj (el/conj ca)) ca)
 
 (kind/test-last [true?])
 
 ;; ### Conjugate distributes: $\overline{a \cdot b} = \bar{a} \cdot \bar{b}$
 
-(la/close? (la/conj (la/mul ca cb))
-           (la/mul (la/conj ca) (la/conj cb)))
+(la/close? (el/conj (el/mul ca cb))
+           (el/mul (el/conj ca) (el/conj cb)))
 
 (kind/test-last [true?])
 
 ;; ### Magnitude is multiplicative: $|a \cdot b| = |a| \cdot |b|$
 
-(< (elem/reduce-max
-    (elem/abs (la/sub (la/abs (la/mul ca cb))
-                      (la/mul (la/abs ca) (la/abs cb)))))
+(< (el/reduce-max
+    (el/abs (la/sub (el/abs (el/mul ca cb))
+                      (el/mul (el/abs ca) (el/abs cb)))))
    1e-10)
 
 (kind/test-last [true?])
@@ -558,10 +558,10 @@
 ;; ### [Cauchy-Schwarz](https://en.wikipedia.org/wiki/Cauchy%E2%80%93Schwarz_inequality): $|\langle a, b \rangle_H|^2 \leq \langle a, a \rangle_H \cdot \langle b, b \rangle_H$
 
 (let [d-ab (la/dot ca cb)
-      re-ab (double (la/re d-ab))
-      im-ab (double (la/im d-ab))
-      re-aa (double (la/re (la/dot ca ca)))
-      re-bb (double (la/re (la/dot cb cb)))]
+      re-ab (double (el/re d-ab))
+      im-ab (double (el/im d-ab))
+      re-aa (double (el/re (la/dot ca ca)))
+      re-bb (double (el/re (la/dot cb cb)))]
   (<= (- (+ (* re-ab re-ab) (* im-ab im-ab)) 1e-10)
       (* re-aa re-bb)))
 
@@ -600,7 +600,7 @@
       det-AB (la/det (la/mmul CA CB))
       det-A (la/det CA)
       det-B (la/det CB)
-      product (la/mul det-A det-B)]
+      product (el/mul det-A det-B)]
   (< (la/norm (la/sub det-AB product)) 1e-10))
 
 (kind/test-last [true?])

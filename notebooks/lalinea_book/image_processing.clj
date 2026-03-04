@@ -2,7 +2,7 @@
 ;;
 ;; An image is a tensor — a 3D array of shape `[height width channels]`.
 ;; This chapter builds image processing tools using dtype-next tensors,
-;; element-wise `elem/` operations, and `t/matrix` for convolution kernels.
+;; element-wise `el/` operations, and `t/matrix` for convolution kernels.
 ;; All images are synthetic: no external files needed.
 
 (ns lalinea-book.image-processing
@@ -10,7 +10,7 @@
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.tensor :as t]
-   [scicloj.lalinea.elementwise :as elem]
+   [scicloj.lalinea.elementwise :as el]
    ;; Tensor ↔ BufferedImage conversion:
    [tech.v3.libs.buffered-image :as bufimg]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
@@ -119,7 +119,7 @@
 ;; ## Brightness and contrast
 ;;
 ;; Since the image tensor is backed by typed data, element-wise
-;; operations with `elem/` transform every pixel at once.
+;; operations with `el/` transform every pixel at once.
 ;;
 ;; **Brightness**: add a constant.
 ;; **Contrast**: multiply by a factor.
@@ -131,8 +131,8 @@
     (-> img
         (t/elemwise-cast :int16)
         (la/scale 1.5)
-        (elem/max 0)
-        (elem/min 255)
+        (el/max 0)
+        (el/min 255)
         (t/elemwise-cast :uint8)
         t/->tensor
         (t/reshape (t/shape img)))))
@@ -195,7 +195,7 @@
 
 ;; Edge detection kernels sum to zero (no DC response):
 
-(la/sum edge-kernel)
+(el/sum edge-kernel)
 
 (kind/test-last [(fn [v] (== 0.0 v))])
 

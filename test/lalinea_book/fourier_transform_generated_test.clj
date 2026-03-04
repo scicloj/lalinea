@@ -3,7 +3,7 @@
  (:require
   [scicloj.lalinea.linalg :as la]
   [scicloj.lalinea.tensor :as t]
-  [scicloj.lalinea.elementwise :as elem]
+  [scicloj.lalinea.elementwise :as el]
   [scicloj.lalinea.transform :as ft]
   [tablecloth.api :as tc]
   [scicloj.tableplot.v1.plotly :as plotly]
@@ -17,7 +17,7 @@
 
 (deftest
  t5_l38
- (is ((fn [ct] (< (abs (double (la/re (ct 0)))) 1.0E-10)) v3_l34)))
+ (is ((fn [ct] (< (abs (double (el/re (ct 0)))) 1.0E-10)) v3_l34)))
 
 
 (def
@@ -29,7 +29,7 @@
    (ft/forward signal)
    recovered
    (ft/inverse-real spectrum)]
-  (elem/reduce-max (elem/abs (la/sub recovered signal)))))
+  (el/reduce-max (el/abs (la/sub recovered signal)))))
 
 
 (deftest t8_l49 (is ((fn [v] (< v 1.0E-10)) v7_l44)))
@@ -45,11 +45,11 @@
    spectrum
    (ft/forward signal)
    time-energy
-   (la/sum (la/mul signal signal))
+   (el/sum (el/mul signal signal))
    magnitudes
-   (la/abs spectrum)
+   (el/abs spectrum)
    freq-energy
-   (/ (la/sum (la/mul magnitudes magnitudes)) n)]
+   (/ (el/sum (el/mul magnitudes magnitudes)) n)]
   (< (abs (- time-energy freq-energy)) 1.0E-10)))
 
 
@@ -68,7 +68,7 @@
    beta
    -1.5
    combined
-   (la/add (la/mul alpha x) (la/mul beta y))
+   (la/add (el/mul alpha x) (el/mul beta y))
    lhs
    (ft/forward combined)
    rhs
@@ -77,10 +77,10 @@
     (la/scale (ft/forward y) beta))]
   (and
    (<
-    (elem/reduce-max (elem/abs (la/sub (la/re lhs) (la/re rhs))))
+    (el/reduce-max (el/abs (la/sub (el/re lhs) (el/re rhs))))
     1.0E-10)
    (<
-    (elem/reduce-max (elem/abs (la/sub (la/im lhs) (la/im rhs))))
+    (el/reduce-max (el/abs (la/sub (el/im lhs) (el/im rhs))))
     1.0E-10))))
 
 
@@ -99,7 +99,7 @@
    Fy
    (ft/forward y)
    product-spectrum
-   (la/mul Fx Fy)
+   (el/mul Fx Fy)
    conv-result
    (ft/inverse-real product-spectrum)
    n
@@ -122,7 +122,7 @@
       (t/set-value! out k s)))
     out)]
   (<
-   (elem/reduce-max (elem/abs (la/sub conv-result manual-conv)))
+   (el/reduce-max (el/abs (la/sub conv-result manual-conv)))
    1.0E-10)))
 
 
@@ -162,7 +162,7 @@
 (def
  v24_l137
  (let
-  [spectrum (ft/forward signal-composed) mags (la/abs spectrum)]
+  [spectrum (ft/forward signal-composed) mags (el/abs spectrum)]
   (->
    (tc/dataset
     {:frequency (range (/ N-vis 2)),
@@ -178,7 +178,7 @@
   [spectrum
    (ft/forward signal-composed)
    mags
-   (la/abs spectrum)
+   (el/abs spectrum)
    half-n
    (/ N-vis 2)
    peak-idx
@@ -193,11 +193,11 @@
  v29_l161
  (let
   [spectrum (ft/forward [3.0 3.0 3.0 3.0])]
-  {:dc (la/re (spectrum 0)),
+  {:dc (el/re (spectrum 0)),
    :others
-   [(la/abs (spectrum 1))
-    (la/abs (spectrum 2))
-    (la/abs (spectrum 3))]}))
+   [(el/abs (spectrum 1))
+    (el/abs (spectrum 2))
+    (el/abs (spectrum 3))]}))
 
 
 (deftest
@@ -207,7 +207,7 @@
     [v]
     (and
      (< (abs (- (double (:dc v)) 12.0)) 1.0E-10)
-     (every? (fn* [p1__88773#] (< p1__88773# 1.0E-10)) (:others v))))
+     (every? (fn* [p1__68868#] (< p1__68868# 1.0E-10)) (:others v))))
    v29_l161)))
 
 
@@ -215,8 +215,8 @@
  v32_l170
  (let
   [spectrum (ft/forward [1.0 -1.0 1.0 -1.0])]
-  {:dc (double (la/abs (spectrum 0))),
-   :nyquist (double (la/re (spectrum 2)))}))
+  {:dc (double (el/abs (spectrum 0))),
+   :nyquist (double (el/re (spectrum 2)))}))
 
 
 (deftest
@@ -239,12 +239,10 @@
    (ft/inverse spectrum)]
   (and
    (<
-    (elem/reduce-max
-     (elem/abs (la/sub (la/re recovered) (la/re signal))))
+    (el/reduce-max (el/abs (la/sub (el/re recovered) (el/re signal))))
     1.0E-10)
    (<
-    (elem/reduce-max
-     (elem/abs (la/sub (la/im recovered) (la/im signal))))
+    (el/reduce-max (el/abs (la/sub (el/im recovered) (el/im signal))))
     1.0E-10))))
 
 
@@ -260,7 +258,7 @@
    (ft/dct-forward signal)
    recovered
    (ft/dct-inverse dct)]
-  (< (elem/reduce-max (elem/abs (la/sub recovered signal))) 1.0E-10)))
+  (< (el/reduce-max (el/abs (la/sub recovered signal))) 1.0E-10)))
 
 
 (deftest t39_l198 (is (true? v38_l193)))

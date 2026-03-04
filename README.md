@@ -24,9 +24,9 @@ Two namespaces cover most usage:
 
 `la/add`, `la/mmul`, `la/transpose`, `la/dot`, and most other functions work
 uniformly on both real tensors and ComplexTensors. Field-aware operations like
-`la/re`, `la/im`, `la/conj` are identity on reals and meaningful on complex.
+`el/re`, `el/im`, `el/conj` are identity on reals and meaningful on complex.
 
-Supporting namespaces: `elem/` (element-wise math), `tape/` (computation recording),
+Supporting namespaces: `el/` (element-wise math), `tape/` (computation recording),
 `grad/` (autodiff), `ft/` (FFT bridge), `vis/` (visualization helpers).
 
 ## Features
@@ -34,8 +34,8 @@ Supporting namespaces: `elem/` (element-wise math), `tape/` (computation recordi
 ### Real matrices
 
 - **Construction** — `matrix`, `eye`, `zeros`, `ones`, `diag`, `column`, `row`, `submatrix`
-- **Arithmetic** — `mmul`, `mpow`, `add`, `sub`, `scale`, `mul`, `transpose`
-- **Properties** — `trace`, `det`, `norm` (Frobenius), `dot`, `abs`, `sq`, `sum`
+- **Arithmetic** — `mmul`, `mpow`, `add`, `sub`, `scale`, `transpose`
+- **Properties** — `trace`, `det`, `norm` (Frobenius), `dot`
 - **Analysis** — `rank`, `condition-number`, `pinv` (pseudoinverse), `null-space`, `col-space`
 - **Solve** — `solve`, `lstsq` (least squares), `invert`
 - **Decompositions** — [eigendecomposition](https://en.wikipedia.org/wiki/Eigendecomposition_of_a_matrix), [SVD](https://en.wikipedia.org/wiki/Singular_value_decomposition), [QR](https://en.wikipedia.org/wiki/QR_decomposition), [Cholesky](https://en.wikipedia.org/wiki/Cholesky_decomposition)
@@ -48,14 +48,16 @@ Supporting namespaces: `elem/` (element-wise math), `tape/` (computation recordi
 
 ### Element-wise operations
 
-- `scicloj.lalinea.elementwise` — 27 tape-aware functions with complex dispatch
+- `scicloj.lalinea.elementwise` — 35+ tape-aware functions with complex dispatch
+- Arithmetic: `mul`, `add`, `sub`, `scale`, `div`
+- Complex-aware: `re`, `im`, `conj`
 - Powers: `sq`, `sqrt`, `pow`, `cbrt`
 - Exponential: `exp`, `log`, `log10`, `log1p`, `expm1`
 - Trigonometric: `sin`, `cos`, `tan`, `asin`, `acos`, `atan`
 - Hyperbolic: `sinh`, `cosh`, `tanh`
-- Reductions: `sum`, `mean`
+- Reductions: `abs`, `sum`, `prod`, `mean`, `reduce-max`, `reduce-min`
 - Rounding: `floor`, `ceil`, `round`, `clip`
-- Comparison: `min`, `max`, `abs`
+- Comparison: `>`, `<`, `>=`, `<=`, `eq`, `not-eq`, `min`, `max`
 
 ### Tagged literals
 
@@ -81,7 +83,7 @@ Round-trip through `pr-str` / `read-string`.
 
 ### Computation tape
 
-- Record `la/`, `t/`, and `elem/` operations as a DAG with `tape/with-tape`
+- Record `la/`, `t/`, and `el/` operations as a DAG with `tape/with-tape`
 - Inspect memory status: `:contiguous`, `:strided`, or `:lazy`
 - Detect shared backing arrays between tensors
 - Visualize computation graphs as Mermaid flowcharts
@@ -89,7 +91,7 @@ Round-trip through `pr-str` / `read-string`.
 ### Automatic differentiation
 
 - Reverse-mode autodiff via VJP rules on the computation tape
-- Differentiable ops: `add`, `sub`, `scale`, `mmul`, `transpose`, `mul`, `trace`, `det`, `invert`, `norm`, `sq`, `sum`
+- Differentiable ops: `la/add`, `la/sub`, `la/scale`, `la/mmul`, `la/transpose`, `la/trace`, `la/det`, `la/invert`, `la/norm`, `la/dot`, `el/mul`, `el/sq`, `el/sum`
 - Compute gradients of scalar functions with respect to matrix inputs
 
 ### Zero-copy interop
@@ -118,7 +120,7 @@ Each chapter includes inline tests via
 ```clojure
 (require '[scicloj.lalinea.tensor :as t])           ; tensor construction, structural ops, EJML interop
 (require '[scicloj.lalinea.linalg :as la])          ; arithmetic, decompositions, solve
-(require '[scicloj.lalinea.elementwise :as elem])   ; element-wise math (sqrt, sin, exp, ...)
+(require '[scicloj.lalinea.elementwise :as el])    ; element-wise math, comparisons, field ops
 (require '[scicloj.lalinea.transform :as ft])       ; FFT / DCT / DST / DHT bridge
 (require '[scicloj.lalinea.tape :as tape])          ; computation DAG recording
 (require '[scicloj.lalinea.grad :as grad])          ; reverse-mode automatic differentiation

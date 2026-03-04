@@ -3,7 +3,7 @@
  (:require
   [scicloj.lalinea.linalg :as la]
   [scicloj.lalinea.tensor :as t]
-  [scicloj.lalinea.elementwise :as elem]
+  [scicloj.lalinea.elementwise :as el]
   [tech.v3.libs.buffered-image :as bufimg]
   [scicloj.kindly.v4.kind :as kind]
   [scicloj.lalinea.vis :as vis]
@@ -137,8 +137,8 @@
     img
     (t/elemwise-cast :int16)
     (la/scale 1.5)
-    (elem/max 0)
-    (elem/min 255)
+    (el/max 0)
+    (el/min 255)
     (t/elemwise-cast :uint8)
     t/->tensor
     (t/reshape (t/shape img))))))
@@ -204,7 +204,7 @@
  (def edge-kernel (t/matrix [[-1 -1 -1] [-1 8 -1] [-1 -1 -1]])))
 
 
-(def v37_l198 (la/sum edge-kernel))
+(def v37_l198 (el/sum edge-kernel))
 
 
 (deftest t38_l200 (is ((fn [v] (== 0.0 v)) v37_l198)))

@@ -15,6 +15,7 @@
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
+   [scicloj.lalinea.elementwise :as el]
    [scicloj.lalinea.tensor :as t]
    ;; Tensor ↔ BufferedImage conversion:
    [tech.v3.libs.buffered-image :as bufimg]
@@ -185,8 +186,8 @@
 (def X
   (let [col0 (t/select data-tensor :all 0)
         col1 (t/select data-tensor :all 1)
-        mean0 (/ (la/sum col0) n-points)
-        mean1 (/ (la/sum col1) n-points)
+        mean0 (/ (el/sum col0) n-points)
+        mean1 (/ (el/sum col1) n-points)
         means (t/compute-tensor [n-points 2]
                                 (fn [_i j] (if (zero? j) mean0 mean1))
                                 :float64)]
@@ -225,7 +226,7 @@ cov-matrix
 ;; of the corresponding eigenvalue.
 
 (let [{:keys [eigenvalues eigenvectors]} pca-eigen
-      reals (la/re eigenvalues)
+      reals (el/re eigenvalues)
       sorted-idx (sort-by (fn [i] (- (double (reals i)))) (range (count eigenvectors)))
       lam1 (double (reals (first sorted-idx)))
       ev1 (nth eigenvectors (first sorted-idx))
@@ -255,14 +256,14 @@ cov-matrix
 ;; Projection is a matrix multiply: $X_{\text{proj}} = X \cdot v_1 \cdot v_1^T$
 
 (let [{:keys [eigenvalues eigenvectors]} pca-eigen
-      reals (la/re eigenvalues)
+      reals (el/re eigenvalues)
       sorted-idx (sort-by (fn [i] (- (double (reals i)))) (range (count eigenvectors)))
       ev1 (nth eigenvectors (first sorted-idx))
       ;; Project: X * v1 * v1^T
       projected (la/mmul (la/mmul X ev1) (la/transpose ev1))
       ;; Fraction of variance explained
       variances (sort > reals)
-      explained (/ (first variances) (la/sum variances))]
+      explained (/ (first variances) (el/sum variances))]
   explained)
 
 ;; The first PC explains most of the variance:

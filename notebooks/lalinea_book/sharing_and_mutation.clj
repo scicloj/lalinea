@@ -17,6 +17,7 @@
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
+   [scicloj.lalinea.elementwise :as el]
    [scicloj.lalinea.tensor :as t]
    ;; Low-level tensor operations for memory demos:
    [tech.v3.tensor :as dtt]
@@ -196,7 +197,7 @@
           (t/matrix [[1 2] [3 4] [5 6]]))
       arr (t/->double-array ct)]
   (aset arr 0 99.0)
-  (la/re (ct 0)))
+  (el/re (ct 0)))
 
 (kind/test-last [(fn [v] (== 99.0 v))])
 
@@ -217,7 +218,7 @@
       ct (t/complex-tensor ct-data)
       arr (t/->double-array ct-data)
       _ (aset arr 1 99.0)]
-  (la/im (ct 0)))
+  (el/im (ct 0)))
 
 (kind/test-last [(fn [v] (== 99.0 v))])
 
@@ -227,18 +228,18 @@
 (let [ct-data (t/matrix [[1 2] [3 4] [5 6]])
       ct (t/complex-tensor ct-data)]
   (t/mset! ct-data 0 1 99.0)
-  (la/im (ct 0)))
+  (el/im (ct 0)))
 
 (kind/test-last [(fn [v] (== 99.0 v))])
 
 ;; ## re and im are strided views
 
-;; `la/re` and `la/im` return views into the interleaved layout.
+;; `el/re` and `el/im` return views into the interleaved layout.
 ;; They share the same backing memory.
 
 (let [ct (t/complex-tensor
           (t/matrix [[10 40] [20 50] [30 60]]))
-      re-view (la/re ct)
+      re-view (el/re ct)
       arr (t/->double-array (t/->tensor ct))
       _ (aset arr 0 -10.0)]
   (double (re-view 0)))
@@ -250,7 +251,7 @@
 
 (let [ct (t/complex-tensor
           (t/matrix [[10 40] [20 50] [30 60]]))
-      re-view (la/re ct)]
+      re-view (el/re ct)]
   (t/mset! (t/->tensor ct) 0 0 -10.0)
   (double (re-view 0)))
 
@@ -258,7 +259,7 @@
 
 ;; ## Lazy operations: no new memory, no new mutation handle
 
-;; `la/add`, `la/mul`, etc. return **lazy noncaching readers**.
+;; `la/add`, `el/mul`, etc. return **lazy noncaching readers**.
 ;; They allocate no new memory — they recompute on every access,
 ;; reading through to the original source buffers. This means
 ;; they don't create a new mutable handle, but they still
@@ -304,8 +305,8 @@
       cb (t/complex-tensor
           (t/matrix [[10 30] [20 40]]))
       lazy-sum (la/add ca cb)]
-  {:re (seq (la/re lazy-sum))
-   :im (seq (la/im lazy-sum))})
+  {:re (seq (el/re lazy-sum))
+   :im (seq (el/im lazy-sum))})
 
 (kind/test-last
  [(fn [{:keys [re im]}]
@@ -321,7 +322,7 @@
       lazy-sum (la/add ca cb)
       arr (t/->double-array (t/->tensor ca))
       _ (aset arr 0 100.0)]
-  (seq (la/re lazy-sum)))
+  (seq (el/re lazy-sum)))
 
 (kind/test-last [(fn [v] (= [110.0 22.0] v))])
 
@@ -333,7 +334,7 @@
           (t/matrix [[10 30] [20 40]]))
       lazy-sum (la/add ca cb)]
   (t/mset! (t/->tensor ca) 0 0 100.0)
-  (seq (la/re lazy-sum)))
+  (seq (el/re lazy-sum)))
 
 (kind/test-last [(fn [v] (= [110.0 22.0] v))])
 
@@ -386,8 +387,8 @@
       ct-clone (t/clone ct-orig)
       orig-arr (t/->double-array (t/->tensor ct-orig))
       _ (aset orig-arr 0 -1.0)]
-  {:orig-re (la/re (ct-orig 0))
-   :clone-re (la/re (ct-clone 0))})
+  {:orig-re (el/re (ct-orig 0))
+   :clone-re (el/re (ct-clone 0))})
 
 (kind/test-last
  [(fn [{:keys [orig-re clone-re]}]
@@ -400,8 +401,8 @@
                (t/matrix [[1 4] [2 5] [3 6]]))
       ct-clone (t/clone ct-orig)]
   (t/mset! (t/->tensor ct-orig) 0 0 -1.0)
-  {:orig-re (la/re (ct-orig 0))
-   :clone-re (la/re (ct-clone 0))})
+  {:orig-re (el/re (ct-orig 0))
+   :clone-re (el/re (ct-clone 0))})
 
 (kind/test-last
  [(fn [{:keys [orig-re clone-re]}]
@@ -434,8 +435,8 @@
       materialized-pq (t/clone lazy-pq)
       arr (t/->double-array (t/->tensor p))
       _ (aset arr 0 999.0)]
-  {:lazy-re (seq (la/re lazy-pq))
-   :materialized-re (seq (la/re materialized-pq))})
+  {:lazy-re (seq (el/re lazy-pq))
+   :materialized-re (seq (el/re materialized-pq))})
 
 (kind/test-last
  [(fn [{:keys [lazy-re materialized-re]}]
@@ -451,8 +452,8 @@
       lazy-pq (la/add p q)
       materialized-pq (t/clone lazy-pq)]
   (t/mset! (t/->tensor p) 0 0 999.0)
-  {:lazy-re (seq (la/re lazy-pq))
-   :materialized-re (seq (la/re materialized-pq))})
+  {:lazy-re (seq (el/re lazy-pq))
+   :materialized-re (seq (el/re materialized-pq))})
 
 (kind/test-last
  [(fn [{:keys [lazy-re materialized-re]}]
@@ -664,8 +665,8 @@
 ;; | `t/select` | No | Yes — strided view | View into same `double[]` |
 ;; | `tensor->dmat` / `dmat->tensor` | No | Yes — same `double[]` | Zero-copy EJML interop |
 ;; | `t/complex-tensor` (1-arity wrap) | No | Yes — wraps tensor | Shares the interleaved array |
-;; | `la/re` / `la/im` | No | Yes — strided view | Views into interleaved layout |
-;; | `la/add`, `la/mul`, etc. | No | No — lazy reader | Reads through to sources |
+;; | `el/re` / `el/im` | No | Yes — strided view | Views into interleaved layout |
+;; | `la/add`, `el/mul`, etc. | No | No — lazy reader | Reads through to sources |
 ;; | `la/add`, `la/sub`, `la/scale` | No | No — lazy reader | Lazy ComplexTensors |
 ;; | `t/compute-tensor` | No | No — lazy, noncaching | May evaluate out of element order |
 ;; | `t/clone` | Yes | Yes — independent | Breaks all links to source |

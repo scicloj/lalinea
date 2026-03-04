@@ -21,7 +21,7 @@
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.tensor :as t]
-   [scicloj.lalinea.elementwise :as elem]
+   [scicloj.lalinea.elementwise :as el]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
@@ -63,7 +63,7 @@
 
 ;; The **degree** of each vertex — how many neighbours it has:
 
-(t/reduce-axis adj la/sum 1)
+(t/reduce-axis adj el/sum 1)
 
 (kind/test-last
  [(fn [v] (= v [2.0 2.0 3.0 3.0 2.0 2.0]))])
@@ -83,7 +83,7 @@
 
 (def laplacian
   (fn [adj]
-    (la/sub (t/diag (t/reduce-axis adj la/sum 1)) adj)))
+    (la/sub (t/diag (t/reduce-axis adj el/sum 1)) adj)))
 
 (def L (laplacian adj))
 
@@ -104,7 +104,7 @@ L
 
 ;; Let us verify that each row sums to zero:
 
-(elem/reduce-max (elem/abs (t/reduce-axis L la/sum 1)))
+(el/reduce-max (el/abs (t/reduce-axis L el/sum 1)))
 
 (kind/test-last
  [(fn [v] (< v 1e-10))])
@@ -164,7 +164,7 @@ fiedler-value
 ;; a spectral bisection of the graph.
 
 (def sorted-eig-indices
-  (let [vals (la/re (:eigenvalues eig))]
+  (let [vals (el/re (:eigenvalues eig))]
     (sort-by (fn [i] (double (vals i))) (range (count (:eigenvalues eig))))))
 
 (def fiedler-eigvec
@@ -183,7 +183,7 @@ fiedler-entries
 ;; The Fiedler vector is orthogonal to the all-ones vector
 ;; (zero mean):
 
-(< (abs (la/sum fiedler-entries)) 1e-10)
+(< (abs (el/sum fiedler-entries)) 1e-10)
 
 (kind/test-last [true?])
 
@@ -322,8 +322,8 @@ cycle-theoretical
 
 ;; They agree to machine precision:
 
-(< (elem/reduce-max
-    (elem/abs (la/sub cycle-eigenvalues cycle-theoretical)))
+(< (el/reduce-max
+    (el/abs (la/sub cycle-eigenvalues cycle-theoretical)))
    1e-10)
 
 (kind/test-last [true?])
@@ -356,8 +356,8 @@ path-eigenvalues
 
 path-theoretical
 
-(< (elem/reduce-max
-    (elem/abs (la/sub path-eigenvalues path-theoretical)))
+(< (el/reduce-max
+    (el/abs (la/sub path-eigenvalues path-theoretical)))
    1e-10)
 
 (kind/test-last [true?])
@@ -427,7 +427,7 @@ comm-eigenvalues
 ;; smallest eigenvalues:
 
 (def sorted-comm-indices
-  (let [vals (la/re (:eigenvalues comm-eig))]
+  (let [vals (el/re (:eigenvalues comm-eig))]
     (sort-by (fn [i] (double (vals i))) (range (count (:eigenvalues comm-eig))))))
 
 ;; The spectral embedding — each vertex gets coordinates from

@@ -3,7 +3,7 @@
  (:require
   [scicloj.lalinea.linalg :as la]
   [scicloj.lalinea.tensor :as t]
-  [scicloj.lalinea.elementwise :as elem]
+  [scicloj.lalinea.elementwise :as el]
   [tablecloth.api :as tc]
   [scicloj.tableplot.v1.plotly :as plotly]
   [scicloj.kindly.v4.kind :as kind]
@@ -20,7 +20,7 @@
  v5_l45
  (let
   [ct (t/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0])]
-  {:re (la/re ct), :im (la/im ct)}))
+  {:re (el/re ct), :im (el/im ct)}))
 
 
 (deftest
@@ -36,14 +36,14 @@
 (deftest
  t9_l56
  (is
-  ((fn [v] (and (= [2] (t/complex-shape v)) (= [1.0 3.0] (la/re v))))
+  ((fn [v] (and (= [2] (t/complex-shape v)) (= [1.0 3.0] (el/re v))))
    v8_l54)))
 
 
 (def v11_l61 (t/complex-tensor-real [5.0 6.0 7.0]))
 
 
-(deftest t12_l63 (is ((fn [v] (= [0.0 0.0 0.0] (la/im v))) v11_l61)))
+(deftest t12_l63 (is ((fn [v] (= [0.0 0.0 0.0] (el/im v))) v11_l61)))
 
 
 (def v14_l67 (t/complex 3.0 4.0))
@@ -52,7 +52,7 @@
 (deftest t15_l69 (is ((fn [v] (t/scalar? v)) v14_l67)))
 
 
-(def v16_l71 [(la/re (t/complex 3.0 4.0)) (la/im (t/complex 3.0 4.0))])
+(def v16_l71 [(el/re (t/complex 3.0 4.0)) (el/im (t/complex 3.0 4.0))])
 
 
 (deftest t17_l73 (is (= v16_l71 [3.0 4.0])))
@@ -70,7 +70,7 @@
  v22_l88
  (let
   [ct (t/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0])]
-  [(la/re (ct 0)) (la/im (ct 0))]))
+  [(el/re (ct 0)) (el/im (ct 0))]))
 
 
 (deftest t23_l91 (is (= v22_l88 [1.0 4.0])))
@@ -80,7 +80,7 @@
  v25_l95
  (let
   [ct (t/complex-tensor [[1.0 2.0] [3.0 4.0]] [[5.0 6.0] [7.0 8.0]])]
-  (la/re (ct 0))))
+  (el/re (ct 0))))
 
 
 (deftest t26_l99 (is (= v25_l95 [1.0 2.0])))
@@ -90,7 +90,7 @@
  v28_l103
  (let
   [ct (t/complex-tensor [[1.0 2.0] [3.0 4.0]] [[5.0 6.0] [7.0 8.0]])]
-  [(la/re ((ct 1) 1)) (la/im ((ct 1) 1))]))
+  [(el/re ((ct 1) 1)) (el/im ((ct 1) 1))]))
 
 
 (deftest t29_l107 (is (= v28_l103 [4.0 8.0])))
@@ -103,7 +103,7 @@
    (t/complex-tensor [1.0 2.0] [3.0 4.0])
    b
    (t/complex-tensor [5.0 6.0] [7.0 8.0])]
-  {:re (la/re (la/mul a b)), :im (la/im (la/mul a b))}))
+  {:re (el/re (el/mul a b)), :im (el/im (el/mul a b))}))
 
 
 (deftest
@@ -130,8 +130,8 @@
 (def
  v37_l140
  (let
-  [ct (la/conj (t/complex-tensor [1.0 2.0] [3.0 -4.0]))]
-  {:re (la/re ct), :im (la/im ct)}))
+  [ct (el/conj (t/complex-tensor [1.0 2.0] [3.0 -4.0]))]
+  {:re (el/re ct), :im (el/im ct)}))
 
 
 (deftest t38_l144 (is ((fn [v] (= (:im v) [-3.0 4.0])) v37_l140)))
@@ -154,7 +154,7 @@
 (def
  v42_l157
  (let
-  [m (la/abs (t/complex-tensor [3.0 0.0] [4.0 1.0]))]
+  [m (el/abs (t/complex-tensor [3.0 0.0] [4.0 1.0]))]
   [(double (m 0)) (double (m 1))]))
 
 
@@ -173,7 +173,7 @@
  v46_l169
  (let
   [a (t/complex-tensor [3.0 1.0] [4.0 2.0]) d (la/dot a a)]
-  {:norm-sq (double (la/re d)), :im-part (double (la/im d))}))
+  {:norm-sq (double (el/re d)), :im-part (double (el/im d))}))
 
 
 (deftest
@@ -201,8 +201,8 @@
     [ct]
     (and
      (= [2 2] (t/complex-shape ct))
-     (= (la/re ct) [[0.0 1.0] [1.0 0.0]])
-     (= (la/im ct) [[0.0 0.0] [0.0 0.0]])))
+     (= (el/re ct) [[0.0 1.0] [1.0 0.0]])
+     (= (el/im ct) [[0.0 0.0] [0.0 0.0]])))
    v50_l185)))
 
 
@@ -218,8 +218,8 @@
   ((fn
     [ct]
     (and
-     (= (la/re ct) [[1.0 3.0] [2.0 4.0]])
-     (= (la/im ct) [[-5.0 -7.0] [-6.0 -8.0]])))
+     (= (el/re ct) [[1.0 3.0] [2.0 4.0]])
+     (= (el/im ct) [[-5.0 -7.0] [-6.0 -8.0]])))
    v53_l196)))
 
 
@@ -235,8 +235,8 @@
   ((fn
     [d]
     (and
-     (< (abs (la/re d)) 1.0E-10)
-     (< (abs (- (la/im d) -16.0)) 1.0E-10)))
+     (< (abs (el/re d)) 1.0E-10)
+     (< (abs (- (el/im d) -16.0)) 1.0E-10)))
    v57_l206)))
 
 
@@ -250,12 +250,12 @@
    product
    (la/mmul A Ainv)
    re-part
-   (la/re product)
+   (el/re product)
    im-part
-   (la/im product)]
+   (el/im product)]
   (and
-   (< (elem/reduce-max (elem/abs (la/sub re-part (t/eye 2)))) 1.0E-10)
-   (< (elem/reduce-max (elem/abs im-part)) 1.0E-10))))
+   (< (el/reduce-max (el/abs (la/sub re-part (t/eye 2)))) 1.0E-10)
+   (< (el/reduce-max (el/abs im-part)) 1.0E-10))))
 
 
 (deftest t62_l225 (is (true? v61_l216)))

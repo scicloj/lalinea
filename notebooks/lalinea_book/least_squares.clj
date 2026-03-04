@@ -17,7 +17,7 @@
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.tensor :as t]
-   [scicloj.lalinea.elementwise :as elem]
+   [scicloj.lalinea.elementwise :as el]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
@@ -102,7 +102,7 @@ c-linear
   (la/sub (la/mmul A-linear c-linear) y-col))
 
 (def rms-linear
-  (math/sqrt (/ (la/sum (la/mul residual-linear residual-linear))
+  (math/sqrt (/ (el/sum (el/mul residual-linear residual-linear))
                 (count x-data))))
 
 rms-linear
@@ -149,7 +149,7 @@ rms-linear
 
 (def y-poly
   (la/add (la/add 1.0 (la/scale x-poly -2.0))
-          (la/add (la/mul x-poly x-poly) noise-poly)))
+          (la/add (el/mul x-poly x-poly) noise-poly)))
 
 (def vandermonde
   (fn [xs degree]
@@ -178,7 +178,7 @@ c-poly
       c1 (c-poly 1 0)
       c2 (c-poly 2 0)
       x-fit (t/make-reader :float64 100 (- (* 0.06 idx) 3.0))
-      y-fit (la/add c0 (la/add (la/scale x-fit c1) (la/scale (la/mul x-fit x-fit) c2)))]
+      y-fit (la/add c0 (la/add (la/scale x-fit c1) (la/scale (el/mul x-fit x-fit) c2)))]
   (-> (tc/dataset {:x x-poly
                    :y y-poly
                    :type (repeat 30 "data")})
@@ -304,9 +304,9 @@ S-svd
              -0.228  0.103  0.189 -0.144  0.268 -0.076  0.131 -0.201]))
 
 (def y-trig
-  (la/add (la/add 3.0 (la/scale (elem/cos x-trig) 2.0))
-          (la/add (la/scale (elem/sin x-trig) -1.5)
-                  (la/add (la/scale (elem/cos (la/scale x-trig 2.0)) 0.5)
+  (la/add (la/add 3.0 (la/scale (el/cos x-trig) 2.0))
+          (la/add (la/scale (el/sin x-trig) -1.5)
+                  (la/add (la/scale (el/cos (la/scale x-trig 2.0)) 0.5)
                           noise-trig))))
 
 (def A-trig
@@ -341,10 +341,10 @@ c-trig
 (let [x-fit (t/make-reader :float64 200
                            (* (/ (* 2.0 math/PI) 200.0) idx))
       y-fit (la/add (c-trig 0 0)
-                    (la/add (la/scale (elem/cos x-fit) (c-trig 1 0))
-                            (la/add (la/scale (elem/sin x-fit) (c-trig 2 0))
-                                    (la/add (la/scale (elem/cos (la/scale x-fit 2.0)) (c-trig 3 0))
-                                            (la/scale (elem/sin (la/scale x-fit 2.0)) (c-trig 4 0))))))]
+                    (la/add (la/scale (el/cos x-fit) (c-trig 1 0))
+                            (la/add (la/scale (el/sin x-fit) (c-trig 2 0))
+                                    (la/add (la/scale (el/cos (la/scale x-fit 2.0)) (c-trig 3 0))
+                                            (la/scale (el/sin (la/scale x-fit 2.0)) (c-trig 4 0))))))]
   (-> (tc/dataset {:x x-trig
                    :y y-trig
                    :type (repeat 40 "data")})

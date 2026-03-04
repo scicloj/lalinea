@@ -12,7 +12,7 @@
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.tensor :as t]
-   [scicloj.lalinea.elementwise :as elem]
+   [scicloj.lalinea.elementwise :as el]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
@@ -133,9 +133,9 @@
 ;; Stretches the x-direction by 3, leaves y unchanged.
 ;; Let us see what it does to a set of points on the unit circle:
 
-(let [angles (la/mul (/ (* 2.0 math/PI) 40.0) (t/make-reader :float64 41 idx))
-      circle-x (elem/cos angles)
-      circle-y (elem/sin angles)
+(let [angles (el/mul (/ (* 2.0 math/PI) 40.0) (t/make-reader :float64 41 idx))
+      circle-x (el/cos angles)
+      circle-y (el/sin angles)
       data-mat (t/hstack [(t/column circle-x) (t/column circle-y)])
       stretched-mat (la/transpose (la/mmul stretch-mat (la/transpose data-mat)))]
   (-> (tc/dataset {:x (t/select stretched-mat :all 0)

@@ -3,7 +3,7 @@
  (:require
   [scicloj.lalinea.linalg :as la]
   [scicloj.lalinea.tensor :as t]
-  [scicloj.lalinea.elementwise :as elem]
+  [scicloj.lalinea.elementwise :as el]
   [scicloj.kindly.v4.kind :as kind]
   [clojure.math :as math]
   [clojure.test :refer [deftest is]]))
@@ -372,7 +372,7 @@
   [{:keys [eigenvalues eigenvectors]}
    (la/eigen A)
    reals
-   (la/re eigenvalues)]
+   (el/re eigenvalues)]
   (every?
    (fn
     [[i evec]]
@@ -393,7 +393,7 @@
   [{:keys [eigenvalues]}
    (la/eigen A)
    eig-sum
-   (la/sum (la/re eigenvalues))]
+   (el/sum (el/re eigenvalues))]
   (la/close-scalar? (la/trace A) eig-sum)))
 
 
@@ -406,7 +406,7 @@
   [{:keys [eigenvalues]}
    (la/eigen A)
    eig-prod
-   (la/prod (la/re eigenvalues))]
+   (el/prod (el/re eigenvalues))]
   (la/close-scalar? (la/det A) eig-prod)))
 
 
@@ -451,7 +451,7 @@
    AtA-eigs
    (la/real-eigenvalues (la/mmul (la/transpose A) A))
    sv-squared
-   (sort > (la/sq S))]
+   (sort > (el/sq S))]
   (la/close?
    (t/->real-tensor sv-squared)
    (t/->real-tensor (reverse AtA-eigs))
@@ -464,7 +464,7 @@
 (def
  v144_l469
  (let
-  [{:keys [S]} (la/svd A) sv-norm (math/sqrt (la/sum (la/mul S S)))]
+  [{:keys [S]} (la/svd A) sv-norm (math/sqrt (el/sum (el/mul S S)))]
   (la/close-scalar? (la/norm A) sv-norm)))
 
 
@@ -522,13 +522,13 @@
  (def cb (t/complex-tensor [-3.0 0.5 2.0] [1.0 -1.5 7.0])))
 
 
-(def v162_l532 (la/close? (la/mul ca cb) (la/mul cb ca)))
+(def v162_l532 (la/close? (el/mul ca cb) (el/mul cb ca)))
 
 
 (deftest t163_l534 (is (true? v162_l532)))
 
 
-(def v165_l538 (la/close? (la/conj (la/conj ca)) ca))
+(def v165_l538 (la/close? (el/conj (el/conj ca)) ca))
 
 
 (deftest t166_l540 (is (true? v165_l538)))
@@ -537,8 +537,8 @@
 (def
  v168_l544
  (la/close?
-  (la/conj (la/mul ca cb))
-  (la/mul (la/conj ca) (la/conj cb))))
+  (el/conj (el/mul ca cb))
+  (el/mul (el/conj ca) (el/conj cb))))
 
 
 (deftest t169_l547 (is (true? v168_l544)))
@@ -547,9 +547,9 @@
 (def
  v171_l551
  (<
-  (elem/reduce-max
-   (elem/abs
-    (la/sub (la/abs (la/mul ca cb)) (la/mul (la/abs ca) (la/abs cb)))))
+  (el/reduce-max
+   (el/abs
+    (la/sub (el/abs (el/mul ca cb)) (el/mul (el/abs ca) (el/abs cb)))))
   1.0E-10))
 
 
@@ -562,13 +562,13 @@
   [d-ab
    (la/dot ca cb)
    re-ab
-   (double (la/re d-ab))
+   (double (el/re d-ab))
    im-ab
-   (double (la/im d-ab))
+   (double (el/im d-ab))
    re-aa
-   (double (la/re (la/dot ca ca)))
+   (double (el/re (la/dot ca ca)))
    re-bb
-   (double (la/re (la/dot cb cb)))]
+   (double (el/re (la/dot cb cb)))]
   (<= (- (+ (* re-ab re-ab) (* im-ab im-ab)) 1.0E-10) (* re-aa re-bb))))
 
 
@@ -620,7 +620,7 @@
    det-B
    (la/det CB)
    product
-   (la/mul det-A det-B)]
+   (el/mul det-A det-B)]
   (< (la/norm (la/sub det-AB product)) 1.0E-10)))
 
 

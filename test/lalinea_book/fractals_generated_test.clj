@@ -3,7 +3,7 @@
  (:require
   [scicloj.lalinea.linalg :as la]
   [scicloj.lalinea.tensor :as t]
-  [scicloj.lalinea.elementwise :as elem]
+  [scicloj.lalinea.elementwise :as el]
   [tech.v3.libs.buffered-image :as bufimg]
   [scicloj.kindly.v4.kind :as kind]
   [clojure.math :as math]
@@ -68,9 +68,9 @@
       counts
       (let
        [z2
-        (t/clone (la/add (la/mul z z) c))
+        (t/clone (la/add (el/mul z z) c))
         mask
-        (elem/le (la/abs z2) 2.0)]
+        (el/<= (el/abs z2) 2.0)]
        (recur z2 (t/clone (la/add counts mask)) (inc k)))))))))
 
 
@@ -179,9 +179,9 @@
       counts
       (let
        [z2
-        (t/clone (la/add (la/mul z z) c-grid))
+        (t/clone (la/add (el/mul z z) c-grid))
         mask
-        (elem/le (la/abs z2) 2.0)]
+        (el/<= (el/abs z2) 2.0)]
        (recur z2 (t/clone (la/add counts mask)) (inc k)))))))))
 
 
@@ -289,14 +289,14 @@
         z
         (let
          [z2
-          (la/mul z z)
+          (el/mul z z)
           z3
-          (la/mul z z2)
+          (el/mul z z2)
           fz
           (la/sub z3 one)
           fpz
           (la/scale z2 3.0)]
-         (recur (t/clone (la/sub z (elem/div fz fpz))) (inc k)))))
+         (recur (t/clone (la/sub z (el/div fz fpz))) (inc k)))))
       dists
       (mapv
        (fn
@@ -310,10 +310,10 @@
              [_ _ part]
              (if
               (zero? part)
-              (double (la/re root))
-              (double (la/im root))))
+              (double (el/re root))
+              (double (el/im root))))
             :float64))]
-         (la/abs (la/sub z-final root-grid))))
+         (el/abs (la/sub z-final root-grid))))
        roots)]
      (t/compute-matrix
       h

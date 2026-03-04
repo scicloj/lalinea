@@ -16,7 +16,7 @@
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.tensor :as t]
-   [scicloj.lalinea.elementwise :as elem]
+   [scicloj.lalinea.elementwise :as el]
    ;; FFT bridge — Fastmath transforms ↔ ComplexTensor:
    [scicloj.lalinea.transform :as ft]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
@@ -35,7 +35,7 @@
 
 ;; The DC component ($k=0$) is $\sum x_n = 0$.
 
-(kind/test-last [(fn [ct] (< (abs (double (la/re (ct 0)))) 1e-10))])
+(kind/test-last [(fn [ct] (< (abs (double (el/re (ct 0)))) 1e-10))])
 
 ;; ## Round-trip
 ;;
@@ -44,7 +44,7 @@
 (let [signal [1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0]
       spectrum (ft/forward signal)
       recovered (ft/inverse-real spectrum)]
-  (elem/reduce-max (elem/abs (la/sub recovered signal))))
+  (el/reduce-max (el/abs (la/sub recovered signal))))
 
 (kind/test-last [(fn [v] (< v 1e-10))])
 
@@ -58,9 +58,9 @@
 (let [signal [1.0 2.0 3.0 4.0]
       n (count signal)
       spectrum (ft/forward signal)
-      time-energy (la/sum (la/mul signal signal))
-      magnitudes (la/abs spectrum)
-      freq-energy (/ (la/sum (la/mul magnitudes magnitudes)) n)]
+      time-energy (el/sum (el/mul signal signal))
+      magnitudes (el/abs spectrum)
+      freq-energy (/ (el/sum (el/mul magnitudes magnitudes)) n)]
   (< (abs (- time-energy freq-energy)) 1e-10))
 
 (kind/test-last [true?])
@@ -73,12 +73,12 @@
       y [5.0 6.0 7.0 8.0]
       alpha 2.0
       beta -1.5
-      combined (la/add (la/mul alpha x) (la/mul beta y))
+      combined (la/add (el/mul alpha x) (el/mul beta y))
       lhs (ft/forward combined)
       rhs (la/add (la/scale (ft/forward x) alpha)
                   (la/scale (ft/forward y) beta))]
-  (and (< (elem/reduce-max (elem/abs (la/sub (la/re lhs) (la/re rhs)))) 1e-10)
-       (< (elem/reduce-max (elem/abs (la/sub (la/im lhs) (la/im rhs)))) 1e-10)))
+  (and (< (el/reduce-max (el/abs (la/sub (el/re lhs) (el/re rhs)))) 1e-10)
+       (< (el/reduce-max (el/abs (la/sub (el/im lhs) (el/im rhs)))) 1e-10)))
 
 (kind/test-last [true?])
 
@@ -93,7 +93,7 @@
       y [1.0 0.0 1.0 0.0]
       Fx (ft/forward x)
       Fy (ft/forward y)
-      product-spectrum (la/mul Fx Fy)
+      product-spectrum (el/mul Fx Fy)
       conv-result (ft/inverse-real product-spectrum)
       n (count x)
       manual-conv (let [out (t/make-container :float64 n)]
@@ -105,7 +105,7 @@
                                                      (double (y (mod (- k j) n))))))))]
                         (t/set-value! out k s)))
                     out)]
-  (< (elem/reduce-max (elem/abs (la/sub conv-result manual-conv))) 1e-10))
+  (< (el/reduce-max (el/abs (la/sub conv-result manual-conv))) 1e-10))
 
 (kind/test-last [true?])
 
@@ -135,7 +135,7 @@
 ;; 3 and 7:
 
 (let [spectrum (ft/forward signal-composed)
-      mags (la/abs spectrum)]
+      mags (el/abs spectrum)]
   (-> (tc/dataset {:frequency (range (/ N-vis 2))
                    :magnitude (take (/ N-vis 2) mags)})
       (plotly/base {:=x :frequency :=y :magnitude})
@@ -145,7 +145,7 @@
 ;; The two largest magnitude bins are at frequencies 3 and 7:
 
 (let [spectrum (ft/forward signal-composed)
-      mags (la/abs spectrum)
+      mags (el/abs spectrum)
       half-n (/ N-vis 2)
       peak-idx (sort-by (fn [i] (- (double (mags i))))
                         (range half-n))]
@@ -159,8 +159,8 @@
 ;; with all other bins zero.
 
 (let [spectrum (ft/forward [3.0 3.0 3.0 3.0])]
-  {:dc (la/re (spectrum 0))
-   :others [(la/abs (spectrum 1)) (la/abs (spectrum 2)) (la/abs (spectrum 3))]})
+  {:dc (el/re (spectrum 0))
+   :others [(el/abs (spectrum 1)) (el/abs (spectrum 2)) (el/abs (spectrum 3))]})
 
 (kind/test-last [(fn [v] (and (< (abs (- (double (:dc v)) 12.0)) 1e-10)
                               (every? #(< % 1e-10) (:others v))))])
@@ -168,8 +168,8 @@
 ;; The DFT of $x = [1, -1, 1, -1]$ has energy only at Nyquist ($k = N/2$).
 
 (let [spectrum (ft/forward [1.0 -1.0 1.0 -1.0])]
-  {:dc (double (la/abs (spectrum 0)))
-   :nyquist (double (la/re (spectrum 2)))})
+  {:dc (double (el/abs (spectrum 0)))
+   :nyquist (double (el/re (spectrum 2)))})
 
 (kind/test-last [(fn [v] (and (< (:dc v) 1e-10)
                               (< (abs (- (:nyquist v) 4.0)) 1e-10)))])
@@ -181,8 +181,8 @@
 (let [signal (t/complex-tensor [1.0 0.0] [0.0 1.0])
       spectrum (ft/forward-complex signal)
       recovered (ft/inverse spectrum)]
-  (and (< (elem/reduce-max (elem/abs (la/sub (la/re recovered) (la/re signal)))) 1e-10)
-       (< (elem/reduce-max (elem/abs (la/sub (la/im recovered) (la/im signal)))) 1e-10)))
+  (and (< (el/reduce-max (el/abs (la/sub (el/re recovered) (el/re signal)))) 1e-10)
+       (< (el/reduce-max (el/abs (la/sub (el/im recovered) (el/im signal)))) 1e-10)))
 
 (kind/test-last [true?])
 
@@ -193,6 +193,6 @@
 (let [signal [1.0 2.0 3.0 4.0]
       dct (ft/dct-forward signal)
       recovered (ft/dct-inverse dct)]
-  (< (elem/reduce-max (elem/abs (la/sub recovered signal))) 1e-10))
+  (< (el/reduce-max (el/abs (la/sub recovered signal))) 1e-10))
 
 (kind/test-last [true?])

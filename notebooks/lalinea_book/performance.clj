@@ -15,7 +15,7 @@
   (:require
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.tensor :as t]
-   [scicloj.lalinea.elementwise :as elem]
+   [scicloj.lalinea.elementwise :as el]
    [tech.v3.datatype :as dtype]
    [tech.v3.datatype.functional :as dfn]
    [tech.v3.tensor :as dtt]
@@ -33,7 +33,7 @@
 (def bench-n (* bench-h bench-w))
 (def bench-max-iter 50)
 
-(defn median-ms
+(defn mean-ms
   "Extract the sample mean from a Criterium result, in milliseconds."
   [bench-result]
   (* 1e3 (first (:sample-mean bench-result))))
@@ -60,7 +60,7 @@
 ;;
 ;; ### Layer 1: La Linea functional
 ;;
-;; ComplexTensor arithmetic with `la/mul`, `la/add`, `elem/le`.
+;; ComplexTensor arithmetic with `el/mul`, `la/add`, `el/<=`.
 ;; Each iteration allocates new tensors via `t/clone`.
 ;; This is the code from the [Fractals](fractals.html) chapter.
 
@@ -83,8 +83,8 @@
       (loop [z zero-grid counts (t/zeros h w) k 0]
         (if (>= k max-iter)
           counts
-          (let [z2 (t/clone (la/add (la/mul z z) c))
-                mask (elem/le (la/abs z2) 2.0)]
+          (let [z2 (t/clone (la/add (el/mul z z) c))
+                mask (el/<= (el/abs z2) 2.0)]
             (recur z2 (t/clone (la/add counts mask)) (inc k))))))))
 
 (def bench-functional
@@ -95,8 +95,8 @@
 
 ;; ### Layer 2: La Linea with `copy!`
 ;;
-;; Same La Linea operations — `la/mul`, `la/add`, `la/sub`,
-;; `la/abs`, `elem/le` — but instead of allocating new tensors
+;; Same La Linea operations — `el/mul`, `la/add`, `la/sub`,
+;; `el/abs`, `el/<=` — but instead of allocating new tensors
 ;; each iteration, we `dtype/copy!` into pre-allocated buffers.
 ;; This isolates the **allocation cost** (Layer 1 vs Layer 2).
 ;;
@@ -115,15 +115,15 @@
         tmp    (t/clone (t/zeros h w))]
     (dotimes [_ max-iter]
       ;; zr_new = zr² - zi² + cr
-      (dtype/copy! (t/->tensor (la/add (la/sub (la/mul zr zr) (la/mul zi zi)) cr))
+      (dtype/copy! (t/->tensor (la/add (la/sub (el/mul zr zr) (el/mul zi zi)) cr))
                    (t/->tensor tmp))
       ;; zi_new = 2·zr·zi + ci
-      (dtype/copy! (t/->tensor (la/add (la/scale (la/mul zr zi) 2.0) ci))
+      (dtype/copy! (t/->tensor (la/add (la/scale (el/mul zr zi) 2.0) ci))
                    (t/->tensor zi))
       (dtype/copy! (t/->tensor tmp) (t/->tensor zr))
       ;; counts += (|z|² ≤ 4) mask
-      (let [mag2 (la/add (la/mul zr zr) (la/mul zi zi))
-            mask (elem/le mag2 4.0)]
+      (let [mag2 (la/add (el/mul zr zr) (el/mul zi zi))
+            mask (el/<= mag2 4.0)]
         (dtype/copy! (t/->tensor (la/add counts mask))
                      (t/->tensor counts))))
     counts))
@@ -240,16 +240,16 @@
 ;; ### Results
 
 (def results
-  (let [func-ms  (median-ms bench-functional)
-        copy-ms  (median-ms bench-copy)
-        dtype-ms (median-ms bench-raw-dtype)
-        raw-ms   (median-ms bench-raw-array)]
+  (let [func-ms  (mean-ms bench-functional)
+        copy-ms  (mean-ms bench-copy)
+        dtype-ms (mean-ms bench-raw-dtype)
+        raw-ms   (mean-ms bench-raw-array)]
     [{:layer "La Linea functional"
-      :description "ComplexTensor, la/mul, la/add, t/clone"
+      :description "ComplexTensor, el/mul, la/add, t/clone"
       :median-ms (math/round func-ms)
       :vs-raw-array (format "%.1f×" (/ func-ms raw-ms))}
      {:layer "La Linea with copy!"
-      :description "la/mul, la/add, dtype/copy!"
+      :description "el/mul, la/add, dtype/copy!"
       :median-ms (math/round copy-ms)
       :vs-raw-array (format "%.1f×" (/ copy-ms raw-ms))}
      {:layer "Raw dtype-next"

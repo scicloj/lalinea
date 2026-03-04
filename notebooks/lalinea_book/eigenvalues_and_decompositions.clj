@@ -15,7 +15,7 @@
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.tensor :as t]
-   [scicloj.lalinea.elementwise :as elem]
+   [scicloj.lalinea.elementwise :as el]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]
    ;; Arrow diagrams for 2D vectors:
@@ -78,8 +78,8 @@
 ;; as a sorted real tensor:
 ;;
 ;;
-;; Since `la/` functions are polymorphic, you can use `la/re`, `la/im`,
-;; `la/abs`, and `la/sum` directly on these ComplexTensor eigenvalues.
+;; Since `la/` functions are polymorphic, you can use `el/re`, `el/im`,
+;; `el/abs`, and `el/sum` directly on these ComplexTensor eigenvalues.
 
 (la/real-eigenvalues A-eig)
 
@@ -95,7 +95,7 @@
 ;; $A\mathbf{v} - \lambda\mathbf{v}$ should be zero:
 
 (every? (fn [i]
-          (let [lam (la/re ((:eigenvalues eig-result) i))
+          (let [lam (el/re ((:eigenvalues eig-result) i))
                 ev (nth (:eigenvectors eig-result) i)]
             (< (la/norm (la/sub (la/mmul A-eig ev)
                                 (la/scale ev lam)))
@@ -115,13 +115,13 @@
 ;;
 ;; Let us verify the trace and determinant connections:
 
-(def eig-reals (la/re (:eigenvalues eig-result)))
+(def eig-reals (el/re (:eigenvalues eig-result)))
 
-(< (abs (- (la/trace A-eig) (la/sum eig-reals))) 1e-10)
+(< (abs (- (la/trace A-eig) (el/sum eig-reals))) 1e-10)
 
 (kind/test-last [true?])
 
-(< (abs (- (la/det A-eig) (la/prod eig-reals))) 1e-10)
+(< (abs (- (la/det A-eig) (el/prod eig-reals))) 1e-10)
 
 (kind/test-last [true?])
 
@@ -162,7 +162,7 @@
 
 (def P-cols
   (let [evecs (:eigenvectors eig-diag)
-        sorted-idx (sort-by (fn [i] (la/re ((:eigenvalues eig-diag) i)))
+        sorted-idx (sort-by (fn [i] (el/re ((:eigenvalues eig-diag) i)))
                             (range 2))]
     (t/hstack (mapv #(nth evecs %) sorted-idx))))
 
@@ -237,7 +237,7 @@ D-result
 
 ;; All eigenvalues are real (imaginary parts zero):
 
-(< (elem/reduce-max (elem/abs (la/im (:eigenvalues eig-S)))) 1e-10)
+(< (el/reduce-max (el/abs (el/im (:eigenvalues eig-S)))) 1e-10)
 
 (kind/test-last [true?])
 
@@ -392,7 +392,7 @@ sigmas
 
 (def ATA (la/mmul (la/transpose A-svd) A-svd))
 
-(every? #(>= % -1e-10) (la/re (:eigenvalues (la/eigen ATA))))
+(every? #(>= % -1e-10) (el/re (:eigenvalues (la/eigen ATA))))
 
 (kind/test-last [true?])
 
@@ -475,7 +475,7 @@ final-eigenvalues
 ;; ### Trace = sum of eigenvalues
 
 (< (abs (- (la/trace A-final)
-           (la/sum final-eigenvalues)))
+           (el/sum final-eigenvalues)))
    1e-10)
 
 (kind/test-last [true?])
@@ -483,7 +483,7 @@ final-eigenvalues
 ;; ### Determinant = product of eigenvalues
 
 (< (abs (- (la/det A-final)
-           (la/prod final-eigenvalues)))
+           (el/prod final-eigenvalues)))
    1e-10)
 
 (kind/test-last [true?])
@@ -496,8 +496,8 @@ final-eigenvalues
 
 (def final-svd (la/svd A-final))
 
-(< (elem/reduce-max
-    (elem/abs (la/sub (sort (:S final-svd))
+(< (el/reduce-max
+    (el/abs (la/sub (sort (:S final-svd))
                       final-eigenvalues)))
    1e-10)
 
@@ -505,7 +505,7 @@ final-eigenvalues
 
 ;; ### Full rank — invertible
 
-(long (la/sum (elem/gt (:S final-svd) 1e-10)))
+(long (el/sum (el/> (:S final-svd) 1e-10)))
 
 (kind/test-last
  [(fn [r] (= r 3))])

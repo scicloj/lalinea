@@ -3,7 +3,7 @@
  (:require
   [scicloj.lalinea.tensor :as t]
   [scicloj.lalinea.linalg :as la]
-  [scicloj.lalinea.elementwise :as elem]
+  [scicloj.lalinea.elementwise :as el]
   [scicloj.kindly.v4.kind :as kind]
   [clojure.math :as math]
   [clojure.test :refer [deftest is]])
@@ -107,7 +107,7 @@
 (def
  v43_l126
  (let
-  [a (t/matrix [1 4 9]) s (elem/sqrt a) cloned (t/clone s)]
+  [a (t/matrix [1 4 9]) s (el/sqrt a) cloned (t/clone s)]
   {:lazy-array? (some? (t/array-buffer s)),
    :cloned-array? (some? (t/array-buffer cloned))}))
 
@@ -129,7 +129,7 @@
 (deftest t47_l145 (is (= v46_l141 99.0)))
 
 
-(def v49_l155 (let [x (t/matrix [[1 4] [9 16]])] (elem/sqrt x)))
+(def v49_l155 (let [x (t/matrix [[1 4] [9 16]])] (el/sqrt x)))
 
 
 (deftest t50_l158 (is ((fn [r] (= 2.0 (r 0 1))) v49_l155)))

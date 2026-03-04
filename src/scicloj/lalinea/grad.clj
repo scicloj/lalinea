@@ -43,7 +43,7 @@
    (fn [g [_a] _out]
      [(la/transpose g)])
 
-   :la/mul
+   :el/mul
    (fn [g [a b] _out]
      [(dfn/* g b) (dfn/* g a)])
 
@@ -52,11 +52,11 @@
      (let [n (first (dtype/shape a))]
        [(la/scale (t/eye n) (double g))]))
 
-   :la/sq
+   :el/sq
    (fn [g [a] _out]
      [(dfn/* g (dfn/* 2.0 a))])
 
-   :la/sum
+   :el/sum
    (fn [g [a] _out]
      (let [shape (dtype/shape a)]
        [(dtype/clone
@@ -114,7 +114,7 @@
         ;; idx: tape-produced ids — used later to
         ;; distinguish external inputs from intermediates
         idx       (into {} (map (juxt :id identity))
-                         entries)
+                        entries)
         target-id (.get registry target)]
     (when (nil? target-id)
       (throw (ex-info "Target not found on tape" {})))

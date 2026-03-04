@@ -3,7 +3,7 @@
  (:require
   [scicloj.lalinea.linalg :as la]
   [scicloj.lalinea.tensor :as t]
-  [scicloj.lalinea.elementwise :as elem]
+  [scicloj.lalinea.elementwise :as el]
   [scicloj.kindly.v4.kind :as kind]
   [scicloj.lalinea.vis :as vis]
   [clojure.test :refer [deftest is]]))
@@ -57,7 +57,7 @@
    [i]
    (let
     [lam
-     (la/re ((:eigenvalues eig-result) i))
+     (el/re ((:eigenvalues eig-result) i))
      ev
      (nth (:eigenvectors eig-result) i)]
     (<
@@ -69,16 +69,16 @@
 (deftest t15_l105 (is (true? v14_l97)))
 
 
-(def v17_l118 (def eig-reals (la/re (:eigenvalues eig-result))))
+(def v17_l118 (def eig-reals (el/re (:eigenvalues eig-result))))
 
 
-(def v18_l120 (< (abs (- (la/trace A-eig) (la/sum eig-reals))) 1.0E-10))
+(def v18_l120 (< (abs (- (la/trace A-eig) (el/sum eig-reals))) 1.0E-10))
 
 
 (deftest t19_l122 (is (true? v18_l120)))
 
 
-(def v20_l124 (< (abs (- (la/det A-eig) (la/prod eig-reals))) 1.0E-10))
+(def v20_l124 (< (abs (- (la/det A-eig) (el/prod eig-reals))) 1.0E-10))
 
 
 (deftest t21_l126 (is (true? v20_l124)))
@@ -98,9 +98,9 @@
    [evecs
     (:eigenvectors eig-diag)
     sorted-idx
-    (sort-by (fn [i] (la/re ((:eigenvalues eig-diag) i))) (range 2))]
+    (sort-by (fn [i] (el/re ((:eigenvalues eig-diag) i))) (range 2))]
    (t/hstack
-    (mapv (fn* [p1__94211#] (nth evecs p1__94211#)) sorted-idx)))))
+    (mapv (fn* [p1__70039#] (nth evecs p1__70039#)) sorted-idx)))))
 
 
 (def
@@ -163,7 +163,7 @@
 
 (def
  v43_l240
- (< (elem/reduce-max (elem/abs (la/im (:eigenvalues eig-S)))) 1.0E-10))
+ (< (el/reduce-max (el/abs (el/im (:eigenvalues eig-S)))) 1.0E-10))
 
 
 (deftest t44_l242 (is (true? v43_l240)))
@@ -242,8 +242,8 @@
 (def
  v69_l395
  (every?
-  (fn* [p1__94212#] (>= p1__94212# -1.0E-10))
-  (la/re (:eigenvalues (la/eigen ATA)))))
+  (fn* [p1__70040#] (>= p1__70040# -1.0E-10))
+  (el/re (:eigenvalues (la/eigen ATA)))))
 
 
 (deftest t70_l397 (is (true? v69_l395)))
@@ -316,7 +316,7 @@
 
 (def
  v93_l477
- (< (abs (- (la/trace A-final) (la/sum final-eigenvalues))) 1.0E-10))
+ (< (abs (- (la/trace A-final) (el/sum final-eigenvalues))) 1.0E-10))
 
 
 (deftest t94_l481 (is (true? v93_l477)))
@@ -324,7 +324,7 @@
 
 (def
  v96_l485
- (< (abs (- (la/det A-final) (la/prod final-eigenvalues))) 1.0E-10))
+ (< (abs (- (la/det A-final) (el/prod final-eigenvalues))) 1.0E-10))
 
 
 (deftest t97_l489 (is (true? v96_l485)))
@@ -336,15 +336,15 @@
 (def
  v100_l499
  (<
-  (elem/reduce-max
-   (elem/abs (la/sub (sort (:S final-svd)) final-eigenvalues)))
+  (el/reduce-max
+   (el/abs (la/sub (sort (:S final-svd)) final-eigenvalues)))
   1.0E-10))
 
 
 (deftest t101_l504 (is (true? v100_l499)))
 
 
-(def v103_l508 (long (la/sum (elem/gt (:S final-svd) 1.0E-10))))
+(def v103_l508 (long (el/sum (el/> (:S final-svd) 1.0E-10))))
 
 
 (deftest t104_l510 (is ((fn [r] (= r 3)) v103_l508)))

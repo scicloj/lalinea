@@ -18,7 +18,7 @@
    ;; La Linea:
    [scicloj.lalinea.linalg :as la]
             [scicloj.lalinea.tensor :as t]
-            [scicloj.lalinea.elementwise :as elem]
+            [scicloj.lalinea.elementwise :as el]
    ;; dtype-next:
    [tech.v3.tensor :as dtt]
    [tech.v3.datatype :as dtype]
@@ -856,7 +856,7 @@ la-nodes
           ;; Eigendecomposition
           {:keys [eigenvalues eigenvectors]} (la/eigen M)
           ;; Sort eigenvalues ascending, pick the order-th
-          reals (la/re eigenvalues)
+          reals (el/re eigenvalues)
           indexed (map-indexed (fn [i _] [i (double (reals i))]) (range N))
           sorted-idx (map first (sort-by second indexed))
           target-idx (nth sorted-idx order)

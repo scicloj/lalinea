@@ -3,7 +3,7 @@
  (:require
   [scicloj.lalinea.linalg :as la]
   [scicloj.lalinea.tensor :as t]
-  [scicloj.lalinea.elementwise :as elem]
+  [scicloj.lalinea.elementwise :as el]
   [tablecloth.api :as tc]
   [scicloj.tableplot.v1.plotly :as plotly]
   [scicloj.kindly.v4.kind :as kind]
@@ -99,7 +99,7 @@
   rms-linear
   (math/sqrt
    (/
-    (la/sum (la/mul residual-linear residual-linear))
+    (el/sum (el/mul residual-linear residual-linear))
     (count x-data)))))
 
 
@@ -179,7 +179,7 @@
   y-poly
   (la/add
    (la/add 1.0 (la/scale x-poly -2.0))
-   (la/add (la/mul x-poly x-poly) noise-poly))))
+   (la/add (el/mul x-poly x-poly) noise-poly))))
 
 
 (def
@@ -235,7 +235,7 @@
    y-fit
    (la/add
     c0
-    (la/add (la/scale x-fit c1) (la/scale (la/mul x-fit x-fit) c2)))]
+    (la/add (la/scale x-fit c1) (la/scale (el/mul x-fit x-fit) c2)))]
   (->
    (tc/dataset {:x x-poly, :y y-poly, :type (repeat 30 "data")})
    (tc/concat
@@ -382,11 +382,11 @@
  (def
   y-trig
   (la/add
-   (la/add 3.0 (la/scale (elem/cos x-trig) 2.0))
+   (la/add 3.0 (la/scale (el/cos x-trig) 2.0))
    (la/add
-    (la/scale (elem/sin x-trig) -1.5)
+    (la/scale (el/sin x-trig) -1.5)
     (la/add
-     (la/scale (elem/cos (la/scale x-trig 2.0)) 0.5)
+     (la/scale (el/cos (la/scale x-trig 2.0)) 0.5)
      noise-trig)))))
 
 
@@ -449,12 +449,12 @@
    (la/add
     (c-trig 0 0)
     (la/add
-     (la/scale (elem/cos x-fit) (c-trig 1 0))
+     (la/scale (el/cos x-fit) (c-trig 1 0))
      (la/add
-      (la/scale (elem/sin x-fit) (c-trig 2 0))
+      (la/scale (el/sin x-fit) (c-trig 2 0))
       (la/add
-       (la/scale (elem/cos (la/scale x-fit 2.0)) (c-trig 3 0))
-       (la/scale (elem/sin (la/scale x-fit 2.0)) (c-trig 4 0))))))]
+       (la/scale (el/cos (la/scale x-fit 2.0)) (c-trig 3 0))
+       (la/scale (el/sin (la/scale x-fit 2.0)) (c-trig 4 0))))))]
   (->
    (tc/dataset {:x x-trig, :y y-trig, :type (repeat 40 "data")})
    (tc/concat

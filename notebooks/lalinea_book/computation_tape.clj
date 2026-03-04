@@ -1,6 +1,6 @@
 ;; # Computation tape
 
-;; The tape namespace records every `la/`, `t/`, and `elem/`
+;; The tape namespace records every `la/`, `t/`, and `el/`
 ;; operation as a directed acyclic graph (DAG). This serves two
 ;; purposes: it powers [automatic differentiation](autodiff.html)
 ;; (reverse-mode autodiff walks the tape backward), and it
@@ -12,7 +12,7 @@
 (ns lalinea-book.computation-tape
   (:require [scicloj.lalinea.linalg :as la]
             [scicloj.lalinea.tensor :as t]
-            [scicloj.lalinea.elementwise :as elem]
+            [scicloj.lalinea.elementwise :as el]
             [scicloj.lalinea.tape :as tape]
             [scicloj.kindly.v4.kind :as kind])
   (:import [org.ejml.data DMatrixRMaj]))
@@ -114,7 +114,7 @@
 
 ;; ## Recording a computation tape
 
-;; `tape/with-tape` records all `la/`, `t/`, and `elem/` operations within its scope.
+;; `tape/with-tape` records all `la/`, `t/`, and `el/` operations within its scope.
 ;; It returns `{:result ... :entries ...}`.
 
 (def tape-result
@@ -139,7 +139,7 @@
 
 ;; ## External inputs
 
-;; The tape tracks `la/`, `t/`, and `elem/` operations. Inputs that
+;; The tape tracks `la/`, `t/`, and `el/` operations. Inputs that
 ;; originate outside La Linea (raw arrays, Clojure data structures,
 ;; dtype-next operations, EJML objects) appear as `{:external true}`.
 
@@ -183,27 +183,27 @@
 
 ;; ### dtype-next operations
 
-;; Using `la/mul` instead of raw `dfn/*` means the tape captures
+;; Using `el/mul` instead of raw `dfn/*` means the tape captures
 ;; the full chain. The `t/matrix` wrapper around the result is also
 ;; recorded.
 
 (def mul-tape
   (tape/with-tape
     (let [A (t/matrix [[1 2] [3 4]])
-          doubled (la/mul A 2.0)
+          doubled (el/mul A 2.0)
           result (la/add (t/matrix doubled) A)]
       result)))
 
 (mapv (fn [e] (select-keys e [:id :op :inputs]))
       (:entries mul-tape))
 
-;; `la/mul` computes the element-wise product, and `t/matrix` wraps
-;; its result. All four operations (`t/matrix`, `la/mul`, `t/matrix`,
+;; `el/mul` computes the element-wise product, and `t/matrix` wraps
+;; its result. All four operations (`t/matrix`, `el/mul`, `t/matrix`,
 ;; `la/add`) are tracked on the tape.
 
 (kind/test-last
  [(fn [entries]
-    (= [:t/matrix :la/mul :t/matrix :la/add]
+    (= [:t/matrix :el/mul :t/matrix :la/add]
        (mapv :op entries)))])
 
 ;; ### EJML structures

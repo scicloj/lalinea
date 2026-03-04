@@ -3,7 +3,7 @@
  (:require
   [scicloj.lalinea.linalg :as la]
   [scicloj.lalinea.tensor :as t]
-  [scicloj.lalinea.elementwise :as elem]
+  [scicloj.lalinea.elementwise :as el]
   [tablecloth.api :as tc]
   [scicloj.tableplot.v1.plotly :as plotly]
   [scicloj.kindly.v4.kind :as kind]
@@ -36,7 +36,7 @@
  (vis/graph-plot six-pos six-edges {:edge-highlight #{[2 3]}}))
 
 
-(def v9_l66 (t/reduce-axis adj la/sum 1))
+(def v9_l66 (t/reduce-axis adj el/sum 1))
 
 
 (deftest t10_l68 (is ((fn [v] (= v [2.0 2.0 3.0 3.0 2.0 2.0])) v9_l66)))
@@ -46,7 +46,7 @@
  v12_l84
  (def
   laplacian
-  (fn [adj] (la/sub (t/diag (t/reduce-axis adj la/sum 1)) adj))))
+  (fn [adj] (la/sub (t/diag (t/reduce-axis adj el/sum 1)) adj))))
 
 
 (def v13_l88 (def L (laplacian adj)))
@@ -64,7 +64,7 @@
    v14_l90)))
 
 
-(def v17_l107 (elem/reduce-max (elem/abs (t/reduce-axis L la/sum 1))))
+(def v17_l107 (el/reduce-max (el/abs (t/reduce-axis L el/sum 1))))
 
 
 (deftest t18_l109 (is ((fn [v] (< v 1.0E-10)) v17_l107)))
@@ -100,7 +100,7 @@
  (def
   sorted-eig-indices
   (let
-   [vals (la/re (:eigenvalues eig))]
+   [vals (el/re (:eigenvalues eig))]
    (sort-by
     (fn [i] (double (vals i)))
     (range (count (:eigenvalues eig)))))))
@@ -122,7 +122,7 @@
 (deftest t34_l180 (is ((fn [v] (= 6 (count v))) v33_l178)))
 
 
-(def v36_l186 (< (abs (la/sum fiedler-entries)) 1.0E-10))
+(def v36_l186 (< (abs (el/sum fiedler-entries)) 1.0E-10))
 
 
 (deftest t37_l188 (is (true? v36_l186)))
@@ -317,8 +317,7 @@
 (def
  v70_l325
  (<
-  (elem/reduce-max
-   (elem/abs (la/sub cycle-eigenvalues cycle-theoretical)))
+  (el/reduce-max (el/abs (la/sub cycle-eigenvalues cycle-theoretical)))
   1.0E-10))
 
 
@@ -371,8 +370,7 @@
 (def
  v80_l359
  (<
-  (elem/reduce-max
-   (elem/abs (la/sub path-eigenvalues path-theoretical)))
+  (el/reduce-max (el/abs (la/sub path-eigenvalues path-theoretical)))
   1.0E-10))
 
 
@@ -462,7 +460,7 @@
  (def
   sorted-comm-indices
   (let
-   [vals (la/re (:eigenvalues comm-eig))]
+   [vals (el/re (:eigenvalues comm-eig))]
    (sort-by
     (fn [i] (double (vals i)))
     (range (count (:eigenvalues comm-eig)))))))
@@ -484,8 +482,8 @@
      :community
      (mapv
       (fn*
-       [p1__95309#]
-       (cond (<= p1__95309# 2) "A" (<= p1__95309# 5) "B" :else "C"))
+       [p1__70869#]
+       (cond (<= p1__70869# 2) "A" (<= p1__70869# 5) "B" :else "C"))
       (range 9))}))))
 
 

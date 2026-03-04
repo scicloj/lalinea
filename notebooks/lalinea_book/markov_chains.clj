@@ -21,6 +21,7 @@
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
+   [scicloj.lalinea.elementwise :as el]
    [scicloj.lalinea.tensor :as t]
    ;; Arg-reduction operations (argmax, argmin, etc.):
    [tech.v3.datatype.argops :as argops]
@@ -140,17 +141,17 @@
 
 (def stationary-eigen
   (let [{:keys [eigenvalues eigenvectors]} eigen-result
-        reals (la/re eigenvalues)
+        reals (el/re eigenvalues)
         idx (first (sort-by (fn [i] (abs (- (double (reals i)) 1.0)))
                             (range (count eigenvectors))))
         ev (nth eigenvectors idx)
-        total (la/sum (t/flatten ev))]
+        total (el/sum (t/flatten ev))]
     (t/flatten (la/scale ev (/ 1.0 total)))))
 
 stationary-eigen
 
 (kind/test-last
- [(fn [v] (and (< (abs (- (la/sum v) 1.0)) 1e-10)
+ [(fn [v] (and (< (abs (- (el/sum v) 1.0)) 1e-10)
                (every? pos? v)))])
 
 ;; The stationary distribution from eigendecomposition should
@@ -177,7 +178,7 @@ stationary-eigen
       (if (>= k iters)
         history
         (let [new-pi (la/mmul pi P)
-              new-pi (la/scale new-pi (/ 1.0 (la/sum new-pi)))
+              new-pi (la/scale new-pi (/ 1.0 (el/sum new-pi)))
               change (la/norm (la/sub new-pi pi))]
           (recur new-pi (inc k)
                  (conj history {:iteration (inc k)
@@ -292,7 +293,7 @@ stationary-eigen
       (if (>= k iters)
         pi
         (let [new-pi (la/mmul pi google-matrix)
-              new-pi (la/scale new-pi (/ 1.0 (la/sum new-pi)))]
+              new-pi (la/scale new-pi (/ 1.0 (el/sum new-pi)))]
           (recur new-pi (inc k)))))))
 
 ;; Foundational courses rank highest — they are referenced across
@@ -306,7 +307,7 @@ stationary-eigen
 
 ;; PageRank values sum to 1:
 
-(la/sum pagerank)
+(el/sum pagerank)
 
 (kind/test-last [(fn [s] (< (abs (- s 1.0)) 1e-10))])
 

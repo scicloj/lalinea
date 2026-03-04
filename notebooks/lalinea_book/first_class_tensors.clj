@@ -13,7 +13,7 @@
 (ns lalinea-book.first-class-tensors
   (:require [scicloj.lalinea.linalg :as la]
             [scicloj.lalinea.tensor :as t]
-            [scicloj.lalinea.elementwise :as elem]
+            [scicloj.lalinea.elementwise :as el]
             [tech.v3.tensor :as dtt]
             [tech.v3.datatype :as dtype]
             [tech.v3.datatype.functional :as dfn]

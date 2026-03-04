@@ -3,7 +3,7 @@
  (:require
   [scicloj.lalinea.linalg :as la]
   [scicloj.lalinea.tensor :as t]
-  [scicloj.lalinea.elementwise :as elem]
+  [scicloj.lalinea.elementwise :as el]
   [tech.v3.tensor :as dtt]
   [tech.v3.datatype :as dtype]
   [tech.v3.datatype.functional :as dfn]
@@ -470,7 +470,7 @@
  (def
   la-rbf-preds
   (mapv
-   (fn* [p1__123823#] (la-rbf-predict la-rbf-model p1__123823#))
+   (fn* [p1__72545#] (la-rbf-predict la-rbf-model p1__72545#))
    rbf-test-pts)))
 
 
@@ -618,9 +618,7 @@
  (def
   la-kriging-preds
   (mapv
-   (fn*
-    [p1__123824#]
-    (la-kriging-predict la-kriging-model p1__123824#))
+   (fn* [p1__72546#] (la-kriging-predict la-kriging-model p1__72546#))
    kriging-test-pts)))
 
 
@@ -866,7 +864,7 @@
     (for
      [v (range -3 4)]
      (mapv
-      (fn* [p1__123825#] (math/pow (double v) (double p1__123825#)))
+      (fn* [p1__72547#] (math/pow (double v) (double p1__72547#)))
       (range 4)))
     (m/seq->double-double-array)
     (org.apache.commons.math3.linear.Array2DRowRealMatrix.)
@@ -1088,7 +1086,7 @@
      {:keys [eigenvalues eigenvectors]}
      (la/eigen M)
      reals
-     (la/re eigenvalues)
+     (el/re eigenvalues)
      indexed
      (map-indexed (fn [i _] [i (double (reals i))]) (range N))
      sorted-idx
@@ -1121,8 +1119,8 @@
       (math/sqrt
        (reduce
         +
-        (map (fn* [p1__123826#] (* p1__123826# p1__123826#)) v)))]
-     (mapv (fn* [p1__123827#] (/ (double p1__123827#) norm)) v)))
+        (map (fn* [p1__72548#] (* p1__72548# p1__72548#)) v)))]
+     (mapv (fn* [p1__72549#] (/ (double p1__72549#) norm)) v)))
    fm-normed
    (normalize (vec fm-ince-c))
    la-normed

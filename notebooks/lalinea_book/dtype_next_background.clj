@@ -75,7 +75,7 @@
 ;; | EJML `DMatrixRMaj` | `double[r*c]` | row-major |
 ;;
 ;; La Linea inherits dtype-next's lazy philosophy: element-wise
-;; operations (`la/add`, `la/sub`, `la/mul`) return lazy readers,
+;; operations (`la/add`, `la/sub`, `el/mul`) return lazy readers,
 ;; while operations that cross into EJML (`la/mmul`, `la/solve`,
 ;; `la/invert`) materialize at the boundary. You get lazy
 ;; composition by default, with explicit materialization only

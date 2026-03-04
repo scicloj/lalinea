@@ -10,6 +10,7 @@
 
 (ns lalinea-book.autodiff
   (:require [scicloj.lalinea.linalg :as la]
+            [scicloj.lalinea.elementwise :as el]
             [scicloj.lalinea.tensor :as t]
             [scicloj.lalinea.tape :as tape]
             [scicloj.lalinea.grad :as grad]
@@ -98,7 +99,7 @@
 (let [a (t/matrix [3.0])
       b (t/matrix [2.0])
       tape-result (tape/with-tape
-                    (la/sum (la/mul (la/sq a) b)))
+                    (el/sum (el/mul (el/sq a) b)))
       grads (grad/grad tape-result
                        (:result tape-result)
                        [a b])]
@@ -152,7 +153,7 @@
 ;; The implementation has two phases:
 ;;
 ;; **Forward pass** — `tape/with-tape` records each `la/`, `t/`, and
-;; `elem/` operation as an entry in a DAG (directed acyclic graph).
+;; `el/` operation as an entry in a DAG (directed acyclic graph).
 ;; Each entry stores:
 ;;
 ;; - The operation keyword (e.g. `:la/mmul`)
@@ -233,7 +234,7 @@ grad-A
 
 (def ls-tape
   (tape/with-tape
-    (la/sum (la/sq (la/sub (la/mmul A2 x) b)))))
+    (el/sum (el/sq (la/sub (la/mmul A2 x) b)))))
 
 (:result ls-tape)
 
@@ -273,7 +274,7 @@ expected-grad
 
 (def ls-tape-A
   (tape/with-tape
-    (la/sum (la/sq (la/sub (la/mmul A2 x) b)))))
+    (el/sum (el/sq (la/sub (la/mmul A2 x) b)))))
 
 (def grad-A2
   (grad/grad ls-tape-A (:result ls-tape-A) A2))
@@ -351,10 +352,10 @@ expected-grad-A
 ;; - `la/scale` — scalar multiplication
 ;; - `la/mmul` — matrix multiplication
 ;; - `la/transpose` — transpose
-;; - `la/mul` — element-wise multiplication
+;; - `el/mul` — element-wise multiplication
 ;; - `la/trace` — matrix trace
-;; - `la/sq` — element-wise square
-;; - `la/sum` — sum of all elements
+;; - `el/sq` — element-wise square
+;; - `el/sum` — sum of all elements
 ;; - `la/dot` — inner product
 ;; - `la/det` — matrix determinant
 ;; - `la/invert` — matrix inverse
@@ -381,7 +382,7 @@ expected-grad-A
   "One gradient descent step for ||Ax - b||²."
   [x lr]
   (let [tape-result (tape/with-tape
-                      (la/sum (la/sq (la/sub
+                      (el/sum (el/sq (la/sub
                                       (la/mmul A-gd x)
                                       b-gd))))
         g (grad/grad tape-result

@@ -7,7 +7,7 @@
 
    For tensor construction and structural operations, see
    `scicloj.lalinea.tensor`."
-  (:refer-clojure :exclude [abs conj])
+
   (:require [scicloj.lalinea.impl.real-tensor :as rt]
             [scicloj.lalinea.impl.complex-tensor :as ct]
             [scicloj.lalinea.impl.ejml :as ejml]
@@ -108,86 +108,6 @@
                   (if (ct/complex? a)
                     (ct/ct-scale a alpha)
                     (rt/->rt (dfn/* a (double alpha)))))))
-
-(defn mul
-  "Element-wise multiply (Hadamard product for real, pointwise complex multiply for complex)."
-  [a b]
-  (tape/record! :la/mul [a b]
-                (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
-                  (if (ct/complex? a)
-                    (ct/ct-mul a b)
-                    (rt/->rt (dfn/* a b))))))
-
-(defn abs
-  "Element-wise absolute value (magnitude for complex). Returns a real tensor."
-  [a]
-  (tape/record! :la/abs [a]
-                (let [a (rt/ensure-tensor a)]
-                  (if (ct/complex? a)
-                    (rt/->rt (ct/ct-abs a))
-                    (rt/->rt (dfn/abs a))))))
-
-(defn sq
-  "Element-wise square."
-  [a]
-  (tape/record! :la/sq [a]
-                (let [a (rt/ensure-tensor a)]
-                  (if (ct/complex? a)
-                    (ct/ct-mul a a)
-                    (rt/->rt (dfn/* a a))))))
-
-(defn sum
-  "Sum of all elements. Returns a double for real tensors,
-   a scalar ComplexTensor for complex."
-  [a]
-  (tape/record! :la/sum [a]
-                (let [a (rt/ensure-tensor a)]
-                  (if (ct/complex? a)
-                    (ct/ct-sum a)
-                    (double (dfn/sum a))))))
-
-(defn prod
-  "Product of all elements. Returns a double. Real only."
-  [a]
-  (tape/record! :la/prod [a]
-                (let [a (rt/ensure-tensor a)]
-                  (reduce * (dtype/->reader a :float64)))))
-
-;; ---------------------------------------------------------------------------
-;; Complex-specific operations (polymorphic)
-;; ---------------------------------------------------------------------------
-
-(defn re
-  "Real part(s). For complex: returns a RealTensor view (or double for scalars).
-   For real: returns the input unchanged."
-  [a]
-  (tape/record! :la/re [a]
-                (if (ct/complex? a)
-                  (ct/re a)
-                  a)))
-
-(defn im
-  "Imaginary part(s). For complex: returns a RealTensor view (or double for scalars).
-   For real: returns zeros matching the input shape."
-  [a]
-  (tape/record! :la/im [a]
-                (if (ct/complex? a)
-                  (ct/im a)
-                  (let [shape (dtype/shape (rt/ensure-tensor a))]
-                    (rt/->rt (dtt/compute-tensor (vec shape) (fn [& _] 0.0) :float64))))))
-
-(defn conj
-  "Complex conjugate. For complex: negates imaginary parts.
-   For real: returns the input unchanged."
-  [a]
-  (tape/record! :la/conj [a]
-                (if (ct/complex? a)
-                  (ct/ct-conj a)
-                  a)))
-
-;; ---------------------------------------------------------------------------
-;; Scalar properties
-;; ---------------------------------------------------------------------------
 
 (defn trace
   "Matrix trace. Returns a double for real matrices, a scalar ComplexTensor
@@ -301,7 +221,7 @@
    `:eigenvalues`  — ComplexTensor of shape `[n]` (complex vector)
    `:eigenvectors` — vector of column eigenvectors as real tensors (or nil)
 
-   Use `(la/re (:eigenvalues result))` for the real parts, or
+   Use `(el/re (:eigenvalues result))` for the real parts, or
    `real-eigenvalues` for a sorted real tensor."
   [a]
   (tape/record! :la/eigen [a]

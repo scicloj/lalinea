@@ -9,7 +9,7 @@
   (:require
    [scicloj.lalinea.tensor :as t]
    [scicloj.lalinea.linalg :as la]
-   [scicloj.lalinea.elementwise :as elem]
+   [scicloj.lalinea.elementwise :as el]
    [scicloj.kindly.v4.kind :as kind]
    [clojure.math :as math])
   (:import [org.ejml.data DMatrixRMaj]))
@@ -120,11 +120,11 @@
 
 ;; ## Materialization: t/clone
 
-;; Lazy results (from `la/add`, `elem/sqrt`, etc.) recompute on
+;; Lazy results (from `la/add`, `el/sqrt`, etc.) recompute on
 ;; every access. Call `t/clone` to materialize into a concrete array:
 
 (let [a (t/matrix [1 4 9])
-      s (elem/sqrt a)
+      s (el/sqrt a)
       cloned (t/clone s)]
   {:lazy-array? (some? (t/array-buffer s))
    :cloned-array? (some? (t/array-buffer cloned))})
@@ -149,15 +149,15 @@
 
 ;; ## Element-wise operations
 ;;
-;; The `scicloj.lalinea.elementwise` namespace (alias `elem/`)
+;; The `scicloj.lalinea.elementwise` namespace (alias `el/`)
 ;; provides tape-aware element-wise functions:
 
 (let [x (t/matrix [[1 4] [9 16]])]
-  (elem/sqrt x))
+  (el/sqrt x))
 
 (kind/test-last [(fn [r] (= 2.0 (r 0 1)))])
 
-;; `la/add`, `la/sub`, `la/scale`, and `la/mul` also work
+;; `la/add`, `la/sub`, `la/scale`, and `el/mul` also work
 ;; element-wise on matching-shape tensors:
 
 (let [a (t/matrix [[1 2] [3 4]])

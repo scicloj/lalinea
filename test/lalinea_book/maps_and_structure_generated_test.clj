@@ -3,7 +3,7 @@
  (:require
   [scicloj.lalinea.linalg :as la]
   [scicloj.lalinea.tensor :as t]
-  [scicloj.lalinea.elementwise :as elem]
+  [scicloj.lalinea.elementwise :as el]
   [tablecloth.api :as tc]
   [scicloj.tableplot.v1.plotly :as plotly]
   [scicloj.kindly.v4.kind :as kind]
@@ -82,11 +82,11 @@
  v24_l136
  (let
   [angles
-   (la/mul (/ (* 2.0 math/PI) 40.0) (t/make-reader :float64 41 idx))
+   (el/mul (/ (* 2.0 math/PI) 40.0) (t/make-reader :float64 41 idx))
    circle-x
-   (elem/cos angles)
+   (el/cos angles)
    circle-y
-   (elem/sin angles)
+   (el/sin angles)
    data-mat
    (t/hstack [(t/column circle-x) (t/column circle-y)])
    stretched-mat

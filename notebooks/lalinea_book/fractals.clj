@@ -8,16 +8,16 @@
 ;;
 ;; This chapter computes fractals using **ComplexTensor** arithmetic.
 ;; Each iteration step is **pointwise** across the entire complex
-;; plane: a single `la/mul` or `la/add` call applies to every
+;; plane: a single `el/mul` or `la/add` call applies to every
 ;; grid point simultaneously. Escape counts are accumulated as
-;; tensors using `elem/le` masks — no per-pixel loops needed.
+;; tensors using `el/<=` masks — no per-pixel loops needed.
 
 (ns lalinea-book.fractals
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.tensor :as t]
-   [scicloj.lalinea.elementwise :as elem]
+   [scicloj.lalinea.elementwise :as el]
    ;; Tensor ↔ BufferedImage conversion:
    [tech.v3.libs.buffered-image :as bufimg]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
@@ -63,7 +63,7 @@
 ;;
 ;; The counting is fully vectorized: at each iteration we
 ;; build a 0/1 mask of pixels that haven't escaped yet
-;; (`elem/le`) and add it to the running count tensor.
+;; (`el/<=`) and add it to the running count tensor.
 
 (def mandelbrot-counts
   (fn [re-min re-max im-min im-max h w max-iter]
@@ -74,8 +74,8 @@
       (loop [z zero-grid counts (t/zeros h w) k 0]
         (if (>= k max-iter)
           counts
-          (let [z2 (t/clone (la/add (la/mul z z) c))
-                mask (elem/le (la/abs z2) 2.0)]
+          (let [z2 (t/clone (la/add (el/mul z z) c))
+                mask (el/<= (el/abs z2) 2.0)]
             (recur z2 (t/clone (la/add counts mask)) (inc k))))))))
 
 ;; ### Rendering
@@ -140,8 +140,8 @@
       (loop [z z0 counts (t/zeros h w) k 0]
         (if (>= k max-iter)
           counts
-          (let [z2 (t/clone (la/add (la/mul z z) c-grid))
-                mask (elem/le (la/abs z2) 2.0)]
+          (let [z2 (t/clone (la/add (el/mul z z) c-grid))
+                mask (el/<= (el/abs z2) 2.0)]
             (recur z2 (t/clone (la/add counts mask)) (inc k))))))))
 
 ;; ### Gallery of Julia sets
@@ -202,7 +202,7 @@
 ;;
 ;; $$z_{n+1} = z - \frac{z^3 - 1}{3z^2}$$
 ;;
-;; The division uses `elem/div`, which handles complex inputs
+;; The division uses `el/div`, which handles complex inputs
 ;; natively — no need for a manual formula.
 
 (def newton-roots
@@ -223,11 +223,11 @@
       (let [z-final (loop [z (t/clone z0) k 0]
                       (if (>= k max-iter)
                         z
-                        (let [z2 (la/mul z z)
-                              z3 (la/mul z z2)
+                        (let [z2 (el/mul z z)
+                              z3 (el/mul z z2)
                               fz (la/sub z3 one)
                               fpz (la/scale z2 3.0)]
-                          (recur (t/clone (la/sub z (elem/div fz fpz)))
+                          (recur (t/clone (la/sub z (el/div fz fpz)))
                                  (inc k)))))
             ;; Classify: compute distance to each root as a tensor
             dists (mapv (fn [root]
@@ -236,10 +236,10 @@
                                             [h w 2]
                                             (fn [_ _ part]
                                               (if (zero? part)
-                                                (double (la/re root))
-                                                (double (la/im root))))
+                                                (double (el/re root))
+                                                (double (el/im root))))
                                             :float64))]
-                            (la/abs (la/sub z-final root-grid))))
+                            (el/abs (la/sub z-final root-grid))))
                         roots)]
         ;; Pick nearest root per pixel
         (t/compute-matrix h w

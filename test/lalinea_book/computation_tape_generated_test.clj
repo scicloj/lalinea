@@ -3,7 +3,7 @@
  (:require
   [scicloj.lalinea.linalg :as la]
   [scicloj.lalinea.tensor :as t]
-  [scicloj.lalinea.elementwise :as elem]
+  [scicloj.lalinea.elementwise :as el]
   [scicloj.lalinea.tape :as tape]
   [scicloj.kindly.v4.kind :as kind]
   [clojure.test :refer [deftest is]])
@@ -167,7 +167,7 @@
     [A
      (t/matrix [[1 2] [3 4]])
      doubled
-     (la/mul A 2.0)
+     (el/mul A 2.0)
      result
      (la/add (t/matrix doubled) A)]
     result))))
@@ -183,7 +183,7 @@
  (is
   ((fn
     [entries]
-    (= [:t/matrix :la/mul :t/matrix :la/add] (mapv :op entries)))
+    (= [:t/matrix :el/mul :t/matrix :la/add] (mapv :op entries)))
    v46_l197)))
 
 
