@@ -214,3 +214,45 @@
 
 
 (deftest t56_l343 (is (true? v55_l336)))
+
+
+(def v58_l373 (def A-gd (t/matrix [[1 0] [0 2] [1 1]])))
+
+
+(def v59_l377 (def b-gd (t/column [3 2 4])))
+
+
+(def
+ v60_l379
+ (defn
+  ls-step
+  "One gradient descent step for ||Ax - b||²."
+  [x lr]
+  (let
+   [tape-result
+    (tape/with-tape (la/sum (la/sq (la/sub (la/mmul A-gd x) b-gd))))
+    g
+    (grad/grad tape-result (:result tape-result) x)]
+   (la/sub x (la/scale g lr)))))
+
+
+(def
+ v61_l390
+ (def
+  x-gd
+  (reduce (fn [x _] (ls-step x 0.05)) (t/column [0 0]) (range 200))))
+
+
+(def v62_l395 x-gd)
+
+
+(def v64_l399 (def x-exact (:x (la/lstsq A-gd b-gd))))
+
+
+(def v65_l401 x-exact)
+
+
+(def v66_l403 (la/close? x-gd x-exact 1.0E-4))
+
+
+(deftest t67_l405 (is (true? v66_l403)))

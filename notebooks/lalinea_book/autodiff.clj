@@ -362,3 +362,44 @@ expected-grad-A
 ;; Operations without VJP rules (like `la/svd`, `la/eigen`)
 ;; are ignored during the backward pass. Their inputs will not receive
 ;; gradients.
+
+;; ## Example: gradient descent
+;;
+;; Putting it together — a toy gradient descent loop that
+;; minimises $\|Ax - b\|^2$ by following the gradient.
+;; Each iteration records a fresh tape, computes the gradient
+;; of the loss with respect to $x$, and takes a step.
+
+(def A-gd (t/matrix [[1 0]
+                      [0 2]
+                      [1 1]]))
+
+(def b-gd (t/column [3 2 4]))
+
+(defn ls-step
+  "One gradient descent step for ||Ax - b||²."
+  [x lr]
+  (let [tape-result (tape/with-tape
+                      (la/sum (la/sq (la/sub
+                                      (la/mmul A-gd x)
+                                      b-gd))))
+        g (grad/grad tape-result
+                     (:result tape-result) x)]
+    (la/sub x (la/scale g lr))))
+
+(def x-gd
+  (reduce (fn [x _] (ls-step x 0.05))
+          (t/column [0 0])
+          (range 200)))
+
+x-gd
+
+;; Compare with the exact least-squares solution:
+
+(def x-exact (:x (la/lstsq A-gd b-gd)))
+
+x-exact
+
+(la/close? x-gd x-exact 1e-4)
+
+(kind/test-last [true?])
