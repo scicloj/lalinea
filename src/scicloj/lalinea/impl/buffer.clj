@@ -21,3 +21,14 @@
         (when-let [buf (.buffer t)]
           (when-let [ab (dtype/as-array-buffer buf)]
             (.ary-data ab)))))))
+
+(defn tensor-shape
+  "Logical shape of a tensor as a vector.
+   For ComplexTensors, returns the complex shape (without
+   the trailing interleaved dimension)."
+  [x]
+  (cond
+    (ct/complex? x) (ct/complex-shape x)
+    (rt/real-tensor? x) (vec (dtype/shape x))
+    (dtt/tensor? x) (vec (dtype/shape x))
+    :else nil))

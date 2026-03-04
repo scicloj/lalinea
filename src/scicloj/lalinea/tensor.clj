@@ -156,9 +156,11 @@
 ;; ---------------------------------------------------------------------------
 
 (defn shape
-  "Return the shape of a tensor as a vector of longs."
+  "Return the logical shape of a tensor as a vector.
+   For ComplexTensors, returns the complex shape
+   (without the trailing interleaved dimension)."
   [a]
-  (vec (dtype/shape (rt/ensure-tensor a))))
+  (buf/tensor-shape a))
 
 (defn reshape
   "Reshape a tensor to a new shape. Zero-copy when possible.

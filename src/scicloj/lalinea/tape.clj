@@ -78,14 +78,6 @@
 ;; Tape recording
 ;; ---------------------------------------------------------------------------
 
-(defn- tensor-shape [x]
-  (cond
-    (ct/complex? x) (ct/complex-shape x)
-    (rt/real-tensor? x) (vec (dtype/shape x))
-    (dtt/tensor? x) (vec (dtype/shape x))
-    (map? x) :map
-    :else nil))
-
 (defn- lookup-input
   "Look up an input in the tape registry. Returns {:id ...} if tracked,
    {:external true} otherwise. Tensor-typed externals are registered
@@ -113,7 +105,9 @@
                    :inputs        input-refs
                    :input-tensors inputs
                    :output        result
-                   :shape         (tensor-shape result)
+                   :shape         (if (map? result)
+                                    :map
+                                    (buf/tensor-shape result))
                    :complex?      (ct/complex? result)}]
         (swap! (:entries tape) conj entry)
         (.put registry result id))))

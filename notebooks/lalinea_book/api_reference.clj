@@ -178,6 +178,13 @@
 
 (kind/test-last [(fn [s] (= [2 3] s))])
 
+;; For ComplexTensors, returns the logical shape
+;; (without the trailing interleaved dimension):
+
+(t/shape (t/complex-tensor [1.0 2.0] [3.0 4.0]))
+
+(kind/test-last [= [2]])
+
 (kind/doc #'t/reshape)
 
 (t/reshape (t/matrix [[1 2] [3 4]]) [4])
