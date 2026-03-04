@@ -139,7 +139,7 @@
  v52_l163
  (let
   [a (t/matrix [[1 2] [3 4]]) b (t/matrix [[10 20] [30 40]])]
-  (la/add a b)))
+  (el/+ a b)))
 
 
 (deftest t53_l167 (is ((fn [r] (= 44.0 (r 1 1))) v52_l163)))

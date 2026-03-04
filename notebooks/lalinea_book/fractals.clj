@@ -8,7 +8,7 @@
 ;;
 ;; This chapter computes fractals using **ComplexTensor** arithmetic.
 ;; Each iteration step is **pointwise** across the entire complex
-;; plane: a single `el/mul` or `la/add` call applies to every
+;; plane: a single `el/*` or `el/+` call applies to every
 ;; grid point simultaneously. Escape counts are accumulated as
 ;; tensors using `el/<=` masks — no per-pixel loops needed.
 
@@ -74,9 +74,9 @@
       (loop [z zero-grid counts (t/zeros h w) k 0]
         (if (>= k max-iter)
           counts
-          (let [z2 (t/clone (la/add (el/mul z z) c))
+          (let [z2 (t/clone (el/+ (el/* z z) c))
                 mask (el/<= (el/abs z2) 2.0)]
-            (recur z2 (t/clone (la/add counts mask)) (inc k))))))))
+            (recur z2 (t/clone (el/+ counts mask)) (inc k))))))))
 
 ;; ### Rendering
 ;;
@@ -140,9 +140,9 @@
       (loop [z z0 counts (t/zeros h w) k 0]
         (if (>= k max-iter)
           counts
-          (let [z2 (t/clone (la/add (el/mul z z) c-grid))
+          (let [z2 (t/clone (el/+ (el/* z z) c-grid))
                 mask (el/<= (el/abs z2) 2.0)]
-            (recur z2 (t/clone (la/add counts mask)) (inc k))))))))
+            (recur z2 (t/clone (el/+ counts mask)) (inc k))))))))
 
 ;; ### Gallery of Julia sets
 ;;
@@ -202,7 +202,7 @@
 ;;
 ;; $$z_{n+1} = z - \frac{z^3 - 1}{3z^2}$$
 ;;
-;; The division uses `el/div`, which handles complex inputs
+;; The division uses `el//`, which handles complex inputs
 ;; natively — no need for a manual formula.
 
 (def newton-roots
@@ -223,11 +223,11 @@
       (let [z-final (loop [z (t/clone z0) k 0]
                       (if (>= k max-iter)
                         z
-                        (let [z2 (el/mul z z)
-                              z3 (el/mul z z2)
-                              fz (la/sub z3 one)
-                              fpz (la/scale z2 3.0)]
-                          (recur (t/clone (la/sub z (el/div fz fpz)))
+                        (let [z2 (el/* z z)
+                              z3 (el/* z z2)
+                              fz (el/- z3 one)
+                              fpz (el/scale z2 3.0)]
+                          (recur (t/clone (el/- z (el// fz fpz)))
                                  (inc k)))))
             ;; Classify: compute distance to each root as a tensor
             dists (mapv (fn [root]
@@ -239,7 +239,7 @@
                                                 (double (el/re root))
                                                 (double (el/im root))))
                                             :float64))]
-                            (el/abs (la/sub z-final root-grid))))
+                            (el/abs (el/- z-final root-grid))))
                         roots)]
         ;; Pick nearest root per pixel
         (t/compute-matrix h w

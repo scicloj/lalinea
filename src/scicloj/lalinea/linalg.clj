@@ -12,6 +12,7 @@
             [scicloj.lalinea.impl.complex-tensor :as ct]
             [scicloj.lalinea.impl.ejml :as ejml]
             [scicloj.lalinea.tape :as tape]
+            [scicloj.lalinea.elementwise :as el]
             [scicloj.lalinea.tensor :as t]
             [tech.v3.tensor :as dtt]
             [tech.v3.datatype :as dtype]
@@ -79,35 +80,6 @@
                     (rt/->rt (dtt/transpose a [1 0]))))))
 
 ;; ---------------------------------------------------------------------------
-;; Arithmetic
-;; ---------------------------------------------------------------------------
-
-(defn add
-  "Matrix addition."
-  [a b]
-  (tape/record! :la/add [a b]
-                (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
-                  (if (ct/complex? a)
-                    (ct/ct-add a b)
-                    (rt/->rt (dfn/+ a b))))))
-
-(defn sub
-  "Matrix subtraction."
-  [a b]
-  (tape/record! :la/sub [a b]
-                (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
-                  (if (ct/complex? a)
-                    (ct/ct-sub a b)
-                    (rt/->rt (dfn/- a b))))))
-
-(defn scale
-  "Scalar multiply. Returns $\\alpha \\cdot a$."
-  [a alpha]
-  (tape/record! :la/scale [a alpha]
-                (let [a (rt/ensure-tensor a)]
-                  (if (ct/complex? a)
-                    (ct/ct-scale a alpha)
-                    (rt/->rt (dfn/* a (double alpha)))))))
 
 (defn trace
   "Matrix trace. Returns a double for real matrices, a scalar ComplexTensor
@@ -173,7 +145,7 @@
   "True when two matrices (or ComplexTensors) are approximately equal:
    $\\|a - b\\|_F < \\mathrm{tol}$. Default tolerance is 1e-10."
   ([a b] (close? a b 1e-10))
-  ([a b tol] (< (norm (sub a b)) (double tol))))
+  ([a b tol] (< (norm (el/- a b)) (double tol))))
 
 (defn close-scalar?
   "True when two scalars are approximately equal:
@@ -341,7 +313,7 @@
   ([a b] (lstsq a b 1e-10))
   ([a b tol]
    (let [x (mmul (pinv a tol) b)
-         residual (sub (mmul a x) b)
+         residual (el/- (mmul a x) b)
          r (rank a tol)]
      {:x x
       :residuals (double (dfn/sum (dfn/* (rt/ensure-tensor residual) (rt/ensure-tensor residual))))

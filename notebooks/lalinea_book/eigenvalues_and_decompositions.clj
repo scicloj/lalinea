@@ -97,8 +97,8 @@
 (every? (fn [i]
           (let [lam (el/re ((:eigenvalues eig-result) i))
                 ev (nth (:eigenvectors eig-result) i)]
-            (< (la/norm (la/sub (la/mmul A-eig ev)
-                                (la/scale ev lam)))
+            (< (la/norm (el/- (la/mmul A-eig ev)
+                                (el/scale ev lam)))
                1e-10)))
         (range 3))
 
@@ -121,7 +121,7 @@
 
 (kind/test-last [true?])
 
-(< (abs (- (la/det A-eig) (el/prod eig-reals))) 1e-10)
+(< (abs (- (la/det A-eig) (el/reduce-* eig-reals))) 1e-10)
 
 (kind/test-last [true?])
 
@@ -249,7 +249,7 @@ D-result
 
 (def QtQ (la/mmul (la/transpose Q-eig) Q-eig))
 
-(la/norm (la/sub QtQ (t/eye 3)))
+(la/norm (el/- QtQ (t/eye 3)))
 
 (kind/test-last
  [(fn [d] (< d 1e-10))])
@@ -355,12 +355,12 @@ sigmas
 ;; Rank-1 approximation — keep only $\sigma_1$:
 
 (def A-rank1
-  (la/scale (la/mmul (t/submatrix (:U svd-lr) :all [0])
+  (el/scale (la/mmul (t/submatrix (:U svd-lr) :all [0])
                      (t/submatrix (:Vt svd-lr) [0] :all)) (first sigmas)))
 
 ;; The approximation error equals $\sigma_2$:
 
-(def approx-err (la/norm (la/sub A-lr A-rank1)))
+(def approx-err (la/norm (el/- A-lr A-rank1)))
 
 (< (abs (- approx-err (second sigmas))) 1e-10)
 
@@ -406,7 +406,7 @@ sigmas
 ;; and is the standard method for solving PD systems.
 
 (def spd-mat
-  (la/add (la/mmul (la/transpose A-eig) A-eig) (t/eye 3)))
+  (el/+ (la/mmul (la/transpose A-eig) A-eig) (t/eye 3)))
 
 (def chol-L (la/cholesky spd-mat))
 
@@ -422,7 +422,7 @@ chol-L
 
 ;; Verify $L L^T = M$:
 
-(la/norm (la/sub (la/mmul chol-L (la/transpose chol-L)) spd-mat))
+(la/norm (el/- (la/mmul chol-L (la/transpose chol-L)) spd-mat))
 
 (kind/test-last
  [(fn [d] (< d 1e-10))])
@@ -483,7 +483,7 @@ final-eigenvalues
 ;; ### Determinant = product of eigenvalues
 
 (< (abs (- (la/det A-final)
-           (el/prod final-eigenvalues)))
+           (el/reduce-* final-eigenvalues)))
    1e-10)
 
 (kind/test-last [true?])
@@ -497,7 +497,7 @@ final-eigenvalues
 (def final-svd (la/svd A-final))
 
 (< (el/reduce-max
-    (el/abs (la/sub (sort (:S final-svd))
+    (el/abs (el/- (sort (:S final-svd))
                       final-eigenvalues)))
    1e-10)
 

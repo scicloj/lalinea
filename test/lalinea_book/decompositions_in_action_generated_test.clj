@@ -150,7 +150,7 @@
     (mapv
      (fn
       [k]
-      (la/norm (la/sub test-image (reconstruct-rank-k svd-result k))))
+      (la/norm (el/- test-image (reconstruct-rank-k svd-result k))))
      [1 5 10 20 50])})
   (plotly/base {:=x :ratio, :=y :error})
   (plotly/layer-point {:=mark-size 10})
@@ -165,7 +165,7 @@
    (mapv
     (fn
      [k]
-     (la/norm (la/sub test-image (reconstruct-rank-k svd-result k))))
+     (la/norm (el/- test-image (reconstruct-rank-k svd-result k))))
     [1 5 10 20 50])]
   (every? (fn [[a b]] (> a b)) (partition 2 1 errors))))
 
@@ -221,14 +221,14 @@
      [n-points 2]
      (fn [_i j] (if (zero? j) mean0 mean1))
      :float64)]
-   (t/clone (la/sub data-tensor means)))))
+   (t/clone (el/- data-tensor means)))))
 
 
 (def
  v36_l198
  (def
   cov-matrix
-  (la/scale (la/mmul (la/transpose X) X) (/ 1.0 (dec n-points)))))
+  (el/scale (la/mmul (la/transpose X) X) (/ 1.0 (dec n-points)))))
 
 
 (def v37_l201 cov-matrix)

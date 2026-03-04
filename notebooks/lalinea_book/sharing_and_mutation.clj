@@ -174,12 +174,12 @@
          (= [1.0 2.0 3.0] values)
          (not shares-memory?)))])
 
-;; A lazy tensor (from `la/add` or `t/compute-tensor`) has
+;; A lazy tensor (from `el/+` or `t/compute-tensor`) has
 ;; no backing array at all — `t/->double-array` allocates one:
 
 (let [a (t/matrix [[1 2] [3 4]])
       b (t/matrix [[10 20] [30 40]])
-      lazy-sum (la/add a b)
+      lazy-sum (el/+ a b)
       arr (t/->double-array lazy-sum)]
   {:values (seq arr)
    :has-array-buffer? (some? (t/array-buffer lazy-sum))})
@@ -259,7 +259,7 @@
 
 ;; ## Lazy operations: no new memory, no new mutation handle
 
-;; `la/add`, `el/mul`, etc. return **lazy noncaching readers**.
+;; `el/+`, `el/*`, etc. return **lazy noncaching readers**.
 ;; They allocate no new memory — they recompute on every access,
 ;; reading through to the original source buffers. This means
 ;; they don't create a new mutable handle, but they still
@@ -267,7 +267,7 @@
 
 (let [x (t/matrix [1 2 3])
       y (t/matrix [10 20 30])
-      lazy-sum (la/add x y)]
+      lazy-sum (el/+ x y)]
   (seq lazy-sum))
 
 (kind/test-last [(fn [v] (= [11.0 22.0 33.0] v))])
@@ -277,7 +277,7 @@
 
 (let [x (t/matrix [1 2 3])
       y (t/matrix [10 20 30])
-      lazy-sum (la/add x y)
+      lazy-sum (el/+ x y)
       arr (t/->double-array x)
       _ (aset arr 0 100.0)]
   (seq lazy-sum))
@@ -289,7 +289,7 @@
 
 (let [x (t/matrix [1 2 3])
       y (t/matrix [10 20 30])
-      lazy-sum (la/add x y)]
+      lazy-sum (el/+ x y)]
   (t/mset! x 0 100.0)
   (seq lazy-sum))
 
@@ -297,14 +297,14 @@
 
 ;; ## Complex arithmetic: lazy results
 
-;; `la/add`, `la/sub`, `la/scale` return lazy ComplexTensors.
-;; Like `la/add`, they read through to the source on every access.
+;; `el/+`, `el/-`, `el/scale` return lazy ComplexTensors.
+;; Like `el/+`, they read through to the source on every access.
 
 (let [ca (t/complex-tensor
           (t/matrix [[1 3] [2 4]]))
       cb (t/complex-tensor
           (t/matrix [[10 30] [20 40]]))
-      lazy-sum (la/add ca cb)]
+      lazy-sum (el/+ ca cb)]
   {:re (seq (el/re lazy-sum))
    :im (seq (el/im lazy-sum))})
 
@@ -319,7 +319,7 @@
           (t/matrix [[1 3] [2 4]]))
       cb (t/complex-tensor
           (t/matrix [[10 30] [20 40]]))
-      lazy-sum (la/add ca cb)
+      lazy-sum (el/+ ca cb)
       arr (t/->double-array (t/->tensor ca))
       _ (aset arr 0 100.0)]
   (seq (el/re lazy-sum)))
@@ -332,7 +332,7 @@
           (t/matrix [[1 3] [2 4]]))
       cb (t/complex-tensor
           (t/matrix [[10 30] [20 40]]))
-      lazy-sum (la/add ca cb)]
+      lazy-sum (el/+ ca cb)]
   (t/mset! (t/->tensor ca) 0 0 100.0)
   (seq (el/re lazy-sum)))
 
@@ -411,7 +411,7 @@
 
 ;; ## Clone also materializes lazy results
 
-;; Cloning a lazy ComplexTensor (from `la/add`, `la/scale`, etc.)
+;; Cloning a lazy ComplexTensor (from `el/+`, `el/scale`, etc.)
 ;; materializes it into a contiguous array. The result is independent
 ;; of the sources.
 
@@ -419,7 +419,7 @@
          (t/matrix [[1 3] [2 4]]))
       q (t/complex-tensor
          (t/matrix [[10 30] [20 40]]))
-      lazy-pq (la/add p q)
+      lazy-pq (el/+ p q)
       materialized-pq (t/clone lazy-pq)]
   (some? (t/array-buffer (t/->tensor materialized-pq))))
 
@@ -431,7 +431,7 @@
          (t/matrix [[1 3] [2 4]]))
       q (t/complex-tensor
          (t/matrix [[10 30] [20 40]]))
-      lazy-pq (la/add p q)
+      lazy-pq (el/+ p q)
       materialized-pq (t/clone lazy-pq)
       arr (t/->double-array (t/->tensor p))
       _ (aset arr 0 999.0)]
@@ -449,7 +449,7 @@
          (t/matrix [[1 3] [2 4]]))
       q (t/complex-tensor
          (t/matrix [[10 30] [20 40]]))
-      lazy-pq (la/add p q)
+      lazy-pq (el/+ p q)
       materialized-pq (t/clone lazy-pq)]
   (t/mset! (t/->tensor p) 0 0 999.0)
   {:lazy-re (seq (el/re lazy-pq))
@@ -509,7 +509,7 @@
 
 (let [a (t/matrix [1 2 3])
       b (t/matrix [10 20 30])
-      col (t/column (la/add a b))]
+      col (t/column (el/+ a b))]
   {:shape (t/shape col)
    :contiguous? (some? (t/array-buffer col))
    :values (seq (t/flatten col))})
@@ -523,7 +523,7 @@
 ;; Copies are deferred to the EJML boundary — `la/mmul` and
 ;; other decompositions copy when they need to:
 
-(let [col (t/column (la/add (t/matrix [1 0])
+(let [col (t/column (el/+ (t/matrix [1 0])
                             (t/matrix [0 1])))
       A (t/matrix [[2 0] [0 3]])]
   (la/mmul A col))
@@ -666,8 +666,8 @@
 ;; | `tensor->dmat` / `dmat->tensor` | No | Yes — same `double[]` | Zero-copy EJML interop |
 ;; | `t/complex-tensor` (1-arity wrap) | No | Yes — wraps tensor | Shares the interleaved array |
 ;; | `el/re` / `el/im` | No | Yes — strided view | Views into interleaved layout |
-;; | `la/add`, `el/mul`, etc. | No | No — lazy reader | Reads through to sources |
-;; | `la/add`, `la/sub`, `la/scale` | No | No — lazy reader | Lazy ComplexTensors |
+;; | `el/+`, `el/*`, etc. | No | No — lazy reader | Reads through to sources |
+;; | `el/+`, `el/-`, `el/scale` | No | No — lazy reader | Lazy ComplexTensors |
 ;; | `t/compute-tensor` | No | No — lazy, noncaching | May evaluate out of element order |
 ;; | `t/clone` | Yes | Yes — independent | Breaks all links to source |
 ;; | `t/submatrix` | Yes | Yes — independent | Always clones |

@@ -41,12 +41,12 @@
 (kind/test-last
  [(fn [s] (= :strided s))])
 
-;; `la/add` returns a lazy reader — no allocation, recomputes
+;; `el/+` returns a lazy reader — no allocation, recomputes
 ;; on every access.
 
 (def B (t/matrix [[5 6] [7 8]]))
 
-(tape/memory-status (la/add A B))
+(tape/memory-status (el/+ A B))
 
 (kind/test-last
  [(fn [s] (= :lazy s))])
@@ -90,11 +90,11 @@
 (kind/test-last
  [(fn [r] (= :shared r))])
 
-;; A lazy result (from `la/add`) actually reads through to its
+;; A lazy result (from `el/+`) actually reads through to its
 ;; inputs on every access — but without a tape, dtype-next does
 ;; not expose that dependency chain:
 
-(tape/memory-relation A (la/add A B))
+(tape/memory-relation A (el/+ A B))
 
 (kind/test-last
  [(fn [r] (= :unknown-lazy r))])
@@ -105,7 +105,7 @@
 
 (let [tr (tape/with-tape
            (let [M (t/matrix [[1 2] [3 4]])
-                 S (la/add M M)]
+                 S (el/+ M M)]
              S))]
   (tape/detect-memory-status (last (:entries tr))))
 
@@ -120,9 +120,9 @@
 (def tape-result
   (tape/with-tape
     (let [M (t/matrix [[1 2] [3 4]])
-          S (la/scale M 2.0)
+          S (el/scale M 2.0)
           I (t/eye 2)
-          C (la/add S I)
+          C (el/+ S I)
           D (la/mmul C (la/transpose M))]
       D)))
 
@@ -151,7 +151,7 @@
 (def array-tape
   (tape/with-tape
     (let [v (t/column [1 2 3])
-          w (la/scale v 5.0)]
+          w (el/scale v 5.0)]
       w)))
 
 (mapv (fn [e] (select-keys e [:id :op :inputs]))
@@ -183,27 +183,27 @@
 
 ;; ### dtype-next operations
 
-;; Using `el/mul` instead of raw `dfn/*` means the tape captures
+;; Using `el/*` instead of raw `dfn/*` means the tape captures
 ;; the full chain. The `t/matrix` wrapper around the result is also
 ;; recorded.
 
 (def mul-tape
   (tape/with-tape
     (let [A (t/matrix [[1 2] [3 4]])
-          doubled (el/mul A 2.0)
-          result (la/add (t/matrix doubled) A)]
+          doubled (el/* A 2.0)
+          result (el/+ (t/matrix doubled) A)]
       result)))
 
 (mapv (fn [e] (select-keys e [:id :op :inputs]))
       (:entries mul-tape))
 
-;; `el/mul` computes the element-wise product, and `t/matrix` wraps
-;; its result. All four operations (`t/matrix`, `el/mul`, `t/matrix`,
-;; `la/add`) are tracked on the tape.
+;; `el/*` computes the element-wise product, and `t/matrix` wraps
+;; its result. All four operations (`t/matrix`, `el/*`, `t/matrix`,
+;; `el/+`) are tracked on the tape.
 
 (kind/test-last
  [(fn [entries]
-    (= [:t/matrix :el/mul :t/matrix :la/add]
+    (= [:t/matrix :el/* :t/matrix :el/+]
        (mapv :op entries)))])
 
 ;; ### EJML structures
@@ -218,49 +218,49 @@
     (let [dm (doto (DMatrixRMaj. 2 2)
                (.setData (double-array [1 0 0 1])))
           I  (t/dmat->tensor dm)
-          result (la/add (t/matrix [[5 6] [7 8]]) I)]
+          result (el/+ (t/matrix [[5 6] [7 8]]) I)]
       result)))
 
 (mapv (fn [e] (select-keys e [:id :op :inputs]))
       (:entries ejml-tape))
 
 ;; The tensor from `t/dmat->tensor` enters the tape as external input
-;; to `la/add`.
+;; to `el/+`.
 
 (kind/test-last
  [(fn [entries]
-    (and (= [:t/matrix :la/add] (mapv :op entries))
+    (and (= [:t/matrix :el/+] (mapv :op entries))
          (:external (second (:inputs (second entries))))))])
 
 ;; ## Complex operations
 
 ;; Complex constructors are recorded as `t/` operations on the tape. The tape
-;; shows the full chain: `t/matrix` → `t/complex-tensor` → `la/add`.
+;; shows the full chain: `t/matrix` → `t/complex-tensor` → `el/+`.
 
 (def complex-tape
   (tape/with-tape
     (let [z1 (t/complex-tensor (t/matrix [[1 0] [0 1]]))
           z2 (t/complex-tensor (t/matrix [[0 1] [1 0]]))
-          s  (la/add z1 z2)]
+          s  (el/+ z1 z2)]
       s)))
 
 (mapv :op (:entries complex-tape))
 
 (kind/test-last
- [(fn [ops] (= [:t/matrix :t/complex-tensor :t/matrix :t/complex-tensor :la/add] ops))])
+ [(fn [ops] (= [:t/matrix :t/complex-tensor :t/matrix :t/complex-tensor :el/+] ops))])
 
-;; The polymorphic `la/add` works for both real and complex inputs.
-;; The tape always records as `:la/add` regardless of the input type.
+;; The polymorphic `el/+` works for both real and complex inputs.
+;; The tape always records as `:el/+` regardless of the input type.
 ;; 
 ;;
-;; Complex inputs produce the same `:la/add` tape key:
+;; Complex inputs produce the same `:el/+` tape key:
 
 (mapv :op (:entries (tape/with-tape
-                      (la/add (t/complex-tensor [1 2])
+                      (el/+ (t/complex-tensor [1 2])
                               (t/complex-tensor [3 4])))))
 
 (kind/test-last
- [(fn [ops] (= [:t/complex-tensor :t/complex-tensor :la/add] ops))])
+ [(fn [ops] (= [:t/complex-tensor :t/complex-tensor :el/+] ops))])
 
 ;; ## Tape summary
 
@@ -309,7 +309,7 @@
     (let [data (t/matrix [[1 0 2]
                           [0 3 0]
                           [4 0 5]])
-          centered (la/sub data (la/scale (t/matrix [[1 1 1]
+          centered (el/- data (el/scale (t/matrix [[1 1 1]
                                                      [1 1 1]
                                                      [1 1 1]])
                                           (/ (double (la/trace data)) 3.0)))

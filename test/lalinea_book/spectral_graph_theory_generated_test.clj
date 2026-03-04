@@ -46,7 +46,7 @@
  v12_l84
  (def
   laplacian
-  (fn [adj] (la/sub (t/diag (t/reduce-axis adj el/sum 1)) adj))))
+  (fn [adj] (el/- (t/diag (t/reduce-axis adj el/sum 1)) adj))))
 
 
 (def v13_l88 (def L (laplacian adj)))
@@ -317,7 +317,7 @@
 (def
  v70_l325
  (<
-  (el/reduce-max (el/abs (la/sub cycle-eigenvalues cycle-theoretical)))
+  (el/reduce-max (el/abs (el/- cycle-eigenvalues cycle-theoretical)))
   1.0E-10))
 
 
@@ -370,7 +370,7 @@
 (def
  v80_l359
  (<
-  (el/reduce-max (el/abs (la/sub path-eigenvalues path-theoretical)))
+  (el/reduce-max (el/abs (el/- path-eigenvalues path-theoretical)))
   1.0E-10))
 
 
@@ -482,8 +482,8 @@
      :community
      (mapv
       (fn*
-       [p1__70869#]
-       (cond (<= p1__70869# 2) "A" (<= p1__70869# 5) "B" :else "C"))
+       [p1__67101#]
+       (cond (<= p1__67101# 2) "A" (<= p1__67101# 5) "B" :else "C"))
       (range 9))}))))
 
 

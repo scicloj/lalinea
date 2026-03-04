@@ -139,7 +139,7 @@
                                    (* img-size img-size)))
                               [1 5 10 20 50])
                  :error (mapv (fn [k]
-                                (la/norm (la/sub test-image
+                                (la/norm (el/- test-image
                                                  (reconstruct-rank-k svd-result k))))
                               [1 5 10 20 50])})
     (plotly/base {:=x :ratio :=y :error})
@@ -149,7 +149,7 @@
 
 ;; Error decreases monotonically as rank increases:
 
-(let [errors (mapv (fn [k] (la/norm (la/sub test-image (reconstruct-rank-k svd-result k))))
+(let [errors (mapv (fn [k] (la/norm (el/- test-image (reconstruct-rank-k svd-result k))))
                    [1 5 10 20 50])]
   (every? (fn [[a b]] (> a b)) (partition 2 1 errors)))
 
@@ -191,12 +191,12 @@
         means (t/compute-tensor [n-points 2]
                                 (fn [_i j] (if (zero? j) mean0 mean1))
                                 :float64)]
-    (t/clone (la/sub data-tensor means))))
+    (t/clone (el/- data-tensor means))))
 
 ;; ### Compute [covariance matrix](https://en.wikipedia.org/wiki/Covariance_matrix) and eigendecompose
 
 (def cov-matrix
-  (la/scale (la/mmul (la/transpose X) X) (/ 1.0 (dec n-points))))
+  (el/scale (la/mmul (la/transpose X) X) (/ 1.0 (dec n-points))))
 
 cov-matrix
 

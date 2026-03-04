@@ -83,7 +83,7 @@
 
 (def laplacian
   (fn [adj]
-    (la/sub (t/diag (t/reduce-axis adj el/sum 1)) adj)))
+    (el/- (t/diag (t/reduce-axis adj el/sum 1)) adj)))
 
 (def L (laplacian adj))
 
@@ -323,7 +323,7 @@ cycle-theoretical
 ;; They agree to machine precision:
 
 (< (el/reduce-max
-    (el/abs (la/sub cycle-eigenvalues cycle-theoretical)))
+    (el/abs (el/- cycle-eigenvalues cycle-theoretical)))
    1e-10)
 
 (kind/test-last [true?])
@@ -357,7 +357,7 @@ path-eigenvalues
 path-theoretical
 
 (< (el/reduce-max
-    (el/abs (la/sub path-eigenvalues path-theoretical)))
+    (el/abs (el/- path-eigenvalues path-theoretical)))
    1e-10)
 
 (kind/test-last [true?])

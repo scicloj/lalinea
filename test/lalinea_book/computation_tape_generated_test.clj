@@ -28,7 +28,7 @@
 (def v10_l47 (def B (t/matrix [[5 6] [7 8]])))
 
 
-(def v11_l49 (tape/memory-status (la/add A B)))
+(def v11_l49 (tape/memory-status (el/+ A B)))
 
 
 (deftest t12_l51 (is ((fn [s] (= :lazy s)) v11_l49)))
@@ -61,7 +61,7 @@
 (deftest t25_l90 (is ((fn [r] (= :shared r)) v24_l88)))
 
 
-(def v27_l97 (tape/memory-relation A (la/add A B)))
+(def v27_l97 (tape/memory-relation A (el/+ A B)))
 
 
 (deftest t28_l99 (is ((fn [r] (= :unknown-lazy r)) v27_l97)))
@@ -71,8 +71,7 @@
  v30_l106
  (let
   [tr
-   (tape/with-tape
-    (let [M (t/matrix [[1 2] [3 4]]) S (la/add M M)] S))]
+   (tape/with-tape (let [M (t/matrix [[1 2] [3 4]]) S (el/+ M M)] S))]
   (tape/detect-memory-status (last (:entries tr)))))
 
 
@@ -88,11 +87,11 @@
     [M
      (t/matrix [[1 2] [3 4]])
      S
-     (la/scale M 2.0)
+     (el/scale M 2.0)
      I
      (t/eye 2)
      C
-     (la/add S I)
+     (el/+ S I)
      D
      (la/mmul C (la/transpose M))]
     D))))
@@ -114,7 +113,7 @@
  v37_l151
  (def
   array-tape
-  (tape/with-tape (let [v (t/column [1 2 3]) w (la/scale v 5.0)] w))))
+  (tape/with-tape (let [v (t/column [1 2 3]) w (el/scale v 5.0)] w))))
 
 
 (def
@@ -167,9 +166,9 @@
     [A
      (t/matrix [[1 2] [3 4]])
      doubled
-     (el/mul A 2.0)
+     (el/* A 2.0)
      result
-     (la/add (t/matrix doubled) A)]
+     (el/+ (t/matrix doubled) A)]
     result))))
 
 
@@ -183,7 +182,7 @@
  (is
   ((fn
     [entries]
-    (= [:t/matrix :el/mul :t/matrix :la/add] (mapv :op entries)))
+    (= [:t/matrix :el/* :t/matrix :el/+] (mapv :op entries)))
    v46_l197)))
 
 
@@ -198,7 +197,7 @@
      I
      (t/dmat->tensor dm)
      result
-     (la/add (t/matrix [[5 6] [7 8]]) I)]
+     (el/+ (t/matrix [[5 6] [7 8]]) I)]
     result))))
 
 
@@ -213,7 +212,7 @@
   ((fn
     [entries]
     (and
-     (= [:t/matrix :la/add] (mapv :op entries))
+     (= [:t/matrix :el/+] (mapv :op entries))
      (:external (second (:inputs (second entries))))))
    v51_l224)))
 
@@ -229,7 +228,7 @@
      z2
      (t/complex-tensor (t/matrix [[0 1] [1 0]]))
      s
-     (la/add z1 z2)]
+     (el/+ z1 z2)]
     s))))
 
 
@@ -242,7 +241,7 @@
   ((fn
     [ops]
     (=
-     [:t/matrix :t/complex-tensor :t/matrix :t/complex-tensor :la/add]
+     [:t/matrix :t/complex-tensor :t/matrix :t/complex-tensor :el/+]
      ops))
    v56_l247)))
 
@@ -253,13 +252,13 @@
   :op
   (:entries
    (tape/with-tape
-    (la/add (t/complex-tensor [1 2]) (t/complex-tensor [3 4]))))))
+    (el/+ (t/complex-tensor [1 2]) (t/complex-tensor [3 4]))))))
 
 
 (deftest
  t60_l262
  (is
-  ((fn [ops] (= [:t/complex-tensor :t/complex-tensor :la/add] ops))
+  ((fn [ops] (= [:t/complex-tensor :t/complex-tensor :el/+] ops))
    v59_l258)))
 
 
@@ -284,9 +283,9 @@
     [data
      (t/matrix [[1 0 2] [0 3 0] [4 0 5]])
      centered
-     (la/sub
+     (el/-
       data
-      (la/scale
+      (el/scale
        (t/matrix [[1 1 1] [1 1 1] [1 1 1]])
        (/ (double (la/trace data)) 3.0)))
      {:keys [U S Vt]}

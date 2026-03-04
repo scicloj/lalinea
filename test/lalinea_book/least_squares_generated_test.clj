@@ -43,9 +43,7 @@
 
 (def
  v5_l59
- (def
-  y-linear
-  (la/add (la/add 2.0 (la/scale x-data 3.0)) noise-linear)))
+ (def y-linear (el/+ (el/+ 2.0 (el/scale x-data 3.0)) noise-linear)))
 
 
 (def
@@ -90,7 +88,7 @@
 
 (def
  v17_l101
- (def residual-linear (la/sub (la/mmul A-linear c-linear) y-col)))
+ (def residual-linear (el/- (la/mmul A-linear c-linear) y-col)))
 
 
 (def
@@ -98,9 +96,7 @@
  (def
   rms-linear
   (math/sqrt
-   (/
-    (el/sum (el/mul residual-linear residual-linear))
-    (count x-data)))))
+   (/ (el/sum (el/* residual-linear residual-linear)) (count x-data)))))
 
 
 (def v19_l108 rms-linear)
@@ -119,7 +115,7 @@
    x-fit
    (t/make-reader :float64 100 (* 0.019 idx))
    y-fit
-   (la/add c0 (la/scale x-fit c1))]
+   (el/+ c0 (el/scale x-fit c1))]
   (->
    (tc/dataset
     {:x x-data, :y y-linear, :type (repeat (count x-data) "data")})
@@ -177,9 +173,9 @@
  v26_l150
  (def
   y-poly
-  (la/add
-   (la/add 1.0 (la/scale x-poly -2.0))
-   (la/add (el/mul x-poly x-poly) noise-poly))))
+  (el/+
+   (el/+ 1.0 (el/scale x-poly -2.0))
+   (el/+ (el/* x-poly x-poly) noise-poly))))
 
 
 (def
@@ -233,9 +229,9 @@
    x-fit
    (t/make-reader :float64 100 (- (* 0.06 idx) 3.0))
    y-fit
-   (la/add
+   (el/+
     c0
-    (la/add (la/scale x-fit c1) (la/scale (el/mul x-fit x-fit) c2)))]
+    (el/+ (el/scale x-fit c1) (el/scale (el/* x-fit x-fit) c2)))]
   (->
    (tc/dataset {:x x-poly, :y y-poly, :type (repeat 30 "data")})
    (tc/concat
@@ -258,7 +254,7 @@
 (def v39_l213 (def R1 (t/submatrix (:R qr-result) (range ncols) :all)))
 
 
-(def v41_l217 (la/norm (la/sub (la/mmul Q1 R1) A-poly)))
+(def v41_l217 (la/norm (el/- (la/mmul Q1 R1) A-poly)))
 
 
 (deftest t42_l219 (is ((fn [v] (< v 1.0E-10)) v41_l217)))
@@ -269,7 +265,7 @@
  (def c-qr (la/solve R1 (la/mmul (la/transpose Q1) (t/column y-poly)))))
 
 
-(def v46_l229 (la/norm (la/sub c-qr c-poly)))
+(def v46_l229 (la/norm (el/- c-qr c-poly)))
 
 
 (deftest t47_l231 (is ((fn [v] (< v 1.0E-10)) v46_l229)))
@@ -309,7 +305,7 @@
    (la/mmul (la/transpose Vt-svd) (la/mmul S-inv Ut-y)))))
 
 
-(def v60_l273 (la/norm (la/sub c-svd c-poly)))
+(def v60_l273 (la/norm (el/- c-svd c-poly)))
 
 
 (deftest t61_l275 (is ((fn [v] (< v 1.0E-8)) v60_l273)))
@@ -381,13 +377,11 @@
  v68_l306
  (def
   y-trig
-  (la/add
-   (la/add 3.0 (la/scale (el/cos x-trig) 2.0))
-   (la/add
-    (la/scale (el/sin x-trig) -1.5)
-    (la/add
-     (la/scale (el/cos (la/scale x-trig 2.0)) 0.5)
-     noise-trig)))))
+  (el/+
+   (el/+ 3.0 (el/scale (el/cos x-trig) 2.0))
+   (el/+
+    (el/scale (el/sin x-trig) -1.5)
+    (el/+ (el/scale (el/cos (el/scale x-trig 2.0)) 0.5) noise-trig)))))
 
 
 (def
@@ -446,15 +440,15 @@
   [x-fit
    (t/make-reader :float64 200 (* (/ (* 2.0 math/PI) 200.0) idx))
    y-fit
-   (la/add
+   (el/+
     (c-trig 0 0)
-    (la/add
-     (la/scale (el/cos x-fit) (c-trig 1 0))
-     (la/add
-      (la/scale (el/sin x-fit) (c-trig 2 0))
-      (la/add
-       (la/scale (el/cos (la/scale x-fit 2.0)) (c-trig 3 0))
-       (la/scale (el/sin (la/scale x-fit 2.0)) (c-trig 4 0))))))]
+    (el/+
+     (el/scale (el/cos x-fit) (c-trig 1 0))
+     (el/+
+      (el/scale (el/sin x-fit) (c-trig 2 0))
+      (el/+
+       (el/scale (el/cos (el/scale x-fit 2.0)) (c-trig 3 0))
+       (el/scale (el/sin (el/scale x-fit 2.0)) (c-trig 4 0))))))]
   (->
    (tc/dataset {:x x-trig, :y y-trig, :type (repeat 40 "data")})
    (tc/concat

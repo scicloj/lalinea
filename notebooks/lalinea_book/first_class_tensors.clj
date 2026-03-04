@@ -43,8 +43,8 @@
 
 ;; And even for lazy tensors (results of arithmetic):
 
-(= (la/add (t/eye 2) (t/eye 2))
-   (la/scale (t/eye 2) 2))
+(= (el/+ (t/eye 2) (t/eye 2))
+   (el/scale (t/eye 2) 2))
 
 (kind/test-last [true?])
 
@@ -87,12 +87,12 @@
 
 ;; La Linea provides vectorized operations that feel natural:
 
-(la/add (t/column [1 2 3]) (t/column [10 20 30]))
+(el/+ (t/column [1 2 3]) (t/column [10 20 30]))
 
 (kind/test-last
  [(fn [v] (la/close? v (t/column [11 22 33])))])
 
-(la/scale (t/matrix [[1 2] [3 4]]) 2)
+(el/scale (t/matrix [[1 2] [3 4]]) 2)
 
 (kind/test-last
  [(fn [m] (la/close? m (t/matrix [[2 4] [6 8]])))])
@@ -100,10 +100,10 @@
 ;; Chaining with `->` threads cleanly:
 
 (-> (t/matrix [[1 0] [0 1]])
-    (la/scale 3)
-    (la/add (t/eye 2)))
+    (el/scale 3)
+    (el/+ (t/eye 2)))
 
-(kind/test-last [(fn [m] (la/close? m (la/scale (t/eye 2) 4)))])
+(kind/test-last [(fn [m] (la/close? m (el/scale (t/eye 2) 4)))])
 
 ;; ## What does not work
 

@@ -121,7 +121,7 @@
    Prevents nested recording: inner operations called from within
    the body are suppressed (the outermost caller wins).
 
-   `op`     — keyword identifying the operation (e.g. `:la/add`)
+   `op`     — keyword identifying the operation (e.g. `:el/+`)
    `inputs` — vector of input tensors/values
    `body`   — expression(s) computing the result"
   [op inputs & body]

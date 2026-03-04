@@ -1,7 +1,7 @@
 ;; # Complex Tensors
 ;;
 ;; La Linea's computation API (`la/`) is polymorphic over the
-;; [number field](https://en.wikipedia.org/wiki/Field_(mathematics)). Functions like `la/add`, `el/mul`, `la/dot`, `la/mmul`,
+;; [number field](https://en.wikipedia.org/wiki/Field_(mathematics)). Functions like `el/+`, `el/*`, `la/dot`, `la/mmul`,
 ;; and `la/transpose` work uniformly on both real tensors and
 ;; ComplexTensors. Field-aware operations like `el/re`, `el/im`,
 ;; `el/conj` are identity on reals and meaningful on complex. You
@@ -114,8 +114,8 @@
 
 (let [a (t/complex-tensor [1.0 2.0] [3.0 4.0])
       b (t/complex-tensor [5.0 6.0] [7.0 8.0])]
-  {:re (el/re (el/mul a b))
-   :im (el/im (el/mul a b))})
+  {:re (el/re (el/* a b))
+   :im (el/im (el/* a b))})
 
 ;; $(1+3i)(5+7i) = -16 + 22i$, $(2+4i)(6+8i) = -20 + 40i$
 
@@ -219,7 +219,7 @@
       product (la/mmul A Ainv)
       re-part (el/re product)
       im-part (el/im product)]
-  (and (< (el/reduce-max (el/abs (la/sub re-part (t/eye 2)))) 1e-10)
+  (and (< (el/reduce-max (el/abs (el/- re-part (t/eye 2)))) 1e-10)
        (< (el/reduce-max (el/abs im-part)) 1e-10)))
 
 (kind/test-last [true?])

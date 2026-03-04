@@ -130,7 +130,7 @@
   (fn [img]
     (-> img
         (t/elemwise-cast :int16)
-        (la/scale 1.5)
+        (el/scale 1.5)
         (el/max 0)
         (el/min 255)
         (t/elemwise-cast :uint8)
@@ -181,7 +181,7 @@
 ;; ### Kernel definitions
 
 (def blur-kernel
-  (la/scale (t/matrix [[1 1 1] [1 1 1] [1 1 1]]) (/ 1.0 9.0)))
+  (el/scale (t/matrix [[1 1 1] [1 1 1] [1 1 1]]) (/ 1.0 9.0)))
 
 (def sharpen-kernel
   (t/matrix [[0 -1  0]

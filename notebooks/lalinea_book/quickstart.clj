@@ -109,7 +109,7 @@
 ;; ComplexTensors wrap a dtype-next tensor whose last dimension is 2
 ;; (interleaved re/im pairs).
 ;;
-;; The same `la/` functions work for both real and complex inputs — `la/add`,
+;; The same `la/` functions work for both real and complex inputs — `el/+`,
 ;; `la/mmul`, `la/transpose` are polymorphic over the number field.
 
 (t/complex-tensor [1.0 2.0 3.0] [4.0 5.0 6.0])
@@ -154,7 +154,7 @@
 
 ;; Element-wise operations preserve tensor structure:
 
-((la/scale (t/matrix [[1 2] [3 4]]) 2.0) 1 1)
+((el/scale (t/matrix [[1 2] [3 4]]) 2.0) 1 1)
 
 (kind/test-last [= 8.0])
 
@@ -234,7 +234,7 @@
 
 (let [A (t/matrix [[1 2] [3 4]])
       tape-result (tape/with-tape
-                    (el/sum (el/sq (la/sub (la/mmul A A)
+                    (el/sum (el/sq (el/- (la/mmul A A)
                                            (t/matrix [[1 0] [0 1]])))))]
   ((grad/grad tape-result (:result tape-result) A) 0 0))
 

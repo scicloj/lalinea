@@ -4,7 +4,7 @@
    Each function records on the tape (when active) and dispatches
    on `ct/complex?`. Functions without meaningful complex analogues
    throw on complex input."
-  (:refer-clojure :exclude [abs min max eq conj > < >= <=])
+  (:refer-clojure :exclude [abs min max eq conj > < >= <= + - * /])
   (:require [scicloj.lalinea.tape :as tape]
             [scicloj.lalinea.impl.real-tensor :as rt]
             [scicloj.lalinea.impl.complex-tensor :as ct]
@@ -30,7 +30,7 @@
     (ct/complex-tensor
      (dtt/reshape
       (dtype/make-reader :float64 n
-                         (let [base (-> idx (quot 2) (* 2))
+                         (let [base (-> idx (quot 2) (clojure.core/* 2))
                                x (double (flat base))
                                y (double (flat (unchecked-inc base)))
                                [r i] (f x y)]
@@ -58,10 +58,10 @@
                   (if (ct/complex? a)
                     ;; sqrt(z) = sqrt(|z|) * e^(i*theta/2)
                     (complex-unary a (fn [x y]
-                                       (let [r (Math/sqrt (Math/sqrt (+ (* x x) (* y y))))
-                                             theta (/ (Math/atan2 y x) 2.0)]
-                                         [(* r (Math/cos theta))
-                                          (* r (Math/sin theta))])))
+                                       (let [r (Math/sqrt (Math/sqrt (clojure.core/+ (clojure.core/* x x) (clojure.core/* y y))))
+                                             theta (clojure.core// (Math/atan2 y x) 2.0)]
+                                         [(clojure.core/* r (Math/cos theta))
+                                          (clojure.core/* r (Math/sin theta))])))
                     (rt/->rt (dfn/sqrt a))))))
 
 (defn pow
@@ -95,8 +95,8 @@
                     ;; exp(x+iy) = e^x * (cos y + i sin y)
                     (complex-unary a (fn [x y]
                                        (let [ex (Math/exp x)]
-                                         [(* ex (Math/cos y))
-                                          (* ex (Math/sin y))])))
+                                         [(clojure.core/* ex (Math/cos y))
+                                          (clojure.core/* ex (Math/sin y))])))
                     (rt/->rt (dfn/exp a))))))
 
 (defn log
@@ -107,7 +107,7 @@
                   (if (ct/complex? a)
                     ;; log(z) = ln|z| + i*arg(z)
                     (complex-unary a (fn [x y]
-                                       [(Math/log (Math/sqrt (+ (* x x) (* y y))))
+                                       [(Math/log (Math/sqrt (clojure.core/+ (clojure.core/* x x) (clojure.core/* y y))))
                                         (Math/atan2 y x)]))
                     (rt/->rt (dfn/log a))))))
 
@@ -132,8 +132,8 @@
                   (if (ct/complex? a)
                     ;; sin(x+iy) = sin(x)cosh(y) + i*cos(x)sinh(y)
                     (complex-unary a (fn [x y]
-                                       [(* (Math/sin x) (Math/cosh y))
-                                        (* (Math/cos x) (Math/sinh y))]))
+                                       [(clojure.core/* (Math/sin x) (Math/cosh y))
+                                        (clojure.core/* (Math/cos x) (Math/sinh y))]))
                     (rt/->rt (dfn/sin a))))))
 
 (defn cos
@@ -144,8 +144,8 @@
                   (if (ct/complex? a)
                     ;; cos(x+iy) = cos(x)cosh(y) - i*sin(x)sinh(y)
                     (complex-unary a (fn [x y]
-                                       [(* (Math/cos x) (Math/cosh y))
-                                        (- (* (Math/sin x) (Math/sinh y)))]))
+                                       [(clojure.core/* (Math/cos x) (Math/cosh y))
+                                        (clojure.core/- (clojure.core/* (Math/sin x) (Math/sinh y)))]))
                     (rt/->rt (dfn/cos a))))))
 
 (defn tan
@@ -169,8 +169,8 @@
                   (if (ct/complex? a)
                     ;; sinh(x+iy) = sinh(x)cos(y) + i*cosh(x)sin(y)
                     (complex-unary a (fn [x y]
-                                       [(* (Math/sinh x) (Math/cos y))
-                                        (* (Math/cosh x) (Math/sin y))]))
+                                       [(clojure.core/* (Math/sinh x) (Math/cos y))
+                                        (clojure.core/* (Math/cosh x) (Math/sin y))]))
                     (rt/->rt (dfn/sinh a))))))
 
 (defn cosh
@@ -181,8 +181,8 @@
                   (if (ct/complex? a)
                     ;; cosh(x+iy) = cosh(x)cos(y) + i*sinh(x)sin(y)
                     (complex-unary a (fn [x y]
-                                       [(* (Math/cosh x) (Math/cos y))
-                                        (* (Math/sinh x) (Math/sin y))]))
+                                       [(clojure.core/* (Math/cosh x) (Math/cos y))
+                                        (clojure.core/* (Math/sinh x) (Math/sin y))]))
                     (rt/->rt (dfn/cosh a))))))
 
 (defn tanh
@@ -268,10 +268,10 @@
                   (if (ct/complex? a)
                     (unsupported-complex! :el/max)
                     (rt/->rt (dfn/max a b))))))
-(defn div
+(defn /
   "Element-wise division. Supports both real and complex inputs."
   [a b]
-  (tape/record! :el/div [a b]
+  (tape/record! :el// [a b]
                 (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
                   (if (or (ct/complex? a) (ct/complex? b))
                     (ct/ct-div a b)
@@ -438,10 +438,10 @@
 ;; Element-wise multiply
 ;; ---------------------------------------------------------------------------
 
-(defn mul
+(defn *
   "Element-wise multiply (Hadamard product for real, pointwise complex multiply for complex)."
   [a b]
-  (tape/record! :el/mul [a b]
+  (tape/record! :el/* [a b]
                 (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
                   (if (ct/complex? a)
                     (ct/ct-mul a b)
@@ -483,30 +483,30 @@
 ;; Reduction
 ;; ---------------------------------------------------------------------------
 
-(defn prod
+(defn reduce-*
   "Product of all elements. Returns a double. Real only."
   [a]
-  (tape/record! :el/prod [a]
+  (tape/record! :el/reduce-* [a]
                 (let [a (rt/ensure-tensor a)]
-                  (reduce * (dtype/->reader a :float64)))))
+                  (reduce clojure.core/* (dtype/->reader a :float64)))))
 
 ;; ---------------------------------------------------------------------------
 ;; Vector-space operations (also available in la/)
 ;; ---------------------------------------------------------------------------
 
-(defn add
+(defn +
   "Element-wise addition."
   [a b]
-  (tape/record! :la/add [a b]
+  (tape/record! :el/+ [a b]
                 (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
                   (if (ct/complex? a)
                     (ct/ct-add a b)
                     (rt/->rt (dfn/+ a b))))))
 
-(defn sub
+(defn -
   "Element-wise subtraction."
   [a b]
-  (tape/record! :la/sub [a b]
+  (tape/record! :el/- [a b]
                 (let [a (rt/ensure-tensor a) b (rt/ensure-tensor b)]
                   (if (ct/complex? a)
                     (ct/ct-sub a b)
@@ -515,7 +515,7 @@
 (defn scale
   "Scalar multiply. Returns α · a."
   [a alpha]
-  (tape/record! :la/scale [a alpha]
+  (tape/record! :el/scale [a alpha]
                 (let [a (rt/ensure-tensor a)]
                   (if (ct/complex? a)
                     (ct/ct-scale a alpha)

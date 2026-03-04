@@ -15,6 +15,7 @@
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
+   [scicloj.lalinea.elementwise :as el]
    [scicloj.lalinea.tensor :as t]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
@@ -49,7 +50,7 @@
 ;; Geometrically, it is "tip to tail" — walk along $\mathbf{u}$,
 ;; then walk along $\mathbf{v}$.
 
-(la/add u v)
+(el/+ u v)
 
 (kind/test-last
  [(fn [r] (and (= 4.0 (r 0 0))
@@ -65,7 +66,7 @@
 ;; Multiplying a vector by a number (a **[scalar](https://en.wikipedia.org/wiki/Scalar_(mathematics))**) scales every entry.
 ;; Geometrically, it stretches (or shrinks, or reverses) the arrow.
 
-(la/scale u 2.0)
+(el/scale u 2.0)
 
 (kind/test-last
  [(fn [r] (and (= 6.0 (r 0 0))
@@ -77,7 +78,7 @@
 
 ;; Scaling by $-1$ reverses the direction:
 
-(la/scale u -1.0)
+(el/scale u -1.0)
 
 (kind/test-last
  [(fn [r] (and (= -3.0 (r 0 0))
@@ -114,7 +115,7 @@
 ;; Let us verify each one on our concrete vectors
 ;; $\mathbf{u} = [3,1]^T$, $\mathbf{v} = [1,2]^T$ in the plane.
 ;;
-;; In La Linea, `la/add` and `la/scale` are the concrete
+;; In La Linea, `el/+` and `el/scale` are the concrete
 ;; implementations of vector addition and scalar multiplication.
 ;; These are not proofs — the axioms hold by the definition of
 ;; entry-wise addition and scaling — but checking them builds
@@ -125,53 +126,53 @@
 
 ;; **Axiom 1 — Commutativity:**
 
-(la/close? (la/add u v) (la/add v u))
+(la/close? (el/+ u v) (el/+ v u))
 
 (kind/test-last [true?])
 
 ;; **Axiom 2 — Associativity:**
 
-(la/close? (la/add (la/add u v) w-ax)
-           (la/add u (la/add v w-ax)))
+(la/close? (el/+ (el/+ u v) w-ax)
+           (el/+ u (el/+ v w-ax)))
 
 (kind/test-last [true?])
 
 ;; **Axiom 3 — Zero vector:**
 
-(la/close? (la/add u zero2) u)
+(la/close? (el/+ u zero2) u)
 
 (kind/test-last [true?])
 
 ;; **Axiom 4 — Additive inverse:**
 
-(la/close? (la/add u (la/scale u -1.0)) zero2)
+(la/close? (el/+ u (el/scale u -1.0)) zero2)
 
 (kind/test-last [true?])
 
 ;; **Axiom 5 — Scalar compatibility:**
 
-(la/close? (la/scale (la/scale u 3.0) 2.0)
-           (la/scale u 6.0))
+(la/close? (el/scale (el/scale u 3.0) 2.0)
+           (el/scale u 6.0))
 
 (kind/test-last [true?])
 
 ;; **Axiom 6 — Scalar identity:**
 
-(la/close? (la/scale u 1.0) u)
+(la/close? (el/scale u 1.0) u)
 
 (kind/test-last [true?])
 
 ;; **Axiom 7 — Distributivity over vectors:**
 
-(la/close? (la/scale (la/add u v) 5.0)
-           (la/add (la/scale u 5.0) (la/scale v 5.0)))
+(la/close? (el/scale (el/+ u v) 5.0)
+           (el/+ (el/scale u 5.0) (el/scale v 5.0)))
 
 (kind/test-last [true?])
 
 ;; **Axiom 8 — Distributivity over scalars:**
 
-(la/close? (la/scale u (+ 2.0 3.0))
-           (la/add (la/scale u 2.0) (la/scale u 3.0)))
+(la/close? (el/scale u (+ 2.0 3.0))
+           (el/+ (el/scale u 2.0) (el/scale u 3.0)))
 
 (kind/test-last [true?])
 
@@ -204,7 +205,7 @@
 ;; where the $\alpha_i$ are scalars. This is the most fundamental
 ;; operation in linear algebra — everything else builds on it.
 
-(la/add (la/scale u 2.0) (la/scale v -1.0))
+(el/+ (el/scale u 2.0) (el/scale v -1.0))
 
 (kind/test-last
  [(fn [r] (and (= 5.0 (r 0 0))
@@ -390,9 +391,9 @@
 ;; $\mathbf{w} = 5\mathbf{e}_1 + (-3)\mathbf{e}_2 + 7\mathbf{e}_3$:
 
 (la/close? w
-           (la/add (la/scale e1 5.0)
-                   (la/add (la/scale e2 -3.0)
-                           (la/scale e3 7.0))))
+           (el/+ (el/scale e1 5.0)
+                 (el/+ (el/scale e2 -3.0)
+                       (el/scale e3 7.0))))
 
 (kind/test-last [true?])
 
@@ -434,9 +435,9 @@
 (def v4 (t/column [2 3 1]))
 
 (la/close? v4
-           (la/add (la/scale v1 2.0)
-                   (la/add (la/scale v2 3.0)
-                           (la/scale v3 1.0))))
+           (el/+ (el/scale v1 2.0)
+                 (el/+ (el/scale v2 3.0)
+                       (el/scale v3 1.0))))
 
 (kind/test-last [true?])
 

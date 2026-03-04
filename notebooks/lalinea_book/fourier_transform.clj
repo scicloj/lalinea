@@ -44,7 +44,7 @@
 (let [signal [1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0]
       spectrum (ft/forward signal)
       recovered (ft/inverse-real spectrum)]
-  (el/reduce-max (el/abs (la/sub recovered signal))))
+  (el/reduce-max (el/abs (el/- recovered signal))))
 
 (kind/test-last [(fn [v] (< v 1e-10))])
 
@@ -58,9 +58,9 @@
 (let [signal [1.0 2.0 3.0 4.0]
       n (count signal)
       spectrum (ft/forward signal)
-      time-energy (el/sum (el/mul signal signal))
+      time-energy (el/sum (el/* signal signal))
       magnitudes (el/abs spectrum)
-      freq-energy (/ (el/sum (el/mul magnitudes magnitudes)) n)]
+      freq-energy (/ (el/sum (el/* magnitudes magnitudes)) n)]
   (< (abs (- time-energy freq-energy)) 1e-10))
 
 (kind/test-last [true?])
@@ -73,12 +73,12 @@
       y [5.0 6.0 7.0 8.0]
       alpha 2.0
       beta -1.5
-      combined (la/add (el/mul alpha x) (el/mul beta y))
+      combined (el/+ (el/* alpha x) (el/* beta y))
       lhs (ft/forward combined)
-      rhs (la/add (la/scale (ft/forward x) alpha)
-                  (la/scale (ft/forward y) beta))]
-  (and (< (el/reduce-max (el/abs (la/sub (el/re lhs) (el/re rhs)))) 1e-10)
-       (< (el/reduce-max (el/abs (la/sub (el/im lhs) (el/im rhs)))) 1e-10)))
+      rhs (el/+ (el/scale (ft/forward x) alpha)
+                  (el/scale (ft/forward y) beta))]
+  (and (< (el/reduce-max (el/abs (el/- (el/re lhs) (el/re rhs)))) 1e-10)
+       (< (el/reduce-max (el/abs (el/- (el/im lhs) (el/im rhs)))) 1e-10)))
 
 (kind/test-last [true?])
 
@@ -93,7 +93,7 @@
       y [1.0 0.0 1.0 0.0]
       Fx (ft/forward x)
       Fy (ft/forward y)
-      product-spectrum (el/mul Fx Fy)
+      product-spectrum (el/* Fx Fy)
       conv-result (ft/inverse-real product-spectrum)
       n (count x)
       manual-conv (let [out (t/make-container :float64 n)]
@@ -105,7 +105,7 @@
                                                      (double (y (mod (- k j) n))))))))]
                         (t/set-value! out k s)))
                     out)]
-  (< (el/reduce-max (el/abs (la/sub conv-result manual-conv))) 1e-10))
+  (< (el/reduce-max (el/abs (el/- conv-result manual-conv))) 1e-10))
 
 (kind/test-last [true?])
 
@@ -181,8 +181,8 @@
 (let [signal (t/complex-tensor [1.0 0.0] [0.0 1.0])
       spectrum (ft/forward-complex signal)
       recovered (ft/inverse spectrum)]
-  (and (< (el/reduce-max (el/abs (la/sub (el/re recovered) (el/re signal)))) 1e-10)
-       (< (el/reduce-max (el/abs (la/sub (el/im recovered) (el/im signal)))) 1e-10)))
+  (and (< (el/reduce-max (el/abs (el/- (el/re recovered) (el/re signal)))) 1e-10)
+       (< (el/reduce-max (el/abs (el/- (el/im recovered) (el/im signal)))) 1e-10)))
 
 (kind/test-last [true?])
 
@@ -193,6 +193,6 @@
 (let [signal [1.0 2.0 3.0 4.0]
       dct (ft/dct-forward signal)
       recovered (ft/dct-inverse dct)]
-  (< (el/reduce-max (el/abs (la/sub recovered signal))) 1e-10))
+  (< (el/reduce-max (el/abs (el/- recovered signal))) 1e-10))
 
 (kind/test-last [true?])

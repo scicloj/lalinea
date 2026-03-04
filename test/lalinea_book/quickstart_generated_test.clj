@@ -161,7 +161,7 @@
 (deftest t52_l153 (is ((fn [v] (= v 10.0)) v51_l151)))
 
 
-(def v54_l157 ((la/scale (t/matrix [[1 2] [3 4]]) 2.0) 1 1))
+(def v54_l157 ((el/scale (t/matrix [[1 2] [3 4]]) 2.0) 1 1))
 
 
 (deftest t55_l159 (is (= v54_l157 8.0)))
@@ -260,7 +260,7 @@
    (t/matrix [[1 2] [3 4]])
    tape-result
    (tape/with-tape
-    (el/sum (el/sq (la/sub (la/mmul A A) (t/matrix [[1 0] [0 1]])))))]
+    (el/sum (el/sq (el/- (la/mmul A A) (t/matrix [[1 0] [0 1]])))))]
   ((grad/grad tape-result (:result tape-result) A) 0 0)))
 
 

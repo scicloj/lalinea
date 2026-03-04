@@ -14,6 +14,7 @@
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
+   [scicloj.lalinea.elementwise :as el]
    [scicloj.lalinea.tensor :as t]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]
@@ -79,7 +80,7 @@
 ;; **Axiom 1 — Linearity:**
 
 (la/close-scalar?
- (la/dot (la/add (la/scale a3 2.0) (la/scale b3 3.0)) c3)
+ (la/dot (el/+ (el/scale a3 2.0) (el/scale b3 3.0)) c3)
  (+ (* 2.0 (la/dot a3 c3))
     (* 3.0 (la/dot b3 c3))))
 
@@ -267,7 +268,7 @@ projected-pt
 ;; to the subspace — that is what makes the projection the
 ;; closest point:
 
-(def resid (la/sub point3d projected-pt))
+(def resid (el/- point3d projected-pt))
 
 resid
 
@@ -301,7 +302,7 @@ resid
 
 ;; Step 1 — normalise $\mathbf{a}$:
 
-(def q1-gs (la/scale a-gs (/ 1.0 (la/norm a-gs))))
+(def q1-gs (el/scale a-gs (/ 1.0 (la/norm a-gs))))
 
 q1-gs
 
@@ -311,12 +312,12 @@ q1-gs
   (la/dot q1-gs b-gs))
 
 (def orthogonal-part
-  (la/sub b-gs (la/scale q1-gs proj-b-on-q1)))
+  (el/- b-gs (el/scale q1-gs proj-b-on-q1)))
 
 ;; Normalise:
 
 (def q2-gs
-  (la/scale orthogonal-part (/ 1.0 (la/norm orthogonal-part))))
+  (el/scale orthogonal-part (/ 1.0 (la/norm orthogonal-part))))
 
 q2-gs
 
@@ -374,14 +375,14 @@ R-thin
 
 ;; Verify $Q^T Q = I$ (orthonormal columns):
 
-(la/norm (la/sub (la/mmul (la/transpose Q-thin) Q-thin) (t/eye 2)))
+(la/norm (el/- (la/mmul (la/transpose Q-thin) Q-thin) (t/eye 2)))
 
 (kind/test-last
  [(fn [d] (< d 1e-10))])
 
 ;; Verify $QR = A$:
 
-(la/norm (la/sub (la/mmul Q-thin R-thin) A-qr))
+(la/norm (el/- (la/mmul Q-thin R-thin) A-qr))
 
 (kind/test-last
  [(fn [d] (< d 1e-10))])

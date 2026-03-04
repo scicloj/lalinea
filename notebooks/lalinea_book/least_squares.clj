@@ -57,7 +57,7 @@
              -0.147 0.165 -0.361 0.096]))
 
 (def y-linear
-  (la/add (la/add 2.0 (la/scale x-data 3.0)) noise-linear))
+  (el/+ (el/+ 2.0 (el/scale x-data 3.0)) noise-linear))
 
 ;; Build the design matrix $A$:
 
@@ -99,10 +99,10 @@ c-linear
 ;; The residual — how well does the fit match the data?
 
 (def residual-linear
-  (la/sub (la/mmul A-linear c-linear) y-col))
+  (el/- (la/mmul A-linear c-linear) y-col))
 
 (def rms-linear
-  (math/sqrt (/ (el/sum (el/mul residual-linear residual-linear))
+  (math/sqrt (/ (el/sum (el/* residual-linear residual-linear))
                 (count x-data))))
 
 rms-linear
@@ -115,7 +115,7 @@ rms-linear
 (let [c0 (c-linear 0 0)
       c1 (c-linear 1 0)
       x-fit (t/make-reader :float64 100 (* 0.019 idx))
-      y-fit (la/add c0 (la/scale x-fit c1))]
+      y-fit (el/+ c0 (el/scale x-fit c1))]
   (-> (tc/dataset {:x x-data
                    :y y-linear
                    :type (repeat (count x-data) "data")})
@@ -148,8 +148,8 @@ rms-linear
              0.031 -0.263  0.195 -0.416  0.347  0.010]))
 
 (def y-poly
-  (la/add (la/add 1.0 (la/scale x-poly -2.0))
-          (la/add (el/mul x-poly x-poly) noise-poly)))
+  (el/+ (el/+ 1.0 (el/scale x-poly -2.0))
+          (el/+ (el/* x-poly x-poly) noise-poly)))
 
 (def vandermonde
   (fn [xs degree]
@@ -178,7 +178,7 @@ c-poly
       c1 (c-poly 1 0)
       c2 (c-poly 2 0)
       x-fit (t/make-reader :float64 100 (- (* 0.06 idx) 3.0))
-      y-fit (la/add c0 (la/add (la/scale x-fit c1) (la/scale (el/mul x-fit x-fit) c2)))]
+      y-fit (el/+ c0 (el/+ (el/scale x-fit c1) (el/scale (el/* x-fit x-fit) c2)))]
   (-> (tc/dataset {:x x-poly
                    :y y-poly
                    :type (repeat 30 "data")})
@@ -214,7 +214,7 @@ c-poly
 
 ;; Verify $A = Q_1 R_1$:
 
-(la/norm (la/sub (la/mmul Q1 R1) A-poly))
+(la/norm (el/- (la/mmul Q1 R1) A-poly))
 
 (kind/test-last
  [(fn [v] (< v 1e-10))])
@@ -226,7 +226,7 @@ c-poly
 
 ;; Compare with the normal-equation solution:
 
-(la/norm (la/sub c-qr c-poly))
+(la/norm (el/- c-qr c-poly))
 
 (kind/test-last
  [(fn [v] (< v 1e-10))])
@@ -270,7 +270,7 @@ S-svd
 
 ;; Compare:
 
-(la/norm (la/sub c-svd c-poly))
+(la/norm (el/- c-svd c-poly))
 
 (kind/test-last
  [(fn [v] (< v 1e-8))])
@@ -304,9 +304,9 @@ S-svd
              -0.228  0.103  0.189 -0.144  0.268 -0.076  0.131 -0.201]))
 
 (def y-trig
-  (la/add (la/add 3.0 (la/scale (el/cos x-trig) 2.0))
-          (la/add (la/scale (el/sin x-trig) -1.5)
-                  (la/add (la/scale (el/cos (la/scale x-trig 2.0)) 0.5)
+  (el/+ (el/+ 3.0 (el/scale (el/cos x-trig) 2.0))
+          (el/+ (el/scale (el/sin x-trig) -1.5)
+                  (el/+ (el/scale (el/cos (el/scale x-trig 2.0)) 0.5)
                           noise-trig))))
 
 (def A-trig
@@ -340,11 +340,11 @@ c-trig
 
 (let [x-fit (t/make-reader :float64 200
                            (* (/ (* 2.0 math/PI) 200.0) idx))
-      y-fit (la/add (c-trig 0 0)
-                    (la/add (la/scale (el/cos x-fit) (c-trig 1 0))
-                            (la/add (la/scale (el/sin x-fit) (c-trig 2 0))
-                                    (la/add (la/scale (el/cos (la/scale x-fit 2.0)) (c-trig 3 0))
-                                            (la/scale (el/sin (la/scale x-fit 2.0)) (c-trig 4 0))))))]
+      y-fit (el/+ (c-trig 0 0)
+                    (el/+ (el/scale (el/cos x-fit) (c-trig 1 0))
+                            (el/+ (el/scale (el/sin x-fit) (c-trig 2 0))
+                                    (el/+ (el/scale (el/cos (el/scale x-fit 2.0)) (c-trig 3 0))
+                                            (el/scale (el/sin (el/scale x-fit 2.0)) (c-trig 4 0))))))]
   (-> (tc/dataset {:x x-trig
                    :y y-trig
                    :type (repeat 40 "data")})

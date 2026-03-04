@@ -60,9 +60,7 @@
      (el/re ((:eigenvalues eig-result) i))
      ev
      (nth (:eigenvectors eig-result) i)]
-    (<
-     (la/norm (la/sub (la/mmul A-eig ev) (la/scale ev lam)))
-     1.0E-10)))
+    (< (la/norm (el/- (la/mmul A-eig ev) (el/scale ev lam))) 1.0E-10)))
   (range 3)))
 
 
@@ -78,7 +76,9 @@
 (deftest t19_l122 (is (true? v18_l120)))
 
 
-(def v20_l124 (< (abs (- (la/det A-eig) (el/prod eig-reals))) 1.0E-10))
+(def
+ v20_l124
+ (< (abs (- (la/det A-eig) (el/reduce-* eig-reals))) 1.0E-10))
 
 
 (deftest t21_l126 (is (true? v20_l124)))
@@ -100,7 +100,7 @@
     sorted-idx
     (sort-by (fn [i] (el/re ((:eigenvalues eig-diag) i))) (range 2))]
    (t/hstack
-    (mapv (fn* [p1__70039#] (nth evecs p1__70039#)) sorted-idx)))))
+    (mapv (fn* [p1__66271#] (nth evecs p1__66271#)) sorted-idx)))))
 
 
 (def
@@ -175,7 +175,7 @@
 (def v47_l250 (def QtQ (la/mmul (la/transpose Q-eig) Q-eig)))
 
 
-(def v48_l252 (la/norm (la/sub QtQ (t/eye 3))))
+(def v48_l252 (la/norm (el/- QtQ (t/eye 3))))
 
 
 (deftest t49_l254 (is ((fn [d] (< d 1.0E-10)) v48_l252)))
@@ -220,14 +220,14 @@
  v62_l357
  (def
   A-rank1
-  (la/scale
+  (el/scale
    (la/mmul
     (t/submatrix (:U svd-lr) :all [0])
     (t/submatrix (:Vt svd-lr) [0] :all))
    (first sigmas))))
 
 
-(def v64_l363 (def approx-err (la/norm (la/sub A-lr A-rank1))))
+(def v64_l363 (def approx-err (la/norm (el/- A-lr A-rank1))))
 
 
 (def v65_l365 (< (abs (- approx-err (second sigmas))) 1.0E-10))
@@ -242,7 +242,7 @@
 (def
  v69_l395
  (every?
-  (fn* [p1__70040#] (>= p1__70040# -1.0E-10))
+  (fn* [p1__66272#] (>= p1__66272# -1.0E-10))
   (el/re (:eigenvalues (la/eigen ATA)))))
 
 
@@ -251,7 +251,7 @@
 
 (def
  v72_l408
- (def spd-mat (la/add (la/mmul (la/transpose A-eig) A-eig) (t/eye 3))))
+ (def spd-mat (el/+ (la/mmul (la/transpose A-eig) A-eig) (t/eye 3))))
 
 
 (def v73_l411 (def chol-L (la/cholesky spd-mat)))
@@ -279,7 +279,7 @@
 
 (def
  v77_l425
- (la/norm (la/sub (la/mmul chol-L (la/transpose chol-L)) spd-mat)))
+ (la/norm (el/- (la/mmul chol-L (la/transpose chol-L)) spd-mat)))
 
 
 (deftest t78_l427 (is ((fn [d] (< d 1.0E-10)) v77_l425)))
@@ -324,7 +324,7 @@
 
 (def
  v96_l485
- (< (abs (- (la/det A-final) (el/prod final-eigenvalues))) 1.0E-10))
+ (< (abs (- (la/det A-final) (el/reduce-* final-eigenvalues))) 1.0E-10))
 
 
 (deftest t97_l489 (is (true? v96_l485)))
@@ -337,7 +337,7 @@
  v100_l499
  (<
   (el/reduce-max
-   (el/abs (la/sub (sort (:S final-svd)) final-eigenvalues)))
+   (el/abs (el/- (sort (:S final-svd)) final-eigenvalues)))
   1.0E-10))
 
 

@@ -73,7 +73,7 @@
 (la/mmul P (t/column (repeat 3 1.0)))
 
 (kind/test-last
- [(fn [sums] (< (la/norm (la/sub sums (t/column (repeat 3 1.0)))) 1e-10))])
+ [(fn [sums] (< (la/norm (el/- sums (t/column (repeat 3 1.0)))) 1e-10))])
 
 ;; ## Propagating state distributions
 ;;
@@ -146,7 +146,7 @@
                             (range (count eigenvectors))))
         ev (nth eigenvectors idx)
         total (el/sum (t/flatten ev))]
-    (t/flatten (la/scale ev (/ 1.0 total)))))
+    (t/flatten (el/scale ev (/ 1.0 total)))))
 
 stationary-eigen
 
@@ -178,8 +178,8 @@ stationary-eigen
       (if (>= k iters)
         history
         (let [new-pi (la/mmul pi P)
-              new-pi (la/scale new-pi (/ 1.0 (el/sum new-pi)))
-              change (la/norm (la/sub new-pi pi))]
+              new-pi (el/scale new-pi (/ 1.0 (el/sum new-pi)))
+              change (la/norm (el/- new-pi pi))]
           (recur new-pi (inc k)
                  (conj history {:iteration (inc k)
                                 :change change})))))))
@@ -273,27 +273,27 @@ stationary-eigen
 (def damping 0.85)
 
 (def google-matrix
-  (la/add (la/scale (t/matrix (repeat n-pages (repeat n-pages 1.0)))
+  (el/+ (el/scale (t/matrix (repeat n-pages (repeat n-pages 1.0)))
                     (/ (- 1.0 damping) n-pages))
-          (la/scale H damping)))
+          (el/scale H damping)))
 
 ;; Verify that each row sums to 1:
 
 (la/mmul google-matrix (t/column (repeat n-pages 1.0)))
 
 (kind/test-last
- [(fn [sums] (< (la/norm (la/sub sums (t/column (repeat n-pages 1.0)))) 1e-10))])
+ [(fn [sums] (< (la/norm (el/- sums (t/column (repeat n-pages 1.0)))) 1e-10))])
 
 ;; Find PageRank via power iteration:
 
 (def pagerank
   (let [iters 50]
-    (loop [pi (la/scale (t/row (repeat n-pages 1.0)) (/ 1.0 n-pages))
+    (loop [pi (el/scale (t/row (repeat n-pages 1.0)) (/ 1.0 n-pages))
            k  0]
       (if (>= k iters)
         pi
         (let [new-pi (la/mmul pi google-matrix)
-              new-pi (la/scale new-pi (/ 1.0 (el/sum new-pi)))]
+              new-pi (el/scale new-pi (/ 1.0 (el/sum new-pi)))]
           (recur new-pi (inc k)))))))
 
 ;; Foundational courses rank highest — they are referenced across

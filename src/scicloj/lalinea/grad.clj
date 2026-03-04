@@ -9,6 +9,7 @@
    linalg requires tape requires complex, and grad needs both tape
    and linalg."
   (:require [scicloj.lalinea.linalg :as la]
+            [scicloj.lalinea.elementwise :as el]
             [scicloj.lalinea.tensor :as t]
             [scicloj.lalinea.tape :as tape]
             [scicloj.lalinea.impl.real-tensor :as rt]
@@ -24,13 +25,13 @@
 (def ^:private vjp-rules
   "Op keyword -> fn of [adjoint, inputs, output] -> vector of
    input adjoints (nil for non-differentiable inputs)."
-  {:la/add
+  {:el/+
    (fn [g [_a _b] _out] [g g])
 
-   :la/sub
+   :el/-
    (fn [g [_a _b] _out] [g (dfn/* -1.0 g)])
 
-   :la/scale
+   :el/scale
    (fn [g [_a alpha] _out]
      [(dfn/* g (double alpha)) nil])
 
@@ -43,14 +44,14 @@
    (fn [g [_a] _out]
      [(la/transpose g)])
 
-   :el/mul
+   :el/*
    (fn [g [a b] _out]
      [(dfn/* g b) (dfn/* g a)])
 
    :la/trace
    (fn [g [a] _out]
      (let [n (first (dtype/shape a))]
-       [(la/scale (t/eye n) (double g))]))
+       [(el/scale (t/eye n) (double g))]))
 
    :el/sq
    (fn [g [a] _out]
@@ -67,18 +68,18 @@
 
    :la/det
    (fn [g [a] out]
-     [(la/scale (la/transpose (la/invert a))
+     [(el/scale (la/transpose (la/invert a))
                 (* (double g) (double out)))])
 
    :la/invert
    (fn [g [_a] out]
      (let [inv-t (la/transpose out)]
-       [(la/scale (la/mmul inv-t (la/mmul g inv-t))
+       [(el/scale (la/mmul inv-t (la/mmul g inv-t))
                   -1.0)]))
 
    :la/norm
    (fn [g [a] out]
-     [(la/scale a (/ (double g) (double out)))])
+     [(el/scale a (/ (double g) (double out)))])
 
    :la/dot
    (fn [g [u v] _out]

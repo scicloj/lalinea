@@ -112,15 +112,15 @@
 ;;
 ;; **Additivity**: $R(\mathbf{u} + \mathbf{v}) = R(\mathbf{u}) + R(\mathbf{v})$:
 
-(la/close? (la/mmul R90 (la/add u v))
-           (la/add (la/mmul R90 u) (la/mmul R90 v)))
+(la/close? (la/mmul R90 (el/+ u v))
+           (el/+ (la/mmul R90 u) (la/mmul R90 v)))
 
 (kind/test-last [true?])
 
 ;; **Homogeneity**: $R(3\mathbf{u}) = 3 R(\mathbf{u})$:
 
-(la/close? (la/mmul R90 (la/scale u 3.0))
-           (la/scale (la/mmul R90 u) 3.0))
+(la/close? (la/mmul R90 (el/scale u 3.0))
+           (el/scale (la/mmul R90 u) 3.0))
 
 (kind/test-last [true?])
 
@@ -133,7 +133,7 @@
 ;; Stretches the x-direction by 3, leaves y unchanged.
 ;; Let us see what it does to a set of points on the unit circle:
 
-(let [angles (el/mul (/ (* 2.0 math/PI) 40.0) (t/make-reader :float64 41 idx))
+(let [angles (el/* (/ (* 2.0 math/PI) 40.0) (t/make-reader :float64 41 idx))
       circle-x (el/cos angles)
       circle-y (el/sin angles)
       data-mat (t/hstack [(t/column circle-x) (t/column circle-y)])
@@ -212,7 +212,7 @@
 (def AB (la/mmul stretch-mat R90))
 (def BA (la/mmul R90 stretch-mat))
 
-(la/norm (la/sub AB BA))
+(la/norm (el/- AB BA))
 
 (kind/test-last
  [(fn [d] (> d 0.1))])
@@ -286,7 +286,7 @@
 ;; scalar multiples. Any scalar times a null space vector
 ;; is again a null space vector (that is the subspace property):
 
-(la/mmul M (la/scale (t/column [1 1 -1]) 7.0))
+(la/mmul M (el/scale (t/column [1 1 -1]) 7.0))
 
 (kind/test-last
  [(fn [r] (< (la/norm r) 1e-10))])

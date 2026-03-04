@@ -103,7 +103,7 @@
    (t/complex-tensor [1.0 2.0] [3.0 4.0])
    b
    (t/complex-tensor [5.0 6.0] [7.0 8.0])]
-  {:re (el/re (el/mul a b)), :im (el/im (el/mul a b))}))
+  {:re (el/re (el/* a b)), :im (el/im (el/* a b))}))
 
 
 (deftest
@@ -254,7 +254,7 @@
    im-part
    (el/im product)]
   (and
-   (< (el/reduce-max (el/abs (la/sub re-part (t/eye 2)))) 1.0E-10)
+   (< (el/reduce-max (el/abs (el/- re-part (t/eye 2)))) 1.0E-10)
    (< (el/reduce-max (el/abs im-part)) 1.0E-10))))
 
 

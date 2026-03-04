@@ -30,7 +30,7 @@
  (is
   ((fn
     [sums]
-    (< (la/norm (la/sub sums (t/column (repeat 3 1.0)))) 1.0E-10))
+    (< (la/norm (el/- sums (t/column (repeat 3 1.0)))) 1.0E-10))
    v7_l73)))
 
 
@@ -113,7 +113,7 @@
     (nth eigenvectors idx)
     total
     (el/sum (t/flatten ev))]
-   (t/flatten (la/scale ev (/ 1.0 total))))))
+   (t/flatten (el/scale ev (/ 1.0 total))))))
 
 
 (def v21_l151 stationary-eigen)
@@ -154,9 +154,9 @@
       [new-pi
        (la/mmul pi P)
        new-pi
-       (la/scale new-pi (/ 1.0 (el/sum new-pi)))
+       (el/scale new-pi (/ 1.0 (el/sum new-pi)))
        change
-       (la/norm (la/sub new-pi pi))]
+       (la/norm (el/- new-pi pi))]
       (recur
        new-pi
        (inc k)
@@ -223,11 +223,11 @@
  v41_l275
  (def
   google-matrix
-  (la/add
-   (la/scale
+  (el/+
+   (el/scale
     (t/matrix (repeat n-pages (repeat n-pages 1.0)))
     (/ (- 1.0 damping) n-pages))
-   (la/scale H damping))))
+   (el/scale H damping))))
 
 
 (def v43_l282 (la/mmul google-matrix (t/column (repeat n-pages 1.0))))
@@ -238,9 +238,7 @@
  (is
   ((fn
     [sums]
-    (<
-     (la/norm (la/sub sums (t/column (repeat n-pages 1.0))))
-     1.0E-10))
+    (< (la/norm (el/- sums (t/column (repeat n-pages 1.0)))) 1.0E-10))
    v43_l282)))
 
 
@@ -251,7 +249,7 @@
   (let
    [iters 50]
    (loop
-    [pi (la/scale (t/row (repeat n-pages 1.0)) (/ 1.0 n-pages)) k 0]
+    [pi (el/scale (t/row (repeat n-pages 1.0)) (/ 1.0 n-pages)) k 0]
     (if
      (>= k iters)
      pi
@@ -259,7 +257,7 @@
       [new-pi
        (la/mmul pi google-matrix)
        new-pi
-       (la/scale new-pi (/ 1.0 (el/sum new-pi)))]
+       (el/scale new-pi (/ 1.0 (el/sum new-pi)))]
       (recur new-pi (inc k))))))))
 
 

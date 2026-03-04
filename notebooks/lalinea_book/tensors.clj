@@ -120,7 +120,7 @@
 
 ;; ## Materialization: t/clone
 
-;; Lazy results (from `la/add`, `el/sqrt`, etc.) recompute on
+;; Lazy results (from `el/+`, `el/sqrt`, etc.) recompute on
 ;; every access. Call `t/clone` to materialize into a concrete array:
 
 (let [a (t/matrix [1 4 9])
@@ -157,12 +157,12 @@
 
 (kind/test-last [(fn [r] (= 2.0 (r 0 1)))])
 
-;; `la/add`, `la/sub`, `la/scale`, and `el/mul` also work
+;; `el/+`, `el/-`, `el/scale`, and `el/*` also work
 ;; element-wise on matching-shape tensors:
 
 (let [a (t/matrix [[1 2] [3 4]])
       b (t/matrix [[10 20] [30 40]])]
-  (la/add a b))
+  (el/+ a b))
 
 (kind/test-last [(fn [r] (= 44.0 (r 1 1)))])
 

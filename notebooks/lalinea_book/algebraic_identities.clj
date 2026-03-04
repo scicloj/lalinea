@@ -47,42 +47,42 @@
 ;;
 ;; Matrix addition is commutative because it operates element-wise.
 
-(la/close? (la/add A B) (la/add B A))
+(la/close? (el/+ A B) (el/+ B A))
 
 (kind/test-last [true?])
 
 ;; ### Associativity of addition: $(A + B) + C = A + (B + C)$
 
-(la/close? (la/add (la/add A B) C)
-           (la/add A (la/add B C)))
+(la/close? (el/+ (el/+ A B) C)
+           (el/+ A (el/+ B C)))
 
 (kind/test-last [true?])
 
 ;; ### Additive identity: $A + 0 = A$
 
-(la/close? (la/add A (t/zeros 3 3)) A)
+(la/close? (el/+ A (t/zeros 3 3)) A)
 
 (kind/test-last [true?])
 
 ;; ### Additive inverse: $A - A = 0$
 
-(< (la/norm (la/sub A A)) 1e-10)
+(< (la/norm (el/- A A)) 1e-10)
 
 (kind/test-last [true?])
 
 ;; ### Scalar distribution: $\alpha(A + B) = \alpha A + \alpha B$
 
 (let [alpha 3.5]
-  (la/close? (la/scale (la/add A B) alpha)
-             (la/add (la/scale A alpha) (la/scale B alpha))))
+  (la/close? (el/scale (el/+ A B) alpha)
+             (el/+ (el/scale A alpha) (el/scale B alpha))))
 
 (kind/test-last [true?])
 
 ;; ### Scalar associativity: $(\alpha \beta) A = \alpha (\beta A)$
 
 (let [alpha 2.0 beta 3.0]
-  (la/close? (la/scale A (* alpha beta))
-             (la/scale (la/scale A beta) alpha)))
+  (la/close? (el/scale A (* alpha beta))
+             (el/scale (el/scale A beta) alpha)))
 
 (kind/test-last [true?])
 
@@ -114,25 +114,25 @@
 
 ;; ### Distributivity: $A(B + C) = AB + AC$
 
-(la/close? (la/mmul A (la/add B C))
-           (la/add (la/mmul A B) (la/mmul A C)))
+(la/close? (la/mmul A (el/+ B C))
+           (el/+ (la/mmul A B) (la/mmul A C)))
 
 (kind/test-last [true?])
 
 ;; ### Right distributivity: $(A + B)C = AC + BC$
 
-(la/close? (la/mmul (la/add A B) C)
-           (la/add (la/mmul A C) (la/mmul B C)))
+(la/close? (la/mmul (el/+ A B) C)
+           (el/+ (la/mmul A C) (la/mmul B C)))
 
 (kind/test-last [true?])
 
 ;; ### Scalar compatibility: $\alpha(AB) = (\alpha A)B = A(\alpha B)$
 
 (let [alpha 2.5]
-  (and (la/close? (la/scale (la/mmul A B) alpha)
-                  (la/mmul (la/scale A alpha) B))
-       (la/close? (la/scale (la/mmul A B) alpha)
-                  (la/mmul A (la/scale B alpha)))))
+  (and (la/close? (el/scale (la/mmul A B) alpha)
+                  (la/mmul (el/scale A alpha) B))
+       (la/close? (el/scale (la/mmul A B) alpha)
+                  (la/mmul A (el/scale B alpha)))))
 
 (kind/test-last [true?])
 
@@ -140,7 +140,7 @@
 ;;
 ;; Unlike addition, matrix multiplication is **not** commutative.
 
-(> (la/norm (la/sub (la/mmul A B) (la/mmul B A))) 0.01)
+(> (la/norm (el/- (la/mmul A B) (la/mmul B A))) 0.01)
 
 (kind/test-last [true?])
 
@@ -161,8 +161,8 @@
 
 ;; ### Sum: $(A + B)^T = A^T + B^T$
 
-(la/close? (la/transpose (la/add A B))
-           (la/add (la/transpose A) (la/transpose B)))
+(la/close? (la/transpose (el/+ A B))
+           (el/+ (la/transpose A) (la/transpose B)))
 
 (kind/test-last [true?])
 
@@ -179,8 +179,8 @@
 ;; ### Scalar: $(\alpha A)^T = \alpha A^T$
 
 (let [alpha 4.0]
-  (la/close? (la/transpose (la/scale A alpha))
-             (la/scale (la/transpose A) alpha)))
+  (la/close? (la/transpose (el/scale A alpha))
+             (el/scale (la/transpose A) alpha)))
 
 (kind/test-last [true?])
 
@@ -195,8 +195,8 @@
 ;; ### Linearity: $\operatorname{tr}(\alpha A + \beta B) = \alpha\operatorname{tr}(A) + \beta\operatorname{tr}(B)$
 
 (let [alpha 2.0 beta 3.0]
-  (la/close-scalar? (la/trace (la/add (la/scale A alpha)
-                                      (la/scale B beta)))
+  (la/close-scalar? (la/trace (el/+ (el/scale A alpha)
+                                      (el/scale B beta)))
                     (+ (* alpha (la/trace A))
                        (* beta (la/trace B)))))
 
@@ -266,7 +266,7 @@
 ;; ### Scalar: $\det(\alpha A) = \alpha^n \det(A)$ for $n \times n$ matrix
 
 (let [alpha 2.0 n 3]
-  (la/close-scalar? (la/det (la/scale A alpha))
+  (la/close-scalar? (la/det (el/scale A alpha))
                     (* (math/pow alpha n) (la/det A))))
 
 (kind/test-last [true?])
@@ -317,8 +317,8 @@
 ;; ### Scalar: $(\alpha A)^{-1} = \frac{1}{\alpha} A^{-1}$
 
 (let [alpha 2.0]
-  (la/close? (la/invert (la/scale A alpha))
-             (la/scale (la/invert A) (/ 1.0 alpha))))
+  (la/close? (la/invert (el/scale A alpha))
+             (el/scale (la/invert A) (/ 1.0 alpha))))
 
 (kind/test-last [true?])
 
@@ -340,7 +340,7 @@
 ;; ### Scale: $\|\alpha A\|_F = |\alpha| \|A\|_F$
 
 (let [alpha -2.5]
-  (la/close-scalar? (la/norm (la/scale A alpha))
+  (la/close-scalar? (la/norm (el/scale A alpha))
                     (* (abs alpha) (la/norm A))))
 
 (kind/test-last [true?])
@@ -402,7 +402,7 @@
   (every? (fn [[i evec]]
             (when evec
               (let [Av (la/mmul A evec)
-                    lam-v (la/scale evec (double (reals i)))]
+                    lam-v (el/scale evec (double (reals i)))]
                 (la/close? Av lam-v))))
           (map-indexed vector eigenvectors)))
 
@@ -419,7 +419,7 @@
 ;; ### Determinant equals product of eigenvalues: $\det(A) = \prod \lambda_i$
 
 (let [{:keys [eigenvalues]} (la/eigen A)
-      eig-prod (el/prod (el/re eigenvalues))]
+      eig-prod (el/reduce-* (el/re eigenvalues))]
   (la/close-scalar? (la/det A) eig-prod))
 
 (kind/test-last [true?])
@@ -467,7 +467,7 @@
 ;; ### [Frobenius norm](https://en.wikipedia.org/wiki/Matrix_norm#Frobenius_norm) from singular values: $\|A\|_F = \sqrt{\sum \sigma_i^2}$
 
 (let [{:keys [S]} (la/svd A)
-      sv-norm (math/sqrt (el/sum (el/mul S S)))]
+      sv-norm (math/sqrt (el/sum (el/* S S)))]
   (la/close-scalar? (la/norm A) sv-norm))
 
 (kind/test-last [true?])
@@ -482,7 +482,7 @@
 ;;
 ;; ### Reconstruction: $L L^T = M$ for SPD matrix $A^T A + I$
 
-(let [M (la/add (la/mmul (la/transpose A) A) I3)
+(let [M (el/+ (la/mmul (la/transpose A) A) I3)
       L (la/cholesky M)]
   (la/close? (la/mmul L (la/transpose L)) M))
 
@@ -529,7 +529,7 @@
 
 ;; ### Commutativity: $a \cdot b = b \cdot a$
 
-(la/close? (el/mul ca cb) (el/mul cb ca))
+(la/close? (el/* ca cb) (el/* cb ca))
 
 (kind/test-last [true?])
 
@@ -541,16 +541,16 @@
 
 ;; ### Conjugate distributes: $\overline{a \cdot b} = \bar{a} \cdot \bar{b}$
 
-(la/close? (el/conj (el/mul ca cb))
-           (el/mul (el/conj ca) (el/conj cb)))
+(la/close? (el/conj (el/* ca cb))
+           (el/* (el/conj ca) (el/conj cb)))
 
 (kind/test-last [true?])
 
 ;; ### Magnitude is multiplicative: $|a \cdot b| = |a| \cdot |b|$
 
 (< (el/reduce-max
-    (el/abs (la/sub (el/abs (el/mul ca cb))
-                      (el/mul (el/abs ca) (el/abs cb)))))
+    (el/abs (el/- (el/abs (el/* ca cb))
+                      (el/* (el/abs ca) (el/abs cb)))))
    1e-10)
 
 (kind/test-last [true?])
@@ -579,7 +579,7 @@
 (let [CA (t/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
       CB (t/complex-tensor [[2 0] [1 3]] [[1 -1] [0 2]])
       CC (t/complex-tensor [[0 1] [2 -1]] [[3 0] [1 1]])]
-  (< (la/norm (la/sub (la/mmul (la/mmul CA CB) CC)
+  (< (la/norm (el/- (la/mmul (la/mmul CA CB) CC)
                       (la/mmul CA (la/mmul CB CC))))
      1e-10))
 
@@ -589,7 +589,7 @@
 
 (let [CA (t/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
       AAdag (la/mmul CA (la/transpose CA))]
-  (< (la/norm (la/sub AAdag (la/transpose AAdag))) 1e-10))
+  (< (la/norm (el/- AAdag (la/transpose AAdag))) 1e-10))
 
 (kind/test-last [true?])
 
@@ -600,8 +600,8 @@
       det-AB (la/det (la/mmul CA CB))
       det-A (la/det CA)
       det-B (la/det CB)
-      product (el/mul det-A det-B)]
-  (< (la/norm (la/sub det-AB product)) 1e-10))
+      product (el/* det-A det-B)]
+  (< (la/norm (el/- det-AB product)) 1e-10))
 
 (kind/test-last [true?])
 
@@ -610,7 +610,7 @@
 (let [CA (t/complex-tensor [[2 1] [1 3]] [[1 0] [0 1]])
       Cb (t/complex-tensor [[1] [2]] [[1] [0]])
       Cx (la/solve CA Cb)]
-  (< (la/norm (la/sub (la/mmul CA Cx) Cb)) 1e-10))
+  (< (la/norm (el/- (la/mmul CA Cx) Cb)) 1e-10))
 
 (kind/test-last [true?])
 
@@ -618,7 +618,7 @@
 
 (let [CA (t/complex-tensor [[1 2] [3 4]] [[0.5 1] [1.5 2]])
       CI (t/complex-tensor [[1 0] [0 1]] [[0 0] [0 0]])]
-  (< (la/norm (la/sub (la/mmul CA (la/invert CA)) CI)) 1e-10))
+  (< (la/norm (el/- (la/mmul CA (la/invert CA)) CI)) 1e-10))
 
 (kind/test-last [true?])
 

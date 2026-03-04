@@ -201,8 +201,8 @@
 (kind/doc #'t/clone)
 
 ;; Materialize a lazy result:
-(t/clone (la/add (t/matrix [[1 2] [3 4]])
-                 (t/matrix [[10 20] [30 40]])))
+(t/clone (el/+ (t/matrix [[1 2] [3 4]])
+               (t/matrix [[10 20] [30 40]])))
 
 (kind/test-last [(fn [m] (= [[11.0 22.0] [33.0 44.0]] m))])
 
@@ -274,26 +274,6 @@
 ;; Most `la/` functions are polymorphic — they accept both real tensors
 ;; and ComplexTensors. Operations like `el/re`, `el/im`, `el/conj` are
 ;; identity on real inputs and meaningful on complex inputs.
-
-(kind/doc #'la/add)
-
-(la/add (t/matrix [[1 2] [3 4]])
-        (t/matrix [[10 20] [30 40]]))
-
-(kind/test-last [(fn [m] (== 11.0 (m 0 0)))])
-
-(kind/doc #'la/sub)
-
-(la/sub (t/matrix [[10 20] [30 40]])
-        (t/matrix [[1 2] [3 4]]))
-
-(kind/test-last [(fn [m] (== 9.0 (m 0 0)))])
-
-(kind/doc #'la/scale)
-
-(la/scale (t/matrix [[1 2] [3 4]]) 3.0)
-
-(kind/test-last [(fn [m] (== 6.0 (m 0 1)))])
 
 (kind/doc #'la/mmul)
 
@@ -560,7 +540,7 @@
 
 (let [a (t/complex-tensor [1.0 2.0] [3.0 4.0])
       b (t/complex-tensor [10.0 20.0] [30.0 40.0])]
-  (el/re (la/add a b)))
+  (el/re (el/+ a b)))
 
 (kind/test-last [= [11.0 22.0]])
 
@@ -568,7 +548,7 @@
 
 (let [a (t/complex-tensor [1.0] [3.0])
       b (t/complex-tensor [2.0] [4.0])
-      c (el/mul a b)]
+      c (el/* a b)]
   [(el/re (c 0)) (el/im (c 0))])
 
 (kind/test-last [= [-10.0 10.0]])
@@ -699,7 +679,7 @@
 
 (kind/test-last [(fn [s] (= :strided s))])
 
-(tape/memory-status (la/add (t/eye 2) (t/eye 2)))
+(tape/memory-status (el/+ (t/eye 2) (t/eye 2)))
 
 (kind/test-last [(fn [s] (= :lazy s))])
 
@@ -714,7 +694,7 @@
 
 (kind/test-last [(fn [r] (= :independent r))])
 
-(tape/memory-relation (t/matrix [[1 2] [3 4]]) (la/add (t/eye 2) (t/eye 2)))
+(tape/memory-relation (t/matrix [[1 2] [3 4]]) (el/+ (t/eye 2) (t/eye 2)))
 
 (kind/test-last [(fn [r] (= :unknown-lazy r))])
 
@@ -723,7 +703,7 @@
 (def tape-example
   (tape/with-tape
     (let [A (t/matrix [[1 2] [3 4]])
-          B (la/scale A 2.0)]
+          B (el/scale A 2.0)]
       (la/mmul B (la/transpose A)))))
 
 (select-keys tape-example [:result :entries])
@@ -762,18 +742,17 @@
 ;;
 ;; The canonical namespace for element-wise operations. All functions
 ;; are tape-aware and dispatch on `t/complex?` for complex inputs.
-;; `el/add`, `el/sub`, and `el/scale` are also available
-;; as `la/add`, `la/sub`, `la/scale` — they share the same tape key.
+;; Naming follows dtype-next's `dfn/` conventions (`+`, `-`, `*`, `/`).
 
-(kind/doc #'el/add)
+(kind/doc #'el/+)
 
-(el/add (t/column [1 2 3]) (t/column [10 20 30]))
+(el/+ (t/column [1 2 3]) (t/column [10 20 30]))
 
 (kind/test-last [(fn [v] (== 11.0 (v 0 0)))])
 
-(kind/doc #'el/sub)
+(kind/doc #'el/-)
 
-(el/sub (t/column [10 20 30]) (t/column [1 2 3]))
+(el/- (t/column [10 20 30]) (t/column [1 2 3]))
 
 (kind/test-last [(fn [v] (== 9.0 (v 0 0)))])
 
@@ -783,9 +762,9 @@
 
 (kind/test-last [(fn [v] (== 10.0 (v 0 0)))])
 
-(kind/doc #'el/mul)
+(kind/doc #'el/*)
 
-(el/mul (t/column [2 3 4]) (t/column [10 20 30]))
+(el/* (t/column [2 3 4]) (t/column [10 20 30]))
 
 (kind/test-last [(fn [v] (== 20.0 (v 0 0)))])
 
@@ -808,9 +787,9 @@
 
 (kind/test-last [(fn [v] (la/close-scalar? v -4.0))])
 
-(kind/doc #'el/prod)
+(kind/doc #'el/reduce-*)
 
-(el/prod (t/column [2 3 4]))
+(el/reduce-* (t/column [2 3 4]))
 
 (kind/test-last [(fn [v] (== 24.0 v))])
 
@@ -976,15 +955,15 @@
 
 (kind/test-last [(fn [v] (= [-1.0 0.5 1.0] v))])
 
-(kind/doc #'el/div)
+(kind/doc #'el//)
 
-(el/div (t/column [10 20 30]) (t/column [2 4 5]))
+(el// (t/column [10 20 30]) (t/column [2 4 5]))
 
 (kind/test-last [(fn [v] (= [5.0 5.0 6.0] (t/flatten v)))])
 
 ;; Complex division:
 
-(el/div (t/complex 3.0 4.0) (t/complex 1.0 2.0))
+(el// (t/complex 3.0 4.0) (t/complex 1.0 2.0))
 
 (kind/test-last [(fn [v] (and (< (abs (- (el/re v) 2.2)) 1e-10)
                               (< (abs (- (el/im v) -0.4)) 1e-10)))])
@@ -1048,7 +1027,7 @@
                     (la/trace (la/mmul (la/transpose A) A)))]
   (la/close? (grad/grad tape-result
                         (:result tape-result) A)
-             (la/scale A 2)))
+             (el/scale A 2)))
 
 (kind/test-last [true?])
 

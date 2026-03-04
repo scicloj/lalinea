@@ -21,6 +21,7 @@
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
+   [scicloj.lalinea.elementwise :as el]
    [scicloj.lalinea.tensor :as t]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
@@ -192,7 +193,7 @@ T-direct
                   right (if (< i (dec n)) (x (inc i)) 0.0)]
               (t/set-value! x i (/ (+ left right (b-buf i)) 2.0))))
           (let [x-col    (t/column (t/clone x))
-                residual (la/norm (la/sub (la/mmul A-heat x-col) b-heat))]
+                residual (la/norm (el/- (la/mmul A-heat x-col) b-heat))]
             (recur (inc k)
                    (conj history {:iteration (inc k)
                                   :residual  residual
@@ -238,6 +239,6 @@ T-direct
 ;; The iterative solution should be close to the direct one:
 
 (let [x-iter (t/column (:x-final gs-result))]
-  (la/norm (la/sub x-iter T-direct)))
+  (la/norm (el/- x-iter T-direct)))
 
 (kind/test-last [(fn [d] (< d 0.01))])

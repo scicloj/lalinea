@@ -179,7 +179,7 @@
    b
    (t/matrix [[10 20] [30 40]])
    lazy-sum
-   (la/add a b)
+   (el/+ a b)
    arr
    (t/->double-array lazy-sum)]
   {:values (seq arr),
@@ -287,7 +287,7 @@
 (def
  v53_l268
  (let
-  [x (t/matrix [1 2 3]) y (t/matrix [10 20 30]) lazy-sum (la/add x y)]
+  [x (t/matrix [1 2 3]) y (t/matrix [10 20 30]) lazy-sum (el/+ x y)]
   (seq lazy-sum)))
 
 
@@ -302,7 +302,7 @@
    y
    (t/matrix [10 20 30])
    lazy-sum
-   (la/add x y)
+   (el/+ x y)
    arr
    (t/->double-array x)
    _
@@ -316,7 +316,7 @@
 (def
  v59_l290
  (let
-  [x (t/matrix [1 2 3]) y (t/matrix [10 20 30]) lazy-sum (la/add x y)]
+  [x (t/matrix [1 2 3]) y (t/matrix [10 20 30]) lazy-sum (el/+ x y)]
   (t/mset! x 0 100.0)
   (seq lazy-sum)))
 
@@ -332,7 +332,7 @@
    cb
    (t/complex-tensor (t/matrix [[10 30] [20 40]]))
    lazy-sum
-   (la/add ca cb)]
+   (el/+ ca cb)]
   {:re (seq (el/re lazy-sum)), :im (seq (el/im lazy-sum))}))
 
 
@@ -351,7 +351,7 @@
    cb
    (t/complex-tensor (t/matrix [[10 30] [20 40]]))
    lazy-sum
-   (la/add ca cb)
+   (el/+ ca cb)
    arr
    (t/->double-array (t/->tensor ca))
    _
@@ -370,7 +370,7 @@
    cb
    (t/complex-tensor (t/matrix [[10 30] [20 40]]))
    lazy-sum
-   (la/add ca cb)]
+   (el/+ ca cb)]
   (t/mset! (t/->tensor ca) 0 0 100.0)
   (seq (el/re lazy-sum))))
 
@@ -479,7 +479,7 @@
    q
    (t/complex-tensor (t/matrix [[10 30] [20 40]]))
    lazy-pq
-   (la/add p q)
+   (el/+ p q)
    materialized-pq
    (t/clone lazy-pq)]
   (some? (t/array-buffer (t/->tensor materialized-pq)))))
@@ -496,7 +496,7 @@
    q
    (t/complex-tensor (t/matrix [[10 30] [20 40]]))
    lazy-pq
-   (la/add p q)
+   (el/+ p q)
    materialized-pq
    (t/clone lazy-pq)
    arr
@@ -524,7 +524,7 @@
    q
    (t/complex-tensor (t/matrix [[10 30] [20 40]]))
    lazy-pq
-   (la/add p q)
+   (el/+ p q)
    materialized-pq
    (t/clone lazy-pq)]
   (t/mset! (t/->tensor p) 0 0 999.0)
@@ -603,7 +603,7 @@
    b
    (t/matrix [10 20 30])
    col
-   (t/column (la/add a b))]
+   (t/column (el/+ a b))]
   {:shape (t/shape col),
    :contiguous? (some? (t/array-buffer col)),
    :values (seq (t/flatten col))}))
@@ -625,7 +625,7 @@
  v107_l526
  (let
   [col
-   (t/column (la/add (t/matrix [1 0]) (t/matrix [0 1])))
+   (t/column (el/+ (t/matrix [1 0]) (t/matrix [0 1])))
    A
    (t/matrix [[2 0] [0 3]])]
   (la/mmul A col)))

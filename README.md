@@ -22,7 +22,7 @@ Two namespaces cover most usage:
 - **`t/`** (`scicloj.lalinea.tensor`) — construct tensors in either field (real or complex)
 - **`la/`** (`scicloj.lalinea.linalg`) — compute with them (polymorphic over the field)
 
-`la/add`, `la/mmul`, `la/transpose`, `la/dot`, and most other functions work
+`la/mmul`, `la/transpose`, `la/dot`, and most other functions work
 uniformly on both real tensors and ComplexTensors. Field-aware operations like
 `el/re`, `el/im`, `el/conj` are identity on reals and meaningful on complex.
 
@@ -34,7 +34,7 @@ Supporting namespaces: `el/` (element-wise math), `tape/` (computation recording
 ### Real matrices
 
 - **Construction** — `matrix`, `eye`, `zeros`, `ones`, `diag`, `column`, `row`, `submatrix`
-- **Arithmetic** — `mmul`, `mpow`, `add`, `sub`, `scale`, `transpose`
+- **Arithmetic** — `mmul`, `mpow`, `transpose`
 - **Properties** — `trace`, `det`, `norm` (Frobenius), `dot`
 - **Analysis** — `rank`, `condition-number`, `pinv` (pseudoinverse), `null-space`, `col-space`
 - **Solve** — `solve`, `lstsq` (least squares), `invert`
@@ -49,7 +49,7 @@ Supporting namespaces: `el/` (element-wise math), `tape/` (computation recording
 ### Element-wise operations
 
 - `scicloj.lalinea.elementwise` — 35+ tape-aware functions with complex dispatch
-- Arithmetic: `mul`, `add`, `sub`, `scale`, `div`
+- Arithmetic: `+`, `-`, `*`, `/`, `scale`
 - Complex-aware: `re`, `im`, `conj`
 - Powers: `sq`, `sqrt`, `pow`, `cbrt`
 - Exponential: `exp`, `log`, `log10`, `log1p`, `expm1`
@@ -83,7 +83,7 @@ Round-trip through `pr-str` / `read-string`.
 
 ### Computation tape
 
-- Record `la/`, `t/`, and `el/` operations as a DAG with `tape/with-tape`
+- Record `t/`, `la/`, and `el/` operations as a DAG with `tape/with-tape`
 - Inspect memory status: `:contiguous`, `:strided`, or `:lazy`
 - Detect shared backing arrays between tensors
 - Visualize computation graphs as Mermaid flowcharts
@@ -91,7 +91,7 @@ Round-trip through `pr-str` / `read-string`.
 ### Automatic differentiation
 
 - Reverse-mode autodiff via VJP rules on the computation tape
-- Differentiable ops: `la/add`, `la/sub`, `la/scale`, `la/mmul`, `la/transpose`, `la/trace`, `la/det`, `la/invert`, `la/norm`, `la/dot`, `el/mul`, `el/sq`, `el/sum`
+- Differentiable ops: `el/+`, `el/-`, `el/scale`, `la/mmul`, `la/transpose`, `la/trace`, `la/det`, `la/invert`, `la/norm`, `la/dot`, `el/*`, `el/sq`, `el/sum`
 - Compute gradients of scalar functions with respect to matrix inputs
 
 ### Zero-copy interop

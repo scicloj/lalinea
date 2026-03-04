@@ -67,11 +67,8 @@
       (>= k max-iter)
       counts
       (let
-       [z2
-        (t/clone (la/add (el/mul z z) c))
-        mask
-        (el/<= (el/abs z2) 2.0)]
-       (recur z2 (t/clone (la/add counts mask)) (inc k)))))))))
+       [z2 (t/clone (el/+ (el/* z z) c)) mask (el/<= (el/abs z2) 2.0)]
+       (recur z2 (t/clone (el/+ counts mask)) (inc k)))))))))
 
 
 (def
@@ -179,10 +176,10 @@
       counts
       (let
        [z2
-        (t/clone (la/add (el/mul z z) c-grid))
+        (t/clone (el/+ (el/* z z) c-grid))
         mask
         (el/<= (el/abs z2) 2.0)]
-       (recur z2 (t/clone (la/add counts mask)) (inc k)))))))))
+       (recur z2 (t/clone (el/+ counts mask)) (inc k)))))))))
 
 
 (def
@@ -289,14 +286,14 @@
         z
         (let
          [z2
-          (el/mul z z)
+          (el/* z z)
           z3
-          (el/mul z z2)
+          (el/* z z2)
           fz
-          (la/sub z3 one)
+          (el/- z3 one)
           fpz
-          (la/scale z2 3.0)]
-         (recur (t/clone (la/sub z (el/div fz fpz))) (inc k)))))
+          (el/scale z2 3.0)]
+         (recur (t/clone (el/- z (el// fz fpz))) (inc k)))))
       dists
       (mapv
        (fn
@@ -313,7 +310,7 @@
               (double (el/re root))
               (double (el/im root))))
             :float64))]
-         (el/abs (la/sub z-final root-grid))))
+         (el/abs (el/- z-final root-grid))))
        roots)]
      (t/compute-matrix
       h

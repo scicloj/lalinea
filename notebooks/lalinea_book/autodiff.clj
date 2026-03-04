@@ -99,7 +99,7 @@
 (let [a (t/matrix [3.0])
       b (t/matrix [2.0])
       tape-result (tape/with-tape
-                    (el/sum (el/mul (el/sq a) b)))
+                    (el/sum (el/* (el/sq a) b)))
       grads (grad/grad tape-result
                        (:result tape-result)
                        [a b])]
@@ -210,7 +210,7 @@ grad-A
 
 ;; The gradient equals 2A:
 
-(la/close? grad-A (la/scale A 2))
+(la/close? grad-A (el/scale A 2))
 
 (kind/test-last [true?])
 
@@ -234,7 +234,7 @@ grad-A
 
 (def ls-tape
   (tape/with-tape
-    (el/sum (el/sq (la/sub (la/mmul A2 x) b)))))
+    (el/sum (el/sq (el/- (la/mmul A2 x) b)))))
 
 (:result ls-tape)
 
@@ -252,8 +252,8 @@ grad-x
 ;; Verify against the analytic gradient $2A^T(Ax - b)$:
 
 (def expected-grad
-  (la/scale (la/mmul (la/transpose A2)
-                     (la/sub (la/mmul A2 x) b))
+  (el/scale (la/mmul (la/transpose A2)
+                     (el/- (la/mmul A2 x) b))
             2))
 
 expected-grad
@@ -274,7 +274,7 @@ expected-grad
 
 (def ls-tape-A
   (tape/with-tape
-    (el/sum (el/sq (la/sub (la/mmul A2 x) b)))))
+    (el/sum (el/sq (el/- (la/mmul A2 x) b)))))
 
 (def grad-A2
   (grad/grad ls-tape-A (:result ls-tape-A) A2))
@@ -284,10 +284,10 @@ grad-A2
 (kind/test-last
  [(fn [g] (la/close? g (t/matrix [[-4 -4] [0 0] [-4 -4]])))])
 
-(def residual (la/sub (la/mmul A2 x) b))
+(def residual (el/- (la/mmul A2 x) b))
 
 (def expected-grad-A
-  (la/scale (la/mmul residual (la/transpose x)) 2))
+  (el/scale (la/mmul residual (la/transpose x)) 2))
 
 expected-grad-A
 
@@ -308,7 +308,7 @@ expected-grad-A
       tape-result (tape/with-tape (la/det A))
       grad-A (grad/grad tape-result
                         (:result tape-result) A)
-      expected (la/scale (la/transpose (la/invert A))
+      expected (el/scale (la/transpose (la/invert A))
                          (la/det A))]
   (la/close? grad-A expected))
 
@@ -326,7 +326,7 @@ expected-grad-A
       grad-A (grad/grad tape-result
                         (:result tape-result) A)
       inv-t (la/transpose (la/invert A))
-      expected (la/scale (la/mmul inv-t inv-t) -1.0)]
+      expected (el/scale (la/mmul inv-t inv-t) -1.0)]
   (la/close? grad-A expected))
 
 (kind/test-last [true?])
@@ -339,7 +339,7 @@ expected-grad-A
       tape-result (tape/with-tape (la/norm A))
       grad-A (grad/grad tape-result
                         (:result tape-result) A)
-      expected (la/scale A (/ 1.0 (la/norm A)))]
+      expected (el/scale A (/ 1.0 (la/norm A)))]
   (la/close? grad-A expected))
 
 (kind/test-last [true?])
@@ -348,11 +348,11 @@ expected-grad-A
 
 ;; The autodiff system supports these operations:
 ;;
-;; - `la/add`, `la/sub` — addition and subtraction
-;; - `la/scale` — scalar multiplication
+;; - `el/+`, `el/-` — addition and subtraction
+;; - `el/scale` — scalar multiplication
 ;; - `la/mmul` — matrix multiplication
 ;; - `la/transpose` — transpose
-;; - `el/mul` — element-wise multiplication
+;; - `el/*` — element-wise multiplication
 ;; - `la/trace` — matrix trace
 ;; - `el/sq` — element-wise square
 ;; - `el/sum` — sum of all elements
@@ -382,12 +382,12 @@ expected-grad-A
   "One gradient descent step for ||Ax - b||²."
   [x lr]
   (let [tape-result (tape/with-tape
-                      (el/sum (el/sq (la/sub
+                      (el/sum (el/sq (el/-
                                       (la/mmul A-gd x)
                                       b-gd))))
         g (grad/grad tape-result
                      (:result tape-result) x)]
-    (la/sub x (la/scale g lr))))
+    (el/- x (el/scale g lr))))
 
 (def x-gd
   (reduce (fn [x _] (ls-step x 0.05))

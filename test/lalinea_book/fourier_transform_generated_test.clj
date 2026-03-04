@@ -29,7 +29,7 @@
    (ft/forward signal)
    recovered
    (ft/inverse-real spectrum)]
-  (el/reduce-max (el/abs (la/sub recovered signal)))))
+  (el/reduce-max (el/abs (el/- recovered signal)))))
 
 
 (deftest t8_l49 (is ((fn [v] (< v 1.0E-10)) v7_l44)))
@@ -45,11 +45,11 @@
    spectrum
    (ft/forward signal)
    time-energy
-   (el/sum (el/mul signal signal))
+   (el/sum (el/* signal signal))
    magnitudes
    (el/abs spectrum)
    freq-energy
-   (/ (el/sum (el/mul magnitudes magnitudes)) n)]
+   (/ (el/sum (el/* magnitudes magnitudes)) n)]
   (< (abs (- time-energy freq-energy)) 1.0E-10)))
 
 
@@ -68,19 +68,17 @@
    beta
    -1.5
    combined
-   (la/add (el/mul alpha x) (el/mul beta y))
+   (el/+ (el/* alpha x) (el/* beta y))
    lhs
    (ft/forward combined)
    rhs
-   (la/add
-    (la/scale (ft/forward x) alpha)
-    (la/scale (ft/forward y) beta))]
+   (el/+
+    (el/scale (ft/forward x) alpha)
+    (el/scale (ft/forward y) beta))]
   (and
+   (< (el/reduce-max (el/abs (el/- (el/re lhs) (el/re rhs)))) 1.0E-10)
    (<
-    (el/reduce-max (el/abs (la/sub (el/re lhs) (el/re rhs))))
-    1.0E-10)
-   (<
-    (el/reduce-max (el/abs (la/sub (el/im lhs) (el/im rhs))))
+    (el/reduce-max (el/abs (el/- (el/im lhs) (el/im rhs))))
     1.0E-10))))
 
 
@@ -99,7 +97,7 @@
    Fy
    (ft/forward y)
    product-spectrum
-   (el/mul Fx Fy)
+   (el/* Fx Fy)
    conv-result
    (ft/inverse-real product-spectrum)
    n
@@ -121,9 +119,7 @@
           (+ acc (* (double (x j)) (double (y (mod (- k j) n))))))))]
       (t/set-value! out k s)))
     out)]
-  (<
-   (el/reduce-max (el/abs (la/sub conv-result manual-conv)))
-   1.0E-10)))
+  (< (el/reduce-max (el/abs (el/- conv-result manual-conv))) 1.0E-10)))
 
 
 (deftest t17_l110 (is (true? v16_l92)))
@@ -207,7 +203,7 @@
     [v]
     (and
      (< (abs (- (double (:dc v)) 12.0)) 1.0E-10)
-     (every? (fn* [p1__68868#] (< p1__68868# 1.0E-10)) (:others v))))
+     (every? (fn* [p1__64995#] (< p1__64995# 1.0E-10)) (:others v))))
    v29_l161)))
 
 
@@ -239,10 +235,10 @@
    (ft/inverse spectrum)]
   (and
    (<
-    (el/reduce-max (el/abs (la/sub (el/re recovered) (el/re signal))))
+    (el/reduce-max (el/abs (el/- (el/re recovered) (el/re signal))))
     1.0E-10)
    (<
-    (el/reduce-max (el/abs (la/sub (el/im recovered) (el/im signal))))
+    (el/reduce-max (el/abs (el/- (el/im recovered) (el/im signal))))
     1.0E-10))))
 
 
@@ -258,7 +254,7 @@
    (ft/dct-forward signal)
    recovered
    (ft/dct-inverse dct)]
-  (< (el/reduce-max (el/abs (la/sub recovered signal))) 1.0E-10)))
+  (< (el/reduce-max (el/abs (el/- recovered signal))) 1.0E-10)))
 
 
 (deftest t39_l198 (is (true? v38_l193)))

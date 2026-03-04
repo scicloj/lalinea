@@ -58,8 +58,8 @@
 (def
  v16_l115
  (la/close?
-  (la/mmul R90 (la/add u v))
-  (la/add (la/mmul R90 u) (la/mmul R90 v))))
+  (la/mmul R90 (el/+ u v))
+  (el/+ (la/mmul R90 u) (la/mmul R90 v))))
 
 
 (deftest t17_l118 (is (true? v16_l115)))
@@ -68,8 +68,8 @@
 (def
  v19_l122
  (la/close?
-  (la/mmul R90 (la/scale u 3.0))
-  (la/scale (la/mmul R90 u) 3.0)))
+  (la/mmul R90 (el/scale u 3.0))
+  (el/scale (la/mmul R90 u) 3.0)))
 
 
 (deftest t20_l125 (is (true? v19_l122)))
@@ -82,7 +82,7 @@
  v24_l136
  (let
   [angles
-   (el/mul (/ (* 2.0 math/PI) 40.0) (t/make-reader :float64 41 idx))
+   (el/* (/ (* 2.0 math/PI) 40.0) (t/make-reader :float64 41 idx))
    circle-x
    (el/cos angles)
    circle-y
@@ -148,7 +148,7 @@
 (def v41_l213 (def BA (la/mmul R90 stretch-mat)))
 
 
-(def v42_l215 (la/norm (la/sub AB BA)))
+(def v42_l215 (la/norm (el/- AB BA)))
 
 
 (deftest t43_l217 (is ((fn [d] (> d 0.1)) v42_l215)))
@@ -172,7 +172,7 @@
 (deftest t50_l278 (is ((fn [r] (< (la/norm r) 1.0E-10)) v49_l276)))
 
 
-(def v52_l289 (la/mmul M (la/scale (t/column [1 1 -1]) 7.0)))
+(def v52_l289 (la/mmul M (el/scale (t/column [1 1 -1]) 7.0)))
 
 
 (deftest t53_l291 (is ((fn [r] (< (la/norm r) 1.0E-10)) v52_l289)))
