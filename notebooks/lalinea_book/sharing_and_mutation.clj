@@ -10,8 +10,8 @@
 ;; demonstrates exactly when sharing happens and when it doesn't,
 ;; so you can make informed choices.
 ;;
-;; The rule of thumb: **if you didn't call `t/clone`, you might
-;; be sharing memory.**
+;; The rule of thumb: **if you didn't call `t/clone` or `t/materialize`,
+;; you might be sharing memory.**
 
 (ns lalinea-book.sharing-and-mutation
   (:require
@@ -377,6 +377,68 @@
     (and (== -999.0 original-00)
          (== 1.0 cloned-00)))])
 
+;; ## t/materialize — idempotent materialization
+
+;; `t/clone` always allocates a fresh copy — even when the input is
+;; already concrete.  `t/materialize` is the lighter alternative:
+;; it returns the input unchanged if it is already backed by a
+;; contiguous array, and clones only when needed (lazy reader chains).
+
+;; The predicate `t/concrete?` tells you which case applies:
+
+(t/concrete? (t/matrix [[1 2] [3 4]]))
+
+(kind/test-last [true?])
+
+(t/concrete? (el/+ (t/matrix [[1 2] [3 4]])
+                   (t/matrix [[10 20] [30 40]])))
+
+(kind/test-last [false?])
+
+;; Materializing a concrete tensor returns the **same object** — no copy:
+
+(let [m (t/matrix [[1 2] [3 4]])]
+  (identical? m (t/materialize m)))
+
+(kind/test-last [true?])
+
+;; Cloning always returns a **different object**:
+
+(let [m (t/matrix [[1 2] [3 4]])]
+  (identical? m (t/clone m)))
+
+(kind/test-last [false?])
+
+;; Materializing a lazy result makes it concrete:
+
+(let [a (t/matrix [[1 2] [3 4]])
+      b (t/matrix [[10 20] [30 40]])
+      lazy-sum (el/+ a b)
+      mat-sum (t/materialize lazy-sum)]
+  {:lazy-concrete? (t/concrete? lazy-sum)
+   :mat-concrete? (t/concrete? mat-sum)
+   :values mat-sum})
+
+(kind/test-last
+ [(fn [{:keys [lazy-concrete? mat-concrete? values]}]
+    (and (false? lazy-concrete?)
+         (true? mat-concrete?)
+         (= [[11.0 22.0] [33.0 44.0]] values)))])
+
+;; The materialized result is independent of the sources:
+
+(let [a (t/matrix [[1 2] [3 4]])
+      b (t/matrix [[10 20] [30 40]])
+      mat-sum (t/materialize (el/+ a b))
+      _ (t/mset! a 0 0 -999.0)]
+  {:a-00 (a 0 0)
+   :mat-00 (mat-sum 0 0)})
+
+(kind/test-last
+ [(fn [{:keys [a-00 mat-00]}]
+    (and (== -999.0 a-00)
+         (== 11.0 mat-00)))])
+
 ;; ## t/clone on ComplexTensors
 
 ;; Cloning a ComplexTensor produces an independent ComplexTensor
@@ -524,7 +586,7 @@
 ;; other decompositions copy when they need to:
 
 (let [col (t/column (el/+ (t/matrix [1 0])
-                            (t/matrix [0 1])))
+                          (t/matrix [0 1])))
       A (t/matrix [[2 0] [0 3]])]
   (la/mmul A col))
 
@@ -670,6 +732,7 @@
 ;; | `el/+`, `el/-`, `el/scale` | No | No — lazy reader | Lazy ComplexTensors |
 ;; | `t/compute-tensor` | No | No — lazy, noncaching | May evaluate out of element order |
 ;; | `t/clone` | Yes | Yes — independent | Breaks all links to source |
+;; | `t/materialize` | Only if lazy | Yes — concrete | No-op if already concrete |
 ;; | `t/submatrix` | Yes | Yes — independent | Always clones |
 ;; | `t/column`, `t/row` | No | Yes — wraps input | Zero-copy for arrays/buffers; lazy for seqs |
 ;; | `t/matrix` | Only for nested seqs | Yes | Pass-through for existing float64 tensors |
@@ -682,8 +745,9 @@
 ;; reader computes. Use `t/clone` to materialize and break the link.
 ;;
 ;; **The guideline**: treat all data as immutable. When you need to
+;; avoid lazy recomputation, use `t/materialize`. When you need to
 ;; mutate (e.g., in a performance-critical inner loop), use
-;; `t/clone` first to ensure you own the backing array.
+;; `t/clone` to ensure you own the backing array.
 ;;
 ;; That said, sharing and mutation can be a **deliberate technique**
 ;; when used with care. `t/mset!` lets you mutate a tensor

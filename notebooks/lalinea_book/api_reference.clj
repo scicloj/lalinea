@@ -200,9 +200,36 @@
 
 (kind/doc #'t/clone)
 
-;; Materialize a lazy result:
-(t/clone (el/+ (t/matrix [[1 2] [3 4]])
-               (t/matrix [[10 20] [30 40]])))
+;; Always allocates a fresh copy:
+(let [m (t/matrix [[1 2] [3 4]])]
+  (identical? m (t/clone m)))
+
+(kind/test-last [false?])
+
+(kind/doc #'t/concrete?)
+
+;; Concrete (backed by array):
+(t/concrete? (t/matrix [[1 2] [3 4]]))
+
+(kind/test-last [true?])
+
+;; Lazy (reader chain from `el/+`):
+(t/concrete? (el/+ (t/matrix [[1 2] [3 4]])
+                   (t/matrix [[10 20] [30 40]])))
+
+(kind/test-last [false?])
+
+(kind/doc #'t/materialize)
+
+;; No-op on concrete:
+(let [m (t/matrix [[1 2] [3 4]])]
+  (identical? m (t/materialize m)))
+
+(kind/test-last [true?])
+
+;; Materializes lazy results:
+(t/materialize (el/+ (t/matrix [[1 2] [3 4]])
+                     (t/matrix [[10 20] [30 40]])))
 
 (kind/test-last [(fn [m] (= [[11.0 22.0] [33.0 44.0]] m))])
 
