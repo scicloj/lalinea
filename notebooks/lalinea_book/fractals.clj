@@ -10,7 +10,7 @@
 ;; Each iteration step is **pointwise** across the entire complex
 ;; plane: a single `la/mul` or `la/add` call applies to every
 ;; grid point simultaneously. Escape counts are accumulated as
-;; tensors using `elem/gt` masks — no per-pixel loops needed.
+;; tensors using `elem/le` masks — no per-pixel loops needed.
 
 (ns lalinea-book.fractals
   (:require
@@ -63,7 +63,7 @@
 ;;
 ;; The counting is fully vectorized: at each iteration we
 ;; build a 0/1 mask of pixels that haven't escaped yet
-;; and add it to the running count tensor.
+;; (`elem/le`) and add it to the running count tensor.
 
 (def mandelbrot-counts
   (fn [re-min re-max im-min im-max h w max-iter]
@@ -75,8 +75,7 @@
         (if (>= k max-iter)
           counts
           (let [z2 (t/clone (la/add (la/mul z z) c))
-                mask (la/sub (t/ones h w)
-                             (elem/gt (la/abs z2) 2.0))]
+                mask (elem/le (la/abs z2) 2.0)]
             (recur z2 (t/clone (la/add counts mask)) (inc k))))))))
 
 ;; ### Rendering
@@ -142,8 +141,7 @@
         (if (>= k max-iter)
           counts
           (let [z2 (t/clone (la/add (la/mul z z) c-grid))
-                mask (la/sub (t/ones h w)
-                             (elem/gt (la/abs z2) 2.0))]
+                mask (elem/le (la/abs z2) 2.0)]
             (recur z2 (t/clone (la/add counts mask)) (inc k))))))))
 
 ;; ### Gallery of Julia sets
@@ -186,6 +184,75 @@
 (kind/test-last
  [(fn [img] (= java.awt.image.BufferedImage (type img)))])
 
+;; ## Imperative version
+;;
+;; For performance-critical inner loops, we can drop to raw
+;; `double-array` primitives via `t/backing-array`. La Linea
+;; still handles grid construction and result wrapping — only
+;; the inner loop uses raw arrays.
+;;
+;; See the [Performance](performance.html) chapter for detailed
+;; benchmarks and analysis of where the overhead lives.
+
+(def mandelbrot-counts-imperative
+  (fn [re-min re-max im-min im-max h w max-iter]
+    (let [h (long h) w (long w) max-iter (long max-iter)
+          n (* h w)
+          cr-grid (t/clone
+                   (t/compute-tensor
+                    [h w]
+                    (fn [r c]
+                      (+ (double re-min)
+                         (* (- (double re-max) (double re-min))
+                            (/ (double c) (double (dec w))))))
+                    :float64))
+          ci-grid (t/clone
+                   (t/compute-tensor
+                    [h w]
+                    (fn [r c]
+                      (+ (double im-min)
+                         (* (- (double im-max) (double im-min))
+                            (/ (double r) (double (dec h))))))
+                    :float64))
+          ^doubles cr (t/backing-array cr-grid)
+          ^doubles ci (t/backing-array ci-grid)
+          cnt-grid (t/clone (t/zeros h w))
+          ^doubles cnt (t/backing-array cnt-grid)
+          ^doubles zr (double-array n)
+          ^doubles zi (double-array n)]
+      (dotimes [_ max-iter]
+        (dotimes [k n]
+          (let [r (aget zr k)
+                i (aget zi k)
+                new-r (+ (- (* r r) (* i i)) (aget cr k))
+                new-i (+ (* 2.0 r i) (aget ci k))]
+            (aset zr k new-r)
+            (aset zi k new-i)
+            (when (<= (+ (* new-r new-r) (* new-i new-i)) 4.0)
+              (aset cnt k (+ (aget cnt k) 1.0))))))
+      cnt-grid)))
+
+;; Same result as the functional version:
+
+(let [h 50 w 60 max-iter 30
+      f (mandelbrot-counts -2.0 0.7 -1.2 1.2 h w max-iter)
+      i (mandelbrot-counts-imperative -2.0 0.7 -1.2 1.2 h w max-iter)]
+  (la/close? f i 1e-10))
+
+(kind/test-last [true?])
+
+;; Same image:
+
+(def mandelbrot-imperative-img
+  (let [h 300 w 400 max-iter 50
+        counts (mandelbrot-counts-imperative -2.0 0.7 -1.2 1.2 h w max-iter)]
+    (counts->image counts h w max-iter)))
+
+(bufimg/tensor->image mandelbrot-imperative-img)
+
+(kind/test-last
+ [(fn [img] (= java.awt.image.BufferedImage (type img)))])
+
 ;; ## Newton's fractal
 ;;
 ;; [Newton's method](https://en.wikipedia.org/wiki/Newton%27s_method)
@@ -204,41 +271,8 @@
 ;;
 ;; $$z_{n+1} = z - \frac{z^3 - 1}{3z^2}$$
 ;;
-;; Like Mandelbrot and Julia sets, the iteration is pointwise
-;; across the entire grid — a single `la/mul`, `la/sub`, or
-;; `la/scale` call applies to every grid point.
-
-;; ### Complex division
-;;
-;; Newton's method requires dividing one complex grid by another.
-;; We build element-wise complex division from real/imaginary parts:
-;; $\frac{a}{b} = \frac{a\bar{b}}{|b|^2}$.
-
-(def complex-div
-  (fn [a b]
-    (let [ar (t/->tensor (la/re a)) ai (t/->tensor (la/im a))
-          br (t/->tensor (la/re b)) bi (t/->tensor (la/im b))
-          denom (la/add (la/mul br br) (la/mul bi bi))]
-      (t/complex-tensor
-       (elem/div (la/add (la/mul ar br) (la/mul ai bi)) denom)
-       (elem/div (la/sub (la/mul ai br) (la/mul ar bi)) denom)))))
-
-;;  Verify: (3+4i)/(1+2i) = (11-2i)/5 = 2.2-0.4i
-
-(let [a (t/complex-tensor (t/matrix [[3]]) (t/matrix [[4]]))
-      b (t/complex-tensor (t/matrix [[1]]) (t/matrix [[2]]))
-      result (complex-div a b)]
-  (and (< (abs (- ((la/re result) 0 0) 2.2)) 1e-10)
-       (< (abs (- ((la/im result) 0 0) -0.4)) 1e-10)))
-
-(kind/test-last [true?])
-
-;; ### Newton iteration
-;;
-;; After iterating, we classify each pixel by which root it
-;; converged to. The distances to each root are computed as
-;; tensors, and `t/compute-matrix` picks the nearest root
-;; per pixel.
+;; The division uses `elem/div`, which handles complex inputs
+;; natively — no need for a manual formula.
 
 (def newton-roots
   (fn [re-min re-max im-min im-max h w max-iter]
@@ -262,7 +296,7 @@
                               z3 (la/mul z z2)
                               fz (la/sub z3 one)
                               fpz (la/scale z2 3.0)]
-                          (recur (t/clone (la/sub z (complex-div fz fpz)))
+                          (recur (t/clone (la/sub z (elem/div fz fpz)))
                                  (inc k)))))
             ;; Classify: compute distance to each root as a tensor
             dists (mapv (fn [root]
@@ -290,8 +324,6 @@
 ;; ### Rendering
 ;;
 ;; Each pixel is colored by which root it converged to.
-;; The three basins get distinct hues; the fractal structure
-;; emerges at the boundaries.
 
 (def root-colors
   [[230 50 50]    ;; root 0 (1+0i) — red
@@ -322,7 +354,6 @@
 ;; ### Zooming in
 ;;
 ;; The boundary between basins has fractal detail at every scale.
-;; Here is a zoom into the region near $z = 0$:
 
 (def newton-zoom
   (let [h 300 w 300 max-iter 50
