@@ -2,8 +2,8 @@
 ;;
 ;; Fractals like the [Mandelbrot set](https://en.wikipedia.org/wiki/Mandelbrot_set)
 ;; and [Julia sets](https://en.wikipedia.org/wiki/Julia_set)
-;; are defined by iterating a complex function
-;; $z_{n+1} = z_n^2 + c$ and checking whether the orbit
+;; are defined by iterating a complex map $z \mapsto z^2 + c$
+;; and checking whether the orbit
 ;; escapes to infinity.
 ;;
 ;; This chapter computes fractals using **ComplexTensor** arithmetic.
