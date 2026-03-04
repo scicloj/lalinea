@@ -13,9 +13,9 @@
 ;; steps, the distribution converges to a **[stationary distribution](https://en.wikipedia.org/wiki/Stationary_distribution)**
 ;; that we can find via eigendecomposition or [power iteration](https://en.wikipedia.org/wiki/Power_iteration).
 ;;
-;; This chapter uses matrix multiply to simulate random walks,
+;; This chapter uses matrix multiply to propagate state distributions,
 ;; eigendecomposition to find stationary distributions analytically,
-;; and imperative power iteration to find them numerically.
+;; and power iteration to find them numerically.
 
 (ns lalinea-book.markov-chains
   (:require
@@ -74,7 +74,7 @@
 (kind/test-last
  [(fn [sums] (< (la/norm (la/sub sums (t/column (repeat 3 1.0)))) 1e-10))])
 
-;; ## Simulating a random walk
+;; ## Propagating state distributions
 ;;
 ;; Starting from Sunny, what's the probability distribution
 ;; after $k$ steps? We represent the state as a row vector
@@ -164,12 +164,10 @@ stationary-eigen
 (kind/test-last [true?])
 
 ;; ## Power iteration
-;;
-;; Power iteration is an **imperative** algorithm:
-;; repeatedly multiply a vector by a matrix and normalize,
-;; until convergence. Unlike the functional `iterate` above,
-;; this version tracks convergence explicitly with a mutable
-;; state.
+;; [Power iteration](https://en.wikipedia.org/wiki/Power_iteration)
+;; repeatedly multiplies a vector by a matrix and normalizes.
+;; Unlike the `iterate` version above, this one uses `loop` to
+;; track the convergence rate at each step.
 
 (def power-iteration-history
   (let [n 3 iters 40]

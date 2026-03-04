@@ -32,9 +32,10 @@
 ;;   decompose the computation into elementary steps and apply
 ;;   the chain rule at each step. Exact, efficient, and mechanical.
 ;;
-;; Autodiff gets the best of both worlds — exact like symbolic
-;; differentiation, efficient like finite differences. La Linea
-;; implements the **reverse mode** of autodiff.
+;; For scalar-valued functions, reverse-mode autodiff is both
+;; exact (like symbolic differentiation) and efficient (one backward
+;; pass for the full gradient, regardless of input dimension).
+;; La Linea implements reverse mode.
 ;;
 ;; ## Forward vs reverse mode
 ;;
@@ -371,8 +372,8 @@ expected-grad-A
 ;; of the loss with respect to $x$, and takes a step.
 
 (def A-gd (t/matrix [[1 0]
-                      [0 2]
-                      [1 1]]))
+                     [0 2]
+                     [1 1]]))
 
 (def b-gd (t/column [3 2 4]))
 

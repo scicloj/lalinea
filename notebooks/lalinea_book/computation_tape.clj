@@ -1,10 +1,11 @@
 ;; # Computation tape
 
-;; dtype-next's laziness is useful but opaque. When you chain
-;; operations like `la/add`, `la/scale`, and `la/transpose`, it is
-;; not obvious which results share memory, which are lazy, and where
-;; copies happen. The tape namespace provides tools to answer these
-;; questions.
+;; The tape namespace records every `la/`, `t/`, and `elem/`
+;; operation as a directed acyclic graph (DAG). This serves two
+;; purposes: it powers [automatic differentiation](autodiff.html)
+;; (reverse-mode autodiff walks the tape backward), and it
+;; helps you inspect what the runtime actually computed —
+;; which results share memory, which are lazy, and where copies happen.
 
 ;; ## Setup
 
@@ -186,7 +187,7 @@
 ;; the full chain. The `t/matrix` wrapper around the result is also
 ;; recorded.
 
-(def dfn-tape
+(def mul-tape
   (tape/with-tape
     (let [A (t/matrix [[1 2] [3 4]])
           doubled (la/mul A 2.0)
@@ -194,7 +195,7 @@
       result)))
 
 (mapv (fn [e] (select-keys e [:id :op :inputs]))
-      (:entries dfn-tape))
+      (:entries mul-tape))
 
 ;; `la/mul` computes the element-wise product, and `t/matrix` wraps
 ;; its result. All four operations (`t/matrix`, `la/mul`, `t/matrix`,

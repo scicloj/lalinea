@@ -10,7 +10,6 @@
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.tensor :as t]
-   ;; Complex tensors — interleaved [re im] layout:
    ;; FFT bridge — Fastmath transforms ↔ ComplexTensor:
    [scicloj.lalinea.transform :as ft]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):

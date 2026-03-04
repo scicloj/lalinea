@@ -7,9 +7,9 @@
 ;;
 ;; This chapter shows three applications of matrix decompositions:
 ;;
-;; - **SVD** for image compression (purely functional)
+;; - **SVD** for image compression
 ;; - **Eigendecomposition** for Principal Component Analysis
-;; - **QR iteration** for computing eigenvalues (imperative)
+;; - **QR iteration** for computing eigenvalues
 
 (ns lalinea-book.decompositions-in-action
   (:require
@@ -277,8 +277,7 @@ cov-matrix
 ;; decomposes $A = QR$ and forms $A' = RQ$. The diagonal of $A'$
 ;; converges to the eigenvalues.
 ;;
-;; This is an **imperative** iteration — we track convergence of
-;; the diagonal entries.
+;; We track convergence of the diagonal entries.
 
 (def test-matrix
   (t/matrix [[4 1 0]

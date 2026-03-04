@@ -57,7 +57,7 @@
              -0.147 0.165 -0.361 0.096]))
 
 (def y-linear
-  (la/add (la/add 2.0 (la/mul 3.0 x-data)) noise-linear))
+  (la/add (la/add 2.0 (la/scale x-data 3.0)) noise-linear))
 
 ;; Build the design matrix $A$:
 
@@ -115,7 +115,7 @@ rms-linear
 (let [c0 (c-linear 0 0)
       c1 (c-linear 1 0)
       x-fit (t/make-reader :float64 100 (* 0.019 idx))
-      y-fit (la/add c0 (la/mul c1 x-fit))]
+      y-fit (la/add c0 (la/scale x-fit c1))]
   (-> (tc/dataset {:x x-data
                    :y y-linear
                    :type (repeat (count x-data) "data")})
@@ -148,7 +148,7 @@ rms-linear
              0.031 -0.263  0.195 -0.416  0.347  0.010]))
 
 (def y-poly
-  (la/add (la/add 1.0 (la/mul -2.0 x-poly))
+  (la/add (la/add 1.0 (la/scale x-poly -2.0))
           (la/add (la/mul x-poly x-poly) noise-poly)))
 
 (def vandermonde
@@ -178,7 +178,7 @@ c-poly
       c1 (c-poly 1 0)
       c2 (c-poly 2 0)
       x-fit (t/make-reader :float64 100 (- (* 0.06 idx) 3.0))
-      y-fit (la/add c0 (la/add (la/mul c1 x-fit) (la/mul c2 (la/mul x-fit x-fit))))]
+      y-fit (la/add c0 (la/add (la/scale x-fit c1) (la/scale (la/mul x-fit x-fit) c2)))]
   (-> (tc/dataset {:x x-poly
                    :y y-poly
                    :type (repeat 30 "data")})
@@ -303,9 +303,9 @@ S-svd
              -0.228  0.103  0.189 -0.144  0.268 -0.076  0.131 -0.201]))
 
 (def y-trig
-  (la/add (la/add 3.0 (la/mul 2.0 (elem/cos x-trig)))
-          (la/add (la/mul -1.5 (elem/sin x-trig))
-                  (la/add (la/mul 0.5 (elem/cos (la/mul 2.0 x-trig)))
+  (la/add (la/add 3.0 (la/scale (elem/cos x-trig) 2.0))
+          (la/add (la/scale (elem/sin x-trig) -1.5)
+                  (la/add (la/scale (elem/cos (la/scale x-trig 2.0)) 0.5)
                           noise-trig))))
 
 (def A-trig
@@ -339,11 +339,11 @@ c-trig
 
 (let [x-fit (t/make-reader :float64 200
                            (* (/ (* 2.0 math/PI) 200.0) idx))
-      y-fit (la/add (la/mul (c-trig 0 0) 1.0)
-                    (la/add (la/mul (c-trig 1 0) (elem/cos x-fit))
-                            (la/add (la/mul (c-trig 2 0) (elem/sin x-fit))
-                                    (la/add (la/mul (c-trig 3 0) (elem/cos (la/mul 2.0 x-fit)))
-                                            (la/mul (c-trig 4 0) (elem/sin (la/mul 2.0 x-fit)))))))]
+      y-fit (la/add (c-trig 0 0)
+                    (la/add (la/scale (elem/cos x-fit) (c-trig 1 0))
+                            (la/add (la/scale (elem/sin x-fit) (c-trig 2 0))
+                                    (la/add (la/scale (elem/cos (la/scale x-fit 2.0)) (c-trig 3 0))
+                                            (la/scale (elem/sin (la/scale x-fit 2.0)) (c-trig 4 0))))))]
   (-> (tc/dataset {:x x-trig
                    :y y-trig
                    :type (repeat 40 "data")})

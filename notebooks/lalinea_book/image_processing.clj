@@ -2,7 +2,7 @@
 ;;
 ;; An image is a tensor — a 3D array of shape `[height width channels]`.
 ;; This chapter builds image processing tools using dtype-next tensors,
-;; element-wise `dfn` operations, and `t/matrix` for convolution kernels.
+;; element-wise `elem/` operations, and `t/matrix` for convolution kernels.
 ;; All images are synthetic: no external files needed.
 
 (ns lalinea-book.image-processing
@@ -119,7 +119,7 @@
 ;; ## Brightness and contrast
 ;;
 ;; Since the image tensor is backed by typed data, element-wise
-;; operations with `dfn` transform every pixel at once.
+;; operations with `elem/` transform every pixel at once.
 ;;
 ;; **Brightness**: add a constant.
 ;; **Contrast**: multiply by a factor.

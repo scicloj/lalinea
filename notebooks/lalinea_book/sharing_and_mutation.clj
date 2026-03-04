@@ -18,7 +18,6 @@
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.tensor :as t]
-   ;; Complex tensors — interleaved [re im] layout:
    ;; Low-level tensor operations for memory demos:
    [tech.v3.tensor :as dtt]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
@@ -674,8 +673,7 @@
 ;; | `t/matrix` | Only for nested seqs | Yes | Pass-through for existing float64 tensors |
 ;; | `la/transpose` (real) | No | Yes — strided view | Zero-copy, shares memory with input |
 ;; | `la/mmul`, `la/invert`, etc. | Yes | Yes — independent | EJML allocates new result |
-;; | `t/->double-array` | Only if needed | N/A — raw `double[]` | Zero-copy when contiguous; copies for subviews/lazy |
-;; | `t/->double-array` | Only if needed | N/A — raw `double[]` | Same convention, on ComplexTensor |
+;; | `t/->double-array` | Only if needed | N/A — raw `double[]` | Zero-copy when contiguous; copies for subviews/lazy. Same for ComplexTensor |
 ;;
 ;; Lazy readers have no array of their own, but they **read through**
 ;; to the source arrays — mutating a source changes what the lazy

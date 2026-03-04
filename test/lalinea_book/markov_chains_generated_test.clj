@@ -139,7 +139,7 @@
 
 
 (def
- v27_l174
+ v27_l172
  (def
   power-iteration-history
   (let
@@ -163,7 +163,7 @@
 
 
 (def
- v29_l190
+ v29_l188
  (->
   (tc/dataset power-iteration-history)
   (plotly/base {:=x :iteration, :=y :change})
@@ -171,14 +171,14 @@
   plotly/plot))
 
 
-(def v31_l197 (:change (last power-iteration-history)))
+(def v31_l195 (:change (last power-iteration-history)))
 
 
-(deftest t32_l199 (is ((fn [c] (< c 1.0E-10)) v31_l197)))
+(deftest t32_l197 (is ((fn [c] (< c 1.0E-10)) v31_l195)))
 
 
 (def
- v34_l215
+ v34_l213
  (def
   course-names
   ["Calculus"
@@ -191,17 +191,17 @@
    "AI"]))
 
 
-(def v35_l220 (def n-pages (count course-names)))
+(def v35_l218 (def n-pages (count course-names)))
 
 
 (def
- v36_l222
+ v36_l220
  (kind/mermaid
   "graph LR\n  subgraph Math\n    Calc[\"Calculus\"]\n    LA[\"Linear Algebra\"]\n    Stats[\"Statistics\"]\n  end\n  subgraph CS\n    IP[\"Intro Programming\"]\n    DS[\"Data Structures\"]\n    DB[\"Databases\"]\n  end\n  ML[\"Machine Learning\"]\n  AI[\"AI\"]\n  Calc --> LA\n  LA --> Calc\n  LA --> Stats\n  Stats --> Calc\n  Stats --> LA\n  IP --> DS\n  DS --> IP\n  DS --> DB\n  ML --> LA\n  ML --> Stats\n  ML --> IP\n  ML --> AI\n  DB --> DS\n  DB --> IP\n  DB --> ML\n  AI --> ML\n  AI --> DS\n  AI --> Stats\n  AI --> LA"))
 
 
 (def
- v38_l260
+ v38_l258
  (def
   H
   (t/matrix
@@ -215,11 +215,11 @@
     [0 1/4 1/4 0 1/4 1/4 0 0]])))
 
 
-(def v40_l274 (def damping 0.85))
+(def v40_l272 (def damping 0.85))
 
 
 (def
- v41_l276
+ v41_l274
  (def
   google-matrix
   (la/add
@@ -229,22 +229,22 @@
    (la/scale H damping))))
 
 
-(def v43_l283 (la/mmul google-matrix (t/column (repeat n-pages 1.0))))
+(def v43_l281 (la/mmul google-matrix (t/column (repeat n-pages 1.0))))
 
 
 (deftest
- t44_l285
+ t44_l283
  (is
   ((fn
     [sums]
     (<
      (la/norm (la/sub sums (t/column (repeat n-pages 1.0))))
      1.0E-10))
-   v43_l283)))
+   v43_l281)))
 
 
 (def
- v46_l290
+ v46_l288
  (def
   pagerank
   (let
@@ -263,7 +263,7 @@
 
 
 (def
- v48_l303
+ v48_l301
  (->
   (tc/dataset {:course course-names, :rank (t/->reader pagerank)})
   (plotly/base {:=x :course, :=y :rank})
@@ -271,13 +271,13 @@
   plotly/plot))
 
 
-(def v50_l311 (la/sum pagerank))
+(def v50_l309 (la/sum pagerank))
 
 
-(deftest t51_l313 (is ((fn [s] (< (abs (- s 1.0)) 1.0E-10)) v50_l311)))
+(deftest t51_l311 (is ((fn [s] (< (abs (- s 1.0)) 1.0E-10)) v50_l309)))
 
 
-(def v53_l318 (nth course-names (argops/argmax pagerank)))
+(def v53_l316 (nth course-names (argops/argmax pagerank)))
 
 
-(deftest t54_l320 (is ((fn [name] (= "Linear Algebra" name)) v53_l318)))
+(deftest t54_l318 (is ((fn [name] (= "Linear Algebra" name)) v53_l316)))

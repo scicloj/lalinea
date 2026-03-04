@@ -22,7 +22,6 @@
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.tensor :as t]
    [scicloj.lalinea.elementwise :as elem]
-   ;; Complex tensors — interleaved [re im] layout:
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
@@ -121,6 +120,10 @@ L
 ;; zero eigenvalues count connected components, and $\lambda_2$
 ;; measures how tightly the graph is connected. (This is the
 ;; opposite of PCA and SVD, where the largest values come first.)
+
+;; We need both eigenvalues and eigenvectors (for the Fiedler
+;; vector below), so we use `la/eigen`. For eigenvalues alone,
+;; `la/real-eigenvalues` is simpler.
 
 (def eig (la/eigen L))
 
@@ -444,10 +447,9 @@ comm-eigenvalues
     (plotly/layer-point {:=mark-size 14})
     plotly/plot)
 
-;; Vertices from the same community cluster tightly in spectral space,
-
-;; Vertices within the same community are closer to each other
-;; than to vertices in other communities:
+;; Vertices within the same community cluster tightly in
+;; spectral space — closer to each other than to vertices
+;; in other communities:
 
 (let [xs (:x embed-data)
       ys (:y embed-data)
@@ -458,7 +460,6 @@ comm-eigenvalues
   (< within-A across-AB))
 
 (kind/test-last [true?])
-;; even though we only used the raw Laplacian eigenvectors.
 
 ;; ## [Cheeger's inequality](https://en.wikipedia.org/wiki/Cheeger%27s_inequality)
 ;;

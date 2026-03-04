@@ -18,7 +18,6 @@
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.tensor :as t]
    [scicloj.lalinea.elementwise :as elem]
-   ;; Complex tensors — interleaved [re im] layout:
    ;; Tensor ↔ BufferedImage conversion:
    [tech.v3.libs.buffered-image :as bufimg]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
