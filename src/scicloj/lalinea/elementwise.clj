@@ -10,6 +10,7 @@
             [scicloj.lalinea.impl.complex-tensor :as ct]
             [tech.v3.datatype :as dtype]
             [tech.v3.datatype.functional :as dfn]
+            [tech.v3.datatype.argops :as argops]
             [tech.v3.tensor :as dtt]))
 
 ;; ---------------------------------------------------------------------------
@@ -375,6 +376,22 @@
                   (if (ct/complex? a)
                     (unsupported-complex! :el/reduce-min)
                     (double (dfn/reduce-min a))))))
+
+(defn argmax
+  "Index of the maximum element. Returns long. Real only."
+  [a]
+  (let [a (rt/ensure-tensor a)]
+    (if (ct/complex? a)
+      (unsupported-complex! :el/argmax)
+      (long (argops/argmax a)))))
+
+(defn argmin
+  "Index of the minimum element. Returns long. Real only."
+  [a]
+  (let [a (rt/ensure-tensor a)]
+    (if (ct/complex? a)
+      (unsupported-complex! :el/argmin)
+      (long (argops/argmin a)))))
 
 ;; ---------------------------------------------------------------------------
 ;; Comparison (element-wise)

@@ -23,8 +23,6 @@
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.elementwise :as el]
    [scicloj.lalinea.tensor :as t]
-   ;; Arg-reduction operations (argmax, argmin, etc.):
-   [tech.v3.datatype.argops :as argops]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
    ;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):
@@ -88,44 +86,38 @@
 
 (def initial-state (t/row [1.0 0.0 0.0]))
 
+(def n-steps 20)
+
 (def walk-history
-  (let [states (iterate (fn [s] (la/mmul s P)) initial-state)]
-    (mapv (fn [k s]
-            {:step k
-             :sunny (s 0 0)
-             :cloudy (s 0 1)
-             :rainy (s 0 2)})
-          (range 20)
-          (take 20 states))))
+  (vec (take n-steps
+             (iterate (fn [s] (la/mmul s P)) initial-state))))
 
 ;; After 20 steps, all states converge to the same distribution
 ;; regardless of starting state:
 
-(-> (tc/dataset (mapcat (fn [{:keys [step sunny cloudy rainy]}]
-                          [{:step step :probability sunny :state "Sunny"}
-                           {:step step :probability cloudy :state "Cloudy"}
-                           {:step step :probability rainy :state "Rainy"}])
-                        walk-history))
+(-> (tc/dataset
+     (mapcat (fn [k s]
+               [{:step k :probability (s 0 0) :state "Sunny"}
+                {:step k :probability (s 0 1) :state "Cloudy"}
+                {:step k :probability (s 0 2) :state "Rainy"}])
+             (range n-steps)
+             walk-history))
     (plotly/base {:=x :step :=y :probability :=color :state})
     (plotly/layer-line)
     plotly/plot)
 
 ;; The distribution stabilizes quickly:
 
-(let [last-state (last walk-history)]
-  [(:sunny last-state)
-   (:cloudy last-state)
-   (:rainy last-state)])
+(let [final (last walk-history)]
+  (el/sum final))
 
-(kind/test-last
- [(fn [v]
-    (and (< (abs (- (+ (v 0) (v 1) (v 2)) 1.0)) 1e-10)
-         ;; Verify convergence: last two steps are nearly identical
-         (let [prev (nth walk-history 18)]
-           (< (+ (abs (- (v 0) (:sunny prev)))
-                 (abs (- (v 1) (:cloudy prev)))
-                 (abs (- (v 2) (:rainy prev))))
-              1e-6))))])
+(kind/test-last [(fn [s] (< (abs (- s 1.0)) 1e-10))])
+
+;; The last two steps are nearly identical:
+
+(la/close? (last walk-history) (nth walk-history (- n-steps 2)) 1e-6)
+
+(kind/test-last [true?])
 
 ;; ## Stationary distribution via eigendecomposition
 ;;
@@ -142,8 +134,7 @@
 (def stationary-eigen
   (let [{:keys [eigenvalues eigenvectors]} eigen-result
         reals (el/re eigenvalues)
-        idx (first (sort-by (fn [i] (abs (- (double (reals i)) 1.0)))
-                            (range (count eigenvectors))))
+        idx (el/argmin (el/abs (el/- reals 1.0)))
         ev (nth eigenvectors idx)
         total (el/sum (t/flatten ev))]
     (t/flatten (el/scale ev (/ 1.0 total)))))
@@ -157,10 +148,9 @@ stationary-eigen
 ;; The stationary distribution from eigendecomposition should
 ;; agree with the random walk convergence:
 
-(let [s (last walk-history)]
-  (la/close? stationary-eigen
-             (t/matrix [(:sunny s) (:cloudy s) (:rainy s)])
-             1e-4))
+(la/close? stationary-eigen
+           (t/flatten (last walk-history))
+           1e-4)
 
 (kind/test-last [true?])
 
@@ -314,6 +304,6 @@ stationary-eigen
 ;; Linear Algebra receives the most inbound links (from Calculus,
 ;; Statistics, Machine Learning, and AI) and ranks highest:
 
-(nth course-names (argops/argmax pagerank))
+(nth course-names (el/argmax pagerank))
 
 (kind/test-last [(fn [name] (= "Linear Algebra" name))])
