@@ -1,5 +1,11 @@
 ;; # Markov Chains and PageRank
 ;;
+;; *Prerequisites: [matrix multiplication](https://en.wikipedia.org/wiki/Matrix_multiplication)
+;; and [eigenvalues](https://en.wikipedia.org/wiki/Eigenvalues_and_eigenvectors)
+;; (covered in the [Eigenvalues and Decompositions](eigenvalues_and_decompositions.html) chapter).
+;; The chapter uses eigendecomposition to find stationary
+;; distributions without re-deriving it.*
+;;
 ;; A [Markov chain](https://en.wikipedia.org/wiki/Markov_chain) is
 ;; a memoryless random process described by a **transition matrix**
 ;; — a matrix whose rows sum to 1. Multiplying a state vector by

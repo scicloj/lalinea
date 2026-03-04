@@ -1,9 +1,9 @@
 ;; # Fourier Transform
 ;;
-;; *Prerequisites: [complex numbers](https://en.wikipedia.org/wiki/Complex_number)
-;; and [trigonometric functions](https://en.wikipedia.org/wiki/Trigonometric_functions).
-;; For background on the Fourier transform, see the
-;; [Wikipedia article](https://en.wikipedia.org/wiki/Discrete_Fourier_transform).*
+;; *Prerequisites: the [discrete Fourier transform](https://en.wikipedia.org/wiki/Discrete_Fourier_transform)
+;; and [complex numbers](https://en.wikipedia.org/wiki/Complex_number).
+;; The chapter uses standard concepts (spectrum, frequency bins,
+;; convolution theorem) without introduction.*
 ;;
 ;; **La Linea** bridges [Fastmath](https://generateme.github.io/fastmath/clay)'s
 ;; transform API to ComplexTensors. Fastmath's

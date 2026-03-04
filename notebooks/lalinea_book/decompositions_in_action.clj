@@ -1,5 +1,10 @@
 ;; # Decompositions in Action
 ;;
+;; *Prerequisites: [matrix decompositions](https://en.wikipedia.org/wiki/Matrix_decomposition)
+;; (covered in the [Eigenvalues and Decompositions](eigenvalues_and_decompositions.html) chapter).
+;; The chapter applies SVD, eigendecomposition, and QR iteration
+;; without re-deriving them.*
+;;
 ;; This chapter shows three applications of matrix decompositions:
 ;;
 ;; - **SVD** for image compression (purely functional)
