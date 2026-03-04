@@ -249,54 +249,54 @@
 (def v35_l204 (def qr-result (la/qr A-poly)))
 
 
-(def v37_l209 (def ncols (second (t/shape A-poly))))
+(def v37_l210 (def ncols (second (t/shape A-poly))))
 
 
-(def v38_l211 (def Q1 (t/submatrix (:Q qr-result) :all (range ncols))))
+(def v38_l212 (def Q1 (t/submatrix (:Q qr-result) :all (range ncols))))
 
 
-(def v39_l212 (def R1 (t/submatrix (:R qr-result) (range ncols) :all)))
+(def v39_l213 (def R1 (t/submatrix (:R qr-result) (range ncols) :all)))
 
 
-(def v41_l216 (la/norm (la/sub (la/mmul Q1 R1) A-poly)))
+(def v41_l217 (la/norm (la/sub (la/mmul Q1 R1) A-poly)))
 
 
-(deftest t42_l218 (is ((fn [v] (< v 1.0E-10)) v41_l216)))
+(deftest t42_l219 (is ((fn [v] (< v 1.0E-10)) v41_l217)))
 
 
 (def
- v44_l223
+ v44_l224
  (def c-qr (la/solve R1 (la/mmul (la/transpose Q1) (t/column y-poly)))))
 
 
-(def v46_l228 (la/norm (la/sub c-qr c-poly)))
+(def v46_l229 (la/norm (la/sub c-qr c-poly)))
 
 
-(deftest t47_l230 (is ((fn [v] (< v 1.0E-10)) v46_l228)))
+(deftest t47_l231 (is ((fn [v] (< v 1.0E-10)) v46_l229)))
 
 
-(def v49_l244 (def svd-result (la/svd A-poly)))
+(def v49_l245 (def svd-result (la/svd A-poly)))
 
 
-(def v51_l249 (def S-svd (:S svd-result)))
+(def v51_l250 (def S-svd (:S svd-result)))
 
 
 (def
- v52_l250
+ v52_l251
  (def U-thin (t/submatrix (:U svd-result) :all (range (count S-svd)))))
 
 
-(def v53_l251 (def Vt-svd (:Vt svd-result)))
+(def v53_l252 (def Vt-svd (:Vt svd-result)))
 
 
-(def v55_l255 S-svd)
+(def v55_l256 S-svd)
 
 
-(deftest t56_l257 (is ((fn [v] (every? pos? v)) v55_l255)))
+(deftest t56_l258 (is ((fn [v] (every? pos? v)) v55_l256)))
 
 
 (def
- v58_l263
+ v58_l264
  (def
   c-svd
   (let
@@ -309,29 +309,29 @@
    (la/mmul (la/transpose Vt-svd) (la/mmul S-inv Ut-y)))))
 
 
-(def v60_l272 (la/norm (la/sub c-svd c-poly)))
+(def v60_l273 (la/norm (la/sub c-svd c-poly)))
 
 
-(deftest t61_l274 (is ((fn [v] (< v 1.0E-8)) v60_l272)))
+(deftest t61_l275 (is ((fn [v] (< v 1.0E-8)) v60_l273)))
 
 
 (def
- v63_l280
+ v63_l281
  (la/close? c-svd (la/mmul (la/pinv A-poly) (t/column y-poly))))
 
 
-(deftest t64_l282 (is (true? v63_l280)))
+(deftest t64_l283 (is (true? v63_l281)))
 
 
 (def
- v66_l294
+ v66_l295
  (def
   x-trig
   (t/make-reader :float64 40 (* (/ (* 2.0 math/PI) 40.0) idx))))
 
 
 (def
- v67_l298
+ v67_l299
  (def
   noise-trig
   (t/matrix
@@ -378,7 +378,7 @@
 
 
 (def
- v68_l305
+ v68_l306
  (def
   y-trig
   (la/add
@@ -391,7 +391,7 @@
 
 
 (def
- v69_l311
+ v69_l312
  (def
   A-trig
   (t/compute-matrix
@@ -416,7 +416,7 @@
 
 
 (def
- v70_l322
+ v70_l323
  (def
   c-trig
   (la/solve
@@ -424,11 +424,11 @@
    (la/mmul (la/transpose A-trig) (t/column y-trig)))))
 
 
-(def v71_l326 c-trig)
+(def v71_l327 c-trig)
 
 
 (deftest
- t72_l328
+ t72_l329
  (is
   ((fn
     [c]
@@ -437,11 +437,11 @@
      (< (abs (- (c 1 0) 2.0)) 0.3)
      (< (abs (- (c 2 0) -1.5)) 0.3)
      (< (abs (- (c 3 0) 0.5)) 0.3)))
-   v71_l326)))
+   v71_l327)))
 
 
 (def
- v74_l340
+ v74_l341
  (let
   [x-fit
    (t/make-reader :float64 200 (* (/ (* 2.0 math/PI) 200.0) idx))
@@ -465,23 +465,23 @@
    plotly/plot)))
 
 
-(def v76_l367 (def condition-number (la/condition-number A-poly)))
+(def v76_l368 (def condition-number (la/condition-number A-poly)))
 
 
-(def v77_l369 condition-number)
+(def v77_l370 condition-number)
 
 
 (deftest
- t78_l371
- (is ((fn [v] (and (> v 1.0) (Double/isFinite v))) v77_l369)))
+ t78_l372
+ (is ((fn [v] (and (> v 1.0) (Double/isFinite v))) v77_l370)))
 
 
 (def
- v80_l377
+ v80_l378
  (def A-high (vandermonde (t/make-reader :float64 30 (* 1.0 idx)) 8)))
 
 
-(def v81_l380 (la/condition-number A-high))
+(def v81_l381 (la/condition-number A-high))
 
 
-(deftest t82_l382 (is ((fn [v] (> v 1000000.0)) v81_l380)))
+(deftest t82_l383 (is ((fn [v] (> v 1000000.0)) v81_l381)))

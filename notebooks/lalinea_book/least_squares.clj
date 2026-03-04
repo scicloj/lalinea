@@ -203,8 +203,9 @@ c-poly
 
 (def qr-result (la/qr A-poly))
 
-;; EJML returns the full QR. For least squares we extract the
-;; "thin" (economy) form: $Q_1$ is $m \times n$, $R_1$ is $n \times n$.
+;; EJML returns the full QR, where $Q$ is $m \times m$. For least
+;; squares we only need the first $n$ columns — the "thin" (economy)
+;; form: $Q_1$ is $m \times n$, $R_1$ is $n \times n$.
 
 (def ncols (second (t/shape A-poly)))
 

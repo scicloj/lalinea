@@ -49,7 +49,7 @@
 (def img-size 100)
 
 (def test-image
-  (t/->tensor
+  (t/->real-tensor
    (t/clone
     (t/compute-tensor [img-size img-size]
                       (fn [r c]

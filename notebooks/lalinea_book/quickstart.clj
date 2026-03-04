@@ -118,7 +118,7 @@
 ;; Complex matrix multiply through the same `mmul`:
 
 (let [A (t/complex-tensor [[1.0 0.0] [0.0 1.0]]
-                           [[0.0 0.0] [0.0 0.0]])]
+                          [[0.0 0.0] [0.0 0.0]])]
   (la/mmul A A))
 
 (kind/test-last [(fn [ct] (= [2 2] (t/complex-shape ct)))])
@@ -201,8 +201,8 @@
 ;; `la/` covers linear algebra; `elem/` covers element-wise math — both
 ;; are tape-aware and work with both real and complex inputs.
 ;;
-;; `scicloj.lalinea.elementwise` provides wrappers
-;; around `dfn/` with complex dispatch:
+;; `scicloj.lalinea.elementwise` provides tape-aware
+;; element-wise math functions (sqrt, sin, exp, ...):
 
 (require '[scicloj.lalinea.elementwise :as elem])
 

@@ -29,8 +29,9 @@
 ;; `t/reshape` is zero-copy — the new tensor wraps the same
 ;; flat `double[]` in a different shape. We use `dtt/ensure-tensor`
 ;; (from dtype-next) to wrap a raw array as a tensor without copying —
-;; La Linea's `t/matrix` always copies, so we drop to the underlying
-;; library here.
+;; `t/matrix` copies when given nested sequences but passes through
+;; an existing float64 tensor unchanged, so we drop to the underlying
+;; library here to guarantee zero-copy wrapping.
 
 (let [flat (double-array [1 2 3 4 5 6])
       t1 (t/reshape (dtt/ensure-tensor flat) [2 3])
@@ -502,7 +503,7 @@
 
 (kind/test-last [(fn [v] (== 99.0 v))])
 
-;; A lazy dfn result stays lazy through `t/column` — no copy,
+;; A lazy dtype-next result stays lazy through `t/column` — no copy,
 ;; no materialization:
 
 (let [a (t/matrix [1 2 3])

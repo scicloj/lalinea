@@ -141,7 +141,7 @@
 
 ;; The tape tracks `la/`, `t/`, and `elem/` operations. Inputs that
 ;; originate outside La Linea (raw arrays, Clojure data structures,
-;; `dfn/` results, EJML objects) appear as `{:external true}`.
+;; dtype-next operations, EJML objects) appear as `{:external true}`.
 
 ;; ### Double arrays
 

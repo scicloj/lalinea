@@ -7,10 +7,10 @@
 ;; escapes to infinity.
 ;;
 ;; This chapter computes fractals using **ComplexTensor** arithmetic.
-;; The iteration loop is imperative — each step mutates the grid
-;; in place. Within each step the computation is **pointwise**
-;; across the entire complex plane: a single `la/mul` or `la/add`
-;; call applies to every grid point.
+;; Each iteration step is **pointwise** across the entire complex
+;; plane: a single `la/mul` or `la/add` call applies to every
+;; grid point simultaneously. Escape counts are accumulated as
+;; tensors using `elem/gt` masks — no per-pixel loops needed.
 
 (ns lalinea-book.fractals
   (:require
@@ -61,29 +61,23 @@
 ;; escape. We color each pixel by **how many iterations**
 ;; it takes to escape $|z| > 2$.
 ;;
-;; The inner loop is imperative: we maintain a mutable `counts`
-;; array and update it at each iteration. But the complex
-;; arithmetic — squaring and adding the entire grid — is
-;; vectorized through ComplexTensor operations.
+;; The counting is fully vectorized: at each iteration we
+;; build a 0/1 mask of pixels that haven't escaped yet
+;; and add it to the running count tensor.
 
 (def mandelbrot-counts
   (fn [re-min re-max im-min im-max h w max-iter]
     (let [c (complex-grid re-min re-max im-min im-max h w)
-          counts (int-array (* h w) 0)
           zero-grid (t/complex-tensor
                      (t/compute-tensor [h w 2]
                                        (fn [_ _ _] 0.0) :float64))]
-      (loop [z zero-grid k 0]
+      (loop [z zero-grid counts (t/zeros h w) k 0]
         (if (>= k max-iter)
           counts
           (let [z2 (t/clone (la/add (la/mul z z) c))
-                abs-t (la/abs z2)]
-            (dotimes [r h]
-              (dotimes [col w]
-                (when (< (abs-t r col) 2.0)
-                  (let [idx (+ (* r w) col)]
-                    (aset counts idx (inc (aget counts idx)))))))
-            (recur z2 (inc k))))))))
+                mask (la/sub (t/ones h w)
+                             (elem/gt (la/abs z2) 2.0))]
+            (recur z2 (t/clone (la/add counts mask)) (inc k))))))))
 
 ;; ### Rendering
 ;;
@@ -95,7 +89,7 @@
   (fn [counts h w max-iter]
     (t/compute-tensor [h w 3]
                       (fn [r c ch]
-                        (let [cnt (aget counts (+ (* r w) c))]
+                        (let [cnt (long (counts r c))]
                           (if (= cnt max-iter) 0
                               (let [t (/ (double cnt) max-iter)]
                                 (case (int ch)
@@ -143,19 +137,14 @@
           c-grid (t/complex-tensor
                   (t/compute-tensor [h w 2]
                                     (fn [_ _ part] (if (zero? part) c-re c-im))
-                                    :float64))
-          counts (int-array (* h w) 0)]
-      (loop [z z0 k 0]
+                                    :float64))]
+      (loop [z z0 counts (t/zeros h w) k 0]
         (if (>= k max-iter)
           counts
           (let [z2 (t/clone (la/add (la/mul z z) c-grid))
-                abs-t (la/abs z2)]
-            (dotimes [r h]
-              (dotimes [col w]
-                (when (< (abs-t r col) 2.0)
-                  (let [idx (+ (* r w) col)]
-                    (aset counts idx (inc (aget counts idx)))))))
-            (recur z2 (inc k))))))))
+                mask (la/sub (t/ones h w)
+                             (elem/gt (la/abs z2) 2.0))]
+            (recur z2 (t/clone (la/add counts mask)) (inc k))))))))
 
 ;; ### Gallery of Julia sets
 ;;
@@ -245,6 +234,11 @@
 (kind/test-last [true?])
 
 ;; ### Newton iteration
+;;
+;; After iterating, we classify each pixel by which root it
+;; converged to. The distances to each root are computed as
+;; tensors, and `t/compute-matrix` picks the nearest root
+;; per pixel.
 
 (def newton-roots
   (fn [re-min re-max im-min im-max h w max-iter]
@@ -257,40 +251,41 @@
           ;; The three cube roots of unity
           roots [(t/complex 1.0 0.0)
                  (t/complex (math/cos (/ (* 2.0 math/PI) 3.0))
-                             (math/sin (/ (* 2.0 math/PI) 3.0)))
+                            (math/sin (/ (* 2.0 math/PI) 3.0)))
                  (t/complex (math/cos (/ (* 4.0 math/PI) 3.0))
-                             (math/sin (/ (* 4.0 math/PI) 3.0)))]
-          root-idx (int-array (* h w) -1)]
-      ;; Iterate Newton's method
-      (loop [z (t/clone z0) k 0]
-        (if (>= k max-iter)
-          ;; Classify each point by nearest root
-          (let [z-final z]
-            (dotimes [r h]
-              (dotimes [c w]
-                (let [idx (+ (* r w) c)
-                      zr ((t/->tensor z-final) r c 0)
-                      zi ((t/->tensor z-final) r c 1)
-                      best (reduce (fn [best-i i]
-                                     (let [root (nth roots i)
-                                           dr (- zr (double (la/re root)))
-                                           di (- zi (double (la/im root)))
-                                           d (+ (* dr dr) (* di di))
-                                           root-best (nth roots best-i)
-                                           dbr (- zr (double (la/re root-best)))
-                                           dbi (- zi (double (la/im root-best)))
-                                           db (+ (* dbr dbr) (* dbi dbi))]
-                                       (if (< d db) i best-i)))
-                                   0 [1 2])]
-                  (aset root-idx idx best))))
-            root-idx)
-          ;; z_{n+1} = z - (z³ - 1) / (3z²)
-          (let [z2 (la/mul z z)
-                z3 (la/mul z z2)
-                fz (la/sub z3 one)
-                fpz (la/scale z2 3.0)
-                z-next (t/clone (la/sub z (complex-div fz fpz)))]
-            (recur z-next (inc k))))))))
+                            (math/sin (/ (* 4.0 math/PI) 3.0)))]]
+      ;; Iterate Newton's method: z_{n+1} = z - (z³ - 1) / (3z²)
+      (let [z-final (loop [z (t/clone z0) k 0]
+                      (if (>= k max-iter)
+                        z
+                        (let [z2 (la/mul z z)
+                              z3 (la/mul z z2)
+                              fz (la/sub z3 one)
+                              fpz (la/scale z2 3.0)]
+                          (recur (t/clone (la/sub z (complex-div fz fpz)))
+                                 (inc k)))))
+            ;; Classify: compute distance to each root as a tensor
+            dists (mapv (fn [root]
+                          (let [root-grid (t/complex-tensor
+                                           (t/compute-tensor
+                                            [h w 2]
+                                            (fn [_ _ part]
+                                              (if (zero? part)
+                                                (double (la/re root))
+                                                (double (la/im root))))
+                                            :float64))]
+                            (la/abs (la/sub z-final root-grid))))
+                        roots)]
+        ;; Pick nearest root per pixel
+        (t/compute-matrix h w
+                          (fn [r c]
+                            (let [d0 ((dists 0) r c)
+                                  d1 ((dists 1) r c)
+                                  d2 ((dists 2) r c)]
+                              (cond
+                                (and (<= d0 d1) (<= d0 d2)) 0.0
+                                (and (<= d1 d0) (<= d1 d2)) 1.0
+                                :else 2.0))))))))
 
 ;; ### Rendering
 ;;
@@ -307,7 +302,7 @@
   (fn [root-idx h w]
     (t/compute-tensor [h w 3]
                       (fn [r c ch]
-                        (let [idx (aget root-idx (+ (* r w) c))]
+                        (let [idx (long (root-idx r c))]
                           (if (neg? idx) 0
                               (nth (nth root-colors idx) ch))))
                       :uint8)))

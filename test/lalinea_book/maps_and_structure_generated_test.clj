@@ -178,83 +178,83 @@
 (deftest t53_l291 (is ((fn [r] (< (la/norm r) 1.0E-10)) v52_l289)))
 
 
-(def v55_l306 (def sv-M (:S (la/svd M))))
+(def v55_l307 (def sv-M (:S (la/svd M))))
 
 
-(def v56_l308 sv-M)
+(def v56_l309 sv-M)
 
 
-(deftest t57_l310 (is ((fn [v] (= 3 (count v))) v56_l308)))
+(deftest t57_l311 (is ((fn [v] (= 3 (count v))) v56_l309)))
 
 
-(def v58_l313 (def rank-M (la/rank M)))
+(def v58_l314 (def rank-M (la/rank M)))
 
 
-(def v59_l315 rank-M)
+(def v59_l316 rank-M)
 
 
-(deftest t60_l317 (is ((fn [r] (= r 2)) v59_l315)))
+(deftest t60_l318 (is ((fn [r] (= r 2)) v59_l316)))
 
 
-(def v62_l328 (def nullity-M (- (second (t/shape M)) rank-M)))
+(def v62_l329 (def nullity-M (- (second (t/shape M)) rank-M)))
 
 
-(def v63_l330 nullity-M)
+(def v63_l331 nullity-M)
 
 
-(deftest t64_l332 (is ((fn [n] (= n 1)) v63_l330)))
+(deftest t64_l333 (is ((fn [n] (= n 1)) v63_l331)))
 
 
-(def v66_l344 (= (+ rank-M nullity-M) (second (t/shape M))))
+(def v66_l345 (= (+ rank-M nullity-M) (second (t/shape M))))
 
 
-(deftest t67_l347 (is (true? v66_l344)))
+(deftest t67_l348 (is (true? v66_l345)))
 
 
-(def v69_l352 (def null-basis (la/null-space M)))
+(def v69_l353 (def null-basis (la/null-space M)))
 
 
-(def v70_l354 null-basis)
+(def v70_l355 null-basis)
 
 
-(def v72_l358 (la/norm (la/mmul M null-basis)))
+(def v72_l359 (la/norm (la/mmul M null-basis)))
 
 
-(deftest t73_l360 (is ((fn [d] (< d 1.0E-10)) v72_l358)))
+(deftest t73_l361 (is ((fn [d] (< d 1.0E-10)) v72_l359)))
 
 
-(def v75_l374 (def A-full (t/matrix [[2 1] [1 3]])))
+(def v75_l375 (def A-full (t/matrix [[2 1] [1 3]])))
 
 
-(def v76_l376 (la/rank A-full))
+(def v76_l377 (la/rank A-full))
 
 
-(deftest t77_l378 (is ((fn [r] (= r 2)) v76_l376)))
+(deftest t77_l379 (is ((fn [r] (= r 2)) v76_l377)))
 
 
-(def v79_l383 (la/solve A-full (t/column [5 7])))
+(def v79_l384 (la/solve A-full (t/column [5 7])))
 
 
-(deftest t80_l385 (is ((fn [x] (some? x)) v79_l383)))
+(deftest t80_l386 (is ((fn [x] (some? x)) v79_l384)))
 
 
-(def v82_l390 (la/solve M (t/column [1 2 3])))
+(def v82_l391 (la/solve M (t/column [1 2 3])))
 
 
-(deftest t83_l392 (is (nil? v82_l390)))
+(deftest t83_l393 (is (nil? v82_l391)))
 
 
-(def v85_l418 (def col-space-basis (la/col-space M)))
+(def v85_l419 (def col-space-basis (la/col-space M)))
 
 
-(def v86_l420 col-space-basis)
+(def v86_l421 col-space-basis)
 
 
-(def v88_l424 (def svd-M (la/svd M)))
+(def v88_l425 (def svd-M (la/svd M)))
 
 
 (def
- v89_l426
+ v89_l427
  (def
   left-null-basis
   (let
@@ -262,11 +262,11 @@
    (t/submatrix U :all (range r (first (t/shape M)))))))
 
 
-(def v90_l431 left-null-basis)
+(def v90_l432 left-null-basis)
 
 
 (def
- v92_l436
+ v92_l437
  (def
   row-space-basis
   (let
@@ -274,11 +274,11 @@
    (la/transpose (t/submatrix Vt (range r) :all)))))
 
 
-(def v93_l441 row-space-basis)
+(def v93_l442 row-space-basis)
 
 
 (def
- v95_l447
+ v95_l448
  {:col-space (second (t/shape col-space-basis)),
   :left-null (second (t/shape left-null-basis)),
   :row-space (second (t/shape row-space-basis)),
@@ -286,7 +286,7 @@
 
 
 (deftest
- t96_l452
+ t96_l453
  (is
   ((fn
     [m]
@@ -295,32 +295,32 @@
      (= 1 (:left-null m))
      (= 2 (:row-space m))
      (= 1 (:null-space m))))
-   v95_l447)))
+   v95_l448)))
 
 
 (def
- v98_l460
+ v98_l461
  (< (la/norm (la/mmul (la/transpose M) left-null-basis)) 1.0E-10))
 
 
-(deftest t99_l462 (is (true? v98_l460)))
+(deftest t99_l463 (is (true? v98_l461)))
 
 
 (def
- v101_l466
+ v101_l467
  (<
   (la/norm (la/mmul (la/transpose col-space-basis) left-null-basis))
   1.0E-10))
 
 
-(deftest t102_l468 (is (true? v101_l466)))
+(deftest t102_l469 (is (true? v101_l467)))
 
 
 (def
- v104_l472
+ v104_l473
  (<
   (la/norm (la/mmul (la/transpose row-space-basis) null-basis))
   1.0E-10))
 
 
-(deftest t105_l474 (is (true? v104_l472)))
+(deftest t105_l475 (is (true? v104_l473)))

@@ -20,7 +20,7 @@
  v4_l51
  (def
   test-image
-  (t/->tensor
+  (t/->real-tensor
    (t/clone
     (t/compute-tensor
      [img-size img-size]

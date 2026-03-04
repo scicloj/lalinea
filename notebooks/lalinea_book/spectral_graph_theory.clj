@@ -119,7 +119,9 @@ L
 ;; interesting structure lives at the **bottom** of the spectrum —
 ;; zero eigenvalues count connected components, and $\lambda_2$
 ;; measures how tightly the graph is connected. (This is the
-;; opposite of PCA and SVD, where the largest values come first.)
+;; opposite of PCA and SVD, where the largest values come first —
+;; if you have not seen those yet, this will make sense when you
+;; reach those chapters.)
 
 ;; We need both eigenvalues and eigenvectors (for the Fiedler
 ;; vector below), so we use `la/eigen`. For eigenvalues alone,

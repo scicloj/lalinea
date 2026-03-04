@@ -77,6 +77,7 @@
 ;; is a convenience that extracts the real parts and returns them
 ;; as a sorted real tensor:
 ;;
+;;
 ;; Since `la/` functions are polymorphic, you can use `la/re`, `la/im`,
 ;; `la/abs`, and `la/sum` directly on these ComplexTensor eigenvalues.
 

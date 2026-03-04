@@ -300,7 +300,8 @@
 ;; The **rank** of a matrix is the dimension of its column space —
 ;; the number of genuinely independent columns.
 ;;
-;; The SVD reveals the rank: it equals the number of non-zero
+;; The SVD (covered in the [Eigenvalues and Decompositions](eigenvalues_and_decompositions.html)
+;; chapter) reveals the rank: it equals the number of non-zero
 ;; singular values.
 
 (def sv-M (:S (la/svd M)))
