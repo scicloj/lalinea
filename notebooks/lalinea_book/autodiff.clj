@@ -4,7 +4,7 @@
 ;; and the [chain rule](https://en.wikipedia.org/wiki/Chain_rule).
 ;; For a broader introduction to autodiff, the
 ;; [JAX autodiff cookbook](https://docs.jax.dev/en/latest/notebooks/autodiff_cookbook.html)
-;; is an excellent companion resource.
+;; is a good companion resource.
 
 ;; ## Setup
 
@@ -56,6 +56,14 @@
 ;; implements reverse mode.
 ;;
 ;; ## The VJP
+;;
+;; Some terminology. A function $f : \mathbb{R}^n \to \mathbb{R}^m$
+;; maps between two vector spaces: the **input space** $\mathbb{R}^n$
+;; and the **output space** $\mathbb{R}^m$. Vectors in the input space
+;; are called **tangents** — they represent small perturbations to the
+;; input. Vectors in the output space that multiply the Jacobian from
+;; the left are called **cotangents** — they represent how sensitive a
+;; downstream scalar quantity is to each component of the output.
 ;;
 ;; Given a function $f : \mathbb{R}^n \to \mathbb{R}^m$, the Jacobian
 ;; $J$ is the $m \times n$ matrix of partial derivatives:
@@ -191,7 +199,11 @@
 
 (def grads (grad/grad tape-result (:result tape-result)))
 
+(kind/pprint grads)
+
 (def grad-A (.get grads A))
+
+grad-A
 
 ;; The gradient equals 2A:
 
