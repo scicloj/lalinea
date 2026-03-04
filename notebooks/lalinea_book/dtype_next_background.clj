@@ -54,7 +54,8 @@
 ;; long pipelines with near-zero overhead.
 ;;
 ;; The trade-off: reading the same element twice computes it twice.
-;; When you need a concrete array, call `dtype/clone`:
+;; When you need a concrete array, call `dtype/clone`
+;; (or `t/materialize` in La Linea, which is a no-op if already concrete):
 
 (let [s (dfn/+ (dtt/->tensor [1 2 3] {:datatype :float64})
                (dtt/->tensor [10 20 30] {:datatype :float64}))

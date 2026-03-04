@@ -133,7 +133,7 @@
  (def
   signal-composed
   (t/->real-tensor
-   (t/clone
+   (t/materialize
     (t/make-reader
      :float64
      N-vis
@@ -203,7 +203,7 @@
     [v]
     (and
      (< (abs (- (double (:dc v)) 12.0)) 1.0E-10)
-     (every? (fn* [p1__105786#] (< p1__105786# 1.0E-10)) (:others v))))
+     (every? (fn* [p1__111538#] (< p1__111538# 1.0E-10)) (:others v))))
    v29_l161)))
 
 

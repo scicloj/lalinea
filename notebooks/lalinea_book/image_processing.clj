@@ -203,17 +203,16 @@
         [kh kw] (t/shape kernel)
         oh (- h kh -1)
         ow (- w kw -1)]
-    (dtype/clone
-     (reduce
-      (fn [acc [dr dc]]
-        (let [weight (double (kernel dr dc))
-              shifted (dtt/select gray-2d
-                                  (range dr (+ dr oh))
-                                  (range dc (+ dc ow)))]
-          (dfn/+ acc (dfn/* shifted weight))))
-      (dtt/compute-tensor [oh ow] (fn [_ _] 0.0) :float64)
-      (for [dr (range kh) dc (range kw)]
-        [dr dc])))))
+    (reduce
+     (fn [acc [dr dc]]
+       (let [weight (double (kernel dr dc))
+             shifted (dtt/select gray-2d
+                                 (range dr (+ dr oh))
+                                 (range dc (+ dc ow)))]
+         (dtype/clone (dfn/+ acc (dfn/* shifted weight)))))
+     (dtype/clone (dtt/compute-tensor [oh ow] (fn [_ _] 0.0) :float64))
+     (for [dr (range kh) dc (range kw)]
+       [dr dc]))))
 
 ;; ### Box blur
 

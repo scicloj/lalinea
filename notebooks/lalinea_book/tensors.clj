@@ -118,10 +118,11 @@
 
 (kind/test-last [(fn [v] (= [4] (t/shape v)))])
 
-;; ## Materialization: t/clone
+;; ## Materialization
 
 ;; Lazy results (from `el/+`, `el/sqrt`, etc.) recompute on
-;; every access. Call `t/clone` to materialize into a concrete array:
+;; every access. Call `t/materialize` to ensure a concrete array
+;; (no-op if already concrete), or `t/clone` to force a fresh copy:
 
 (let [a (t/matrix [1 4 9])
       s (el/sqrt a)

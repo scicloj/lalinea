@@ -213,64 +213,63 @@
     (- h kh -1)
     ow
     (- w kw -1)]
-   (dtype/clone
-    (reduce
-     (fn
-      [acc [dr dc]]
-      (let
-       [weight
-        (double (kernel dr dc))
-        shifted
-        (dtt/select gray-2d (range dr (+ dr oh)) (range dc (+ dc ow)))]
-       (dfn/+ acc (dfn/* shifted weight))))
-     (dtt/compute-tensor [oh ow] (fn [_ _] 0.0) :float64)
-     (for [dr (range kh) dc (range kw)] [dr dc]))))))
+   (reduce
+    (fn
+     [acc [dr dc]]
+     (let
+      [weight
+       (double (kernel dr dc))
+       shifted
+       (dtt/select gray-2d (range dr (+ dr oh)) (range dc (+ dc ow)))]
+      (dtype/clone (dfn/+ acc (dfn/* shifted weight)))))
+    (dtype/clone (dtt/compute-tensor [oh ow] (fn [_ _] 0.0) :float64))
+    (for [dr (range kh) dc (range kw)] [dr dc])))))
 
 
 (def
- v42_l220
+ v42_l219
  (bufimg/tensor->image
   (vis/matrix->gray-image
    (apply-kernel (to-grayscale checkerboard) blur-kernel))))
 
 
 (deftest
- t43_l224
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v42_l220)))
+ t43_l223
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v42_l219)))
 
 
 (def
- v45_l232
+ v45_l231
  (bufimg/tensor->image
   (vis/matrix->gray-image
    (apply-kernel (to-grayscale checkerboard) edge-kernel))))
 
 
 (deftest
- t46_l236
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v45_l232)))
+ t46_l235
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v45_l231)))
 
 
 (def
- v48_l243
+ v48_l242
  (bufimg/tensor->image
   (vis/matrix->gray-image
    (apply-kernel (to-grayscale circle-img) sharpen-kernel))))
 
 
 (deftest
- t49_l247
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v48_l243)))
+ t49_l246
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v48_l242)))
 
 
-(def v51_l261 (def sobel-x (t/matrix [[-1 0 1] [-2 0 2] [-1 0 1]])))
+(def v51_l260 (def sobel-x (t/matrix [[-1 0 1] [-2 0 2] [-1 0 1]])))
 
 
-(def v52_l264 (def sobel-y (t/matrix [[-1 -2 -1] [0 0 0] [1 2 1]])))
+(def v52_l263 (def sobel-y (t/matrix [[-1 -2 -1] [0 0 0] [1 2 1]])))
 
 
 (def
- v53_l267
+ v53_l266
  (defn
   sobel-edges
   [gray-2d]
@@ -283,11 +282,11 @@
 
 
 (def
- v54_l272
+ v54_l271
  (bufimg/tensor->image
   (vis/matrix->gray-image (sobel-edges (to-grayscale circle-img)))))
 
 
 (deftest
- t55_l276
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v54_l272)))
+ t55_l275
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v54_l271)))

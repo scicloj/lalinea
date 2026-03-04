@@ -76,7 +76,7 @@
       combined (el/+ (el/* alpha x) (el/* beta y))
       lhs (ft/forward combined)
       rhs (el/+ (el/scale (ft/forward x) alpha)
-                  (el/scale (ft/forward y) beta))]
+                (el/scale (ft/forward y) beta))]
   (and (< (el/reduce-max (el/abs (el/- (el/re lhs) (el/re rhs)))) 1e-10)
        (< (el/reduce-max (el/abs (el/- (el/im lhs) (el/im rhs)))) 1e-10)))
 
@@ -117,7 +117,7 @@
 
 (def signal-composed
   (t/->real-tensor
-   (t/clone
+   (t/materialize
     (t/make-reader :float64 N-vis
                    (let [ti (/ (double idx) N-vis)]
                      (+ (math/sin (* 2 math/PI 3 ti))

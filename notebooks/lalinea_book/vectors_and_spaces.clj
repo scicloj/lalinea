@@ -236,7 +236,7 @@
                    b (range -2.0 2.1 0.5)]
                [a b])
       n (count coeffs)
-      points (t/clone
+      points (t/materialize
               (t/compute-tensor [n 2]
                                 (fn [i j]
                                   (let [[a b] (nth coeffs i)]
@@ -263,7 +263,7 @@
                    b (range -2.0 2.1 0.5)]
                [a b])
       n (count coeffs)
-      points (t/clone
+      points (t/materialize
               (t/compute-tensor [n 2]
                                 (fn [i j]
                                   (let [[a b] (nth coeffs i)]

@@ -47,7 +47,7 @@
 
 
 (def
- v13_l59
+ v13_l60
  (let
   [s
    (dfn/+
@@ -58,4 +58,4 @@
   (some? (dtype/as-array-buffer materialized))))
 
 
-(deftest t14_l64 (is (true? v13_l59)))
+(deftest t14_l65 (is (true? v13_l60)))

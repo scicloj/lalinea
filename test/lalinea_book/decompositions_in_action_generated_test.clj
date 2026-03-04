@@ -22,7 +22,7 @@
  (def
   test-image
   (t/->real-tensor
-   (t/clone
+   (t/materialize
     (t/compute-tensor
      [img-size img-size]
      (fn
@@ -221,7 +221,7 @@
      [n-points 2]
      (fn [_i j] (if (zero? j) mean0 mean1))
      :float64)]
-   (t/clone (el/- data-tensor means)))))
+   (t/materialize (el/- data-tensor means)))))
 
 
 (def

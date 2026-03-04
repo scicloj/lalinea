@@ -67,8 +67,11 @@
       (>= k max-iter)
       counts
       (let
-       [z2 (t/clone (el/+ (el/* z z) c)) mask (el/<= (el/abs z2) 2.0)]
-       (recur z2 (t/clone (el/+ counts mask)) (inc k)))))))))
+       [z2
+        (t/materialize (el/+ (el/* z z) c))
+        mask
+        (el/<= (el/abs z2) 2.0)]
+       (recur z2 (t/materialize (el/+ counts mask)) (inc k)))))))))
 
 
 (def
@@ -176,10 +179,10 @@
       counts
       (let
        [z2
-        (t/clone (el/+ (el/* z z) c-grid))
+        (t/materialize (el/+ (el/* z z) c-grid))
         mask
         (el/<= (el/abs z2) 2.0)]
-       (recur z2 (t/clone (el/+ counts mask)) (inc k)))))))))
+       (recur z2 (t/materialize (el/+ counts mask)) (inc k)))))))))
 
 
 (def
@@ -293,7 +296,7 @@
           (el/- z3 one)
           fpz
           (el/scale z2 3.0)]
-         (recur (t/clone (el/- z (el// fz fpz))) (inc k)))))
+         (recur (t/materialize (el/- z (el// fz fpz))) (inc k)))))
       dists
       (mapv
        (fn

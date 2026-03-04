@@ -51,7 +51,7 @@
 
 (def test-image
   (t/->real-tensor
-   (t/clone
+   (t/materialize
     (t/compute-tensor [img-size img-size]
                       (fn [r c]
                         (let [x (/ (- c 50.0) 50.0)
@@ -140,7 +140,7 @@
                               [1 5 10 20 50])
                  :error (mapv (fn [k]
                                 (la/norm (el/- test-image
-                                                 (reconstruct-rank-k svd-result k))))
+                                               (reconstruct-rank-k svd-result k))))
                               [1 5 10 20 50])})
     (plotly/base {:=x :ratio :=y :error})
     (plotly/layer-point {:=mark-size 10})
@@ -191,7 +191,7 @@
         means (t/compute-tensor [n-points 2]
                                 (fn [_i j] (if (zero? j) mean0 mean1))
                                 :float64)]
-    (t/clone (el/- data-tensor means))))
+    (t/materialize (el/- data-tensor means))))
 
 ;; ### Compute [covariance matrix](https://en.wikipedia.org/wiki/Covariance_matrix) and eigendecompose
 

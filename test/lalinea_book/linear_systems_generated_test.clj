@@ -23,7 +23,7 @@
  v7_l68
  (def
   A-heat
-  (t/clone
+  (t/materialize
    (t/compute-tensor
     [n n]
     (fn [i j] (cond (= i j) 2.0 (= (abs (- i j)) 1) -1.0 :else 0.0))

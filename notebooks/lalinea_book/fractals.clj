@@ -74,9 +74,9 @@
       (loop [z zero-grid counts (t/zeros h w) k 0]
         (if (>= k max-iter)
           counts
-          (let [z2 (t/clone (el/+ (el/* z z) c))
+          (let [z2 (t/materialize (el/+ (el/* z z) c))
                 mask (el/<= (el/abs z2) 2.0)]
-            (recur z2 (t/clone (el/+ counts mask)) (inc k))))))))
+            (recur z2 (t/materialize (el/+ counts mask)) (inc k))))))))
 
 ;; ### Rendering
 ;;
@@ -140,9 +140,9 @@
       (loop [z z0 counts (t/zeros h w) k 0]
         (if (>= k max-iter)
           counts
-          (let [z2 (t/clone (el/+ (el/* z z) c-grid))
+          (let [z2 (t/materialize (el/+ (el/* z z) c-grid))
                 mask (el/<= (el/abs z2) 2.0)]
-            (recur z2 (t/clone (el/+ counts mask)) (inc k))))))))
+            (recur z2 (t/materialize (el/+ counts mask)) (inc k))))))))
 
 ;; ### Gallery of Julia sets
 ;;
@@ -227,7 +227,7 @@
                               z3 (el/* z z2)
                               fz (el/- z3 one)
                               fpz (el/scale z2 3.0)]
-                          (recur (t/clone (el/- z (el// fz fpz)))
+                          (recur (t/materialize (el/- z (el// fz fpz)))
                                  (inc k)))))
             ;; Classify: compute distance to each root as a tensor
             dists (mapv (fn [root]

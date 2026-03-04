@@ -105,7 +105,7 @@
 
 
 (def
- v43_l126
+ v43_l127
  (let
   [a (t/matrix [1 4 9]) s (el/sqrt a) cloned (t/clone s)]
   {:lazy-array? (some? (t/array-buffer s)),
@@ -113,40 +113,40 @@
 
 
 (deftest
- t44_l132
+ t44_l133
  (is
   ((fn
     [{:keys [lazy-array? cloned-array?]}]
     (and (not lazy-array?) cloned-array?))
-   v43_l126)))
+   v43_l127)))
 
 
 (def
- v46_l141
+ v46_l142
  (let [m (t/matrix [[1 2] [3 4]])] (t/mset! m 0 1 99.0) (m 0 1)))
 
 
-(deftest t47_l145 (is (= v46_l141 99.0)))
+(deftest t47_l146 (is (= v46_l142 99.0)))
 
 
-(def v49_l155 (let [x (t/matrix [[1 4] [9 16]])] (el/sqrt x)))
+(def v49_l156 (let [x (t/matrix [[1 4] [9 16]])] (el/sqrt x)))
 
 
-(deftest t50_l158 (is ((fn [r] (= 2.0 (r 0 1))) v49_l155)))
+(deftest t50_l159 (is ((fn [r] (= 2.0 (r 0 1))) v49_l156)))
 
 
 (def
- v52_l163
+ v52_l164
  (let
   [a (t/matrix [[1 2] [3 4]]) b (t/matrix [[10 20] [30 40]])]
   (el/+ a b)))
 
 
-(deftest t53_l167 (is ((fn [r] (= 44.0 (r 1 1))) v52_l163)))
+(deftest t53_l168 (is ((fn [r] (= 44.0 (r 1 1))) v52_l164)))
 
 
 (def
- v55_l174
+ v55_l175
  (let
   [m (t/matrix [[1.0 2.0] [3.0 4.0]]) dm (t/tensor->dmat m)]
   {:identical? (identical? (t/->double-array m) (.data dm)),
@@ -155,38 +155,38 @@
 
 
 (deftest
- t56_l181
+ t56_l182
  (is
   ((fn [v] (and (:identical? v) (= (:rows v) 2) (= (:cols v) 2)))
-   v55_l174)))
+   v55_l175)))
 
 
 (def
- v58_l187
+ v58_l188
  (let
   [m (t/matrix [[1.0 0.0] [0.0 1.0]]) dm (t/tensor->dmat m)]
   (.set dm 0 1 99.0)
   (m 0 1)))
 
 
-(deftest t59_l192 (is (= v58_l187 99.0)))
+(deftest t59_l193 (is (= v58_l188 99.0)))
 
 
-(def v61_l201 (la/mmul (t/matrix [[1 2] [3 4]]) (t/eye 2)))
+(def v61_l202 (la/mmul (t/matrix [[1 2] [3 4]]) (t/eye 2)))
 
 
-(deftest t62_l204 (is ((fn [m] (= 1.0 (m 0 0))) v61_l201)))
+(deftest t62_l205 (is ((fn [m] (= 1.0 (m 0 0))) v61_l202)))
 
 
-(def v64_l208 (la/invert (t/matrix [[1 2] [3 4]])))
+(def v64_l209 (la/invert (t/matrix [[1 2] [3 4]])))
 
 
-(deftest t65_l210 (is ((fn [m] (= [2 2] (t/shape m))) v64_l208)))
+(deftest t65_l211 (is ((fn [m] (= [2 2] (t/shape m))) v64_l209)))
 
 
-(def v67_l214 (la/norm (t/matrix [[1 2 3] [4 5 6]])))
+(def v67_l215 (la/norm (t/matrix [[1 2 3] [4 5 6]])))
 
 
 (deftest
- t68_l216
- (is ((fn [v] (< (abs (- v (math/sqrt 91.0))) 1.0E-10)) v67_l214)))
+ t68_l217
+ (is ((fn [v] (< (abs (- v (math/sqrt 91.0))) 1.0E-10)) v67_l215)))

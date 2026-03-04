@@ -66,7 +66,7 @@
 ;; on each adjacent diagonal:
 
 (def A-heat
-  (t/clone
+  (t/materialize
    (t/compute-tensor
     [n n]
     (fn [i j]

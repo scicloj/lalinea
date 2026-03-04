@@ -473,9 +473,10 @@
 
 ;; ## Clone also materializes lazy results
 
-;; Cloning a lazy ComplexTensor (from `el/+`, `el/scale`, etc.)
-;; materializes it into a contiguous array. The result is independent
-;; of the sources.
+;; `t/materialize` is usually the right choice for forcing evaluation
+;; of a lazy result (see the section above). `t/clone` also works,
+;; and additionally guarantees a fresh copy — useful when you need
+;; mutation safety. Here we show `t/clone` on lazy ComplexTensors:
 
 (let [p (t/complex-tensor
          (t/matrix [[1 3] [2 4]]))
@@ -671,8 +672,8 @@
 
 (kind/test-last [false?])
 
-;; `t/clone` materializes the lazy tensor into a contiguous
-;; array, fixing this problem:
+;; `t/clone` (or `t/materialize`) forces the lazy tensor into a
+;; contiguous array, fixing this problem:
 
 (let [rng (java.util.Random. 42)
       t (t/clone
@@ -742,7 +743,8 @@
 ;;
 ;; Lazy readers have no array of their own, but they **read through**
 ;; to the source arrays — mutating a source changes what the lazy
-;; reader computes. Use `t/clone` to materialize and break the link.
+;; reader computes. Use `t/materialize` to force evaluation, or
+;; `t/clone` to also break any sharing link.
 ;;
 ;; **The guideline**: treat all data as immutable. When you need to
 ;; avoid lazy recomputation, use `t/materialize`. When you need to

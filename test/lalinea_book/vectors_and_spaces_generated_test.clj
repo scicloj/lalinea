@@ -167,7 +167,7 @@
    n
    (count coeffs)
    points
-   (t/clone
+   (t/materialize
     (t/compute-tensor
      [n 2]
      (fn
@@ -197,7 +197,7 @@
    n
    (count coeffs)
    points
-   (t/clone
+   (t/materialize
     (t/compute-tensor
      [n 2]
      (fn
