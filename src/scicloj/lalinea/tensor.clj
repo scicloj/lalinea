@@ -17,6 +17,7 @@
             [tech.v3.tensor :as dtt]
             [tech.v3.datatype :as dtype]
             [tech.v3.datatype.functional :as dfn]
+            [tech.v3.datatype.protocols :as dtype-proto]
             [scicloj.lalinea.impl.print])
   (:import [org.ejml.data DMatrixRMaj ZMatrixRMaj]))
 
@@ -252,19 +253,33 @@
                     (rt/->rt (dtt/reduce-axis a reduce-fn (int axis)))))))
 
 ;; ---------------------------------------------------------------------------
-;; Materialization and mutation
+;; Materialization, cloning, and mutation
 ;; ---------------------------------------------------------------------------
 
+(defn concrete?
+  "True if the tensor is backed by a contiguous array (not a lazy reader chain)."
+  [a]
+  (let [raw (rt/ensure-tensor a)]
+    (dtype-proto/convertible-to-array-buffer?
+     (dtype/->buffer (if (ct/complex? raw) (ct/->tensor raw) raw)))))
+
 (defn clone
-  "Materialize a tensor into a contiguous copy. Breaks all links to
-   the source — the returned tensor owns its own `double[]`.
-   Returns a RealTensor for real input, ComplexTensor for complex."
+  "Deep-copy a tensor into a fresh contiguous array.  Always allocates,
+   even when the input is already concrete.  Use `materialize` when you
+   only need to ensure the result is concrete without a redundant copy."
   [a]
   (tape/record! :t/clone [a]
                 (let [a (rt/ensure-tensor a)]
                   (if (ct/complex? a)
                     (ct/wrap-tensor (dtype/clone (ct/->tensor a)))
                     (rt/->rt (dtype/clone a))))))
+
+(defn materialize
+  "Ensure a tensor is backed by a contiguous array.
+   Returns the input unchanged if already concrete; clones if lazy.
+   Use `clone` when you need a guaranteed independent copy."
+  [a]
+  (if (concrete? a) a (clone a)))
 
 (defn mset!
   "Mutate a tensor element in place. Takes a tensor, indices, and a value.
@@ -310,7 +325,7 @@
 (defn compute-tensor
   "Create a tensor by calling a function at each index.
    Returns a RealTensor for 1D and 2D shapes, raw tensor for 3D+.
-   Use `clone` to materialize the lazy result when needed."
+   Use `materialize` or `clone` to force evaluation when needed."
   [shape-vec f datatype]
   (tape/record! :t/compute-tensor [shape-vec f datatype]
                 (let [result (dtt/compute-tensor shape-vec f datatype)]
