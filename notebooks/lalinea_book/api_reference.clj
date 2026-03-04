@@ -240,6 +240,16 @@
 
 (kind/test-last [(fn [n] (= 4 n))])
 
+(kind/doc #'t/backing-array)
+
+(let [A (t/matrix [[1 2] [3 4]])
+      B (t/clone A)]
+  [(some? (t/backing-array A))
+   (identical? (t/backing-array A)
+               (t/backing-array B))])
+
+(kind/test-last [= [true false]])
+
 (kind/doc #'t/->reader)
 
 (let [rdr (t/->reader (t/column [10 20 30]))]

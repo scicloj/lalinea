@@ -13,6 +13,7 @@
             [tech.v3.tensor :as dtt]
             [scicloj.lalinea.impl.complex-tensor :as ct]
             [scicloj.lalinea.impl.real-tensor :as rt]
+            [scicloj.lalinea.impl.buffer :as buf]
             [scicloj.kindly.v4.kind :as kind])
   (:import [java.util IdentityHashMap]))
 
@@ -36,20 +37,9 @@
 ;; ---------------------------------------------------------------------------
 
 (defn- backing-array
-  "Extract the backing double[] from a tensor, if any.
-   Works for both contiguous tensors (via as-array-buffer) and
-   strided views (via .buffer → as-array-buffer).
-   Returns nil for lazy tensors."
+  "Extract the backing double[] from a tensor, if any."
   [t]
-  (let [t (cond (ct/complex? t) (ct/->tensor t)
-                (rt/real-tensor? t) (rt/->tensor t)
-                :else t)]
-    (if-let [ab (dtype/as-array-buffer t)]
-      (.ary-data ab)
-      (when (dtt/tensor? t)
-        (when-let [buf (.buffer t)]
-          (when-let [ab (dtype/as-array-buffer buf)]
-            (.ary-data ab)))))))
+  (buf/backing-array t))
 
 (defn memory-status
   "Classify a tensor's memory backing.

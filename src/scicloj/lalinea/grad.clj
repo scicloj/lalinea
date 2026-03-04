@@ -126,7 +126,7 @@
   (let [^IdentityHashMap registry (:registry tape-result)
         entries  (:entries tape-result)
         idx       (into {} (map (juxt :id identity))
-                         entries)
+                        entries)
         target-id (.get registry target)]
     (when (nil? target-id)
       (throw (ex-info "Target not found on tape" {})))

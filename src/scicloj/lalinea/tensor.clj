@@ -10,6 +10,7 @@
    Structural operations preserve the RealTensor/ComplexTensor type."
   (:refer-clojure :exclude [flatten reshape select clone])
   (:require [scicloj.lalinea.impl.real-tensor :as rt]
+            [scicloj.lalinea.impl.buffer :as buf]
             [scicloj.lalinea.impl.complex-tensor :as ct]
             [scicloj.lalinea.impl.ejml :as ejml]
             [scicloj.lalinea.tape :as tape]
@@ -290,6 +291,14 @@
   (if (ct/complex? a)
     (ct/->double-array a)
     (dtype/->double-array (rt/ensure-tensor a))))
+
+(defn backing-array
+  "Return the shared backing `double[]` of a tensor,
+   or nil if the tensor is lazy or not array-backed.
+   Never copies. Useful for checking whether two tensors
+   share memory."
+  ^doubles [t]
+  (buf/backing-array t))
 
 (defn ->reader
   "Get a read-only indexed view of a tensor's elements."

@@ -199,7 +199,8 @@
 
 (def grads (grad/grad tape-result (:result tape-result)))
 
-(kind/pprint grads)
+;; `grad/grad` returns a map from each input tensor to its gradient:
+grads
 
 (def grad-A (.get grads A))
 
@@ -240,6 +241,8 @@ grad-A
 
 (def ls-grads (grad/grad ls-tape (:result ls-tape)))
 
+
+ls-grads
 (def grad-x (.get ls-grads x))
 
 grad-x
@@ -275,6 +278,8 @@ expected-grad
     (la/sum (la/sq (la/sub (la/mmul A2 x) b)))))
 
 (def grads-A (grad/grad ls-tape-A (:result ls-tape-A)))
+
+grads-A
 
 (def grad-A2 (.get grads-A A2))
 

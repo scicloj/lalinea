@@ -10,7 +10,7 @@
 
 
 (def
- v3_l87
+ v3_l95
  (let
   [a
    (t/matrix [3.0])
@@ -24,149 +24,161 @@
 
 
 (deftest
- t4_l95
+ t4_l103
  (is
   ((fn
     [{:keys [grad-a grad-b]}]
     (and
      (< (abs (- grad-a 12.0)) 1.0E-10)
      (< (abs (- grad-b 9.0)) 1.0E-10)))
-   v3_l87)))
+   v3_l95)))
 
 
-(def v6_l171 (def A (t/matrix [[1 2] [3 4]])))
+(def v6_l179 (def A (t/matrix [[1 2] [3 4]])))
 
 
 (def
- v7_l174
+ v7_l182
  (def
   tape-result
   (tape/with-tape (la/trace (la/mmul (la/transpose A) A)))))
 
 
-(def v8_l178 (:result tape-result))
+(def v8_l186 (:result tape-result))
 
 
-(deftest t9_l180 (is ((fn [v] (== 30.0 v)) v8_l178)))
+(deftest t9_l188 (is ((fn [v] (== 30.0 v)) v8_l186)))
 
 
-(def v11_l185 (mapv :op (:entries tape-result)))
+(def v11_l193 (mapv :op (:entries tape-result)))
 
 
-(deftest t12_l187 (is (= v11_l185 [:la/transpose :la/mmul :la/trace])))
+(deftest t12_l195 (is (= v11_l193 [:la/transpose :la/mmul :la/trace])))
 
 
-(def v14_l192 (def grads (grad/grad tape-result (:result tape-result))))
+(def v14_l200 (def grads (grad/grad tape-result (:result tape-result))))
 
 
-(def v15_l194 (def grad-A (.get grads A)))
+(def v16_l203 grads)
 
 
-(def v17_l198 (la/close? grad-A (la/scale A 2)))
+(def v17_l205 (def grad-A (.get grads A)))
 
 
-(deftest t18_l200 (is (true? v17_l198)))
+(def v18_l207 grad-A)
 
 
-(def v20_l204 (tape/mermaid tape-result (:result tape-result)))
+(def v20_l211 (la/close? grad-A (la/scale A 2)))
 
 
-(def v22_l212 (def A2 (t/matrix [[1 0] [0 2] [1 1]])))
+(deftest t21_l213 (is (true? v20_l211)))
 
 
-(def v23_l216 (def b (t/column [3 2 4])))
+(def v23_l217 (tape/mermaid tape-result (:result tape-result)))
 
 
-(def v24_l218 (def x (t/column [1 1])))
+(def v25_l225 (def A2 (t/matrix [[1 0] [0 2] [1 1]])))
+
+
+(def v26_l229 (def b (t/column [3 2 4])))
+
+
+(def v27_l231 (def x (t/column [1 1])))
 
 
 (def
- v25_l220
+ v28_l233
  (def
   ls-tape
   (tape/with-tape (la/sum (la/sq (la/sub (la/mmul A2 x) b))))))
 
 
-(def v26_l224 (:result ls-tape))
+(def v29_l237 (:result ls-tape))
 
 
-(deftest t27_l226 (is ((fn [v] (== 8.0 v)) v26_l224)))
+(deftest t30_l239 (is ((fn [v] (== 8.0 v)) v29_l237)))
 
 
-(def v28_l229 (def ls-grads (grad/grad ls-tape (:result ls-tape))))
+(def v31_l242 (def ls-grads (grad/grad ls-tape (:result ls-tape))))
 
 
-(def v29_l231 (def grad-x (.get ls-grads x)))
+(def v32_l245 ls-grads)
 
 
-(def v30_l233 grad-x)
+(def v33_l246 (def grad-x (.get ls-grads x)))
+
+
+(def v34_l248 grad-x)
 
 
 (deftest
- t31_l235
- (is ((fn [g] (la/close? g (t/column [-8 -4]))) v30_l233)))
+ t35_l250
+ (is ((fn [g] (la/close? g (t/column [-8 -4]))) v34_l248)))
 
 
 (def
- v33_l240
+ v37_l255
  (def
   expected-grad
   (la/scale (la/mmul (la/transpose A2) (la/sub (la/mmul A2 x) b)) 2)))
 
 
-(def v34_l245 expected-grad)
+(def v38_l260 expected-grad)
 
 
-(def v35_l247 (la/close? grad-x expected-grad))
+(def v39_l262 (la/close? grad-x expected-grad))
 
 
-(deftest t36_l249 (is (true? v35_l247)))
+(deftest t40_l264 (is (true? v39_l262)))
 
 
-(def v38_l253 (tape/mermaid ls-tape (:result ls-tape)))
+(def v42_l268 (tape/mermaid ls-tape (:result ls-tape)))
 
 
 (def
- v40_l261
+ v44_l276
  (def
   ls-tape-A
   (tape/with-tape (la/sum (la/sq (la/sub (la/mmul A2 x) b))))))
 
 
-(def v41_l265 (def grads-A (grad/grad ls-tape-A (:result ls-tape-A))))
+(def v45_l280 (def grads-A (grad/grad ls-tape-A (:result ls-tape-A))))
 
 
-(def v42_l267 (def grad-A2 (.get grads-A A2)))
+(def v46_l282 grads-A)
 
 
-(def v43_l269 grad-A2)
+(def v47_l284 (def grad-A2 (.get grads-A A2)))
+
+
+(def v48_l286 grad-A2)
 
 
 (deftest
- t44_l271
+ t49_l288
  (is
-  ((fn [g] (la/close? g (t/matrix [[-4 -4] [0 0] [-4 -4]]))) v43_l269)))
+  ((fn [g] (la/close? g (t/matrix [[-4 -4] [0 0] [-4 -4]]))) v48_l286)))
 
 
-(def v45_l274 (def residual (la/sub (la/mmul A2 x) b)))
-
-
-(def
- v46_l276
- (def expected-grad-A (la/scale (la/mmul residual (la/transpose x)) 2)))
-
-
-(def v47_l278 expected-grad-A)
-
-
-(def v48_l280 (la/close? grad-A2 expected-grad-A))
-
-
-(deftest t49_l282 (is (true? v48_l280)))
+(def v50_l291 (def residual (la/sub (la/mmul A2 x) b)))
 
 
 (def
  v51_l293
+ (def expected-grad-A (la/scale (la/mmul residual (la/transpose x)) 2)))
+
+
+(def v52_l295 expected-grad-A)
+
+
+(def v53_l297 (la/close? grad-A2 expected-grad-A))
+
+
+(deftest t54_l299 (is (true? v53_l297)))
+
+
+(def
+ v56_l310
  (let
   [A
    (t/matrix [[2 1] [1 3]])
@@ -181,11 +193,11 @@
   (la/close? grad-A expected)))
 
 
-(deftest t52_l301 (is (true? v51_l293)))
+(deftest t57_l318 (is (true? v56_l310)))
 
 
 (def
- v54_l309
+ v59_l326
  (let
   [A
    (t/matrix [[2 1] [1 3]])
@@ -202,11 +214,11 @@
   (la/close? grad-A expected)))
 
 
-(deftest t55_l317 (is (true? v54_l309)))
+(deftest t60_l334 (is (true? v59_l326)))
 
 
 (def
- v57_l323
+ v62_l340
  (let
   [A
    (t/matrix [[3 0] [0 4]])
@@ -221,4 +233,4 @@
   (la/close? grad-A expected)))
 
 
-(deftest t58_l330 (is (true? v57_l323)))
+(deftest t63_l347 (is (true? v62_l340)))
