@@ -178,15 +178,15 @@
    half-n
    (/ N-vis 2)
    peak-idx
-   (sort-by (fn [i] (- (double (mags i)))) (range half-n))]
+   (el/argsort > (t/select mags (range half-n)))]
   (= [3 7] (sort (take 2 peak-idx)))))
 
 
-(deftest t27_l154 (is (true? v26_l147)))
+(deftest t27_l153 (is (true? v26_l147)))
 
 
 (def
- v29_l161
+ v29_l160
  (let
   [spectrum (ft/forward [3.0 3.0 3.0 3.0])]
   {:dc (el/re (spectrum 0)),
@@ -197,18 +197,18 @@
 
 
 (deftest
- t30_l165
+ t30_l164
  (is
   ((fn
     [v]
     (and
      (< (abs (- (double (:dc v)) 12.0)) 1.0E-10)
-     (every? (fn* [p1__111538#] (< p1__111538# 1.0E-10)) (:others v))))
-   v29_l161)))
+     (every? (fn* [p1__122150#] (< p1__122150# 1.0E-10)) (:others v))))
+   v29_l160)))
 
 
 (def
- v32_l170
+ v32_l169
  (let
   [spectrum (ft/forward [1.0 -1.0 1.0 -1.0])]
   {:dc (double (el/abs (spectrum 0))),
@@ -216,16 +216,16 @@
 
 
 (deftest
- t33_l174
+ t33_l173
  (is
   ((fn
     [v]
     (and (< (:dc v) 1.0E-10) (< (abs (- (:nyquist v) 4.0)) 1.0E-10)))
-   v32_l170)))
+   v32_l169)))
 
 
 (def
- v35_l181
+ v35_l180
  (let
   [signal
    (t/complex-tensor [1.0 0.0] [0.0 1.0])
@@ -242,11 +242,11 @@
     1.0E-10))))
 
 
-(deftest t36_l187 (is (true? v35_l181)))
+(deftest t36_l186 (is (true? v35_l180)))
 
 
 (def
- v38_l193
+ v38_l192
  (let
   [signal
    [1.0 2.0 3.0 4.0]
@@ -257,4 +257,4 @@
   (< (el/reduce-max (el/abs (el/- recovered signal))) 1.0E-10)))
 
 
-(deftest t39_l198 (is (true? v38_l193)))
+(deftest t39_l197 (is (true? v38_l192)))

@@ -99,11 +99,7 @@
  v29_l166
  (def
   sorted-eig-indices
-  (let
-   [vals (el/re (:eigenvalues eig))]
-   (sort-by
-    (fn [i] (double (vals i)))
-    (range (count (:eigenvalues eig)))))))
+  (let [vals (el/re (:eigenvalues eig))] (el/argsort vals))))
 
 
 (def
@@ -301,11 +297,12 @@
  v64_l311
  (def
   cycle-theoretical
-  (sort
-   (t/make-reader
-    :float64
-    cn
-    (- 2.0 (* 2.0 (math/cos (/ (* 2.0 math/PI idx) cn))))))))
+  (el/sort
+   (t/->real-tensor
+    (t/make-reader
+     :float64
+     cn
+     (- 2.0 (* 2.0 (math/cos (/ (* 2.0 math/PI idx) cn)))))))))
 
 
 (def v66_l317 cycle-eigenvalues)
@@ -357,11 +354,12 @@
  v78_l353
  (def
   path-theoretical
-  (sort
-   (t/make-reader
-    :float64
-    pn
-    (- 2.0 (* 2.0 (math/cos (/ (* math/PI idx) pn))))))))
+  (el/sort
+   (t/->real-tensor
+    (t/make-reader
+     :float64
+     pn
+     (- 2.0 (* 2.0 (math/cos (/ (* math/PI idx) pn)))))))))
 
 
 (def v79_l357 path-theoretical)
@@ -459,11 +457,7 @@
  v92_l429
  (def
   sorted-comm-indices
-  (let
-   [vals (el/re (:eigenvalues comm-eig))]
-   (sort-by
-    (fn [i] (double (vals i)))
-    (range (count (:eigenvalues comm-eig)))))))
+  (let [vals (el/re (:eigenvalues comm-eig))] (el/argsort vals))))
 
 
 (def
@@ -482,8 +476,8 @@
      :community
      (mapv
       (fn*
-       [p1__107822#]
-       (cond (<= p1__107822# 2) "A" (<= p1__107822# 5) "B" :else "C"))
+       [p1__121988#]
+       (cond (<= p1__121988# 2) "A" (<= p1__121988# 5) "B" :else "C"))
       (range 9))}))))
 
 

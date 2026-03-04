@@ -264,9 +264,7 @@
    reals
    (el/re eigenvalues)
    sorted-idx
-   (sort-by
-    (fn [i] (- (double (reals i))))
-    (range (count eigenvectors)))
+   (el/argsort > reals)
    lam1
    (double (reals (first sorted-idx)))
    ev1
@@ -310,15 +308,13 @@
    reals
    (el/re eigenvalues)
    sorted-idx
-   (sort-by
-    (fn [i] (- (double (reals i))))
-    (range (count eigenvectors)))
+   (el/argsort > reals)
    ev1
    (nth eigenvectors (first sorted-idx))
    projected
    (la/mmul (la/mmul X ev1) (la/transpose ev1))
    variances
-   (sort > reals)
+   (el/sort > reals)
    explained
    (/ (first variances) (el/sum variances))]
   explained))
@@ -354,7 +350,7 @@
       A-next
       (la/mmul R Q)
       diag
-      (sort (t/diag A-next))
+      (el/sort (t/diag A-next))
       off-diag
       (math/sqrt
        (+
@@ -397,11 +393,8 @@
   [final
    (last qr-history)
    computed
-   (sort [(:eig-1 final) (:eig-2 final) (:eig-3 final)])]
-  (la/close?
-   (t/->real-tensor computed)
-   (t/->real-tensor true-eigenvalues)
-   1.0E-4)))
+   (el/sort (t/row [(:eig-1 final) (:eig-2 final) (:eig-3 final)]))]
+  (la/close? computed true-eigenvalues 1.0E-4)))
 
 
 (deftest t67_l345 (is (true? v66_l340)))

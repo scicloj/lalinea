@@ -445,11 +445,8 @@
    AtA-eigs
    (la/real-eigenvalues (la/mmul (la/transpose A) A))
    sv-squared
-   (sort > (el/sq S))]
-  (la/close?
-   (t/->real-tensor sv-squared)
-   (t/->real-tensor (reverse AtA-eigs))
-   1.0E-8)))
+   (el/sort > (el/sq S))]
+  (la/close? sv-squared (t/->real-tensor (reverse AtA-eigs)) 1.0E-8)))
 
 
 (deftest t142_l465 (is (true? v141_l459)))

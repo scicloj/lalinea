@@ -196,7 +196,7 @@
 
 (let [alpha 2.0 beta 3.0]
   (la/close-scalar? (la/trace (el/+ (el/scale A alpha)
-                                      (el/scale B beta)))
+                                    (el/scale B beta)))
                     (+ (* alpha (la/trace A))
                        (* beta (la/trace B)))))
 
@@ -458,8 +458,8 @@
 
 (let [{:keys [S]} (la/svd A)
       AtA-eigs (la/real-eigenvalues (la/mmul (la/transpose A) A))
-      sv-squared (sort > (el/sq S))]
-  (la/close? (t/->real-tensor sv-squared)
+      sv-squared (el/sort > (el/sq S))]
+  (la/close? sv-squared
              (t/->real-tensor (reverse AtA-eigs)) 1e-8))
 
 (kind/test-last [true?])
@@ -550,7 +550,7 @@
 
 (< (el/reduce-max
     (el/abs (el/- (el/abs (el/* ca cb))
-                      (el/* (el/abs ca) (el/abs cb)))))
+                  (el/* (el/abs ca) (el/abs cb)))))
    1e-10)
 
 (kind/test-last [true?])
@@ -580,7 +580,7 @@
       CB (t/complex-tensor [[2 0] [1 3]] [[1 -1] [0 2]])
       CC (t/complex-tensor [[0 1] [2 -1]] [[3 0] [1 1]])]
   (< (la/norm (el/- (la/mmul (la/mmul CA CB) CC)
-                      (la/mmul CA (la/mmul CB CC))))
+                    (la/mmul CA (la/mmul CB CC))))
      1e-10))
 
 (kind/test-last [true?])

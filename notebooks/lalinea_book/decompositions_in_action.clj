@@ -227,7 +227,7 @@ cov-matrix
 
 (let [{:keys [eigenvalues eigenvectors]} pca-eigen
       reals (el/re eigenvalues)
-      sorted-idx (sort-by (fn [i] (- (double (reals i)))) (range (count eigenvectors)))
+      sorted-idx (el/argsort > reals)
       lam1 (double (reals (first sorted-idx)))
       ev1 (nth eigenvectors (first sorted-idx))
       lam2 (double (reals (second sorted-idx)))
@@ -257,12 +257,12 @@ cov-matrix
 
 (let [{:keys [eigenvalues eigenvectors]} pca-eigen
       reals (el/re eigenvalues)
-      sorted-idx (sort-by (fn [i] (- (double (reals i)))) (range (count eigenvectors)))
+      sorted-idx (el/argsort > reals)
       ev1 (nth eigenvectors (first sorted-idx))
       ;; Project: X * v1 * v1^T
       projected (la/mmul (la/mmul X ev1) (la/transpose ev1))
       ;; Fraction of variance explained
-      variances (sort > reals)
+      variances (el/sort > reals)
       explained (/ (first variances) (el/sum variances))]
   explained)
 
@@ -306,7 +306,7 @@ true-eigenvalues
       (let [{:keys [Q R]} (la/qr A)
             A-next (la/mmul R Q)
             ;; Extract diagonal
-            diag (sort (t/diag A-next))
+            diag (el/sort (t/diag A-next))
             ;; Off-diagonal magnitude
             off-diag (math/sqrt
                       (+ (let [v (A-next 0 1)] (* v v))
@@ -338,9 +338,9 @@ true-eigenvalues
 ;; The diagonal converges to the true eigenvalues:
 
 (let [final (last qr-history)
-      computed (sort [(:eig-1 final) (:eig-2 final) (:eig-3 final)])]
-  (la/close? (t/->real-tensor computed)
-             (t/->real-tensor true-eigenvalues) 1e-4))
+      computed (el/sort (t/row [(:eig-1 final) (:eig-2 final) (:eig-3 final)]))]
+  (la/close? computed
+             true-eigenvalues 1e-4))
 
 (kind/test-last [true?])
 

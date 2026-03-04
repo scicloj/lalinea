@@ -98,7 +98,7 @@
           (let [lam (el/re ((:eigenvalues eig-result) i))
                 ev (nth (:eigenvectors eig-result) i)]
             (< (la/norm (el/- (la/mmul A-eig ev)
-                                (el/scale ev lam)))
+                              (el/scale ev lam)))
                1e-10)))
         (range 3))
 
@@ -162,8 +162,7 @@
 
 (def P-cols
   (let [evecs (:eigenvectors eig-diag)
-        sorted-idx (sort-by (fn [i] (el/re ((:eigenvalues eig-diag) i)))
-                            (range 2))]
+        sorted-idx (el/argsort (el/re (:eigenvalues eig-diag)))]
     (t/hstack (mapv #(nth evecs %) sorted-idx))))
 
 ;; The similarity transform yields a diagonal matrix:
@@ -497,8 +496,8 @@ final-eigenvalues
 (def final-svd (la/svd A-final))
 
 (< (el/reduce-max
-    (el/abs (el/- (sort (:S final-svd))
-                      final-eigenvalues)))
+    (el/abs (el/- (el/sort (:S final-svd))
+                  final-eigenvalues)))
    1e-10)
 
 (kind/test-last [true?])

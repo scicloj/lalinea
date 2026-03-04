@@ -165,7 +165,7 @@ fiedler-value
 
 (def sorted-eig-indices
   (let [vals (el/re (:eigenvalues eig))]
-    (sort-by (fn [i] (double (vals i))) (range (count (:eigenvalues eig))))))
+    (el/argsort vals)))
 
 (def fiedler-eigvec
   (nth (:eigenvectors eig) (second sorted-eig-indices)))
@@ -309,8 +309,8 @@ K5-eigenvalues
   (la/real-eigenvalues (laplacian cycle-adj)))
 
 (def cycle-theoretical
-  (sort (t/make-reader :float64 cn
-                       (- 2.0 (* 2.0 (math/cos (/ (* 2.0 math/PI idx) cn)))))))
+  (el/sort (t/->real-tensor (t/make-reader :float64 cn
+                                           (- 2.0 (* 2.0 (math/cos (/ (* 2.0 math/PI idx) cn))))))))
 
 ;; Computed eigenvalues:
 
@@ -351,8 +351,8 @@ cycle-theoretical
 path-eigenvalues
 
 (def path-theoretical
-  (sort (t/make-reader :float64 pn
-                       (- 2.0 (* 2.0 (math/cos (/ (* math/PI idx) pn)))))))
+  (el/sort (t/->real-tensor (t/make-reader :float64 pn
+                                           (- 2.0 (* 2.0 (math/cos (/ (* math/PI idx) pn))))))))
 
 path-theoretical
 
@@ -428,7 +428,7 @@ comm-eigenvalues
 
 (def sorted-comm-indices
   (let [vals (el/re (:eigenvalues comm-eig))]
-    (sort-by (fn [i] (double (vals i))) (range (count (:eigenvalues comm-eig))))))
+    (el/argsort vals)))
 
 ;; The spectral embedding — each vertex gets coordinates from
 ;; the second and third smallest eigenvectors:

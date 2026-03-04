@@ -1043,6 +1043,46 @@
 
 (kind/test-last [(fn [v] (== 1.0 v))])
 
+(kind/doc #'el/argmax)
+
+(el/argmax (t/column [3 7 2 9 1]))
+
+(kind/test-last [(fn [v] (== 3 v))])
+
+(kind/doc #'el/argmin)
+
+(el/argmin (t/column [3 7 2 9 1]))
+
+(kind/test-last [(fn [v] (== 4 v))])
+
+(kind/doc #'el/argsort)
+
+;; Ascending:
+
+(el/argsort (t/column [3 7 2 9 1]))
+
+(kind/test-last [(fn [v] (= [4 2 0 1 3] v))])
+
+;; Descending:
+
+(el/argsort > (t/column [3 7 2 9 1]))
+
+(kind/test-last [(fn [v] (= [3 1 0 2 4] v))])
+
+(kind/doc #'el/sort)
+
+;; Ascending:
+
+(el/sort (t/column [3 7 2 9 1]))
+
+(kind/test-last [(fn [v] (= [1.0 2.0 3.0 7.0 9.0] (t/flatten v)))])
+
+;; Descending:
+
+(el/sort > (t/column [3 7 2 9 1]))
+
+(kind/test-last [(fn [v] (= [9.0 7.0 3.0 2.0 1.0] (t/flatten v)))])
+
 ;; ## `scicloj.lalinea.grad`
 ;;
 ;; Reverse-mode automatic differentiation on the computation tape.

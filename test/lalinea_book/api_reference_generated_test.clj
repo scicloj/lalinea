@@ -1638,11 +1638,63 @@
 (deftest t459_l1044 (is ((fn [v] (== 1.0 v)) v458_l1042)))
 
 
-(def v461_l1050 (kind/doc #'grad/grad))
+(def v460_l1046 (kind/doc #'el/argmax))
+
+
+(def v461_l1048 (el/argmax (t/column [3 7 2 9 1])))
+
+
+(deftest t462_l1050 (is ((fn [v] (== 3 v)) v461_l1048)))
+
+
+(def v463_l1052 (kind/doc #'el/argmin))
+
+
+(def v464_l1054 (el/argmin (t/column [3 7 2 9 1])))
+
+
+(deftest t465_l1056 (is ((fn [v] (== 4 v)) v464_l1054)))
+
+
+(def v466_l1058 (kind/doc #'el/argsort))
+
+
+(def v468_l1062 (el/argsort (t/column [3 7 2 9 1])))
+
+
+(deftest t469_l1064 (is ((fn [v] (= [4 2 0 1 3] v)) v468_l1062)))
+
+
+(def v471_l1068 (el/argsort > (t/column [3 7 2 9 1])))
+
+
+(deftest t472_l1070 (is ((fn [v] (= [3 1 0 2 4] v)) v471_l1068)))
+
+
+(def v473_l1072 (kind/doc #'el/sort))
+
+
+(def v475_l1076 (el/sort (t/column [3 7 2 9 1])))
+
+
+(deftest
+ t476_l1078
+ (is ((fn [v] (= [1.0 2.0 3.0 7.0 9.0] (t/flatten v))) v475_l1076)))
+
+
+(def v478_l1082 (el/sort > (t/column [3 7 2 9 1])))
+
+
+(deftest
+ t479_l1084
+ (is ((fn [v] (= [9.0 7.0 3.0 2.0 1.0] (t/flatten v))) v478_l1082)))
+
+
+(def v481_l1090 (kind/doc #'grad/grad))
 
 
 (def
- v462_l1052
+ v482_l1092
  (let
   [A
    (t/matrix [[1 2] [3 4]])
@@ -1653,36 +1705,36 @@
    (el/scale A 2))))
 
 
-(deftest t463_l1059 (is (true? v462_l1052)))
+(deftest t483_l1099 (is (true? v482_l1092)))
 
 
-(def v465_l1065 (kind/doc #'vis/arrow-plot))
+(def v485_l1105 (kind/doc #'vis/arrow-plot))
 
 
 (def
- v466_l1067
+ v486_l1107
  (vis/arrow-plot
   [{:xy [2 1], :color "#2266cc", :label "u"}
    {:xy [-1 1.5], :color "#cc4422", :label "v"}]
   {:width 250}))
 
 
-(def v467_l1071 (kind/doc #'vis/graph-plot))
+(def v487_l1111 (kind/doc #'vis/graph-plot))
 
 
 (def
- v468_l1073
+ v488_l1113
  (vis/graph-plot
   [[0 0] [1 0] [0.5 0.87]]
   [[0 1] [1 2] [2 0]]
   {:width 250, :labels ["A" "B" "C"]}))
 
 
-(def v469_l1077 (kind/doc #'vis/matrix->gray-image))
+(def v489_l1117 (kind/doc #'vis/matrix->gray-image))
 
 
 (def
- v470_l1079
+ v490_l1119
  (let
   [m
    (t/compute-tensor
@@ -1693,16 +1745,16 @@
 
 
 (deftest
- t471_l1084
+ t491_l1124
  (is
-  ((fn [img] (= java.awt.image.BufferedImage (type img))) v470_l1079)))
+  ((fn [img] (= java.awt.image.BufferedImage (type img))) v490_l1119)))
 
 
-(def v472_l1086 (kind/doc #'vis/extract-channel))
+(def v492_l1126 (kind/doc #'vis/extract-channel))
 
 
 (def
- v473_l1088
+ v493_l1128
  (let
   [img
    (t/compute-tensor
@@ -1713,6 +1765,6 @@
 
 
 (deftest
- t474_l1094
+ t494_l1134
  (is
-  ((fn [img] (= java.awt.image.BufferedImage (type img))) v473_l1088)))
+  ((fn [img] (= java.awt.image.BufferedImage (type img))) v493_l1128)))

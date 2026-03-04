@@ -147,8 +147,7 @@
 (let [spectrum (ft/forward signal-composed)
       mags (el/abs spectrum)
       half-n (/ N-vis 2)
-      peak-idx (sort-by (fn [i] (- (double (mags i))))
-                        (range half-n))]
+      peak-idx (el/argsort > (t/select mags (range half-n)))]
   (= [3 7] (sort (take 2 peak-idx))))
 
 (kind/test-last [true?])

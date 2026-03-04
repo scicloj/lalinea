@@ -4,7 +4,7 @@
    Each function records on the tape (when active) and dispatches
    on `ct/complex?`. Functions without meaningful complex analogues
    throw on complex input."
-  (:refer-clojure :exclude [abs min max eq conj > < >= <= + - * /])
+  (:refer-clojure :exclude [abs min max eq conj sort > < >= <= + - * /])
   (:require [scicloj.lalinea.tape :as tape]
             [scicloj.lalinea.impl.real-tensor :as rt]
             [scicloj.lalinea.impl.complex-tensor :as ct]
@@ -392,6 +392,34 @@
     (if (ct/complex? a)
       (unsupported-complex! :el/argmin)
       (long (argops/argmin a)))))
+
+(defn argsort
+  "Indices that would sort the tensor in ascending order.
+   Returns a Clojure vector of longs. Real only.
+   With comparator: (argsort > a) for descending."
+  ([a] (argsort nil a))
+  ([comp a]
+   (let [a (rt/ensure-tensor a)]
+     (if (ct/complex? a)
+       (unsupported-complex! :el/argsort)
+       (vec (if comp
+              (argops/argsort comp a)
+              (argops/argsort a)))))))
+
+(defn sort
+  "Sorted copy of the tensor. Returns RealTensor. Real only.
+   With comparator: (sort > a) for descending."
+  ([a] (sort nil a))
+  ([comp a]
+   (tape/record! :el/sort [a]
+     (let [a (rt/ensure-tensor a)]
+       (if (ct/complex? a)
+         (unsupported-complex! :el/sort)
+         (let [indices (if comp
+                         (argops/argsort comp a)
+                         (argops/argsort a))]
+           (rt/->real-tensor (dtype/clone (dtype/indexed-buffer indices a)))))))))
+
 
 ;; ---------------------------------------------------------------------------
 ;; Comparison (element-wise)
