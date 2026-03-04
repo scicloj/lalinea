@@ -1551,42 +1551,42 @@
   [A
    (t/matrix [[1 2] [3 4]])
    tape-result
-   (tape/with-tape (la/trace (la/mmul (la/transpose A) A)))
-   grads
-   (grad/grad tape-result (:result tape-result))]
-  (la/close? (.get grads A) (la/scale A 2))))
+   (tape/with-tape (la/trace (la/mmul (la/transpose A) A)))]
+  (la/close?
+   (grad/grad tape-result (:result tape-result) A)
+   (la/scale A 2))))
 
 
-(deftest t431_l997 (is (true? v430_l991)))
+(deftest t431_l998 (is (true? v430_l991)))
 
 
-(def v433_l1003 (kind/doc #'vis/arrow-plot))
+(def v433_l1004 (kind/doc #'vis/arrow-plot))
 
 
 (def
- v434_l1005
+ v434_l1006
  (vis/arrow-plot
   [{:xy [2 1], :color "#2266cc", :label "u"}
    {:xy [-1 1.5], :color "#cc4422", :label "v"}]
   {:width 250}))
 
 
-(def v435_l1009 (kind/doc #'vis/graph-plot))
+(def v435_l1010 (kind/doc #'vis/graph-plot))
 
 
 (def
- v436_l1011
+ v436_l1012
  (vis/graph-plot
   [[0 0] [1 0] [0.5 0.87]]
   [[0 1] [1 2] [2 0]]
   {:width 250, :labels ["A" "B" "C"]}))
 
 
-(def v437_l1015 (kind/doc #'vis/matrix->gray-image))
+(def v437_l1016 (kind/doc #'vis/matrix->gray-image))
 
 
 (def
- v438_l1017
+ v438_l1018
  (let
   [m
    (t/compute-tensor
@@ -1597,16 +1597,16 @@
 
 
 (deftest
- t439_l1022
+ t439_l1023
  (is
-  ((fn [img] (= java.awt.image.BufferedImage (type img))) v438_l1017)))
+  ((fn [img] (= java.awt.image.BufferedImage (type img))) v438_l1018)))
 
 
-(def v440_l1024 (kind/doc #'vis/extract-channel))
+(def v440_l1025 (kind/doc #'vis/extract-channel))
 
 
 (def
- v441_l1026
+ v441_l1027
  (let
   [img
    (t/compute-tensor
@@ -1617,6 +1617,6 @@
 
 
 (deftest
- t442_l1032
+ t442_l1033
  (is
-  ((fn [img] (= java.awt.image.BufferedImage (type img))) v441_l1026)))
+  ((fn [img] (= java.awt.image.BufferedImage (type img))) v441_l1027)))

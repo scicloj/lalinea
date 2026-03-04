@@ -85,7 +85,9 @@
   [^IdentityHashMap registry ^clojure.lang.Atom counter input]
   (if-let [id (.get registry input)]
     {:id id}
-    (if (or (dtt/tensor? input) (ct/complex? input) (rt/real-tensor? input))
+    (if (or (dtt/tensor? input)
+            (ct/complex? input)
+            (rt/real-tensor? input))
       (let [id (str "x" (swap! counter inc))]
         (.put registry input id)
         {:id id :external true})
@@ -99,10 +101,11 @@
       (let [^IdentityHashMap registry (:registry tape)
             counter (:counter tape)
             id (str "t" (swap! counter inc))
-            input-refs (mapv (partial lookup-input registry counter) inputs)
             entry {:id            id
                    :op            op
-                   :inputs        input-refs
+                   :inputs        (mapv (partial lookup-input
+                                                 registry counter)
+                                        inputs)
                    :input-tensors inputs
                    :output        result
                    :shape         (if (map? result)

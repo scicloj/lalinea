@@ -990,9 +990,10 @@
 
 (let [A (t/matrix [[1 2] [3 4]])
       tape-result (tape/with-tape
-                    (la/trace (la/mmul (la/transpose A) A)))
-      grads (grad/grad tape-result (:result tape-result))]
-  (la/close? (.get grads A) (la/scale A 2)))
+                    (la/trace (la/mmul (la/transpose A) A)))]
+  (la/close? (grad/grad tape-result
+                        (:result tape-result) A)
+             (la/scale A 2)))
 
 (kind/test-last [true?])
 

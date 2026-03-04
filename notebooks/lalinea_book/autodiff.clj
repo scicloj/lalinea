@@ -90,15 +90,19 @@
 ;; The VJP with $\bar{v} = 1$ gives the gradient $[2ab, \; a^2]$.
 ;; At $a = 3, b = 2$: gradient is $[12, \; 9]$.
 ;;
-;; We can verify this with La Linea:
+;; We can verify this with La Linea. `grad/grad` takes a tape result,
+;; a target scalar, and the inputs to differentiate with respect to.
+;; For multiple inputs, pass a vector — it returns a map:
 
 (let [a (t/matrix [3.0])
       b (t/matrix [2.0])
       tape-result (tape/with-tape
                     (la/sum (la/mul (la/sq a) b)))
-      grads (grad/grad tape-result (:result tape-result))]
-  {:grad-a ((.get grads a) 0)
-   :grad-b ((.get grads b) 0)})
+      grads (grad/grad tape-result
+                       (:result tape-result)
+                       [a b])]
+  {:grad-a ((grads a) 0)
+   :grad-b ((grads b) 0)})
 
 (kind/test-last
  [(fn [{:keys [grad-a grad-b]}]
@@ -164,8 +168,8 @@
 ;;    a value used by multiple operations receives gradient contributions
 ;;    from each)
 ;;
-;; The result is an `IdentityHashMap` mapping each input tensor to
-;; its gradient.
+;; The third argument to `grad/grad` specifies which inputs to return
+;; gradients for — a single tensor or a vector of tensors.
 
 ;; ## Example: derivative of $\text{trace}(A^T A)$
 
@@ -195,14 +199,10 @@
 (kind/test-last
  [= [:la/transpose :la/mmul :la/trace]])
 
-;; Compute the gradient:
+;; Compute the gradient — pass `A` as the input of interest:
 
-(def grads (grad/grad tape-result (:result tape-result)))
-
-;; `grad/grad` returns a map from each input tensor to its gradient:
-grads
-
-(def grad-A (.get grads A))
+(def grad-A
+  (grad/grad tape-result (:result tape-result) A))
 
 grad-A
 
@@ -239,11 +239,8 @@ grad-A
 (kind/test-last
  [(fn [v] (== 8.0 v))])
 
-(def ls-grads (grad/grad ls-tape (:result ls-tape)))
-
-
-ls-grads
-(def grad-x (.get ls-grads x))
+(def grad-x
+  (grad/grad ls-tape (:result ls-tape) x))
 
 grad-x
 
@@ -277,11 +274,8 @@ expected-grad
   (tape/with-tape
     (la/sum (la/sq (la/sub (la/mmul A2 x) b)))))
 
-(def grads-A (grad/grad ls-tape-A (:result ls-tape-A)))
-
-grads-A
-
-(def grad-A2 (.get grads-A A2))
+(def grad-A2
+  (grad/grad ls-tape-A (:result ls-tape-A) A2))
 
 grad-A2
 
@@ -290,7 +284,8 @@ grad-A2
 
 (def residual (la/sub (la/mmul A2 x) b))
 
-(def expected-grad-A (la/scale (la/mmul residual (la/transpose x)) 2))
+(def expected-grad-A
+  (la/scale (la/mmul residual (la/transpose x)) 2))
 
 expected-grad-A
 
@@ -309,8 +304,8 @@ expected-grad-A
 
 (let [A (t/matrix [[2 1] [1 3]])
       tape-result (tape/with-tape (la/det A))
-      grads (grad/grad tape-result (:result tape-result))
-      grad-A (.get grads A)
+      grad-A (grad/grad tape-result
+                        (:result tape-result) A)
       expected (la/scale (la/transpose (la/invert A))
                          (la/det A))]
   (la/close? grad-A expected))
@@ -324,9 +319,10 @@ expected-grad-A
 ;; $\frac{\partial f}{\partial A} = -(A^{-T})^2$
 
 (let [A (t/matrix [[2 1] [1 3]])
-      tape-result (tape/with-tape (la/trace (la/invert A)))
-      grads (grad/grad tape-result (:result tape-result))
-      grad-A (.get grads A)
+      tape-result (tape/with-tape
+                    (la/trace (la/invert A)))
+      grad-A (grad/grad tape-result
+                        (:result tape-result) A)
       inv-t (la/transpose (la/invert A))
       expected (la/scale (la/mmul inv-t inv-t) -1.0)]
   (la/close? grad-A expected))
@@ -339,8 +335,8 @@ expected-grad-A
 
 (let [A (t/matrix [[3 0] [0 4]])
       tape-result (tape/with-tape (la/norm A))
-      grads (grad/grad tape-result (:result tape-result))
-      grad-A (.get grads A)
+      grad-A (grad/grad tape-result
+                        (:result tape-result) A)
       expected (la/scale A (/ 1.0 (la/norm A)))]
   (la/close? grad-A expected))
 

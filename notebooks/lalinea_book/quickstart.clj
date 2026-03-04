@@ -237,8 +237,7 @@
 (let [A (t/matrix [[1 2] [3 4]])
       tape-result (tape/with-tape
                     (la/sum (la/sq (la/sub (la/mmul A A)
-                                           (t/matrix [[1 0] [0 1]])))))
-      grads (grad/grad tape-result (:result tape-result))]
-  ((.get grads A) 0 0))
+                                           (t/matrix [[1 0] [0 1]])))))]
+  ((grad/grad tape-result (:result tape-result) A) 0 0))
 
 (kind/test-last [(fn [v] (number? v))])

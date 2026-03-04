@@ -3,7 +3,7 @@
 
    Provides VJP (vector-Jacobian product) rules for la/ operations
    and a `grad` function that walks the tape backwards to compute
-   gradients of a scalar output with respect to external inputs.
+   gradients of a scalar output with respect to specified inputs.
 
    Lives in a separate namespace to avoid circular dependencies:
    linalg requires tape requires complex, and grad needs both tape
@@ -101,40 +101,33 @@
       (dtype/clone (dfn/+ existing new-grad)))))
 
 ;; -----------------------------------------------------------
-;; grad
+;; Backward pass
 ;; -----------------------------------------------------------
 
-(defn grad
-  "Gradients of a scalar w.r.t. external inputs.
-
-   `tape-result` — map returned by `tape/with-tape`
-   `target`      — scalar output (must be on the tape)
-
-   Returns an IdentityHashMap from input tensors to
-   their gradients.
-
-   Example:
-   ```clojure
-   (let [A (t/matrix [[1 2] [3 4]])
-         tape-result (tape/with-tape
-                       (la/trace (la/mmul A A)))
-         grads (grad/grad tape-result
-                          (:result tape-result))]
-     (.get grads A))
-   ```"
+(defn- compute-adjoints
+  "Run the backward pass over tape entries, returning an
+   IdentityHashMap from each external input tensor to its
+   gradient (as a RealTensor)."
   [tape-result target]
   (let [^IdentityHashMap registry (:registry tape-result)
         entries  (:entries tape-result)
+        ;; idx: tape-produced ids — used later to
+        ;; distinguish external inputs from intermediates
         idx       (into {} (map (juxt :id identity))
-                        entries)
+                         entries)
         target-id (.get registry target)]
     (when (nil? target-id)
       (throw (ex-info "Target not found on tape" {})))
+    ;; Backward pass: walk the tape in reverse,
+    ;; propagating cotangents via VJP rules.
     (let [adjoints (java.util.HashMap.)]
+      ;; Seed: d(target)/d(target) = 1
       (.put adjoints target-id 1.0)
       (doseq [entry (rseq entries)]
         (let [eid (:id entry)
               g   (.get adjoints eid)]
+          ;; Only process entries that received
+          ;; a gradient from downstream.
           (when (some? g)
             (when-let [rule (get vjp-rules (:op entry))]
               (let [ins  (mapv rt/ensure-tensor
@@ -144,6 +137,9 @@
                     out  (rt/ensure-tensor
                           (:output entry))
                     igs  (rule g* ins out)]
+                ;; Distribute to each input (additive —
+                ;; a value used by multiple ops receives
+                ;; contributions from each).
                 (dotimes [i (count refs)]
                   (when-let [ig (nth igs i nil)]
                     (when-let [rid (:id (nth refs i))]
@@ -151,6 +147,8 @@
                             (add-grad
                              (.get adjoints rid)
                              ig))))))))))
+      ;; Collect: return gradients for external inputs
+      ;; only (ids starting with "x", not in the tape).
       (let [result (IdentityHashMap.)]
         (doseq [^java.util.Map$Entry me
                 (.entrySet registry)]
@@ -161,3 +159,34 @@
               (when-let [g (.get adjoints id)]
                 (.put result obj (rt/->rt g))))))
         result))))
+
+;; -----------------------------------------------------------
+;; grad
+;; -----------------------------------------------------------
+
+(defn grad
+  "Gradient of a scalar w.r.t. one or more inputs.
+
+   `tape-result` — map returned by `tape/with-tape`
+   `target`      — scalar output (must be on the tape)
+   `wrt`         — input tensor, or vector of input tensors
+
+   For a single input, returns its gradient tensor directly.
+   For a vector of inputs, returns a map `{input gradient}`.
+
+   Example:
+   ```clojure
+   (let [A (t/matrix [[1 2] [3 4]])
+         tape-result (tape/with-tape
+                       (la/trace (la/mmul A A)))]
+     (grad/grad tape-result (:result tape-result) A))
+   ```"
+  [tape-result target wrt]
+  (let [^IdentityHashMap adjoints
+        (compute-adjoints tape-result target)]
+    (if (vector? wrt)
+      (into {}
+            (map (fn [input]
+                   [input (.get adjoints input)]))
+            wrt)
+      (.get adjoints wrt))))

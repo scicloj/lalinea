@@ -262,10 +262,8 @@
    (t/matrix [[1 2] [3 4]])
    tape-result
    (tape/with-tape
-    (la/sum (la/sq (la/sub (la/mmul A A) (t/matrix [[1 0] [0 1]])))))
-   grads
-   (grad/grad tape-result (:result tape-result))]
-  ((.get grads A) 0 0)))
+    (la/sum (la/sq (la/sub (la/mmul A A) (t/matrix [[1 0] [0 1]])))))]
+  ((grad/grad tape-result (:result tape-result) A) 0 0)))
 
 
-(deftest t85_l244 (is ((fn [v] (number? v)) v84_l237)))
+(deftest t85_l243 (is ((fn [v] (number? v)) v84_l237)))
