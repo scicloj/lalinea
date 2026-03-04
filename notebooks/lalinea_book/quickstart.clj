@@ -11,7 +11,7 @@
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.elementwise :as el]
    [scicloj.lalinea.tensor :as t]
-   ;; FFT bridge — Fastmath transforms ↔ ComplexTensor:
+   ;; FFT bridge — Fastmath transforms <-> ComplexTensor:
    [scicloj.lalinea.transform :as ft]
    ;; Visualization annotations (https://scicloj.github.io/kindly-noted/):
    [scicloj.kindly.v4.kind :as kind]

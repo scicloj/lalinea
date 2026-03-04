@@ -104,7 +104,7 @@
     (and (== 999.0 A-00)
          (== 999.0 row0-0)))])
 
-;; ## Tensor ↔ DMatrixRMaj: zero-copy both ways
+;; ## Tensor <-> DMatrixRMaj: zero-copy both ways
 
 ;; `tensor->dmat` and `dmat->tensor` share the same `double[]`.
 ;; This is how La Linea achieves zero-overhead interop with EJML.

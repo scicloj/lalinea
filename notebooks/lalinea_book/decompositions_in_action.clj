@@ -17,7 +17,7 @@
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.elementwise :as el]
    [scicloj.lalinea.tensor :as t]
-   ;; Tensor ↔ BufferedImage conversion:
+   ;; Tensor <-> BufferedImage conversion:
    [tech.v3.libs.buffered-image :as bufimg]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]

@@ -17,7 +17,7 @@
    [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.tensor :as t]
    [scicloj.lalinea.elementwise :as el]
-   ;; FFT bridge — Fastmath transforms ↔ ComplexTensor:
+   ;; FFT bridge — Fastmath transforms <-> ComplexTensor:
    [scicloj.lalinea.transform :as ft]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]

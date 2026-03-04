@@ -96,8 +96,8 @@ Round-trip through `pr-str` / `read-string`.
 
 ### Zero-copy interop
 
-- dtype-next tensor ↔ EJML `DMatrixRMaj` — same `double[]`, no copy
-- ComplexTensor ↔ EJML `ZMatrixRMaj` — same interleaved `double[]`, no copy
+- dtype-next tensor <-> EJML `DMatrixRMaj` — same `double[]`, no copy
+- ComplexTensor <-> EJML `ZMatrixRMaj` — same interleaved `double[]`, no copy
 - Mutations through either view are immediately visible in the other
 - All `dfn` element-wise operations work directly on matrices (they are tensors)
 

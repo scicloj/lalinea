@@ -12,7 +12,7 @@
            [org.ejml.dense.row CommonOps_ZDRM NormOps_ZDRM MatrixFeatures_ZDRM]
            [org.ejml.dense.row.factory DecompositionFactory_DDRM DecompositionFactory_ZDRM]))
 ;; ---------------------------------------------------------------------------
-;; Zero-copy interop: dtype-next tensor ↔ DMatrixRMaj
+;; Zero-copy interop: dtype-next tensor <-> DMatrixRMaj
 ;; ---------------------------------------------------------------------------
 
 (defn tensor->dmat
