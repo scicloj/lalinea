@@ -70,12 +70,12 @@
        [z2
         (t/clone (la/add (la/mul z z) c))
         mask
-        (la/sub (t/ones h w) (elem/gt (la/abs z2) 2.0))]
+        (elem/le (la/abs z2) 2.0)]
        (recur z2 (t/clone (la/add counts mask)) (inc k)))))))))
 
 
 (def
- v10_l88
+ v10_l87
  (def
   counts->image
   (fn
@@ -110,7 +110,7 @@
 
 
 (def
- v12_l103
+ v12_l102
  (def
   mandelbrot-img
   (let
@@ -125,16 +125,16 @@
    (counts->image counts h w max-iter))))
 
 
-(def v13_l108 (bufimg/tensor->image mandelbrot-img))
+(def v13_l107 (bufimg/tensor->image mandelbrot-img))
 
 
 (deftest
- t14_l110
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v13_l108)))
+ t14_l109
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v13_l107)))
 
 
 (def
- v16_l118
+ v16_l117
  (def
   mandelbrot-zoom
   (let
@@ -149,16 +149,16 @@
    (counts->image counts h w max-iter))))
 
 
-(def v17_l123 (bufimg/tensor->image mandelbrot-zoom))
+(def v17_l122 (bufimg/tensor->image mandelbrot-zoom))
 
 
 (deftest
- t18_l125
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v17_l123)))
+ t18_l124
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v17_l122)))
 
 
 (def
- v20_l134
+ v20_l133
  (def
   julia-counts
   (fn
@@ -181,12 +181,12 @@
        [z2
         (t/clone (la/add (la/mul z z) c-grid))
         mask
-        (la/sub (t/ones h w) (elem/gt (la/abs z2) 2.0))]
+        (elem/le (la/abs z2) 2.0)]
        (recur z2 (t/clone (la/add counts mask)) (inc k)))))))))
 
 
 (def
- v22_l155
+ v22_l153
  (def
   julia-dendrite
   (let
@@ -201,16 +201,16 @@
    (counts->image counts h w max-iter))))
 
 
-(def v23_l160 (bufimg/tensor->image julia-dendrite))
+(def v23_l158 (bufimg/tensor->image julia-dendrite))
 
 
 (deftest
- t24_l162
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v23_l160)))
+ t24_l160
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v23_l158)))
 
 
 (def
- v26_l167
+ v26_l165
  (def
   julia-connected
   (let
@@ -225,16 +225,16 @@
    (counts->image counts h w max-iter))))
 
 
-(def v27_l172 (bufimg/tensor->image julia-connected))
+(def v27_l170 (bufimg/tensor->image julia-connected))
 
 
 (deftest
- t28_l174
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v27_l172)))
+ t28_l172
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v27_l170)))
 
 
 (def
- v30_l179
+ v30_l177
  (def
   julia-rabbit
   (let
@@ -249,55 +249,131 @@
    (counts->image counts h w max-iter))))
 
 
-(def v31_l184 (bufimg/tensor->image julia-rabbit))
+(def v31_l182 (bufimg/tensor->image julia-rabbit))
 
 
 (deftest
- t32_l186
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v31_l184)))
+ t32_l184
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v31_l182)))
 
 
 (def
- v34_l217
+ v34_l197
  (def
-  complex-div
+  mandelbrot-counts-imperative
   (fn
-   [a b]
+   [re-min re-max im-min im-max h w max-iter]
    (let
-    [ar
-     (t/->tensor (la/re a))
-     ai
-     (t/->tensor (la/im a))
-     br
-     (t/->tensor (la/re b))
-     bi
-     (t/->tensor (la/im b))
-     denom
-     (la/add (la/mul br br) (la/mul bi bi))]
-    (t/complex-tensor
-     (elem/div (la/add (la/mul ar br) (la/mul ai bi)) denom)
-     (elem/div (la/sub (la/mul ai br) (la/mul ar bi)) denom))))))
+    [h
+     (long h)
+     w
+     (long w)
+     max-iter
+     (long max-iter)
+     n
+     (* h w)
+     cr-grid
+     (t/clone
+      (t/compute-tensor
+       [h w]
+       (fn
+        [r c]
+        (+
+         (double re-min)
+         (*
+          (- (double re-max) (double re-min))
+          (/ (double c) (double (dec w))))))
+       :float64))
+     ci-grid
+     (t/clone
+      (t/compute-tensor
+       [h w]
+       (fn
+        [r c]
+        (+
+         (double im-min)
+         (*
+          (- (double im-max) (double im-min))
+          (/ (double r) (double (dec h))))))
+       :float64))
+     cr
+     (t/backing-array cr-grid)
+     ci
+     (t/backing-array ci-grid)
+     cnt-grid
+     (t/clone (t/zeros h w))
+     cnt
+     (t/backing-array cnt-grid)
+     zr
+     (double-array n)
+     zi
+     (double-array n)]
+    (dotimes
+     [_ max-iter]
+     (dotimes
+      [k n]
+      (let
+       [r
+        (aget zr k)
+        i
+        (aget zi k)
+        new-r
+        (+ (- (* r r) (* i i)) (aget cr k))
+        new-i
+        (+ (* 2.0 r i) (aget ci k))]
+       (aset zr k new-r)
+       (aset zi k new-i)
+       (when
+        (<= (+ (* new-r new-r) (* new-i new-i)) 4.0)
+        (aset cnt k (+ (aget cnt k) 1.0))))))
+    cnt-grid))))
 
 
 (def
- v36_l228
+ v36_l237
  (let
-  [a
-   (t/complex-tensor (t/matrix [[3]]) (t/matrix [[4]]))
-   b
-   (t/complex-tensor (t/matrix [[1]]) (t/matrix [[2]]))
-   result
-   (complex-div a b)]
-  (and
-   (< (abs (- ((la/re result) 0 0) 2.2)) 1.0E-10)
-   (< (abs (- ((la/im result) 0 0) -0.4)) 1.0E-10))))
+  [h
+   50
+   w
+   60
+   max-iter
+   30
+   f
+   (mandelbrot-counts -2.0 0.7 -1.2 1.2 h w max-iter)
+   i
+   (mandelbrot-counts-imperative -2.0 0.7 -1.2 1.2 h w max-iter)]
+  (la/close? f i 1.0E-10)))
 
 
-(deftest t37_l234 (is (true? v36_l228)))
+(deftest t37_l242 (is (true? v36_l237)))
 
 
 (def
- v39_l243
+ v39_l246
+ (def
+  mandelbrot-imperative-img
+  (let
+   [h
+    300
+    w
+    400
+    max-iter
+    50
+    counts
+    (mandelbrot-counts-imperative -2.0 0.7 -1.2 1.2 h w max-iter)]
+   (counts->image counts h w max-iter))))
+
+
+(def v40_l251 (bufimg/tensor->image mandelbrot-imperative-img))
+
+
+(deftest
+ t41_l253
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v40_l251)))
+
+
+(def
+ v43_l277
  (def
   newton-roots
   (fn
@@ -335,7 +411,7 @@
           (la/sub z3 one)
           fpz
           (la/scale z2 3.0)]
-         (recur (t/clone (la/sub z (complex-div fz fpz))) (inc k)))))
+         (recur (t/clone (la/sub z (elem/div fz fpz))) (inc k)))))
       dists
       (mapv
        (fn
@@ -370,11 +446,11 @@
          2.0)))))))))
 
 
-(def v41_l296 (def root-colors [[230 50 50] [50 180 50] [50 80 220]]))
+(def v45_l328 (def root-colors [[230 50 50] [50 180 50] [50 80 220]]))
 
 
 (def
- v42_l301
+ v46_l333
  (def
   roots->image
   (fn
@@ -390,7 +466,7 @@
 
 
 (def
- v44_l312
+ v48_l344
  (def
   newton-img
   (let
@@ -405,16 +481,16 @@
    (roots->image root-idx h w))))
 
 
-(def v45_l317 (bufimg/tensor->image newton-img))
+(def v49_l349 (bufimg/tensor->image newton-img))
 
 
 (deftest
- t46_l319
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v45_l317)))
+ t50_l351
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v49_l349)))
 
 
 (def
- v48_l327
+ v52_l358
  (def
   newton-zoom
   (let
@@ -429,9 +505,9 @@
    (roots->image root-idx h w))))
 
 
-(def v49_l332 (bufimg/tensor->image newton-zoom))
+(def v53_l363 (bufimg/tensor->image newton-zoom))
 
 
 (deftest
- t50_l334
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v49_l332)))
+ t54_l365
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v53_l363)))

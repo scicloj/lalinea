@@ -1513,40 +1513,109 @@
  (is ((fn [v] (= [5.0 5.0 6.0] (t/flatten v))) v417_l963)))
 
 
-(def v419_l967 (kind/doc #'elem/gt))
-
-
-(def v420_l969 (elem/gt (t/column [1 5 3]) (t/column [2 4 3])))
+(def v420_l969 (elem/div (t/complex 3.0 4.0) (t/complex 1.0 2.0)))
 
 
 (deftest
  t421_l971
- (is ((fn [v] (= [0.0 1.0 0.0] (t/flatten v))) v420_l969)))
+ (is
+  ((fn
+    [v]
+    (and
+     (< (abs (- (la/re v) 2.2)) 1.0E-10)
+     (< (abs (- (la/im v) -0.4)) 1.0E-10)))
+   v420_l969)))
 
 
-(def v422_l973 (kind/doc #'elem/reduce-max))
+(def v422_l974 (kind/doc #'elem/gt))
 
 
-(def v423_l975 (elem/reduce-max (t/column [3 7 2 9 1])))
+(def v423_l976 (elem/gt (t/column [1 5 3]) (t/column [2 4 3])))
 
 
-(deftest t424_l977 (is ((fn [v] (== 9.0 v)) v423_l975)))
+(deftest
+ t424_l978
+ (is ((fn [v] (= [0.0 1.0 0.0] (t/flatten v))) v423_l976)))
 
 
-(def v425_l979 (kind/doc #'elem/reduce-min))
+(def v425_l980 (kind/doc #'elem/lt))
 
 
-(def v426_l981 (elem/reduce-min (t/column [3 7 2 9 1])))
+(def v426_l982 (elem/lt (t/column [1 5 3]) (t/column [2 4 3])))
 
 
-(deftest t427_l983 (is ((fn [v] (== 1.0 v)) v426_l981)))
+(deftest
+ t427_l984
+ (is ((fn [v] (= [1.0 0.0 0.0] (t/flatten v))) v426_l982)))
 
 
-(def v429_l989 (kind/doc #'grad/grad))
+(def v428_l986 (kind/doc #'elem/ge))
+
+
+(def v429_l988 (elem/ge (t/column [1 5 3]) (t/column [2 4 3])))
+
+
+(deftest
+ t430_l990
+ (is ((fn [v] (= [0.0 1.0 1.0] (t/flatten v))) v429_l988)))
+
+
+(def v431_l992 (kind/doc #'elem/le))
+
+
+(def v432_l994 (elem/le (t/column [1 5 3]) (t/column [2 4 3])))
+
+
+(deftest
+ t433_l996
+ (is ((fn [v] (= [1.0 0.0 1.0] (t/flatten v))) v432_l994)))
+
+
+(def v434_l998 (kind/doc #'elem/eq))
+
+
+(def v435_l1000 (elem/eq (t/column [1 5 3]) (t/column [2 4 3])))
+
+
+(deftest
+ t436_l1002
+ (is ((fn [v] (= [0.0 0.0 1.0] (t/flatten v))) v435_l1000)))
+
+
+(def v437_l1004 (kind/doc #'elem/ne))
+
+
+(def v438_l1006 (elem/ne (t/column [1 5 3]) (t/column [2 4 3])))
+
+
+(deftest
+ t439_l1008
+ (is ((fn [v] (= [1.0 1.0 0.0] (t/flatten v))) v438_l1006)))
+
+
+(def v440_l1010 (kind/doc #'elem/reduce-max))
+
+
+(def v441_l1012 (elem/reduce-max (t/column [3 7 2 9 1])))
+
+
+(deftest t442_l1014 (is ((fn [v] (== 9.0 v)) v441_l1012)))
+
+
+(def v443_l1016 (kind/doc #'elem/reduce-min))
+
+
+(def v444_l1018 (elem/reduce-min (t/column [3 7 2 9 1])))
+
+
+(deftest t445_l1020 (is ((fn [v] (== 1.0 v)) v444_l1018)))
+
+
+(def v447_l1026 (kind/doc #'grad/grad))
 
 
 (def
- v430_l991
+ v448_l1028
  (let
   [A
    (t/matrix [[1 2] [3 4]])
@@ -1557,36 +1626,36 @@
    (la/scale A 2))))
 
 
-(deftest t431_l998 (is (true? v430_l991)))
+(deftest t449_l1035 (is (true? v448_l1028)))
 
 
-(def v433_l1004 (kind/doc #'vis/arrow-plot))
+(def v451_l1041 (kind/doc #'vis/arrow-plot))
 
 
 (def
- v434_l1006
+ v452_l1043
  (vis/arrow-plot
   [{:xy [2 1], :color "#2266cc", :label "u"}
    {:xy [-1 1.5], :color "#cc4422", :label "v"}]
   {:width 250}))
 
 
-(def v435_l1010 (kind/doc #'vis/graph-plot))
+(def v453_l1047 (kind/doc #'vis/graph-plot))
 
 
 (def
- v436_l1012
+ v454_l1049
  (vis/graph-plot
   [[0 0] [1 0] [0.5 0.87]]
   [[0 1] [1 2] [2 0]]
   {:width 250, :labels ["A" "B" "C"]}))
 
 
-(def v437_l1016 (kind/doc #'vis/matrix->gray-image))
+(def v455_l1053 (kind/doc #'vis/matrix->gray-image))
 
 
 (def
- v438_l1018
+ v456_l1055
  (let
   [m
    (t/compute-tensor
@@ -1597,16 +1666,16 @@
 
 
 (deftest
- t439_l1023
+ t457_l1060
  (is
-  ((fn [img] (= java.awt.image.BufferedImage (type img))) v438_l1018)))
+  ((fn [img] (= java.awt.image.BufferedImage (type img))) v456_l1055)))
 
 
-(def v440_l1025 (kind/doc #'vis/extract-channel))
+(def v458_l1062 (kind/doc #'vis/extract-channel))
 
 
 (def
- v441_l1027
+ v459_l1064
  (let
   [img
    (t/compute-tensor
@@ -1617,6 +1686,6 @@
 
 
 (deftest
- t442_l1033
+ t460_l1070
  (is
-  ((fn [img] (= java.awt.image.BufferedImage (type img))) v441_l1027)))
+  ((fn [img] (= java.awt.image.BufferedImage (type img))) v459_l1064)))
