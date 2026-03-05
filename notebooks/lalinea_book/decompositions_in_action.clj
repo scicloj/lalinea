@@ -47,15 +47,15 @@
 ;; A pattern with low-frequency structure (smooth gradients
 ;; and geometric shapes) compresses well with SVD.
 
-(def img-size 100)
+(def img-size 600)
 
 (def test-image
   (t/->real-tensor
    (t/materialize
     (t/compute-tensor [img-size img-size]
                       (fn [r c]
-                        (let [x (/ (- c 50.0) 50.0)
-                              y (/ (- r 50.0) 50.0)
+                        (let [x (/ (- c 300.0) 300.0)
+                              y (/ (- r 300.0) 300.0)
                               circle (if (< (+ (* x x) (* y y)) 0.5) 200.0 50.0)
                               gradient (* 100.0 (+ 0.5 (* 0.5 (math/sin (* 3.0 x)))))]
                           (+ (* 0.6 circle) (* 0.4 gradient))))

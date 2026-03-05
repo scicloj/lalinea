@@ -474,11 +474,11 @@ window.Quarto = {
 <h3 class="anchored" data-anchor-id="color-gradient">Color gradient</h3>
 <div class="sourceClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> gradient</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  (t/compute-tensor [<span class="dv">200</span> <span class="dv">200</span> <span class="dv">3</span>]</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  (t/compute-tensor [<span class="dv">600</span> <span class="dv">600</span> <span class="dv">3</span>]</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                    (<span class="kw">fn</span> [r c ch]</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                      (<span class="kw">case</span> (<span class="kw">int</span> ch)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                        <span class="dv">0</span> (<span class="kw">int</span> (<span class="kw">*</span> <span class="dv">255</span> (<span class="kw">/</span> r <span class="fl">200.0</span>)))   <span class="co">;; red: top-&gt;bottom</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>                        <span class="dv">1</span> (<span class="kw">int</span> (<span class="kw">*</span> <span class="dv">255</span> (<span class="kw">/</span> c <span class="fl">200.0</span>)))   <span class="co">;; green: left-&gt;right</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                        <span class="dv">0</span> (<span class="kw">int</span> (<span class="kw">*</span> <span class="dv">255</span> (<span class="kw">/</span> r <span class="fl">600.0</span>)))   <span class="co">;; red: top-&gt;bottom</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>                        <span class="dv">1</span> (<span class="kw">int</span> (<span class="kw">*</span> <span class="dv">255</span> (<span class="kw">/</span> c <span class="fl">600.0</span>)))   <span class="co">;; green: left-&gt;right</span></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>                        <span class="dv">2</span> <span class="dv">128</span>))                        <span class="co">;; blue: constant</span></span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>                    <span class="at">:uint8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -493,7 +493,7 @@ window.Quarto = {
 <h3 class="anchored" data-anchor-id="checkerboard">Checkerboard</h3>
 <div class="sourceClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> checkerboard</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [size <span class="dv">200</span> sq <span class="dv">25</span>]</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [size <span class="dv">600</span> sq <span class="dv">75</span>]</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    (t/compute-tensor [size size <span class="dv">3</span>]</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>                      (<span class="kw">fn</span> [r c _ch]</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>                        (<span class="kw">if</span> (<span class="kw">even?</span> (<span class="kw">+</span> (<span class="kw">quot</span> r sq) (<span class="kw">quot</span> c sq))) <span class="dv">240</span> <span class="dv">30</span>))</span>
@@ -510,7 +510,7 @@ window.Quarto = {
 <h3 class="anchored" data-anchor-id="circle-on-dark-background">Circle on dark background</h3>
 <div class="sourceClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> circle-img</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [size <span class="dv">200</span> cx <span class="dv">100</span> cy <span class="dv">100</span> radius <span class="dv">60</span>]</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [size <span class="dv">600</span> cx <span class="dv">300</span> cy <span class="dv">300</span> radius <span class="dv">180</span>]</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    (t/compute-tensor [size size <span class="dv">3</span>]</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>                      (<span class="kw">fn</span> [r c ch]</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>                        (<span class="kw">let</span> [dr (<span class="kw">-</span> r cy) dc (<span class="kw">-</span> c cx)</span>
@@ -550,7 +550,7 @@ window.Quarto = {
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>   (<span class="kw">int</span> (ch <span class="dv">199</span> <span class="dv">0</span>))])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">0</span> <span class="dv">253</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">0</span> <span class="dv">84</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="swap-channels" class="level3">

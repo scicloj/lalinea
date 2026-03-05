@@ -522,7 +522,7 @@ window.Quarto = {
 <h3 class="anchored" data-anchor-id="the-classic-view">The classic view</h3>
 <div class="sourceClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> mandelbrot-img</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [h <span class="dv">300</span> w <span class="dv">400</span> max-iter <span class="dv">50</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [h <span class="dv">450</span> w <span class="dv">600</span> max-iter <span class="dv">50</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        counts (mandelbrot-counts -<span class="fl">2.0</span> <span class="fl">0.7</span> -<span class="fl">1.2</span> <span class="fl">1.2</span> h w max-iter)]</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    (counts-&gt;image counts h w max-iter)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -538,7 +538,7 @@ window.Quarto = {
 <p>The Mandelbrot set has infinite detail at every scale. Here’s a zoom into the “Seahorse Valley”:</p>
 <div class="sourceClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> mandelbrot-zoom</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [h <span class="dv">300</span> w <span class="dv">400</span> max-iter <span class="dv">100</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [h <span class="dv">450</span> w <span class="dv">600</span> max-iter <span class="dv">100</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        counts (mandelbrot-counts -<span class="fl">0.77</span> -<span class="fl">0.73</span> <span class="fl">0.05</span> <span class="fl">0.08</span> h w max-iter)]</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    (counts-&gt;image counts h w max-iter)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -574,7 +574,7 @@ window.Quarto = {
 <p><span class="math inline">\(c = -0.7 + 0.27i\)</span> — a <a href="https://en.wikipedia.org/wiki/Dendrite_(mathematics)">dendrite</a> (connected, empty interior):</p>
 <div class="sourceClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> julia-dendrite</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [h <span class="dv">300</span> w <span class="dv">300</span> max-iter <span class="dv">80</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [h <span class="dv">600</span> w <span class="dv">600</span> max-iter <span class="dv">80</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>        counts (julia-counts -<span class="fl">0.7</span> <span class="fl">0.27</span> -<span class="fl">1.5</span> <span class="fl">1.5</span> -<span class="fl">1.5</span> <span class="fl">1.5</span> h w max-iter)]</span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    (counts-&gt;image counts h w max-iter)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -587,7 +587,7 @@ window.Quarto = {
 <p><span class="math inline">\(c = 0.355 + 0.355i\)</span> — a <a href="https://en.wikipedia.org/wiki/Julia_set">connected Julia set</a>:</p>
 <div class="sourceClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> julia-connected</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [h <span class="dv">300</span> w <span class="dv">300</span> max-iter <span class="dv">80</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [h <span class="dv">600</span> w <span class="dv">600</span> max-iter <span class="dv">80</span></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        counts (julia-counts <span class="fl">0.355</span> <span class="fl">0.355</span> -<span class="fl">1.5</span> <span class="fl">1.5</span> -<span class="fl">1.5</span> <span class="fl">1.5</span> h w max-iter)]</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    (counts-&gt;image counts h w max-iter)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -600,7 +600,7 @@ window.Quarto = {
 <p><span class="math inline">\(c = -0.4 + 0.6i\)</span> — a <a href="https://en.wikipedia.org/wiki/Douady_rabbit">rabbit-like</a> Julia set:</p>
 <div class="sourceClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> julia-rabbit</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [h <span class="dv">300</span> w <span class="dv">300</span> max-iter <span class="dv">80</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [h <span class="dv">600</span> w <span class="dv">600</span> max-iter <span class="dv">80</span></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>        counts (julia-counts -<span class="fl">0.4</span> <span class="fl">0.6</span> -<span class="fl">1.5</span> <span class="fl">1.5</span> -<span class="fl">1.5</span> <span class="fl">1.5</span> h w max-iter)]</span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    (counts-&gt;image counts h w max-iter)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -690,7 +690,7 @@ window.Quarto = {
 <h3 class="anchored" data-anchor-id="the-full-view">The full view</h3>
 <div class="sourceClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> newton-img</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [h <span class="dv">300</span> w <span class="dv">300</span> max-iter <span class="dv">30</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [h <span class="dv">600</span> w <span class="dv">600</span> max-iter <span class="dv">30</span></span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>        root-idx (newton-roots -<span class="fl">2.0</span> <span class="fl">2.0</span> -<span class="fl">2.0</span> <span class="fl">2.0</span> h w max-iter)]</span>
 <span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    (roots-&gt;image root-idx h w)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -706,7 +706,7 @@ window.Quarto = {
 <p>The boundary between basins has fractal detail at every scale.</p>
 <div class="sourceClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> newton-zoom</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [h <span class="dv">300</span> w <span class="dv">300</span> max-iter <span class="dv">50</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [h <span class="dv">600</span> w <span class="dv">600</span> max-iter <span class="dv">50</span></span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>        root-idx (newton-roots -<span class="fl">0.5</span> <span class="fl">0.5</span> -<span class="fl">0.5</span> <span class="fl">0.5</span> h w max-iter)]</span>
 <span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    (roots-&gt;image root-idx h w)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>

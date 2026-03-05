@@ -42,7 +42,7 @@
 
 (vis/arrow-plot [{:label "u" :xy [3 1] :color "#2266cc"}
                  {:label "v" :xy [1 2] :color "#cc4422"}]
-                {:width 300})
+                {:width 600})
 
 ;; ### Vector addition
 ;;
@@ -59,7 +59,7 @@
 (vis/arrow-plot [{:label "u" :xy [3 1] :color "#2266cc"}
                  {:label "v" :xy [1 2] :color "#cc4422" :from [3 1]}
                  {:label "u+v" :xy [4 3] :color "#228833" :dashed? true}]
-                {:width 300})
+                {:width 600})
 
 ;; ### Scalar multiplication
 ;;
@@ -74,7 +74,7 @@
 
 (vis/arrow-plot [{:label "u" :xy [3 1] :color "#2266cc"}
                  {:label "2u" :xy [6 2] :color "#8844cc"}]
-                {:width 300})
+                {:width 600})
 
 ;; Scaling by $-1$ reverses the direction:
 
@@ -86,7 +86,7 @@
 
 (vis/arrow-plot [{:label "u" :xy [3 1] :color "#2266cc"}
                  {:label "\u2212u" :xy [-3 -1] :color "#cc4422"}]
-                {:width 300})
+                {:width 600})
 
 ;; ### The vector space axioms
 ;;
@@ -308,7 +308,7 @@
 
 (vis/arrow-plot [{:label "[3,1]" :xy [3 1] :color "#2266cc"}
                  {:label "[1,2]" :xy [1 2] :color "#cc4422"}]
-                {:width 250})
+                {:width 600})
 
 ;; These point in different directions — they are independent
 ;; ($\det \neq 0$):
@@ -325,7 +325,7 @@
 
 (vis/arrow-plot [{:label "[3,1]" :xy [3 1] :color "#2266cc"}
                  {:label "[6,2]" :xy [6 2] :color "#cc4422"}]
-                {:width 250})
+                {:width 600})
 
 ;; They lie on the same line — the second adds no new direction.
 

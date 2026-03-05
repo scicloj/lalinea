@@ -223,7 +223,7 @@
 (vis/arrow-plot [{:label "e₁" :xy [1 0] :color "#999999"}
                  {:label "R then S" :xy [0 1] :color "#2266cc"}
                  {:label "S then R" :xy [0 3] :color "#cc4422"}]
-                {:width 200})
+                {:width 600})
 
 ;; The result depends on the order — just like "put on socks,
 ;; then shoes" is different from "put on shoes, then socks."

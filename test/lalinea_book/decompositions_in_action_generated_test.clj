@@ -14,7 +14,7 @@
   [clojure.test :refer [deftest is]]))
 
 
-(def v3_l50 (def img-size 100))
+(def v3_l50 (def img-size 600))
 
 
 (def
@@ -29,9 +29,9 @@
       [r c]
       (let
        [x
-        (/ (- c 50.0) 50.0)
+        (/ (- c 300.0) 300.0)
         y
-        (/ (- r 50.0) 50.0)
+        (/ (- r 300.0) 300.0)
         circle
         (if (< (+ (* x x) (* y y)) 0.5) 200.0 50.0)
         gradient

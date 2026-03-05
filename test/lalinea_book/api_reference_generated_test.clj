@@ -1679,7 +1679,7 @@
  (vis/arrow-plot
   [{:xy [2 1], :color "#2266cc", :label "u"}
    {:xy [-1 1.5], :color "#cc4422", :label "v"}]
-  {:width 250}))
+  {:width 600}))
 
 
 (def v476_l1085 (kind/doc #'vis/graph-plot))
@@ -1690,7 +1690,7 @@
  (vis/graph-plot
   [[0 0] [1 0] [0.5 0.87]]
   [[0 1] [1 2] [2 0]]
-  {:width 250, :labels ["A" "B" "C"]}))
+  {:width 600, :labels ["A" "B" "C"]}))
 
 
 (def v478_l1091 (kind/doc #'vis/matrix->gray-image))
@@ -1701,8 +1701,8 @@
  (let
   [m
    (t/compute-tensor
-    [50 50]
-    (fn [r c] (* 255.0 (/ (+ r c) 100.0)))
+    [200 200]
+    (fn [r c] (* 255.0 (/ (+ r c) 400.0)))
     :float64)]
   (bufimg/tensor->image (vis/matrix->gray-image m))))
 
@@ -1721,8 +1721,10 @@
  (let
   [img
    (t/compute-tensor
-    [50 50 3]
-    (fn [r c ch] (case (int ch) 0 (int (* 255 (/ r 50.0))) 1 128 2 64))
+    [200 200 3]
+    (fn
+     [r c ch]
+     (case (int ch) 0 (int (* 255 (/ r 200.0))) 1 128 2 64))
     :uint8)]
   (bufimg/tensor->image (vis/extract-channel img 0))))
 

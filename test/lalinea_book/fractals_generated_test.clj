@@ -114,9 +114,9 @@
   mandelbrot-img
   (let
    [h
-    300
+    450
     w
-    400
+    600
     max-iter
     50
     counts
@@ -138,9 +138,9 @@
   mandelbrot-zoom
   (let
    [h
-    300
+    450
     w
-    400
+    600
     max-iter
     100
     counts
@@ -190,9 +190,9 @@
   julia-dendrite
   (let
    [h
-    300
+    600
     w
-    300
+    600
     max-iter
     80
     counts
@@ -214,9 +214,9 @@
   julia-connected
   (let
    [h
-    300
+    600
     w
-    300
+    600
     max-iter
     80
     counts
@@ -238,9 +238,9 @@
   julia-rabbit
   (let
    [h
-    300
+    600
     w
-    300
+    600
     max-iter
     80
     counts
@@ -355,9 +355,9 @@
   newton-img
   (let
    [h
-    300
+    600
     w
-    300
+    600
     max-iter
     30
     root-idx
@@ -379,9 +379,9 @@
   newton-zoom
   (let
    [h
-    300
+    600
     w
-    300
+    600
     max-iter
     50
     root-idx

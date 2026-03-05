@@ -160,7 +160,7 @@
   [{:label "e₁", :xy [1 0], :color "#999999"}
    {:label "R then S", :xy [0 1], :color "#2266cc"}
    {:label "S then R", :xy [0 3], :color "#cc4422"}]
-  {:width 200}))
+  {:width 600}))
 
 
 (def v47_l268 (def M (t/matrix [[1 2 3] [4 5 9] [7 8 15]])))

@@ -341,7 +341,7 @@ cycle-theoretical
 
 (vis/graph-plot [[0 0] [1 0] [2 0] [3 0] [4 0] [5 0]]
                 [[0 1] [1 2] [2 3] [3 4] [4 5]]
-                {:width 350})
+                {:width 600})
 
 (def path-eigenvalues
   (la/real-eigenvalues (laplacian path-adj)))
@@ -395,7 +395,7 @@ path-theoretical
                                "#228833" "#228833" "#228833"
                                "#dd8800" "#dd8800" "#dd8800"]
                  :edge-highlight #{[2 3] [5 6]}
-                 :width 400})
+                 :width 600})
 
 (def comm-eig (la/eigen (laplacian community-adj)))
 

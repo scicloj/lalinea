@@ -18,15 +18,15 @@
  (def
   gradient
   (t/compute-tensor
-   [200 200 3]
+   [600 600 3]
    (fn
     [r c ch]
     (case
      (int ch)
      0
-     (int (* 255 (/ r 200.0)))
+     (int (* 255 (/ r 600.0)))
      1
-     (int (* 255 (/ c 200.0)))
+     (int (* 255 (/ c 600.0)))
      2
      128))
    :uint8)))
@@ -45,7 +45,7 @@
  (def
   checkerboard
   (let
-   [size 200 sq 25]
+   [size 600 sq 75]
    (t/compute-tensor
     [size size 3]
     (fn [r c _ch] (if (even? (+ (quot r sq) (quot c sq))) 240 30))
@@ -65,7 +65,7 @@
  (def
   circle-img
   (let
-   [size 200 cx 100 cy 100 radius 60]
+   [size 600 cx 300 cy 300 radius 180]
    (t/compute-tensor
     [size size 3]
     (fn

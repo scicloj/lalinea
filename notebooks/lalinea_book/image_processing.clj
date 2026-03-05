@@ -34,11 +34,11 @@
 ;; ### Color gradient
 
 (def gradient
-  (t/compute-tensor [200 200 3]
+  (t/compute-tensor [600 600 3]
                     (fn [r c ch]
                       (case (int ch)
-                        0 (int (* 255 (/ r 200.0)))   ;; red: top->bottom
-                        1 (int (* 255 (/ c 200.0)))   ;; green: left->right
+                        0 (int (* 255 (/ r 600.0)))   ;; red: top->bottom
+                        1 (int (* 255 (/ c 600.0)))   ;; green: left->right
                         2 128))                        ;; blue: constant
                     :uint8))
 
@@ -50,7 +50,7 @@
 ;; ### Checkerboard
 
 (def checkerboard
-  (let [size 200 sq 25]
+  (let [size 600 sq 75]
     (t/compute-tensor [size size 3]
                       (fn [r c _ch]
                         (if (even? (+ (quot r sq) (quot c sq))) 240 30))
@@ -64,7 +64,7 @@
 ;; ### Circle on dark background
 
 (def circle-img
-  (let [size 200 cx 100 cy 100 radius 60]
+  (let [size 600 cx 300 cy 300 radius 180]
     (t/compute-tensor [size size 3]
                       (fn [r c ch]
                         (let [dr (- r cy) dc (- c cx)

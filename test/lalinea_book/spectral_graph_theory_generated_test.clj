@@ -339,7 +339,7 @@
  (vis/graph-plot
   [[0 0] [1 0] [2 0] [3 0] [4 0] [5 0]]
   [[0 1] [1 2] [2 3] [3 4] [4 5]]
-  {:width 350}))
+  {:width 600}))
 
 
 (def
@@ -415,7 +415,7 @@
     "#dd8800"
     "#dd8800"],
    :edge-highlight #{[2 3] [5 6]},
-   :width 400}))
+   :width 600}))
 
 
 (def v85_l400 (def comm-eig (la/eigen (laplacian community-adj))))
@@ -476,8 +476,8 @@
      :community
      (mapv
       (fn*
-       [p1__67814#]
-       (cond (<= p1__67814# 2) "A" (<= p1__67814# 5) "B" :else "C"))
+       [p1__76152#]
+       (cond (<= p1__76152# 2) "A" (<= p1__76152# 5) "B" :else "C"))
       (range 9))}))))
 
 

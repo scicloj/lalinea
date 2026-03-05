@@ -22,7 +22,7 @@
  (vis/arrow-plot
   [{:label "u", :xy [3 1], :color "#2266cc"}
    {:label "v", :xy [1 2], :color "#cc4422"}]
-  {:width 300}))
+  {:width 600}))
 
 
 (def v8_l53 (el/+ u v))
@@ -39,7 +39,7 @@
   [{:label "u", :xy [3 1], :color "#2266cc"}
    {:label "v", :xy [1 2], :color "#cc4422", :from [3 1]}
    {:label "u+v", :xy [4 3], :color "#228833", :dashed? true}]
-  {:width 300}))
+  {:width 600}))
 
 
 (def v12_l69 (el/scale u 2.0))
@@ -55,7 +55,7 @@
  (vis/arrow-plot
   [{:label "u", :xy [3 1], :color "#2266cc"}
    {:label "2u", :xy [6 2], :color "#8844cc"}]
-  {:width 300}))
+  {:width 600}))
 
 
 (def v16_l81 (el/scale u -1.0))
@@ -71,7 +71,7 @@
  (vis/arrow-plot
   [{:label "u", :xy [3 1], :color "#2266cc"}
    {:label "−u", :xy [-3 -1], :color "#cc4422"}]
-  {:width 300}))
+  {:width 600}))
 
 
 (def v20_l124 (def w-ax (t/column [-1 4])))
@@ -220,7 +220,7 @@
  (vis/arrow-plot
   [{:label "[3,1]", :xy [3 1], :color "#2266cc"}
    {:label "[1,2]", :xy [1 2], :color "#cc4422"}]
-  {:width 250}))
+  {:width 600}))
 
 
 (def v58_l318 (la/det (t/matrix [[3 1] [1 2]])))
@@ -234,7 +234,7 @@
  (vis/arrow-plot
   [{:label "[3,1]", :xy [3 1], :color "#2266cc"}
    {:label "[6,2]", :xy [6 2], :color "#cc4422"}]
-  {:width 250}))
+  {:width 600}))
 
 
 (def v63_l334 (la/det (t/matrix [[3 6] [1 2]])))

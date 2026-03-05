@@ -99,7 +99,7 @@
 ;; ### The classic view
 
 (def mandelbrot-img
-  (let [h 300 w 400 max-iter 50
+  (let [h 450 w 600 max-iter 50
         counts (mandelbrot-counts -2.0 0.7 -1.2 1.2 h w max-iter)]
     (counts->image counts h w max-iter)))
 
@@ -114,7 +114,7 @@
 ;; Here's a zoom into the "Seahorse Valley":
 
 (def mandelbrot-zoom
-  (let [h 300 w 400 max-iter 100
+  (let [h 450 w 600 max-iter 100
         counts (mandelbrot-counts -0.77 -0.73 0.05 0.08 h w max-iter)]
     (counts->image counts h w max-iter)))
 
@@ -150,7 +150,7 @@
 ;; $c = -0.7 + 0.27i$ — a [dendrite](https://en.wikipedia.org/wiki/Dendrite_(mathematics)) (connected, empty interior):
 
 (def julia-dendrite
-  (let [h 300 w 300 max-iter 80
+  (let [h 600 w 600 max-iter 80
         counts (julia-counts -0.7 0.27 -1.5 1.5 -1.5 1.5 h w max-iter)]
     (counts->image counts h w max-iter)))
 
@@ -162,7 +162,7 @@
 ;; $c = 0.355 + 0.355i$ — a [connected Julia set](https://en.wikipedia.org/wiki/Julia_set):
 
 (def julia-connected
-  (let [h 300 w 300 max-iter 80
+  (let [h 600 w 600 max-iter 80
         counts (julia-counts 0.355 0.355 -1.5 1.5 -1.5 1.5 h w max-iter)]
     (counts->image counts h w max-iter)))
 
@@ -174,7 +174,7 @@
 ;; $c = -0.4 + 0.6i$ — a [rabbit-like](https://en.wikipedia.org/wiki/Douady_rabbit) Julia set:
 
 (def julia-rabbit
-  (let [h 300 w 300 max-iter 80
+  (let [h 600 w 600 max-iter 80
         counts (julia-counts -0.4 0.6 -1.5 1.5 -1.5 1.5 h w max-iter)]
     (counts->image counts h w max-iter)))
 
@@ -272,7 +272,7 @@
 ;; ### The full view
 
 (def newton-img
-  (let [h 300 w 300 max-iter 30
+  (let [h 600 w 600 max-iter 30
         root-idx (newton-roots -2.0 2.0 -2.0 2.0 h w max-iter)]
     (roots->image root-idx h w)))
 
@@ -286,7 +286,7 @@
 ;; The boundary between basins has fractal detail at every scale.
 
 (def newton-zoom
-  (let [h 300 w 300 max-iter 50
+  (let [h 600 w 600 max-iter 50
         root-idx (newton-roots -0.5 0.5 -0.5 0.5 h w max-iter)]
     (roots->image root-idx h w)))
 
