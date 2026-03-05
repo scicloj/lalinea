@@ -152,7 +152,7 @@ The [book notebooks](https://scicloj.github.io/lalinea/) also use
 
 ```bash
 clojure -M:dev -m nrepl.cmdline   # start REPL
-./run_tests.sh                     # run tests (521 tests, 521 assertions)
+./run_tests.sh                     # run tests
 clojure -T:build ci                # test + build JAR
 ```
 
