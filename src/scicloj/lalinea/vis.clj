@@ -15,9 +15,9 @@
     :dashed? — dashed stroke (optional)
 
   `opts` is a map with:
-    :width  — SVG width in pixels, default 300 (optional)"
+    :width  — SVG width in pixels, default 600 (optional)"
   [arrows opts]
-  (let [width (or (:width opts) 300)
+  (let [width (or (:width opts) 600)
         all-pts (mapcat (fn [{:keys [xy from]}]
                           (let [[fx fy] (or from [0 0])
                                 [tx ty] [(+ fx (xy 0)) (+ fy (xy 1))]]
@@ -106,7 +106,7 @@
     :node-colors    — vector of CSS colors per node (optional)
     :edge-highlight — set of [i j] pairs to highlight in red (optional)"
   [positions edges opts]
-  (let [width (or (:width opts) 300)
+  (let [width (or (:width opts) 600)
         n (count positions)
         labels (or (:labels opts) (mapv str (range n)))
         node-colors (or (:node-colors opts) (vec (repeat n "#2266cc")))
