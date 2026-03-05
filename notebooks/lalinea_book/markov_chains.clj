@@ -9,7 +9,8 @@
 ;; A [Markov chain](https://en.wikipedia.org/wiki/Markov_chain) is
 ;; a memoryless random process described by a **transition matrix**
 ;; — a matrix whose rows sum to 1. Multiplying a state vector by
-;; the transition matrix advances the chain one step. After many
+;; the transition matrix advances the chain one step. Under mild conditions
+;; ([irreducibility](https://en.wikipedia.org/wiki/Markov_chain#Reducibility) and [aperiodicity](https://en.wikipedia.org/wiki/Markov_chain#Periodicity)), after many
 ;; steps, the distribution converges to a **[stationary distribution](https://en.wikipedia.org/wiki/Stationary_distribution)**
 ;; that we can find via eigendecomposition or [power iteration](https://en.wikipedia.org/wiki/Power_iteration).
 ;;

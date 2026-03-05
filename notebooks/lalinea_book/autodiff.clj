@@ -27,7 +27,7 @@
 ;;   Simple, but noisy (rounding errors) and slow: computing the gradient
 ;;   of $f : \mathbb{R}^n \to \mathbb{R}$ requires $n$ evaluations.
 ;; - **Symbolic differentiation**: apply differentiation rules to the
-;;   expression tree. Exact, but expressions swell exponentially
+;;   expression tree. Exact, but expressions can grow exponentially
 ;;   for deep compositions.
 ;; - **[Automatic differentiation](https://en.wikipedia.org/wiki/Automatic_differentiation)**:
 ;;   decompose the computation into elementary steps and apply

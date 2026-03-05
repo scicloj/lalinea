@@ -390,6 +390,6 @@ R-thin
 ;; In practice, the manual Gram-Schmidt process we showed above
 ;; can lose orthogonality due to floating-point rounding —
 ;; especially for nearly dependent vectors. EJML's QR (via
-;; Householder reflections) is numerically stable and should
+;; [Householder reflections](https://en.wikipedia.org/wiki/Householder_transformation)) is numerically stable and should
 ;; always be preferred over hand-coded Gram-Schmidt.
 ;; The manual version here is for building intuition.

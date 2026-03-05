@@ -265,8 +265,8 @@ D-result
 ;; It says every symmetric matrix is just scaling along
 ;; orthogonal axes.
 ;;
-;; The word "spectrum" for the eigenvalues comes from this
-;; theorem — the eigenvalues are the "spectral lines" of the matrix.
+;; The word "[spectrum](https://en.wikipedia.org/wiki/Spectral_theorem#History)"
+;; was introduced by Hilbert, by analogy with optical spectra.
 ;;
 ;; Symmetry ($A = A^T$) is the matrix expression of a deeper
 ;; abstract property: the operator is **self-adjoint** with
@@ -278,7 +278,7 @@ D-result
 ;; on inner product spaces. In different settings it takes
 ;; different forms: for the integral inner product
 ;; $\langle f, g \rangle = \int f\,g\,dx$ on function spaces,
-;; the self-adjoint condition leads to **Sturm-Liouville theory**
+;; the self-adjoint condition leads to **[Sturm-Liouville theory](https://en.wikipedia.org/wiki/Sturm%E2%80%93Liouville_theory)**
 ;; — the same spectral structure (real eigenvalues, orthogonal
 ;; eigenfunctions) appears in differential equations.
 
@@ -328,7 +328,7 @@ D-result
 
 ;; ### Low-rank approximation
 ;;
-;; The **Eckart-Young theorem** says the best rank-$k$
+;; The **[Eckart-Young theorem](https://en.wikipedia.org/wiki/Low-rank_approximation#The_Eckart%E2%80%93Young%E2%80%93Mirsky_theorem)** says the best rank-$k$
 ;; approximation to $A$ (minimising the Frobenius norm of
 ;; the error) is obtained by keeping only the $k$ largest
 ;; singular values and zeroing the rest.

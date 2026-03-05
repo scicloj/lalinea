@@ -119,9 +119,7 @@ L
 ;; interesting structure lives at the **bottom** of the spectrum —
 ;; zero eigenvalues count connected components, and $\lambda_2$
 ;; measures how tightly the graph is connected. (This is the
-;; opposite of PCA and SVD, where the largest values come first —
-;; if you have not seen those yet, this will make sense when you
-;; reach those chapters.)
+;; opposite of PCA and SVD, where the largest values come first.)
 
 ;; We need both eigenvalues and eigenvectors (for the Fiedler
 ;; vector below), so we use `la/eigen`. For eigenvalues alone,
@@ -253,11 +251,11 @@ disc-eigenvalues
 
 ;; Two zero eigenvalues confirm two connected components.
 
-;; ## The complete graph
+;; ## The [complete graph](https://en.wikipedia.org/wiki/Complete_graph)
 ;;
 ;; At the other extreme, $K_n$ (the complete graph) connects every
 ;; vertex to every other. All non-zero eigenvalues of its Laplacian
-;; equal $n$.
+;; [equal $n$](https://en.wikipedia.org/wiki/Laplacian_matrix#Example).
 
 (def kn 5)
 
@@ -288,7 +286,7 @@ K5-eigenvalues
 ;; ## The [cycle graph](https://en.wikipedia.org/wiki/Cycle_graph)
 ;;
 ;; $C_n$ connects each vertex to its two neighbours in a ring.
-;; Its Laplacian eigenvalues have a known formula:
+;; Its [Laplacian eigenvalues](https://en.wikipedia.org/wiki/Laplacian_matrix#Example) have a closed-form formula:
 ;;
 ;; $$\lambda_k = 2 - 2\cos\!\left(\frac{2\pi k}{n}\right),\quad k = 0,\ldots,n-1$$
 
@@ -328,9 +326,9 @@ cycle-theoretical
 
 (kind/test-last [true?])
 
-;; ## The path graph
+;; ## The [path graph](https://en.wikipedia.org/wiki/Path_graph)
 ;;
-;; A path $P_n$ is a chain of $n$ vertices. Its Laplacian eigenvalues are:
+;; A path $P_n$ is a chain of $n$ vertices. Its [Laplacian eigenvalues](https://en.wikipedia.org/wiki/Laplacian_matrix#Example) are:
 ;;
 ;; $$\lambda_k = 2 - 2\cos\!\left(\frac{\pi k}{n}\right),\quad k = 0,\ldots,n-1$$
 
@@ -463,24 +461,27 @@ comm-eigenvalues
 
 (kind/test-last [true?])
 
-;; ## [Cheeger's inequality](https://en.wikipedia.org/wiki/Cheeger%27s_inequality)
+;; ## [Cheeger's inequality](https://en.wikipedia.org/wiki/Cheeger_constant_(graph_theory))
 ;;
 ;; Cheeger's inequality links the algebraic connectivity $\lambda_2$ to
-;; the **edge expansion** (or conductance) $h(G)$ of the graph:
+;; the **[edge expansion](https://en.wikipedia.org/wiki/Edge_expansion)** $h(G)$ of the graph.
+;; For the unnormalized Laplacian:
 ;;
-;; $$\frac{\lambda_2}{2} \leq h(G) \leq \sqrt{2 \lambda_2}$$
+;; $$\frac{\lambda_2}{2} \leq h(G) \leq \sqrt{2\, d_{\max}\, \lambda_2}$$
 ;;
-;; The conductance measures the minimum ratio of boundary
+;; where $d_{\max}$ is the maximum vertex degree.
+;; The edge expansion measures the minimum ratio of boundary
 ;; edges to the smaller side of a partition.
 ;;
 ;; For our original 6-vertex graph, the optimal cut is the single
 ;; bridge edge (2–3), dividing into equal halves of size 3.
-;; So $h(G) = 1/3$.
+;; So $h(G) = 1/3$. The maximum degree is 3.
 
 (def conductance (/ 1.0 3.0))
+(def d-max 3.0)
 
 (and (<= (/ fiedler-value 2.0) conductance)
-     (<= conductance (math/sqrt (* 2.0 fiedler-value))))
+     (<= conductance (math/sqrt (* 2.0 d-max fiedler-value))))
 
 (kind/test-last [true?])
 

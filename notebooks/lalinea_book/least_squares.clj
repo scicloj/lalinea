@@ -149,7 +149,7 @@ rms-linear
 
 (def y-poly
   (el/+ (el/+ 1.0 (el/scale x-poly -2.0))
-          (el/+ (el/* x-poly x-poly) noise-poly)))
+        (el/+ (el/* x-poly x-poly) noise-poly)))
 
 (def vandermonde
   (fn [xs degree]
@@ -305,9 +305,9 @@ S-svd
 
 (def y-trig
   (el/+ (el/+ 3.0 (el/scale (el/cos x-trig) 2.0))
-          (el/+ (el/scale (el/sin x-trig) -1.5)
-                  (el/+ (el/scale (el/cos (el/scale x-trig 2.0)) 0.5)
-                          noise-trig))))
+        (el/+ (el/scale (el/sin x-trig) -1.5)
+              (el/+ (el/scale (el/cos (el/scale x-trig 2.0)) 0.5)
+                    noise-trig))))
 
 (def A-trig
   (t/compute-matrix (count x-trig) 5
@@ -341,10 +341,10 @@ c-trig
 (let [x-fit (t/make-reader :float64 200
                            (* (/ (* 2.0 math/PI) 200.0) idx))
       y-fit (el/+ (c-trig 0 0)
-                    (el/+ (el/scale (el/cos x-fit) (c-trig 1 0))
-                            (el/+ (el/scale (el/sin x-fit) (c-trig 2 0))
-                                    (el/+ (el/scale (el/cos (el/scale x-fit 2.0)) (c-trig 3 0))
-                                            (el/scale (el/sin (el/scale x-fit 2.0)) (c-trig 4 0))))))]
+                  (el/+ (el/scale (el/cos x-fit) (c-trig 1 0))
+                        (el/+ (el/scale (el/sin x-fit) (c-trig 2 0))
+                              (el/+ (el/scale (el/cos (el/scale x-fit 2.0)) (c-trig 3 0))
+                                    (el/scale (el/sin (el/scale x-fit 2.0)) (c-trig 4 0))))))]
   (-> (tc/dataset {:x x-trig
                    :y y-trig
                    :type (repeat 40 "data")})
@@ -383,7 +383,7 @@ condition-number
 (kind/test-last
  [(fn [v] (> v 1e6))])
 
-;; Condition numbers above $10^6$ suggest the normal equations
+;; For double-precision arithmetic, condition numbers above $10^6$ suggest the normal equations
 ;; will lose accuracy — QR or SVD should be preferred.
 
 ;; ---
