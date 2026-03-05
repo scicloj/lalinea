@@ -1,9 +1,7 @@
 {:paths ["src" "resources"]
  :deps {org.clojure/clojure {:mvn/version "1.12.0"}
         cnuernber/dtype-next {:mvn/version "11.008"}
-        scicloj/tablecloth {:mvn/version "7.029.2"}
         org.scicloj/kindly {:mvn/version "4-beta23"}
-        org.scicloj/tableplot {:mvn/version "1-beta15"}
         generateme/fastmath {:mvn/version "3.0.0-alpha4"}
         org.ejml/ejml-ddense {:mvn/version "0.44.0"}
         org.ejml/ejml-zdense {:mvn/version "0.44.0"}
