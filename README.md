@@ -13,7 +13,7 @@ row-major `double[]` memory layout, enabling **zero-copy** interop.
 |Source |[![(GitHub repo)](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/scicloj/lalinea)|
 |Deps |[![Clojars Project](https://img.shields.io/clojars/v/org.scicloj/lalinea.svg)](https://clojars.org/org.scicloj/lalinea)|
 |License |[MIT](https://github.com/scicloj/lalinea/blob/main/LICENSE)|
-|Status |🛠alpha🛠|
+|Status |🛠experimental🛠|
 
 ## Design
 
@@ -23,8 +23,8 @@ Three namespaces cover most usage:
 - **`el/`** (`scicloj.lalinea.elementwise`) — element-wise math, polymorphic over the field
 - **`la/`** (`scicloj.lalinea.linalg`) — linear algebra: products, decompositions, solve
 
-All three are polymorphic — they work uniformly on both real tensors and
-ComplexTensors. Field-aware operations like `el/re`, `el/im`, `el/conj`
+All three are polymorphic — they work uniformly on both real and comples tensors.
+Field-aware operations like `el/re`, `el/im`, `el/conj`
 are identity on reals and meaningful on complex.
 
 Supporting namespaces: `tape/` (computation recording),
@@ -78,9 +78,8 @@ Round-trip through `pr-str` / `read-string`.
 
 ### Fourier transforms
 
-- Forward/inverse [FFT](https://en.wikipedia.org/wiki/Fast_Fourier_transform) bridging real signals to ComplexTensor spectra
-- Complex-to-complex FFT
-- [DCT](https://en.wikipedia.org/wiki/Discrete_cosine_transform), [DST](https://en.wikipedia.org/wiki/Discrete_sine_transform), [DHT](https://en.wikipedia.org/wiki/Discrete_Hartley_transform)
+- Forward/inverse [DFT](https://en.wikipedia.org/wiki/Discrete_Fourier_transform) bridging real signals to complex spectra, as well as complex-to-complex
+- , [DCT](https://en.wikipedia.org/wiki/Discrete_cosine_transform), [DST](https://en.wikipedia.org/wiki/Discrete_sine_transform), [DHT](https://en.wikipedia.org/wiki/Discrete_Hartley_transform)
 
 ### Computation tape
 
@@ -149,7 +148,7 @@ clojure -T:build ci                # test + build JAR
 
 ## License
 
-MIT License — see LICENSE file.
+MIT License
 
 ---
 
