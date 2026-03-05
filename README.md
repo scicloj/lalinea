@@ -18,8 +18,9 @@ The two share the same row-major `double[]` memory layout, enabling **zero-copy*
 
 ## Design
 
-La Linea embraces dtype-next as the tensor layer. Matrices are backed by
-dtype-next tensors and interoperate with the dtype-next ecosystem — Tablecloth
+La Linea embraces [dtype-next](https://github.com/cnuernber/dtype-next) as the
+tensor layer. Matrices are backed by dtype-next tensors and interoperate with the
+dtype-next ecosystem — [Tablecloth](https://scicloj.github.io/tablecloth/)/[tech.ml.dataset](https://github.com/techascent/tech.ml.dataset)
 datasets accept them as columns, and dtype-next's own `dtype/clone`, `dfn/`
 reductions, and protocol queries work directly on them. La Linea inherits
 dtype-next's **lazy, noncaching** evaluation — element-wise operations compose
