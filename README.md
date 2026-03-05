@@ -1,10 +1,11 @@
 # La Linea
 
-**[Linear algebra](https://en.wikipedia.org/wiki/Linear_algebra) with [tensor](https://en.wikipedia.org/wiki/Tensor) abstractions in [Clojure](https://clojure.org/)**
+*What if dtype-next had linear algebra and complex numbers?*
 
-La Linea is a linear algebra library where matrices are [dtype-next](https://github.com/cnuernber/dtype-next) tensors
-and [EJML](https://ejml.org/) provides the computational backend. The two share the same
-row-major `double[]` memory layout, enabling **zero-copy** interop.
+La Linea extends [dtype-next](https://github.com/cnuernber/dtype-next) — Clojure's
+high-performance tensor foundation — with linear algebra and complex numbers,
+powered by [EJML](https://ejml.org/) as the computational backend.
+The two share the same row-major `double[]` memory layout, enabling **zero-copy** interop.
 
 ## General info
 |||
@@ -17,13 +18,21 @@ row-major `double[]` memory layout, enabling **zero-copy** interop.
 
 ## Design
 
+La Linea embraces dtype-next as the tensor layer. Matrices are backed by
+dtype-next tensors and interoperate with the dtype-next ecosystem — Tablecloth
+datasets accept them as columns, and dtype-next's own `dtype/clone`, `dfn/`
+reductions, and protocol queries work directly on them. La Linea inherits
+dtype-next's **lazy, noncaching** evaluation — element-wise operations compose
+without allocating intermediate arrays. Operations that cross into EJML
+materialize at the boundary.
+
 Three namespaces cover most usage:
 
 - **`t/`** (`scicloj.lalinea.tensor`) — construct tensors in either field (real or complex)
 - **`el/`** (`scicloj.lalinea.elementwise`) — element-wise math, polymorphic over the field
 - **`la/`** (`scicloj.lalinea.linalg`) — linear algebra: products, decompositions, solve
 
-All three are polymorphic — they work uniformly on both real and comples tensors.
+All three are polymorphic — they work uniformly on both real tensors and ComplexTensors.
 Field-aware operations like `el/re`, `el/im`, `el/conj`
 are identity on reals and meaningful on complex.
 
