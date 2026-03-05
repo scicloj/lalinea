@@ -100,7 +100,7 @@
     sorted-idx
     (el/argsort (el/re (:eigenvalues eig-diag)))]
    (t/hstack
-    (mapv (fn* [p1__78397#] (nth evecs p1__78397#)) sorted-idx)))))
+    (mapv (fn* [p1__76076#] (nth evecs p1__76076#)) sorted-idx)))))
 
 
 (def
@@ -242,7 +242,7 @@
 (def
  v69_l394
  (every?
-  (fn* [p1__78398#] (>= p1__78398# -1.0E-10))
+  (fn* [p1__76077#] (>= p1__76077# -1.0E-10))
   (el/re (:eigenvalues (la/eigen ATA)))))
 
 

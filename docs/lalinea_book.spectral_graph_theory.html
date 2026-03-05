@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.24">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>21&nbsp; Spectral Graph Theory – La Linea</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./lalinea_book.algebraic_identities.html" rel="next">
+<link href="./lalinea_book.least_squares.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dc55a5b9e770e841cd82e46aadbfb9b0.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-7529eae91c9d5d7e2e31629d38ec538d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lalinea_book.linear_systems.html">Applications</a></li><li class="breadcrumb-item"><a href="./lalinea_book.spectral_graph_theory.html"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Spectral Graph Theory</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">La Linea</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Preface</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Getting Started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.quickstart.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Quickstart</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Core Concepts</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.dtype_next_background.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">dtype-next background</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.tensors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Tensors</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.complex_tensors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Complex Tensors</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.ecosystem.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Ecosystem Composability</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.fourier_transform.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Fourier Transform</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.sharing_and_mutation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Sharing and Mutation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.computation_tape.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Computation tape</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.autodiff.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Automatic Differentiation</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Abstract Linear Algebra</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.vectors_and_spaces.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Vectors and Spaces</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.maps_and_structure.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Maps and Structure</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.inner_products_and_orthogonality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Inner Products and Orthogonality</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.eigenvalues_and_decompositions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Eigenvalues and Decompositions</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Applications</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.linear_systems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Solving Linear Systems</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.markov_chains.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Markov Chains and PageRank</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.image_processing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Image Processing with Tensors</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.fractals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Fractals with Complex Tensors</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.decompositions_in_action.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Decompositions in Action</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.least_squares.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Least Squares and Curve Fitting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.spectral_graph_theory.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Spectral Graph Theory</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Validation</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.algebraic_identities.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Algebraic Identities — A Verification Suite</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Reference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.api_reference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">API Reference</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="3">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#from-graphs-to-matrices" id="toc-from-graphs-to-matrices" class="nav-link active" data-scroll-target="#from-graphs-to-matrices">From graphs to matrices</a></li>
+  <li><a href="#the-graph-laplacian" id="toc-the-graph-laplacian" class="nav-link" data-scroll-target="#the-graph-laplacian">The graph Laplacian</a></li>
+  <li><a href="#eigenvalues-of-the-laplacian" id="toc-eigenvalues-of-the-laplacian" class="nav-link" data-scroll-target="#eigenvalues-of-the-laplacian">Eigenvalues of the Laplacian</a></li>
+  <li><a href="#the-fiedler-vector" id="toc-the-fiedler-vector" class="nav-link" data-scroll-target="#the-fiedler-vector">The Fiedler vector</a></li>
+  <li><a href="#disconnected-graphs" id="toc-disconnected-graphs" class="nav-link" data-scroll-target="#disconnected-graphs">Disconnected graphs</a></li>
+  <li><a href="#the-complete-graph" id="toc-the-complete-graph" class="nav-link" data-scroll-target="#the-complete-graph">The complete graph</a></li>
+  <li><a href="#the-cycle-graph" id="toc-the-cycle-graph" class="nav-link" data-scroll-target="#the-cycle-graph">The cycle graph</a></li>
+  <li><a href="#the-path-graph" id="toc-the-path-graph" class="nav-link" data-scroll-target="#the-path-graph">The path graph</a></li>
+  <li><a href="#spectral-clustering" id="toc-spectral-clustering" class="nav-link" data-scroll-target="#spectral-clustering">Spectral clustering</a></li>
+  <li><a href="#cheegers-inequality" id="toc-cheegers-inequality" class="nav-link" data-scroll-target="#cheegers-inequality">Cheeger’s inequality</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lalinea_book.linear_systems.html">Applications</a></li><li class="breadcrumb-item"><a href="./lalinea_book.spectral_graph_theory.html"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Spectral Graph Theory</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Spectral Graph Theory</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<style></style>
+<style>.printedClojure .sourceCode {
+  background-color: transparent;
+  border-style: none;
+}
+</style>
+<style>.clay-limit-image-width .clay-image {max-width: 100%}
+.clay-side-by-side .sourceCode {margin: 0}
+.clay-side-by-side {margin: 1em 0}
+</style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" type="text/javascript"></script>
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.20.0/plotly.min.js" type="text/javascript"></script>
+<p><em>Prerequisites: <a href="https://en.wikipedia.org/wiki/Graph_(discrete_mathematics)">graphs</a> and <a href="https://en.wikipedia.org/wiki/Eigenvalues_and_eigenvectors">eigenvalues</a> (covered in the <a href="eigenvalues_and_decompositions.html">Eigenvalues and Decompositions</a> chapter).</em></p>
+<p>A graph is a set of vertices connected by edges. The <em>spectrum</em> — the eigenvalues of matrices derived from a graph — reveals structural properties: how many connected components there are, which vertices form tightly-knit clusters, and how quickly information spreads across the network.</p>
+<p>This notebook uses linear algebra to move from the <strong>adjacency matrix</strong> (which edges exist?) through the <strong>Laplacian matrix</strong> (a discrete analogue of the Laplacian operator from calculus) to <strong><a href="https://en.wikipedia.org/wiki/Spectral_clustering">spectral clustering</a></strong> (which vertices belong together?).</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">ns</span> lalinea-book.spectral-graph-theory</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  (<span class="at">:require</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>   <span class="co">;; La Linea (https://github.com/scicloj/lalinea):</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>   [scicloj.lalinea.linalg <span class="at">:as</span> la]</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>   [scicloj.lalinea.tensor <span class="at">:as</span> t]</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>   [scicloj.lalinea.elementwise <span class="at">:as</span> el]</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>   <span class="co">;; Dataset manipulation (https://scicloj.github.io/tablecloth/):</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>   [tablecloth.api <span class="at">:as</span> tc]</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>   <span class="co">;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>   [scicloj.tableplot.v1.plotly <span class="at">:as</span> plotly]</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>   <span class="co">;; Visualization annotations (https://scicloj.github.io/kindly-noted/):</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>   [scicloj.kindly.v4.kind <span class="at">:as</span> kind]</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>   <span class="co">;; Graph and arrow diagrams:</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>   [scicloj.lalinea.vis <span class="at">:as</span> vis]</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>   [clojure.math <span class="at">:as</span> math]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="from-graphs-to-matrices" class="level2">
+<h2 class="anchored" data-anchor-id="from-graphs-to-matrices">From graphs to matrices</h2>
+<p>Consider a small social network with 6 people. An edge between two people means they know each other.</p>
+<p>The <strong><a href="https://en.wikipedia.org/wiki/Adjacency_matrix">adjacency matrix</a></strong> <span class="math inline">\(A\)</span> has <span class="math inline">\(A_{ij} = 1\)</span> if vertices <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> are connected, and <span class="math inline">\(0\)</span> otherwise. For an undirected graph, <span class="math inline">\(A\)</span> is symmetric.</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> adj</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  (t/matrix [[<span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span>]</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>             [<span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span>]</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>             [<span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>]</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>             [<span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span>]</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>             [<span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span>]</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>             [<span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span>]]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The graph has two clusters: vertices {0, 1, 2} and {3, 4, 5}, connected through a single bridge edge (2–3).</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> six-pos</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  [[<span class="dv">0</span> <span class="dv">1</span>] [<span class="dv">0</span> -<span class="dv">1</span>] [<span class="fl">1.5</span> <span class="dv">0</span>] [<span class="fl">3.5</span> <span class="dv">0</span>] [<span class="dv">5</span> <span class="dv">1</span>] [<span class="dv">5</span> -<span class="dv">1</span>]])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> six-edges</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  [[<span class="dv">0</span> <span class="dv">1</span>] [<span class="dv">0</span> <span class="dv">2</span>] [<span class="dv">1</span> <span class="dv">2</span>] [<span class="dv">2</span> <span class="dv">3</span>] [<span class="dv">3</span> <span class="dv">4</span>] [<span class="dv">3</span> <span class="dv">5</span>] [<span class="dv">4</span> <span class="dv">5</span>]])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>(vis/graph-plot six-pos six-edges</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                {<span class="at">:edge-highlight</span> #{[<span class="dv">2</span> <span class="dv">3</span>]}})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<svg height="200.0" viewbox="-2.0 -3.0 9.0 6.0" width="300"><line stroke="#999" stroke-width="0.0675" x1="0" x2="0" y1="-1" y2="1"></line><line stroke="#999" stroke-width="0.0675" x1="0" x2="1.5" y1="-1" y2="0"></line><line stroke="#999" stroke-width="0.0675" x1="0" x2="1.5" y1="1" y2="0"></line><line stroke="#cc4422" stroke-width="0.135" x1="1.5" x2="3.5" y1="0" y2="0"></line><line stroke="#999" stroke-width="0.0675" x1="3.5" x2="5" y1="0" y2="-1"></line><line stroke="#999" stroke-width="0.0675" x1="3.5" x2="5" y1="0" y2="1"></line><line stroke="#999" stroke-width="0.0675" x1="5" x2="5" y1="-1" y2="1"></line><circle cx="0" cy="-1" fill="#2266cc" r="0.55" stroke="#333" stroke-width="0.045"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="0" y="-1">0</text><circle cx="0" cy="1" fill="#2266cc" r="0.55" stroke="#333" stroke-width="0.045"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="0" y="1">1</text><circle cx="1.5" cy="0" fill="#2266cc" r="0.55" stroke="#333" stroke-width="0.045"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="1.5" y="0">2</text><circle cx="3.5" cy="0" fill="#2266cc" r="0.55" stroke="#333" stroke-width="0.045"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="3.5" y="0">3</text><circle cx="5" cy="-1" fill="#2266cc" r="0.55" stroke="#333" stroke-width="0.045"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="5" y="-1">4</text><circle cx="5" cy="1" fill="#2266cc" r="0.55" stroke="#333" stroke-width="0.045"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="5" y="1">5</text></svg>
+<p>The <strong>degree</strong> of each vertex — how many neighbours it has:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(t/reduce-axis adj el/sum <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>#la/R [<span class="at">:float64</span> [<span class="dv">6</span>] [<span class="fl">2.000</span> <span class="fl">2.000</span> <span class="fl">3.000</span> <span class="fl">3.000</span> <span class="fl">2.000</span> <span class="fl">2.000</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Vertex 2 and vertex 3 have degree 3 — they serve as hubs within their respective clusters and as the bridge between them.</p>
+</section>
+<section id="the-graph-laplacian" class="level2">
+<h2 class="anchored" data-anchor-id="the-graph-laplacian">The graph Laplacian</h2>
+<p>The <strong><a href="https://en.wikipedia.org/wiki/Laplacian_matrix">Laplacian matrix</a></strong> is defined as:</p>
+<p><span class="math display">\[L = D - A\]</span></p>
+<p>where <span class="math inline">\(D\)</span> is the diagonal degree matrix. The Laplacian encodes the same connectivity as <span class="math inline">\(A\)</span>, but its eigenvalues have direct structural meaning.</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> laplacian</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">fn</span> [adj]</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    (el/- (t/diag (t/reduce-axis adj el/sum <span class="dv">1</span>)) adj)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> L </span>(laplacian adj))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>L</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>#la/R [<span class="at">:float64</span> [<span class="dv">6</span> <span class="dv">6</span>]</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>       [[ <span class="fl">2.000</span> -<span class="fl">1.000</span> -<span class="fl">1.000</span>  <span class="fl">0.000</span>  <span class="fl">0.000</span>  <span class="fl">0.000</span>]</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>        [-<span class="fl">1.000</span>  <span class="fl">2.000</span> -<span class="fl">1.000</span>  <span class="fl">0.000</span>  <span class="fl">0.000</span>  <span class="fl">0.000</span>]</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>        [-<span class="fl">1.000</span> -<span class="fl">1.000</span>  <span class="fl">3.000</span> -<span class="fl">1.000</span>  <span class="fl">0.000</span>  <span class="fl">0.000</span>]</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>        [ <span class="fl">0.000</span>  <span class="fl">0.000</span> -<span class="fl">1.000</span>  <span class="fl">3.000</span> -<span class="fl">1.000</span> -<span class="fl">1.000</span>]</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>        [ <span class="fl">0.000</span>  <span class="fl">0.000</span>  <span class="fl">0.000</span> -<span class="fl">1.000</span>  <span class="fl">2.000</span> -<span class="fl">1.000</span>]</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>        [ <span class="fl">0.000</span>  <span class="fl">0.000</span>  <span class="fl">0.000</span> -<span class="fl">1.000</span> -<span class="fl">1.000</span>  <span class="fl">2.000</span>]]]</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Key properties of <span class="math inline">\(L\)</span>:</p>
+<ul>
+<li>Symmetric and positive semi-definite</li>
+<li>Every row sums to zero</li>
+<li>Smallest eigenvalue is always <span class="math inline">\(0\)</span></li>
+<li>The number of zero eigenvalues equals the number of connected components</li>
+</ul>
+<p>Let us verify that each row sums to zero:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(el/reduce-max (el/abs (t/reduce-axis L el/sum <span class="dv">1</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fl">0.0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="eigenvalues-of-the-laplacian" class="level2">
+<h2 class="anchored" data-anchor-id="eigenvalues-of-the-laplacian">Eigenvalues of the Laplacian</h2>
+<p>The eigenvalues <span class="math inline">\(0 = \lambda_1 \leq \lambda_2 \leq \cdots \leq \lambda_n\)</span> are called the <strong>spectrum</strong> of the graph.</p>
+<p>Note the ascending order: in spectral graph theory the convention is to number eigenvalues from smallest to largest, because the interesting structure lives at the <strong>bottom</strong> of the spectrum — zero eigenvalues count connected components, and <span class="math inline">\(\lambda_2\)</span> measures how tightly the graph is connected. (This is the opposite of PCA and SVD, where the largest values come first.)</p>
+<p>We need both eigenvalues and eigenvectors (for the Fiedler vector below), so we use <code>la/eigen</code>. For eigenvalues alone, <code>la/real-eigenvalues</code> is simpler.</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> eig </span>(la/eigen L))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> eigenvalues </span>(la/real-eigenvalues (laplacian adj)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>eigenvalues</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>#la/R [<span class="at">:float64</span> [<span class="dv">6</span>] [-<span class="fl">3.886E-16</span> <span class="fl">0.4384</span> <span class="fl">3.000</span> <span class="fl">3.000</span> <span class="fl">3.000</span> <span class="fl">4.562</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The smallest eigenvalue is <span class="math inline">\(0\)</span> (confirming the graph is connected — there is exactly one zero eigenvalue).</p>
+<p>The second-smallest eigenvalue <span class="math inline">\(\lambda_2\)</span> is called the <strong><a href="https://en.wikipedia.org/wiki/Algebraic_connectivity">algebraic connectivity</a></strong> (or <strong>Fiedler value</strong>). It measures how well-connected the graph is — a larger <span class="math inline">\(\lambda_2\)</span> means the graph is harder to disconnect.</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> fiedler-value </span>(<span class="kw">second</span> eigenvalues))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>fiedler-value</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fl">0.43844718719116893</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The Fiedler value is much closer to <span class="math inline">\(0\)</span> than to <span class="math inline">\(n = 6\)</span> (the value for the <a href="https://en.wikipedia.org/wiki/Complete_graph">complete graph</a> <span class="math inline">\(K_n\)</span>), reflecting the bottleneck at the single bridge edge 2–3.</p>
+</section>
+<section id="the-fiedler-vector" class="level2">
+<h2 class="anchored" data-anchor-id="the-fiedler-vector">The <a href="https://en.wikipedia.org/wiki/Algebraic_connectivity">Fiedler vector</a></h2>
+<p>The eigenvector corresponding to <span class="math inline">\(\lambda_2\)</span> is the <strong>Fiedler vector</strong>. Its sign pattern partitions the vertices into two groups, giving a spectral bisection of the graph.</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> sorted-eig-indices</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [<span class="kw">vals</span> (el/re (<span class="at">:eigenvalues</span> eig))]</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    (el/argsort <span class="kw">vals</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> fiedler-eigvec</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">nth</span> (<span class="at">:eigenvectors</span> eig) (<span class="kw">second</span> sorted-eig-indices)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The Fiedler vector entries:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> fiedler-entries</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  (t/flatten fiedler-eigvec))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>fiedler-entries</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>#la/R [<span class="at">:float64</span> [<span class="dv">6</span>] [<span class="fl">0.4647</span> <span class="fl">0.4647</span> <span class="fl">0.2610</span> -<span class="fl">0.2610</span> -<span class="fl">0.4647</span> -<span class="fl">0.4647</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The Fiedler vector is orthogonal to the all-ones vector (zero mean):</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">&lt;</span> (abs (el/sum fiedler-entries)) <span class="fl">1e-10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="va">true</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Vertices with negative entries belong to one cluster, vertices with positive entries belong to the other.</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> cluster-assignment</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">mapv</span> (<span class="kw">fn</span> [x] (<span class="kw">if</span> (<span class="kw">neg?</span> x) <span class="at">:A</span> <span class="at">:B</span>)) fiedler-entries))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>cluster-assignment</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>[<span class="at">:B</span> <span class="at">:B</span> <span class="at">:B</span> <span class="at">:A</span> <span class="at">:A</span> <span class="at">:A</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The spectral bisection perfectly recovers the two clusters {0, 1, 2} and {3, 4, 5}. Here is the graph with vertices coloured by cluster:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>(vis/graph-plot six-pos six-edges</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>                {<span class="at">:node-colors</span> (<span class="kw">mapv</span> {<span class="at">:A</span> <span class="st">"#2266cc"</span> <span class="at">:B</span> <span class="st">"#dd8800"</span>}</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>                                    cluster-assignment)</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">:edge-highlight</span> #{[<span class="dv">2</span> <span class="dv">3</span>]}})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<svg height="200.0" viewbox="-2.0 -3.0 9.0 6.0" width="300"><line stroke="#999" stroke-width="0.0675" x1="0" x2="0" y1="-1" y2="1"></line><line stroke="#999" stroke-width="0.0675" x1="0" x2="1.5" y1="-1" y2="0"></line><line stroke="#999" stroke-width="0.0675" x1="0" x2="1.5" y1="1" y2="0"></line><line stroke="#cc4422" stroke-width="0.135" x1="1.5" x2="3.5" y1="0" y2="0"></line><line stroke="#999" stroke-width="0.0675" x1="3.5" x2="5" y1="0" y2="-1"></line><line stroke="#999" stroke-width="0.0675" x1="3.5" x2="5" y1="0" y2="1"></line><line stroke="#999" stroke-width="0.0675" x1="5" x2="5" y1="-1" y2="1"></line><circle cx="0" cy="-1" fill="#dd8800" r="0.55" stroke="#333" stroke-width="0.045"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="0" y="-1">0</text><circle cx="0" cy="1" fill="#dd8800" r="0.55" stroke="#333" stroke-width="0.045"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="0" y="1">1</text><circle cx="1.5" cy="0" fill="#dd8800" r="0.55" stroke="#333" stroke-width="0.045"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="1.5" y="0">2</text><circle cx="3.5" cy="0" fill="#2266cc" r="0.55" stroke="#333" stroke-width="0.045"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="3.5" y="0">3</text><circle cx="5" cy="-1" fill="#2266cc" r="0.55" stroke="#333" stroke-width="0.045"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="5" y="-1">4</text><circle cx="5" cy="1" fill="#2266cc" r="0.55" stroke="#333" stroke-width="0.045"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="5" y="1">5</text></svg>
+<p>Let us visualize the Fiedler vector. Each vertex’s value shows which side of the partition it falls on.</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">-&gt;</span> (tc/dataset {<span class="at">:vertex</span> (<span class="kw">range</span> <span class="dv">6</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">:fiedler-value</span> fiedler-entries</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">:cluster</span> cluster-assignment})</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    (plotly/base {:=x <span class="at">:vertex</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>                  :=y <span class="at">:fiedler-value</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>                  :=color <span class="at">:cluster</span>})</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    (plotly/layer-bar)</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    plotly/plot)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div style="height:auto;width:100%;"><script>Plotly.newPlot(document.currentScript.parentElement, [{"y":[0.4647051316572963,0.4647051316572962,0.26095647380885284],"name":":B","marker":{"color":"#1B9E77"},"type":"bar","x":[0,1,2]},{"y":[-0.260956473808852,-0.46470513165729577,-0.46470513165729577],"name":":A","marker":{"color":"#D95F02"},"type":"bar","x":[3,4,5]}], {"width":500,"height":400,"margin":{"t":25},"automargin":false,"plot_bgcolor":"rgb(235,235,235)","xaxis":{"gridcolor":"rgb(255,255,255)","title":"vertex","showgrid":true},"yaxis":{"gridcolor":"rgb(255,255,255)","title":"fiedler-value","showgrid":true}}, {});</script></div>
+</section>
+<section id="disconnected-graphs" class="level2">
+<h2 class="anchored" data-anchor-id="disconnected-graphs">Disconnected graphs</h2>
+<p>When we remove the bridge edge (2–3), the graph splits into two components. The Laplacian then has <strong>two</strong> zero eigenvalues.</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> adj-disconnected</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  (t/matrix [[<span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span>]</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>             [<span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span>]</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>             [<span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span>]</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>             [<span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span>]</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>             [<span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span>]</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>             [<span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span>]]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>(vis/graph-plot six-pos</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>                [[<span class="dv">0</span> <span class="dv">1</span>] [<span class="dv">0</span> <span class="dv">2</span>] [<span class="dv">1</span> <span class="dv">2</span>] [<span class="dv">3</span> <span class="dv">4</span>] [<span class="dv">3</span> <span class="dv">5</span>] [<span class="dv">4</span> <span class="dv">5</span>]]</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>                {<span class="at">:node-colors</span> [<span class="st">"#2266cc"</span> <span class="st">"#2266cc"</span> <span class="st">"#2266cc"</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"#dd8800"</span> <span class="st">"#dd8800"</span> <span class="st">"#dd8800"</span>]})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<svg height="200.0" viewbox="-2.0 -3.0 9.0 6.0" width="300"><line stroke="#999" stroke-width="0.0675" x1="0" x2="0" y1="-1" y2="1"></line><line stroke="#999" stroke-width="0.0675" x1="0" x2="1.5" y1="-1" y2="0"></line><line stroke="#999" stroke-width="0.0675" x1="0" x2="1.5" y1="1" y2="0"></line><line stroke="#999" stroke-width="0.0675" x1="3.5" x2="5" y1="0" y2="-1"></line><line stroke="#999" stroke-width="0.0675" x1="3.5" x2="5" y1="0" y2="1"></line><line stroke="#999" stroke-width="0.0675" x1="5" x2="5" y1="-1" y2="1"></line><circle cx="0" cy="-1" fill="#2266cc" r="0.55" stroke="#333" stroke-width="0.045"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="0" y="-1">0</text><circle cx="0" cy="1" fill="#2266cc" r="0.55" stroke="#333" stroke-width="0.045"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="0" y="1">1</text><circle cx="1.5" cy="0" fill="#2266cc" r="0.55" stroke="#333" stroke-width="0.045"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="1.5" y="0">2</text><circle cx="3.5" cy="0" fill="#dd8800" r="0.55" stroke="#333" stroke-width="0.045"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="3.5" y="0">3</text><circle cx="5" cy="-1" fill="#dd8800" r="0.55" stroke="#333" stroke-width="0.045"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="5" y="-1">4</text><circle cx="5" cy="1" fill="#dd8800" r="0.55" stroke="#333" stroke-width="0.045"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="5" y="1">5</text></svg>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> disc-eigenvalues</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  (la/real-eigenvalues (laplacian adj-disconnected)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>disc-eigenvalues</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>#la/R [<span class="at">:float64</span> [<span class="dv">6</span>] [<span class="fl">0.000</span> <span class="fl">0.000</span> <span class="fl">3.000</span> <span class="fl">3.000</span> <span class="fl">3.000</span> <span class="fl">3.000</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Two zero eigenvalues confirm two connected components.</p>
+</section>
+<section id="the-complete-graph" class="level2">
+<h2 class="anchored" data-anchor-id="the-complete-graph">The <a href="https://en.wikipedia.org/wiki/Complete_graph">complete graph</a></h2>
+<p>At the other extreme, <span class="math inline">\(K_n\)</span> (the complete graph) connects every vertex to every other. All non-zero eigenvalues of its Laplacian <a href="https://en.wikipedia.org/wiki/Laplacian_matrix#Example">equal <span class="math inline">\(n\)</span></a>.</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> kn </span><span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> K5-adj</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  (t/compute-tensor [kn kn]</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>                    (<span class="kw">fn</span> [i j] (<span class="kw">if</span> (<span class="kw">not=</span> i j) <span class="fl">1.0</span> <span class="fl">0.0</span>))</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">:float64</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>(vis/graph-plot [[<span class="fl">0.0</span> <span class="fl">1.0</span>] [-<span class="fl">0.951</span> <span class="fl">0.309</span>] [-<span class="fl">0.588</span> -<span class="fl">0.809</span>] [<span class="fl">0.588</span> -<span class="fl">0.809</span>] [<span class="fl">0.951</span> <span class="fl">0.309</span>]]</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>                [[<span class="dv">0</span> <span class="dv">1</span>] [<span class="dv">0</span> <span class="dv">2</span>] [<span class="dv">0</span> <span class="dv">3</span>] [<span class="dv">0</span> <span class="dv">4</span>] [<span class="dv">1</span> <span class="dv">2</span>] [<span class="dv">1</span> <span class="dv">3</span>] [<span class="dv">1</span> <span class="dv">4</span>] [<span class="dv">2</span> <span class="dv">3</span>] [<span class="dv">2</span> <span class="dv">4</span>] [<span class="dv">3</span> <span class="dv">4</span>]]</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>                {})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<svg height="291.85068349106206" viewbox="-1.7118 -1.7608000000000001 3.4236 3.3306000000000004" width="300"><line stroke="#999" stroke-width="0.025677" x1="0.0" x2="-0.951" y1="-1.0" y2="-0.309"></line><line stroke="#999" stroke-width="0.025677" x1="0.0" x2="-0.588" y1="-1.0" y2="0.809"></line><line stroke="#999" stroke-width="0.025677" x1="0.0" x2="0.588" y1="-1.0" y2="0.809"></line><line stroke="#999" stroke-width="0.025677" x1="0.0" x2="0.951" y1="-1.0" y2="-0.309"></line><line stroke="#999" stroke-width="0.025677" x1="-0.951" x2="-0.588" y1="-0.309" y2="0.809"></line><line stroke="#999" stroke-width="0.025677" x1="-0.951" x2="0.588" y1="-0.309" y2="0.809"></line><line stroke="#999" stroke-width="0.025677" x1="-0.951" x2="0.951" y1="-0.309" y2="-0.309"></line><line stroke="#999" stroke-width="0.025677" x1="-0.588" x2="0.588" y1="0.809" y2="0.809"></line><line stroke="#999" stroke-width="0.025677" x1="-0.588" x2="0.951" y1="0.809" y2="-0.309"></line><line stroke="#999" stroke-width="0.025677" x1="0.588" x2="0.951" y1="0.809" y2="-0.309"></line><circle cx="0.0" cy="-1.0" fill="#2266cc" r="0.25106399999999995" stroke="#333" stroke-width="0.017117999999999998"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.17574479999999995" font-weight="bold" text-anchor="middle" x="0.0" y="-1.0">0</text><circle cx="-0.951" cy="-0.309" fill="#2266cc" r="0.25106399999999995" stroke="#333" stroke-width="0.017117999999999998"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.17574479999999995" font-weight="bold" text-anchor="middle" x="-0.951" y="-0.309">1</text><circle cx="-0.588" cy="0.809" fill="#2266cc" r="0.25106399999999995" stroke="#333" stroke-width="0.017117999999999998"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.17574479999999995" font-weight="bold" text-anchor="middle" x="-0.588" y="0.809">2</text><circle cx="0.588" cy="0.809" fill="#2266cc" r="0.25106399999999995" stroke="#333" stroke-width="0.017117999999999998"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.17574479999999995" font-weight="bold" text-anchor="middle" x="0.588" y="0.809">3</text><circle cx="0.951" cy="-0.309" fill="#2266cc" r="0.25106399999999995" stroke="#333" stroke-width="0.017117999999999998"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.17574479999999995" font-weight="bold" text-anchor="middle" x="0.951" y="-0.309">4</text></svg>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> K5-eigenvalues</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  (la/real-eigenvalues (laplacian K5-adj)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>K5-eigenvalues</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>#la/R [<span class="at">:float64</span> [<span class="dv">5</span>] [<span class="fl">0.000</span> <span class="fl">5.000</span> <span class="fl">5.000</span> <span class="fl">5.000</span> <span class="fl">5.000</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Eigenvalue <span class="math inline">\(0\)</span> (multiplicity 1) and eigenvalue <span class="math inline">\(5\)</span> (multiplicity 4). The high algebraic connectivity (<span class="math inline">\(\lambda_2 = 5\)</span>) reflects maximal connectivity.</p>
+</section>
+<section id="the-cycle-graph" class="level2">
+<h2 class="anchored" data-anchor-id="the-cycle-graph">The <a href="https://en.wikipedia.org/wiki/Cycle_graph">cycle graph</a></h2>
+<p><span class="math inline">\(C_n\)</span> connects each vertex to its two neighbours in a ring. Its <a href="https://en.wikipedia.org/wiki/Laplacian_matrix#Example">Laplacian eigenvalues</a> have a closed-form formula:</p>
+<p><span class="math display">\[\lambda_k = 2 - 2\cos\!\left(\frac{2\pi k}{n}\right),\quad k = 0,\ldots,n-1\]</span></p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> cn </span><span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> cycle-adj</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  (t/compute-tensor [cn cn]</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>                    (<span class="kw">fn</span> [i j] (<span class="kw">if</span> (<span class="kw">or</span> (<span class="kw">=</span> j (<span class="kw">mod</span> (<span class="kw">inc</span> i) cn))</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>                                      (<span class="kw">=</span> j (<span class="kw">mod</span> (<span class="kw">+</span> i (<span class="kw">dec</span> cn)) cn)))</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>                                <span class="fl">1.0</span> <span class="fl">0.0</span>))</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>                    <span class="at">:float64</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>(vis/graph-plot [[<span class="fl">0.0</span> <span class="fl">1.0</span>] [-<span class="fl">0.707</span> <span class="fl">0.707</span>] [-<span class="fl">1.0</span> <span class="fl">0.0</span>] [-<span class="fl">0.707</span> -<span class="fl">0.707</span>] [-<span class="fl">0.0</span> -<span class="fl">1.0</span>] [<span class="fl">0.707</span> -<span class="fl">0.707</span>] [<span class="fl">1.0</span> -<span class="fl">0.0</span>] [<span class="fl">0.707</span> <span class="fl">0.707</span>]]</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>                [[<span class="dv">0</span> <span class="dv">1</span>] [<span class="dv">1</span> <span class="dv">2</span>] [<span class="dv">2</span> <span class="dv">3</span>] [<span class="dv">3</span> <span class="dv">4</span>] [<span class="dv">4</span> <span class="dv">5</span>] [<span class="dv">5</span> <span class="dv">6</span>] [<span class="dv">6</span> <span class="dv">7</span>] [<span class="dv">7</span> <span class="dv">0</span>]]</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>                {})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<svg height="300.0" viewbox="-1.8 -1.8 3.6 3.6" width="300"><line stroke="#999" stroke-width="0.027000000000000003" x1="0.0" x2="-0.707" y1="-1.0" y2="-0.707"></line><line stroke="#999" stroke-width="0.027000000000000003" x1="-0.707" x2="-1.0" y1="-0.707" y2="-0.0"></line><line stroke="#999" stroke-width="0.027000000000000003" x1="-1.0" x2="-0.707" y1="-0.0" y2="0.707"></line><line stroke="#999" stroke-width="0.027000000000000003" x1="-0.707" x2="-0.0" y1="0.707" y2="1.0"></line><line stroke="#999" stroke-width="0.027000000000000003" x1="-0.0" x2="0.707" y1="1.0" y2="0.707"></line><line stroke="#999" stroke-width="0.027000000000000003" x1="0.707" x2="1.0" y1="0.707" y2="0.0"></line><line stroke="#999" stroke-width="0.027000000000000003" x1="1.0" x2="0.707" y1="0.0" y2="-0.707"></line><line stroke="#999" stroke-width="0.027000000000000003" x1="0.707" x2="0.0" y1="-0.707" y2="-1.0"></line><circle cx="0.0" cy="-1.0" fill="#2266cc" r="0.165" stroke="#333" stroke-width="0.018000000000000002"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.11549999999999999" font-weight="bold" text-anchor="middle" x="0.0" y="-1.0">0</text><circle cx="-0.707" cy="-0.707" fill="#2266cc" r="0.165" stroke="#333" stroke-width="0.018000000000000002"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.11549999999999999" font-weight="bold" text-anchor="middle" x="-0.707" y="-0.707">1</text><circle cx="-1.0" cy="-0.0" fill="#2266cc" r="0.165" stroke="#333" stroke-width="0.018000000000000002"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.11549999999999999" font-weight="bold" text-anchor="middle" x="-1.0" y="-0.0">2</text><circle cx="-0.707" cy="0.707" fill="#2266cc" r="0.165" stroke="#333" stroke-width="0.018000000000000002"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.11549999999999999" font-weight="bold" text-anchor="middle" x="-0.707" y="0.707">3</text><circle cx="-0.0" cy="1.0" fill="#2266cc" r="0.165" stroke="#333" stroke-width="0.018000000000000002"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.11549999999999999" font-weight="bold" text-anchor="middle" x="-0.0" y="1.0">4</text><circle cx="0.707" cy="0.707" fill="#2266cc" r="0.165" stroke="#333" stroke-width="0.018000000000000002"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.11549999999999999" font-weight="bold" text-anchor="middle" x="0.707" y="0.707">5</text><circle cx="1.0" cy="0.0" fill="#2266cc" r="0.165" stroke="#333" stroke-width="0.018000000000000002"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.11549999999999999" font-weight="bold" text-anchor="middle" x="1.0" y="0.0">6</text><circle cx="0.707" cy="-0.707" fill="#2266cc" r="0.165" stroke="#333" stroke-width="0.018000000000000002"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.11549999999999999" font-weight="bold" text-anchor="middle" x="0.707" y="-0.707">7</text></svg>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> cycle-eigenvalues</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  (la/real-eigenvalues (laplacian cycle-adj)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> cycle-theoretical</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  (el/sort (t/-&gt;real-tensor (t/make-reader <span class="at">:float64</span> cn</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>                                           (<span class="kw">-</span> <span class="fl">2.0</span> (<span class="kw">*</span> <span class="fl">2.0</span> (math/cos (<span class="kw">/</span> (<span class="kw">*</span> <span class="fl">2.0</span> math/PI idx) cn))))))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Computed eigenvalues:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>cycle-eigenvalues</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>#la/R [<span class="at">:float64</span> [<span class="dv">8</span>] [-<span class="fl">5.551E-16</span> <span class="fl">0.5858</span> <span class="fl">0.5858</span> <span class="fl">2.000</span> <span class="fl">2.000</span> <span class="fl">3.414</span> <span class="fl">3.414</span> <span class="fl">4.000</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Theoretical eigenvalues:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb51"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>cycle-theoretical</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>#la/R [<span class="at">:float64</span> [<span class="dv">8</span>] [<span class="fl">0.000</span> <span class="fl">0.5858</span> <span class="fl">0.5858</span> <span class="fl">2.000</span> <span class="fl">2.000</span> <span class="fl">3.414</span> <span class="fl">3.414</span> <span class="fl">4.000</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>They agree to machine precision:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb53"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">&lt;</span> (el/reduce-max</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>    (el/abs (el/- cycle-eigenvalues cycle-theoretical)))</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>   <span class="fl">1e-10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb54"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="va">true</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="the-path-graph" class="level2">
+<h2 class="anchored" data-anchor-id="the-path-graph">The <a href="https://en.wikipedia.org/wiki/Path_graph">path graph</a></h2>
+<p>A path <span class="math inline">\(P_n\)</span> is a chain of <span class="math inline">\(n\)</span> vertices. Its <a href="https://en.wikipedia.org/wiki/Laplacian_matrix#Example">Laplacian eigenvalues</a> are:</p>
+<p><span class="math display">\[\lambda_k = 2 - 2\cos\!\left(\frac{\pi k}{n}\right),\quad k = 0,\ldots,n-1\]</span></p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb55"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> pn </span><span class="dv">6</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb56"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> path-adj</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>  (t/compute-tensor [pn pn]</span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>                    (<span class="kw">fn</span> [i j] (<span class="kw">if</span> (<span class="kw">=</span> <span class="dv">1</span> (abs (<span class="kw">-</span> i j))) <span class="fl">1.0</span> <span class="fl">0.0</span>))</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">:float64</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb57"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>(vis/graph-plot [[<span class="dv">0</span> <span class="dv">0</span>] [<span class="dv">1</span> <span class="dv">0</span>] [<span class="dv">2</span> <span class="dv">0</span>] [<span class="dv">3</span> <span class="dv">0</span>] [<span class="dv">4</span> <span class="dv">0</span>] [<span class="dv">5</span> <span class="dv">0</span>]]</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>                [[<span class="dv">0</span> <span class="dv">1</span>] [<span class="dv">1</span> <span class="dv">2</span>] [<span class="dv">2</span> <span class="dv">3</span>] [<span class="dv">3</span> <span class="dv">4</span>] [<span class="dv">4</span> <span class="dv">5</span>]]</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>                {<span class="at">:width</span> <span class="dv">350</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<svg height="155.55555555555554" viewbox="-2.0 -2.0 9.0 4.0" width="350"><line stroke="#999" stroke-width="0.057857142857142864" x1="0" x2="1" y1="0" y2="0"></line><line stroke="#999" stroke-width="0.057857142857142864" x1="1" x2="2" y1="0" y2="0"></line><line stroke="#999" stroke-width="0.057857142857142864" x1="2" x2="3" y1="0" y2="0"></line><line stroke="#999" stroke-width="0.057857142857142864" x1="3" x2="4" y1="0" y2="0"></line><line stroke="#999" stroke-width="0.057857142857142864" x1="4" x2="5" y1="0" y2="0"></line><circle cx="0" cy="0" fill="#2266cc" r="0.55" stroke="#333" stroke-width="0.038571428571428576"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="0" y="0">0</text><circle cx="1" cy="0" fill="#2266cc" r="0.55" stroke="#333" stroke-width="0.038571428571428576"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="1" y="0">1</text><circle cx="2" cy="0" fill="#2266cc" r="0.55" stroke="#333" stroke-width="0.038571428571428576"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="2" y="0">2</text><circle cx="3" cy="0" fill="#2266cc" r="0.55" stroke="#333" stroke-width="0.038571428571428576"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="3" y="0">3</text><circle cx="4" cy="0" fill="#2266cc" r="0.55" stroke="#333" stroke-width="0.038571428571428576"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="4" y="0">4</text><circle cx="5" cy="0" fill="#2266cc" r="0.55" stroke="#333" stroke-width="0.038571428571428576"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.385" font-weight="bold" text-anchor="middle" x="5" y="0">5</text></svg>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb58"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> path-eigenvalues</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>  (la/real-eigenvalues (laplacian path-adj)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb59"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>path-eigenvalues</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb60"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>#la/R [<span class="at">:float64</span> [<span class="dv">6</span>] [<span class="fl">2.776E-16</span> <span class="fl">0.2679</span> <span class="fl">1.000</span> <span class="fl">2.000</span> <span class="fl">3.000</span> <span class="fl">3.732</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb61"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> path-theoretical</span></span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>  (el/sort (t/-&gt;real-tensor (t/make-reader <span class="at">:float64</span> pn</span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>                                           (<span class="kw">-</span> <span class="fl">2.0</span> (<span class="kw">*</span> <span class="fl">2.0</span> (math/cos (<span class="kw">/</span> (<span class="kw">*</span> math/PI idx) pn))))))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb62"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>path-theoretical</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb63"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>#la/R [<span class="at">:float64</span> [<span class="dv">6</span>] [<span class="fl">0.000</span> <span class="fl">0.2679</span> <span class="fl">1.000</span> <span class="fl">2.000</span> <span class="fl">3.000</span> <span class="fl">3.732</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb64"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">&lt;</span> (el/reduce-max</span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>    (el/abs (el/- path-eigenvalues path-theoretical)))</span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>   <span class="fl">1e-10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb65"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="va">true</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="spectral-clustering" class="level2">
+<h2 class="anchored" data-anchor-id="spectral-clustering"><a href="https://en.wikipedia.org/wiki/Spectral_clustering">Spectral clustering</a></h2>
+<p>The Fiedler vector gives a 2-way partition. For <span class="math inline">\(k\)</span>-way clustering, we use the first <span class="math inline">\(k\)</span> eigenvectors. Each vertex becomes a point in <span class="math inline">\(\mathbb{R}^k\)</span>, and we cluster these points.</p>
+<p>Consider a graph with three clear communities:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb66"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> community-adj</span></span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>  (t/matrix</span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>   [<span class="co">;; Community 1: vertices 0-2</span></span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span>]</span>
+<span id="cb66-5"><a href="#cb66-5" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span>]</span>
+<span id="cb66-6"><a href="#cb66-6" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span>]</span>
+<span id="cb66-7"><a href="#cb66-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">;; Community 2: vertices 3-5</span></span>
+<span id="cb66-8"><a href="#cb66-8" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span>]</span>
+<span id="cb66-9"><a href="#cb66-9" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span>]</span>
+<span id="cb66-10"><a href="#cb66-10" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>]</span>
+<span id="cb66-11"><a href="#cb66-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">;; Community 3: vertices 6-8</span></span>
+<span id="cb66-12"><a href="#cb66-12" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span>]</span>
+<span id="cb66-13"><a href="#cb66-13" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span>]</span>
+<span id="cb66-14"><a href="#cb66-14" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span>]]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb67"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>(vis/graph-plot [[<span class="dv">0</span> <span class="fl">0.8</span>] [<span class="dv">0</span> -<span class="fl">0.8</span>] [<span class="fl">1.5</span> <span class="dv">0</span>]</span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>                 [<span class="fl">3.5</span> <span class="dv">0</span>] [<span class="dv">5</span> <span class="fl">0.8</span>] [<span class="dv">5</span> -<span class="fl">0.8</span>]</span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>                 [<span class="fl">6.5</span> <span class="dv">0</span>] [<span class="dv">8</span> <span class="fl">0.8</span>] [<span class="dv">8</span> -<span class="fl">0.8</span>]]</span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a>                [[<span class="dv">0</span> <span class="dv">1</span>] [<span class="dv">0</span> <span class="dv">2</span>] [<span class="dv">1</span> <span class="dv">2</span>]</span>
+<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a>                 [<span class="dv">2</span> <span class="dv">3</span>]</span>
+<span id="cb67-6"><a href="#cb67-6" aria-hidden="true" tabindex="-1"></a>                 [<span class="dv">3</span> <span class="dv">4</span>] [<span class="dv">3</span> <span class="dv">5</span>] [<span class="dv">4</span> <span class="dv">5</span>]</span>
+<span id="cb67-7"><a href="#cb67-7" aria-hidden="true" tabindex="-1"></a>                 [<span class="dv">5</span> <span class="dv">6</span>]</span>
+<span id="cb67-8"><a href="#cb67-8" aria-hidden="true" tabindex="-1"></a>                 [<span class="dv">6</span> <span class="dv">7</span>] [<span class="dv">6</span> <span class="dv">8</span>] [<span class="dv">7</span> <span class="dv">8</span>]]</span>
+<span id="cb67-9"><a href="#cb67-9" aria-hidden="true" tabindex="-1"></a>                {<span class="at">:node-colors</span> [<span class="st">"#2266cc"</span> <span class="st">"#2266cc"</span> <span class="st">"#2266cc"</span></span>
+<span id="cb67-10"><a href="#cb67-10" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"#228833"</span> <span class="st">"#228833"</span> <span class="st">"#228833"</span></span>
+<span id="cb67-11"><a href="#cb67-11" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"#dd8800"</span> <span class="st">"#dd8800"</span> <span class="st">"#dd8800"</span>]</span>
+<span id="cb67-12"><a href="#cb67-12" aria-hidden="true" tabindex="-1"></a>                 <span class="at">:edge-highlight</span> #{[<span class="dv">2</span> <span class="dv">3</span>] [<span class="dv">5</span> <span class="dv">6</span>]}</span>
+<span id="cb67-13"><a href="#cb67-13" aria-hidden="true" tabindex="-1"></a>                 <span class="at">:width</span> <span class="dv">400</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<svg height="222.22222222222223" viewbox="-3.2 -4.0 14.4 8.0" width="400"><line stroke="#999" stroke-width="0.081" x1="0" x2="0" y1="-0.8" y2="0.8"></line><line stroke="#999" stroke-width="0.081" x1="0" x2="1.5" y1="-0.8" y2="0"></line><line stroke="#999" stroke-width="0.081" x1="0" x2="1.5" y1="0.8" y2="0"></line><line stroke="#cc4422" stroke-width="0.162" x1="1.5" x2="3.5" y1="0" y2="0"></line><line stroke="#999" stroke-width="0.081" x1="3.5" x2="5" y1="0" y2="-0.8"></line><line stroke="#999" stroke-width="0.081" x1="3.5" x2="5" y1="0" y2="0.8"></line><line stroke="#999" stroke-width="0.081" x1="5" x2="5" y1="-0.8" y2="0.8"></line><line stroke="#cc4422" stroke-width="0.162" x1="5" x2="6.5" y1="0.8" y2="0"></line><line stroke="#999" stroke-width="0.081" x1="6.5" x2="8" y1="0" y2="-0.8"></line><line stroke="#999" stroke-width="0.081" x1="6.5" x2="8" y1="0" y2="0.8"></line><line stroke="#999" stroke-width="0.081" x1="8" x2="8" y1="-0.8" y2="0.8"></line><circle cx="0" cy="-0.8" fill="#2266cc" r="0.5866666666666667" stroke="#333" stroke-width="0.054"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.4106666666666666" font-weight="bold" text-anchor="middle" x="0" y="-0.8">0</text><circle cx="0" cy="0.8" fill="#2266cc" r="0.5866666666666667" stroke="#333" stroke-width="0.054"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.4106666666666666" font-weight="bold" text-anchor="middle" x="0" y="0.8">1</text><circle cx="1.5" cy="0" fill="#2266cc" r="0.5866666666666667" stroke="#333" stroke-width="0.054"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.4106666666666666" font-weight="bold" text-anchor="middle" x="1.5" y="0">2</text><circle cx="3.5" cy="0" fill="#228833" r="0.5866666666666667" stroke="#333" stroke-width="0.054"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.4106666666666666" font-weight="bold" text-anchor="middle" x="3.5" y="0">3</text><circle cx="5" cy="-0.8" fill="#228833" r="0.5866666666666667" stroke="#333" stroke-width="0.054"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.4106666666666666" font-weight="bold" text-anchor="middle" x="5" y="-0.8">4</text><circle cx="5" cy="0.8" fill="#228833" r="0.5866666666666667" stroke="#333" stroke-width="0.054"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.4106666666666666" font-weight="bold" text-anchor="middle" x="5" y="0.8">5</text><circle cx="6.5" cy="0" fill="#dd8800" r="0.5866666666666667" stroke="#333" stroke-width="0.054"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.4106666666666666" font-weight="bold" text-anchor="middle" x="6.5" y="0">6</text><circle cx="8" cy="-0.8" fill="#dd8800" r="0.5866666666666667" stroke="#333" stroke-width="0.054"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.4106666666666666" font-weight="bold" text-anchor="middle" x="8" y="-0.8">7</text><circle cx="8" cy="0.8" fill="#dd8800" r="0.5866666666666667" stroke="#333" stroke-width="0.054"></circle><text dominant-baseline="central" fill="white" font-family="sans-serif" font-size="0.4106666666666666" font-weight="bold" text-anchor="middle" x="8" y="0.8">8</text></svg>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb68"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> comm-eig </span>(la/eigen (laplacian community-adj)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The eigenvalues sorted ascending:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb69"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> comm-eigenvalues </span>(la/real-eigenvalues (laplacian community-adj)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb70"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>comm-eigenvalues</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb71"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>#la/R [<span class="at">:float64</span> [<span class="dv">9</span>] [-<span class="fl">2.220E-16</span> <span class="fl">0.2087</span> <span class="fl">0.6972</span> <span class="fl">3.000</span> <span class="fl">3.000</span> <span class="fl">3.000</span> <span class="fl">3.000</span> <span class="fl">4.303</span> <span class="fl">4.791</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb72"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">-&gt;</span> (tc/dataset {<span class="at">:index</span> (<span class="kw">range</span> (<span class="kw">count</span> comm-eigenvalues))</span>
+<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">:eigenvalue</span> comm-eigenvalues})</span>
+<span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a>    (plotly/base {:=x <span class="at">:index</span> :=y <span class="at">:eigenvalue</span>})</span>
+<span id="cb72-4"><a href="#cb72-4" aria-hidden="true" tabindex="-1"></a>    (plotly/layer-bar)</span>
+<span id="cb72-5"><a href="#cb72-5" aria-hidden="true" tabindex="-1"></a>    plotly/plot)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div style="height:auto;width:100%;"><script>Plotly.newPlot(document.currentScript.parentElement, [{"y":[-2.220446049250313E-16,0.20871215252207964,0.6972243622680054,2.9999999999999996,2.9999999999999996,3.0,3.0000000000000004,4.3027756377319974,4.791287847477921],"name":"","type":"bar","x":[0,1,2,3,4,5,6,7,8]}], {"width":500,"height":400,"margin":{"t":25},"automargin":false,"plot_bgcolor":"rgb(235,235,235)","xaxis":{"gridcolor":"rgb(255,255,255)","title":"index","showgrid":true},"yaxis":{"gridcolor":"rgb(255,255,255)","title":"eigenvalue","showgrid":true}}, {});</script></div>
+<p>The three smallest eigenvalues are small, then a jump to the fourth. This <strong>spectral gap</strong> signals three communities.</p>
+<p>To cluster, we use the eigenvectors corresponding to the three smallest eigenvalues:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb73"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> sorted-comm-indices</span></span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [<span class="kw">vals</span> (el/re (<span class="at">:eigenvalues</span> comm-eig))]</span>
+<span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a>    (el/argsort <span class="kw">vals</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The spectral embedding — each vertex gets coordinates from the second and third smallest eigenvectors:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb74"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> embed-data</span></span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [ev2 (<span class="kw">nth</span> (<span class="at">:eigenvectors</span> comm-eig) (<span class="kw">nth</span> sorted-comm-indices <span class="dv">1</span>))</span>
+<span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a>        ev3 (<span class="kw">nth</span> (<span class="at">:eigenvectors</span> comm-eig) (<span class="kw">nth</span> sorted-comm-indices <span class="dv">2</span>))]</span>
+<span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a>    (tc/dataset {<span class="at">:vertex</span> (<span class="kw">range</span> <span class="dv">9</span>)</span>
+<span id="cb74-5"><a href="#cb74-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">:x</span> (t/-&gt;reader ev2)</span>
+<span id="cb74-6"><a href="#cb74-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">:y</span> (t/-&gt;reader ev3)</span>
+<span id="cb74-7"><a href="#cb74-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">:community</span> (<span class="kw">mapv</span> #(<span class="kw">cond</span> (<span class="kw">&lt;=</span> <span class="va">%</span> <span class="dv">2</span>) <span class="st">"A"</span></span>
+<span id="cb74-8"><a href="#cb74-8" aria-hidden="true" tabindex="-1"></a>                                         (<span class="kw">&lt;=</span> <span class="va">%</span> <span class="dv">5</span>) <span class="st">"B"</span></span>
+<span id="cb74-9"><a href="#cb74-9" aria-hidden="true" tabindex="-1"></a>                                         <span class="at">:else</span> <span class="st">"C"</span>)</span>
+<span id="cb74-10"><a href="#cb74-10" aria-hidden="true" tabindex="-1"></a>                                  (<span class="kw">range</span> <span class="dv">9</span>))})))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb75"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">-&gt;</span> embed-data</span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>    (plotly/base {:=x <span class="at">:x</span> :=y <span class="at">:y</span> :=color <span class="at">:community</span>})</span>
+<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a>    (plotly/layer-point {:=mark-size <span class="dv">14</span>})</span>
+<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a>    plotly/plot)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div style="height:auto;width:100%;"><script>Plotly.newPlot(document.currentScript.parentElement, [{"y":[0.29389153292264786,0.2938915329226476,0.08898319630468832],"name":"A","marker":{"color":"#1B9E77","size":14},"mode":"markers","type":"scatter","x":[-0.43276686113240803,-0.4327668611324079,-0.34244315800523906]},{"y":[-0.3828747292273361,-0.5877830658452957,-0.3828747292273363],"name":"B","marker":{"color":"#D95F02","size":14},"mode":"markers","type":"scatter","x":[-0.09032370312716904,-2.9465229979037347E-16,0.09032370312716875]},{"y":[0.0889831963046881,0.29389153292264775,0.29389153292264775],"name":"C","marker":{"color":"#7570B3","size":14},"mode":"markers","type":"scatter","x":[0.3424431580052389,0.4327668611324079,0.4327668611324079]}], {"width":500,"height":400,"margin":{"t":25},"automargin":false,"plot_bgcolor":"rgb(235,235,235)","xaxis":{"gridcolor":"rgb(255,255,255)","title":"x","showgrid":true},"yaxis":{"gridcolor":"rgb(255,255,255)","title":"y","showgrid":true}}, {});</script></div>
+<p>Vertices within the same community cluster tightly in spectral space — closer to each other than to vertices in other communities:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb76"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">let</span> [xs (<span class="at">:x</span> embed-data)</span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>      ys (<span class="at">:y</span> embed-data)</span>
+<span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a>      dist (<span class="kw">fn</span> [i j] (math/sqrt (<span class="kw">+</span> (<span class="kw">let</span> [d (<span class="kw">-</span> (xs i) (xs j))] (<span class="kw">*</span> d d))</span>
+<span id="cb76-4"><a href="#cb76-4" aria-hidden="true" tabindex="-1"></a>                                   (<span class="kw">let</span> [d (<span class="kw">-</span> (ys i) (ys j))] (<span class="kw">*</span> d d)))))</span>
+<span id="cb76-5"><a href="#cb76-5" aria-hidden="true" tabindex="-1"></a>      within-A (dist <span class="dv">0</span> <span class="dv">1</span>)</span>
+<span id="cb76-6"><a href="#cb76-6" aria-hidden="true" tabindex="-1"></a>      across-AB (<span class="kw">apply</span> <span class="kw">min</span> (<span class="kw">for</span> [a [<span class="dv">0</span> <span class="dv">1</span> <span class="dv">2</span>] b [<span class="dv">3</span> <span class="dv">4</span> <span class="dv">5</span>]] (dist a b)))]</span>
+<span id="cb76-7"><a href="#cb76-7" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">&lt;</span> within-A across-AB))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb77"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="va">true</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="cheegers-inequality" class="level2">
+<h2 class="anchored" data-anchor-id="cheegers-inequality"><a href="https://en.wikipedia.org/wiki/Cheeger_constant_(graph_theory)">Cheeger’s inequality</a></h2>
+<p>Cheeger’s inequality links the algebraic connectivity <span class="math inline">\(\lambda_2\)</span> to the <strong><a href="https://en.wikipedia.org/wiki/Edge_expansion">edge expansion</a></strong> <span class="math inline">\(h(G)\)</span> of the graph. For the unnormalized Laplacian:</p>
+<p><span class="math display">\[\frac{\lambda_2}{2} \leq h(G) \leq \sqrt{2\, d_{\max}\, \lambda_2}\]</span></p>
+<p>where <span class="math inline">\(d_{\max}\)</span> is the maximum vertex degree. The edge expansion measures the minimum ratio of boundary edges to the smaller side of a partition.</p>
+<p>For our original 6-vertex graph, the optimal cut is the single bridge edge (2–3), dividing into equal halves of size 3. So <span class="math inline">\(h(G) = 1/3\)</span>. The maximum degree is 3.</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb78"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> conductance </span>(<span class="kw">/</span> <span class="fl">1.0</span> <span class="fl">3.0</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb79"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> d-max </span><span class="fl">3.0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb80"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">and</span> (<span class="kw">&lt;=</span> (<span class="kw">/</span> fiedler-value <span class="fl">2.0</span>) conductance)</span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a>     (<span class="kw">&lt;=</span> conductance (math/sqrt (<span class="kw">*</span> <span class="fl">2.0</span> d-max fiedler-value))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb81"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="va">true</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Cheeger’s inequality is satisfied — the spectral gap and the combinatorial bottleneck are in agreement.</p>
+<hr>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<p>This notebook demonstrated:</p>
+<ul>
+<li><p><strong>Adjacency matrix</strong> <span class="math inline">\(\to\)</span> <strong>Laplacian</strong> <span class="math inline">\(L = D - A\)</span></p></li>
+<li><p><strong>Eigenvalues of <span class="math inline">\(L\)</span></strong>: zero count = connected components, <span class="math inline">\(\lambda_2\)</span> = algebraic connectivity</p></li>
+<li><p><strong>Fiedler vector</strong>: sign pattern gives spectral bisection</p></li>
+<li><p><strong>Disconnected graphs</strong>: multiple zero eigenvalues</p></li>
+<li><p><strong>Complete and cycle graphs</strong>: closed-form eigenvalue formulas verified</p></li>
+<li><p><strong>Spectral clustering</strong>: <span class="math inline">\(k\)</span> eigenvectors <span class="math inline">\(\to\)</span> <span class="math inline">\(k\)</span>-way partition</p></li>
+<li><p><strong>Cheeger’s inequality</strong>: spectral gap bounds edge expansion</p></li>
+</ul>
+<div style="background-color:grey;height:2px;width:100%;"></div>
+<div><pre><small><small>source: <a href="https://github.com/scicloj/lalinea/blob/main/notebooks/lalinea_book/spectral_graph_theory.clj">notebooks/lalinea_book/spectral_graph_theory.clj</a></small></small></pre></div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./lalinea_book.least_squares.html" class="pagination-link" aria-label="Least Squares and Curve Fitting">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Least Squares and Curve Fitting</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./lalinea_book.algebraic_identities.html" class="pagination-link" aria-label="Algebraic Identities — A Verification Suite">
+        <span class="nav-page-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Algebraic Identities — A Verification Suite</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

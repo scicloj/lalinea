@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.24">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>11&nbsp; Vectors and Spaces – La Linea</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./lalinea_book.maps_and_structure.html" rel="next">
+<link href="./lalinea_book.autodiff.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dc55a5b9e770e841cd82e46aadbfb9b0.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-7529eae91c9d5d7e2e31629d38ec538d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lalinea_book.vectors_and_spaces.html">Abstract Linear Algebra</a></li><li class="breadcrumb-item"><a href="./lalinea_book.vectors_and_spaces.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Vectors and Spaces</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">La Linea</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Preface</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Getting Started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.quickstart.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Quickstart</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Core Concepts</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.dtype_next_background.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">dtype-next background</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.tensors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Tensors</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.complex_tensors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Complex Tensors</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.ecosystem.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Ecosystem Composability</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.fourier_transform.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Fourier Transform</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.sharing_and_mutation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Sharing and Mutation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.computation_tape.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Computation tape</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.autodiff.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Automatic Differentiation</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Abstract Linear Algebra</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.vectors_and_spaces.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Vectors and Spaces</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.maps_and_structure.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Maps and Structure</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.inner_products_and_orthogonality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Inner Products and Orthogonality</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.eigenvalues_and_decompositions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Eigenvalues and Decompositions</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Applications</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.linear_systems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Solving Linear Systems</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.markov_chains.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Markov Chains and PageRank</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.image_processing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Image Processing with Tensors</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.fractals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Fractals with Complex Tensors</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.decompositions_in_action.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Decompositions in Action</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.least_squares.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Least Squares and Curve Fitting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.spectral_graph_theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Spectral Graph Theory</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Validation</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.algebraic_identities.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Algebraic Identities — A Verification Suite</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Reference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lalinea_book.api_reference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">API Reference</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="3">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#vectors" id="toc-vectors" class="nav-link active" data-scroll-target="#vectors">Vectors</a>
+  <ul>
+  <li><a href="#vectors-in-mathbbrn" id="toc-vectors-in-mathbbrn" class="nav-link" data-scroll-target="#vectors-in-mathbbrn">Vectors in <span class="math inline">\(\mathbb{R}^n\)</span></a></li>
+  <li><a href="#vector-addition" id="toc-vector-addition" class="nav-link" data-scroll-target="#vector-addition">Vector addition</a></li>
+  <li><a href="#scalar-multiplication" id="toc-scalar-multiplication" class="nav-link" data-scroll-target="#scalar-multiplication">Scalar multiplication</a></li>
+  <li><a href="#the-vector-space-axioms" id="toc-the-vector-space-axioms" class="nav-link" data-scroll-target="#the-vector-space-axioms">The vector space axioms</a></li>
+  </ul></li>
+  <li><a href="#linear-combinations-and-span" id="toc-linear-combinations-and-span" class="nav-link" data-scroll-target="#linear-combinations-and-span">Linear combinations and span</a>
+  <ul>
+  <li><a href="#linear-combinations" id="toc-linear-combinations" class="nav-link" data-scroll-target="#linear-combinations">Linear combinations</a></li>
+  <li><a href="#span" id="toc-span" class="nav-link" data-scroll-target="#span">Span</a></li>
+  </ul></li>
+  <li><a href="#linear-independence" id="toc-linear-independence" class="nav-link" data-scroll-target="#linear-independence">Linear independence</a>
+  <ul>
+  <li><a href="#the-key-question" id="toc-the-key-question" class="nav-link" data-scroll-target="#the-key-question">The key question</a></li>
+  </ul></li>
+  <li><a href="#basis-and-dimension" id="toc-basis-and-dimension" class="nav-link" data-scroll-target="#basis-and-dimension">Basis and dimension</a>
+  <ul>
+  <li><a href="#basis" id="toc-basis" class="nav-link" data-scroll-target="#basis">Basis</a></li>
+  <li><a href="#coordinates" id="toc-coordinates" class="nav-link" data-scroll-target="#coordinates">Coordinates</a></li>
+  <li><a href="#dimension" id="toc-dimension" class="nav-link" data-scroll-target="#dimension">Dimension</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lalinea_book.vectors_and_spaces.html">Abstract Linear Algebra</a></li><li class="breadcrumb-item"><a href="./lalinea_book.vectors_and_spaces.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Vectors and Spaces</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Vectors and Spaces</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<style></style>
+<style>.printedClojure .sourceCode {
+  background-color: transparent;
+  border-style: none;
+}
+</style>
+<style>.clay-limit-image-width .clay-image {max-width: 100%}
+.clay-side-by-side .sourceCode {margin: 0}
+.clay-side-by-side {margin: 1em 0}
+</style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" type="text/javascript"></script>
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.20.0/plotly.min.js" type="text/javascript"></script>
+<p>A <strong><a href="https://en.wikipedia.org/wiki/Vector_space">vector space</a></strong> is an abstract concept: any collection of objects that can be added together and scaled by numbers, following a short list of axioms. Theorems proved from these axioms apply to every vector space simultaneously — columns of numbers, polynomials, functions, matrices, and more.</p>
+<p>This chapter develops the foundations using <span class="math inline">\(\mathbb{R}^n\)</span> — columns of real numbers — as our main concrete example. We define addition and scaling, state the axioms, and build up to the key concepts of <a href="https://en.wikipedia.org/wiki/Linear_independence">linear independence</a>, <a href="https://en.wikipedia.org/wiki/Basis_(linear_algebra)">basis</a>, and dimension.</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">ns</span> lalinea-book.vectors-and-spaces</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  (<span class="at">:require</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>   <span class="co">;; La Linea (https://github.com/scicloj/lalinea):</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>   [scicloj.lalinea.linalg <span class="at">:as</span> la]</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>   [scicloj.lalinea.elementwise <span class="at">:as</span> el]</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>   [scicloj.lalinea.tensor <span class="at">:as</span> t]</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>   <span class="co">;; Dataset manipulation (https://scicloj.github.io/tablecloth/):</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>   [tablecloth.api <span class="at">:as</span> tc]</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>   <span class="co">;; Interactive Plotly charts (https://scicloj.github.io/tableplot/):</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>   [scicloj.tableplot.v1.plotly <span class="at">:as</span> plotly]</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>   <span class="co">;; Visualization annotations (https://scicloj.github.io/kindly-noted/):</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>   [scicloj.kindly.v4.kind <span class="at">:as</span> kind]</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>   <span class="co">;; Arrow diagrams for 2D vectors:</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>   [scicloj.lalinea.vis <span class="at">:as</span> vis]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="vectors" class="level2">
+<h2 class="anchored" data-anchor-id="vectors">Vectors</h2>
+<section id="vectors-in-mathbbrn" class="level3">
+<h3 class="anchored" data-anchor-id="vectors-in-mathbbrn">Vectors in <span class="math inline">\(\mathbb{R}^n\)</span></h3>
+<p>Our concrete setting is <span class="math inline">\(\mathbb{R}^n\)</span> — the space of ordered lists of <span class="math inline">\(n\)</span> real numbers. A vector in <span class="math inline">\(\mathbb{R}^2\)</span> (the plane) has two entries; a vector in <span class="math inline">\(\mathbb{R}^3\)</span> (space) has three.</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> u </span>(t/column [<span class="dv">3</span> <span class="dv">1</span>]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> v </span>(t/column [<span class="dv">1</span> <span class="dv">2</span>]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>We can think of these as arrows from the origin to a point, or as displacements — “go 3 units right and 1 unit up.”</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(vis/arrow-plot [{<span class="at">:label</span> <span class="st">"u"</span> <span class="at">:xy</span> [<span class="dv">3</span> <span class="dv">1</span>] <span class="at">:color</span> <span class="st">"#2266cc"</span>}</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>                 {<span class="at">:label</span> <span class="st">"v"</span> <span class="at">:xy</span> [<span class="dv">1</span> <span class="dv">2</span>] <span class="at">:color</span> <span class="st">"#cc4422"</span>}]</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                {<span class="at">:width</span> <span class="dv">300</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<svg height="237.5" viewbox="-0.8999999999999999 -2.9 4.8 3.8" width="300"><defs><marker id="ah-2266cc" markerheight="0.224" markerunits="userSpaceOnUse" markerwidth="0.32" orient="auto" refx="0.32" refy="0.112"><polygon fill="#2266cc" points="0 0, 0.32 0.112, 0 0.224"></polygon></marker><marker id="ah-cc4422" markerheight="0.224" markerunits="userSpaceOnUse" markerwidth="0.32" orient="auto" refx="0.32" refy="0.112"><polygon fill="#cc4422" points="0 0, 0.32 0.112, 0 0.224"></polygon></marker></defs><line stroke="#ddd" stroke-width="0.016" x1="-1" x2="-1" y1="1" y2="-3"></line><line stroke="#999" stroke-width="0.032" x1="0" x2="0" y1="1" y2="-3"></line><line stroke="#ddd" stroke-width="0.016" x1="1" x2="1" y1="1" y2="-3"></line><line stroke="#ddd" stroke-width="0.016" x1="2" x2="2" y1="1" y2="-3"></line><line stroke="#ddd" stroke-width="0.016" x1="3" x2="3" y1="1" y2="-3"></line><line stroke="#ddd" stroke-width="0.016" x1="4" x2="4" y1="1" y2="-3"></line><line stroke="#ddd" stroke-width="0.016" x1="-1" x2="4" y1="1" y2="1"></line><line stroke="#999" stroke-width="0.032" x1="-1" x2="4" y1="0" y2="0"></line><line stroke="#ddd" stroke-width="0.016" x1="-1" x2="4" y1="-1" y2="-1"></line><line stroke="#ddd" stroke-width="0.016" x1="-1" x2="4" y1="-2" y2="-2"></line><line stroke="#ddd" stroke-width="0.016" x1="-1" x2="4" y1="-3" y2="-3"></line><line marker-end="url(#ah-2266cc)" stroke="#2266cc" stroke-width="0.048" x1="0" x2="3" y1="0" y2="-1"></line><text dominant-baseline="central" fill="#2266cc" font-family="sans-serif" font-size="0.384" font-weight="bold" text-anchor="middle" x="2.0149979764946737" y="-0.955006070515978">u</text><line marker-end="url(#ah-cc4422)" stroke="#cc4422" stroke-width="0.048" x1="0" x2="1" y1="0" y2="-2"></line><text dominant-baseline="central" fill="#cc4422" font-family="sans-serif" font-size="0.384" font-weight="bold" text-anchor="middle" x="0.4595779710592226" y="-1.5202110144703886">v</text></svg>
+</section>
+<section id="vector-addition" class="level3">
+<h3 class="anchored" data-anchor-id="vector-addition">Vector addition</h3>
+<p>Adding two vectors means adding their entries position by position. Geometrically, it is “tip to tail” — walk along <span class="math inline">\(\mathbf{u}\)</span>, then walk along <span class="math inline">\(\mathbf{v}\)</span>.</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>(el/+ u v)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>#la/R [<span class="at">:float64</span> [<span class="dv">2</span> <span class="dv">1</span>]</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>       [[<span class="fl">4.000</span>]</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>        [<span class="fl">3.000</span>]]]</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(vis/arrow-plot [{<span class="at">:label</span> <span class="st">"u"</span> <span class="at">:xy</span> [<span class="dv">3</span> <span class="dv">1</span>] <span class="at">:color</span> <span class="st">"#2266cc"</span>}</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>                 {<span class="at">:label</span> <span class="st">"v"</span> <span class="at">:xy</span> [<span class="dv">1</span> <span class="dv">2</span>] <span class="at">:color</span> <span class="st">"#cc4422"</span> <span class="at">:from</span> [<span class="dv">3</span> <span class="dv">1</span>]}</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                 {<span class="at">:label</span> <span class="st">"u+v"</span> <span class="at">:xy</span> [<span class="dv">4</span> <span class="dv">3</span>] <span class="at">:color</span> <span class="st">"#228833"</span> <span class="at">:dashed</span>? <span class="va">true</span>}]</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                {<span class="at">:width</span> <span class="dv">300</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<svg height="253.125" viewbox="-1.2 -4.2 6.4 5.4" width="300"><defs><marker id="ah-2266cc" markerheight="0.29866666666666664" markerunits="userSpaceOnUse" markerwidth="0.42666666666666664" orient="auto" refx="0.42666666666666664" refy="0.14933333333333332"><polygon fill="#2266cc" points="0 0, 0.42666666666666664 0.14933333333333332, 0 0.29866666666666664"></polygon></marker><marker id="ah-cc4422" markerheight="0.29866666666666664" markerunits="userSpaceOnUse" markerwidth="0.42666666666666664" orient="auto" refx="0.42666666666666664" refy="0.14933333333333332"><polygon fill="#cc4422" points="0 0, 0.42666666666666664 0.14933333333333332, 0 0.29866666666666664"></polygon></marker><marker id="ah-228833" markerheight="0.29866666666666664" markerunits="userSpaceOnUse" markerwidth="0.42666666666666664" orient="auto" refx="0.42666666666666664" refy="0.14933333333333332"><polygon fill="#228833" points="0 0, 0.42666666666666664 0.14933333333333332, 0 0.29866666666666664"></polygon></marker></defs><line stroke="#ddd" stroke-width="0.021333333333333333" x1="-2" x2="-2" y1="2" y2="-5"></line><line stroke="#ddd" stroke-width="0.021333333333333333" x1="-1" x2="-1" y1="2" y2="-5"></line><line stroke="#999" stroke-width="0.042666666666666665" x1="0" x2="0" y1="2" y2="-5"></line><line stroke="#ddd" stroke-width="0.021333333333333333" x1="1" x2="1" y1="2" y2="-5"></line><line stroke="#ddd" stroke-width="0.021333333333333333" x1="2" x2="2" y1="2" y2="-5"></line><line stroke="#ddd" stroke-width="0.021333333333333333" x1="3" x2="3" y1="2" y2="-5"></line><line stroke="#ddd" stroke-width="0.021333333333333333" x1="4" x2="4" y1="2" y2="-5"></line><line stroke="#ddd" stroke-width="0.021333333333333333" x1="5" x2="5" y1="2" y2="-5"></line><line stroke="#ddd" stroke-width="0.021333333333333333" x1="6" x2="6" y1="2" y2="-5"></line><line stroke="#ddd" stroke-width="0.021333333333333333" x1="-2" x2="6" y1="2" y2="2"></line><line stroke="#ddd" stroke-width="0.021333333333333333" x1="-2" x2="6" y1="1" y2="1"></line><line stroke="#999" stroke-width="0.042666666666666665" x1="-2" x2="6" y1="0" y2="0"></line><line stroke="#ddd" stroke-width="0.021333333333333333" x1="-2" x2="6" y1="-1" y2="-1"></line><line stroke="#ddd" stroke-width="0.021333333333333333" x1="-2" x2="6" y1="-2" y2="-2"></line><line stroke="#ddd" stroke-width="0.021333333333333333" x1="-2" x2="6" y1="-3" y2="-3"></line><line stroke="#ddd" stroke-width="0.021333333333333333" x1="-2" x2="6" y1="-4" y2="-4"></line><line stroke="#ddd" stroke-width="0.021333333333333333" x1="-2" x2="6" y1="-5" y2="-5"></line><line marker-end="url(#ah-2266cc)" stroke="#2266cc" stroke-width="0.064" x1="0" x2="3" y1="0" y2="-1"></line><text dominant-baseline="central" fill="#2266cc" font-family="sans-serif" font-size="0.512" font-weight="bold" text-anchor="middle" x="1.9866639686595648" y="-1.0400080940213041">u</text><line marker-end="url(#ah-cc4422)" stroke="#cc4422" stroke-width="0.064" x1="3" x2="4" y1="-1" y2="-3"></line><text dominant-baseline="central" fill="#cc4422" font-family="sans-serif" font-size="0.512" font-weight="bold" text-anchor="middle" x="3.3794372947456304" y="-2.560281352627185">v</text><line marker-end="url(#ah-228833)" stroke="#228833" stroke-dasharray="0.17066666666666666 0.128" stroke-width="0.064" x1="0" x2="4" y1="0" y2="-3"></line><text dominant-baseline="central" fill="#228833" font-family="sans-serif" font-size="0.512" font-weight="bold" text-anchor="middle" x="2.5849599999999997" y="-2.3867199999999995">u+v</text></svg>
+</section>
+<section id="scalar-multiplication" class="level3">
+<h3 class="anchored" data-anchor-id="scalar-multiplication">Scalar multiplication</h3>
+<p>Multiplying a vector by a number (a <strong><a href="https://en.wikipedia.org/wiki/Scalar_(mathematics)">scalar</a></strong>) scales every entry. Geometrically, it stretches (or shrinks, or reverses) the arrow.</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(el/scale u <span class="fl">2.0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>#la/R [<span class="at">:float64</span> [<span class="dv">2</span> <span class="dv">1</span>]</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>       [[<span class="fl">6.000</span>]</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        [<span class="fl">2.000</span>]]]</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(vis/arrow-plot [{<span class="at">:label</span> <span class="st">"u"</span> <span class="at">:xy</span> [<span class="dv">3</span> <span class="dv">1</span>] <span class="at">:color</span> <span class="st">"#2266cc"</span>}</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                 {<span class="at">:label</span> <span class="st">"2u"</span> <span class="at">:xy</span> [<span class="dv">6</span> <span class="dv">2</span>] <span class="at">:color</span> <span class="st">"#8844cc"</span>}]</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>                {<span class="at">:width</span> <span class="dv">300</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<svg height="175.0" viewbox="-1.7999999999999998 -3.8 9.6 5.6" width="300"><defs><marker id="ah-2266cc" markerheight="0.448" markerunits="userSpaceOnUse" markerwidth="0.64" orient="auto" refx="0.64" refy="0.224"><polygon fill="#2266cc" points="0 0, 0.64 0.224, 0 0.448"></polygon></marker><marker id="ah-8844cc" markerheight="0.448" markerunits="userSpaceOnUse" markerwidth="0.64" orient="auto" refx="0.64" refy="0.224"><polygon fill="#8844cc" points="0 0, 0.64 0.224, 0 0.448"></polygon></marker></defs><line stroke="#ddd" stroke-width="0.032" x1="-2" x2="-2" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.032" x1="-1" x2="-1" y1="2" y2="-4"></line><line stroke="#999" stroke-width="0.064" x1="0" x2="0" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.032" x1="1" x2="1" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.032" x1="2" x2="2" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.032" x1="3" x2="3" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.032" x1="4" x2="4" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.032" x1="5" x2="5" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.032" x1="6" x2="6" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.032" x1="7" x2="7" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.032" x1="8" x2="8" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.032" x1="-2" x2="8" y1="2" y2="2"></line><line stroke="#ddd" stroke-width="0.032" x1="-2" x2="8" y1="1" y2="1"></line><line stroke="#999" stroke-width="0.064" x1="-2" x2="8" y1="0" y2="0"></line><line stroke="#ddd" stroke-width="0.032" x1="-2" x2="8" y1="-1" y2="-1"></line><line stroke="#ddd" stroke-width="0.032" x1="-2" x2="8" y1="-2" y2="-2"></line><line stroke="#ddd" stroke-width="0.032" x1="-2" x2="8" y1="-3" y2="-3"></line><line stroke="#ddd" stroke-width="0.032" x1="-2" x2="8" y1="-4" y2="-4"></line><line marker-end="url(#ah-2266cc)" stroke="#2266cc" stroke-width="0.096" x1="0" x2="3" y1="0" y2="-1"></line><text dominant-baseline="central" fill="#2266cc" font-family="sans-serif" font-size="0.768" font-weight="bold" text-anchor="middle" x="1.9299959529893476" y="-1.2100121410319562">u</text><line marker-end="url(#ah-8844cc)" stroke="#8844cc" stroke-width="0.096" x1="0" x2="6" y1="0" y2="-2"></line><text dominant-baseline="central" fill="#8844cc" font-family="sans-serif" font-size="0.768" font-weight="bold" text-anchor="middle" x="4.029995952989347" y="-1.910012141031956">2u</text></svg>
+<p>Scaling by <span class="math inline">\(-1\)</span> reverses the direction:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(el/scale u -<span class="fl">1.0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>#la/R [<span class="at">:float64</span> [<span class="dv">2</span> <span class="dv">1</span>]</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>       [[-<span class="fl">3.000</span>]</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>        [-<span class="fl">1.000</span>]]]</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(vis/arrow-plot [{<span class="at">:label</span> <span class="st">"u"</span> <span class="at">:xy</span> [<span class="dv">3</span> <span class="dv">1</span>] <span class="at">:color</span> <span class="st">"#2266cc"</span>}</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>                 {<span class="at">:label</span> <span class="st">"\u2212u"</span> <span class="at">:xy</span> [-<span class="dv">3</span> -<span class="dv">1</span>] <span class="at">:color</span> <span class="st">"#cc4422"</span>}]</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>                {<span class="at">:width</span> <span class="dv">300</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<svg height="175.0" viewbox="-4.8 -2.8 9.6 5.6" width="300"><defs><marker id="ah-2266cc" markerheight="0.448" markerunits="userSpaceOnUse" markerwidth="0.64" orient="auto" refx="0.64" refy="0.224"><polygon fill="#2266cc" points="0 0, 0.64 0.224, 0 0.448"></polygon></marker><marker id="ah-cc4422" markerheight="0.448" markerunits="userSpaceOnUse" markerwidth="0.64" orient="auto" refx="0.64" refy="0.224"><polygon fill="#cc4422" points="0 0, 0.64 0.224, 0 0.448"></polygon></marker></defs><line stroke="#ddd" stroke-width="0.032" x1="-5" x2="-5" y1="3" y2="-3"></line><line stroke="#ddd" stroke-width="0.032" x1="-4" x2="-4" y1="3" y2="-3"></line><line stroke="#ddd" stroke-width="0.032" x1="-3" x2="-3" y1="3" y2="-3"></line><line stroke="#ddd" stroke-width="0.032" x1="-2" x2="-2" y1="3" y2="-3"></line><line stroke="#ddd" stroke-width="0.032" x1="-1" x2="-1" y1="3" y2="-3"></line><line stroke="#999" stroke-width="0.064" x1="0" x2="0" y1="3" y2="-3"></line><line stroke="#ddd" stroke-width="0.032" x1="1" x2="1" y1="3" y2="-3"></line><line stroke="#ddd" stroke-width="0.032" x1="2" x2="2" y1="3" y2="-3"></line><line stroke="#ddd" stroke-width="0.032" x1="3" x2="3" y1="3" y2="-3"></line><line stroke="#ddd" stroke-width="0.032" x1="4" x2="4" y1="3" y2="-3"></line><line stroke="#ddd" stroke-width="0.032" x1="5" x2="5" y1="3" y2="-3"></line><line stroke="#ddd" stroke-width="0.032" x1="-5" x2="5" y1="3" y2="3"></line><line stroke="#ddd" stroke-width="0.032" x1="-5" x2="5" y1="2" y2="2"></line><line stroke="#ddd" stroke-width="0.032" x1="-5" x2="5" y1="1" y2="1"></line><line stroke="#999" stroke-width="0.064" x1="-5" x2="5" y1="0" y2="0"></line><line stroke="#ddd" stroke-width="0.032" x1="-5" x2="5" y1="-1" y2="-1"></line><line stroke="#ddd" stroke-width="0.032" x1="-5" x2="5" y1="-2" y2="-2"></line><line stroke="#ddd" stroke-width="0.032" x1="-5" x2="5" y1="-3" y2="-3"></line><line marker-end="url(#ah-2266cc)" stroke="#2266cc" stroke-width="0.096" x1="0" x2="3" y1="0" y2="-1"></line><text dominant-baseline="central" fill="#2266cc" font-family="sans-serif" font-size="0.768" font-weight="bold" text-anchor="middle" x="1.9299959529893476" y="-1.2100121410319562">u</text><line marker-end="url(#ah-cc4422)" stroke="#cc4422" stroke-width="0.096" x1="0" x2="-3" y1="0" y2="1"></line><text dominant-baseline="central" fill="#cc4422" font-family="sans-serif" font-size="0.768" font-weight="bold" text-anchor="middle" x="-1.9299959529893476" y="1.2100121410319562">−u</text></svg>
+</section>
+<section id="the-vector-space-axioms" class="level3">
+<h3 class="anchored" data-anchor-id="the-vector-space-axioms">The vector space axioms</h3>
+<p>These two operations — addition and scalar multiplication — satisfy a list of rules that feel obvious for columns of numbers, but they define a useful abstraction. Any collection of objects obeying these rules is called a <strong>vector space</strong>.</p>
+<p>The axioms are:</p>
+<p><strong>Addition axioms:</strong></p>
+<ol type="1">
+<li><strong>Commutativity</strong>: for all vectors <span class="math inline">\(\mathbf{u}, \mathbf{v}\)</span>: <span class="math inline">\(\mathbf{u} + \mathbf{v} = \mathbf{v} + \mathbf{u}\)</span></li>
+<li><strong>Associativity</strong>: for all vectors <span class="math inline">\(\mathbf{u}, \mathbf{v}, \mathbf{w}\)</span>: <span class="math inline">\((\mathbf{u} + \mathbf{v}) + \mathbf{w} = \mathbf{u} + (\mathbf{v} + \mathbf{w})\)</span></li>
+<li><strong>Zero vector</strong>: there exists <span class="math inline">\(\mathbf{0}\)</span> such that for every vector <span class="math inline">\(\mathbf{u}\)</span>: <span class="math inline">\(\mathbf{u} + \mathbf{0} = \mathbf{u}\)</span></li>
+<li><strong>Additive inverse</strong>: for every <span class="math inline">\(\mathbf{u}\)</span>, there exists <span class="math inline">\(-\mathbf{u}\)</span> with <span class="math inline">\(\mathbf{u} + (-\mathbf{u}) = \mathbf{0}\)</span></li>
+</ol>
+<p><strong>Scalar multiplication axioms:</strong></p>
+<ol start="5" type="1">
+<li><strong>Compatibility</strong>: for all scalars <span class="math inline">\(\alpha, \beta\)</span> and every vector <span class="math inline">\(\mathbf{u}\)</span>: <span class="math inline">\(\alpha(\beta \mathbf{u}) = (\alpha \beta) \mathbf{u}\)</span></li>
+<li><strong>Identity</strong>: for every vector <span class="math inline">\(\mathbf{u}\)</span>: <span class="math inline">\(1 \cdot \mathbf{u} = \mathbf{u}\)</span></li>
+<li><strong>Distributivity over vectors</strong>: for every scalar <span class="math inline">\(\alpha\)</span> and all vectors <span class="math inline">\(\mathbf{u}, \mathbf{v}\)</span>: <span class="math inline">\(\alpha(\mathbf{u} + \mathbf{v}) = \alpha\mathbf{u} + \alpha\mathbf{v}\)</span></li>
+<li><strong>Distributivity over scalars</strong>: for all scalars <span class="math inline">\(\alpha, \beta\)</span> and every vector <span class="math inline">\(\mathbf{u}\)</span>: <span class="math inline">\((\alpha + \beta)\mathbf{u} = \alpha\mathbf{u} + \beta\mathbf{u}\)</span></li>
+</ol>
+<p>Let us verify each one on our concrete vectors <span class="math inline">\(\mathbf{u} = [3,1]^T\)</span>, <span class="math inline">\(\mathbf{v} = [1,2]^T\)</span> in the plane.</p>
+<p>In La Linea, <code>el/+</code> and <code>el/scale</code> are the concrete implementations of vector addition and scalar multiplication. These are not proofs — the axioms hold by the definition of entry-wise addition and scaling — but checking them builds intuition for what each rule says.</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> w-ax </span>(t/column [-<span class="dv">1</span> <span class="dv">4</span>]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> zero2 </span>(t/column [<span class="dv">0</span> <span class="dv">0</span>]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Axiom 1 — Commutativity:</strong></p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(la/close? (el/+ u v) (el/+ v u))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="va">true</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Axiom 2 — Associativity:</strong></p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>(la/close? (el/+ (el/+ u v) w-ax)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>           (el/+ u (el/+ v w-ax)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="va">true</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Axiom 3 — Zero vector:</strong></p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>(la/close? (el/+ u zero2) u)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="va">true</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Axiom 4 — Additive inverse:</strong></p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>(la/close? (el/+ u (el/scale u -<span class="fl">1.0</span>)) zero2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="va">true</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Axiom 5 — Scalar compatibility:</strong></p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>(la/close? (el/scale (el/scale u <span class="fl">3.0</span>) <span class="fl">2.0</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>           (el/scale u <span class="fl">6.0</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="va">true</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Axiom 6 — Scalar identity:</strong></p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>(la/close? (el/scale u <span class="fl">1.0</span>) u)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="va">true</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Axiom 7 — Distributivity over vectors:</strong></p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>(la/close? (el/scale (el/+ u v) <span class="fl">5.0</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>           (el/+ (el/scale u <span class="fl">5.0</span>) (el/scale v <span class="fl">5.0</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="va">true</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Axiom 8 — Distributivity over scalars:</strong></p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>(la/close? (el/scale u (<span class="kw">+</span> <span class="fl">2.0</span> <span class="fl">3.0</span>))</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>           (el/+ (el/scale u <span class="fl">2.0</span>) (el/scale u <span class="fl">3.0</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="va">true</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Any collection of objects satisfying these rules is a vector space, and theorems proved from these axioms apply to all of them.</p>
+<p>The rules feel unsurprising for number columns, but the same structure appears in surprising places:</p>
+<ul>
+<li><strong>Polynomials</strong> of degree <span class="math inline">\(\leq n\)</span>: add coefficients, scale by constants. Dimension <span class="math inline">\(n+1\)</span>.</li>
+<li><strong>Continuous functions</strong> <span class="math inline">\(f: [a,b] \to \mathbb{R}\)</span>: pointwise addition <span class="math inline">\((f+g)(x) = f(x)+g(x)\)</span> and scaling <span class="math inline">\((\alpha f)(x) = \alpha f(x)\)</span>. Infinite-dimensional.</li>
+<li><strong>Matrices</strong> of size <span class="math inline">\(m \times n\)</span>: entry-by-entry addition and scaling. Dimension <span class="math inline">\(mn\)</span>.</li>
+<li><strong>Solutions to a linear ODE</strong> like <span class="math inline">\(y'' + y = 0\)</span>: any linear combination of solutions is again a solution.</li>
+</ul>
+<p>Working abstractly means proving something once — say, that every basis has the same number of elements — and having it apply to all of these simultaneously. The rest of this chapter works in <span class="math inline">\(\mathbb{R}^n\)</span>, but the concepts (span, independence, basis, dimension) are defined by the axioms and hold in every vector space.</p>
+<hr>
+</section>
+</section>
+<section id="linear-combinations-and-span" class="level2">
+<h2 class="anchored" data-anchor-id="linear-combinations-and-span"><a href="https://en.wikipedia.org/wiki/Linear_combination">Linear combinations</a> and span</h2>
+<section id="linear-combinations" class="level3">
+<h3 class="anchored" data-anchor-id="linear-combinations">Linear combinations</h3>
+<p>A <strong>linear combination</strong> of vectors <span class="math inline">\(\mathbf{v}_1, \ldots, \mathbf{v}_k\)</span> is any expression <span class="math inline">\(\alpha_1 \mathbf{v}_1 + \cdots + \alpha_k \mathbf{v}_k\)</span> where the <span class="math inline">\(\alpha_i\)</span> are scalars. This is the most fundamental operation in linear algebra — everything else builds on it.</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>(el/+ (el/scale u <span class="fl">2.0</span>) (el/scale v -<span class="fl">1.0</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>#la/R [<span class="at">:float64</span> [<span class="dv">2</span> <span class="dv">1</span>]</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>       [[<span class="fl">5.000</span>]</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>        [<span class="fl">0.000</span>]]]</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><span class="math inline">\(2 \cdot [3,1]^T + (-1) \cdot [1,2]^T = [5,0]^T\)</span>. We combined <span class="math inline">\(\mathbf{u}\)</span> and <span class="math inline">\(\mathbf{v}\)</span> to reach a new point. Visually: start with <span class="math inline">\(2\mathbf{u}\)</span>, then add <span class="math inline">\(-\mathbf{v}\)</span> (shown dashed) tip-to-tail:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>(vis/arrow-plot [{<span class="at">:label</span> <span class="st">"2u"</span> <span class="at">:xy</span> [<span class="dv">6</span> <span class="dv">2</span>] <span class="at">:color</span> <span class="st">"#2266cc"</span>}</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>                 {<span class="at">:label</span> <span class="st">"-v"</span> <span class="at">:xy</span> [-<span class="dv">1</span> -<span class="dv">2</span>] <span class="at">:color</span> <span class="st">"#cc4422"</span> <span class="at">:from</span> [<span class="dv">6</span> <span class="dv">2</span>] <span class="at">:dashed</span>? <span class="va">true</span>}</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>                 {<span class="at">:label</span> <span class="st">"2u-v"</span> <span class="at">:xy</span> [<span class="dv">5</span> <span class="dv">0</span>] <span class="at">:color</span> <span class="st">"#228833"</span>}]</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>                {})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<svg height="175.0" viewbox="-1.7999999999999998 -3.8 9.6 5.6" width="300"><defs><marker id="ah-2266cc" markerheight="0.448" markerunits="userSpaceOnUse" markerwidth="0.64" orient="auto" refx="0.64" refy="0.224"><polygon fill="#2266cc" points="0 0, 0.64 0.224, 0 0.448"></polygon></marker><marker id="ah-cc4422" markerheight="0.448" markerunits="userSpaceOnUse" markerwidth="0.64" orient="auto" refx="0.64" refy="0.224"><polygon fill="#cc4422" points="0 0, 0.64 0.224, 0 0.448"></polygon></marker><marker id="ah-228833" markerheight="0.448" markerunits="userSpaceOnUse" markerwidth="0.64" orient="auto" refx="0.64" refy="0.224"><polygon fill="#228833" points="0 0, 0.64 0.224, 0 0.448"></polygon></marker></defs><line stroke="#ddd" stroke-width="0.032" x1="-2" x2="-2" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.032" x1="-1" x2="-1" y1="2" y2="-4"></line><line stroke="#999" stroke-width="0.064" x1="0" x2="0" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.032" x1="1" x2="1" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.032" x1="2" x2="2" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.032" x1="3" x2="3" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.032" x1="4" x2="4" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.032" x1="5" x2="5" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.032" x1="6" x2="6" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.032" x1="7" x2="7" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.032" x1="8" x2="8" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.032" x1="-2" x2="8" y1="2" y2="2"></line><line stroke="#ddd" stroke-width="0.032" x1="-2" x2="8" y1="1" y2="1"></line><line stroke="#999" stroke-width="0.064" x1="-2" x2="8" y1="0" y2="0"></line><line stroke="#ddd" stroke-width="0.032" x1="-2" x2="8" y1="-1" y2="-1"></line><line stroke="#ddd" stroke-width="0.032" x1="-2" x2="8" y1="-2" y2="-2"></line><line stroke="#ddd" stroke-width="0.032" x1="-2" x2="8" y1="-3" y2="-3"></line><line stroke="#ddd" stroke-width="0.032" x1="-2" x2="8" y1="-4" y2="-4"></line><line marker-end="url(#ah-2266cc)" stroke="#2266cc" stroke-width="0.096" x1="0" x2="6" y1="0" y2="-2"></line><text dominant-baseline="central" fill="#2266cc" font-family="sans-serif" font-size="0.768" font-weight="bold" text-anchor="middle" x="4.029995952989347" y="-1.910012141031956">2u</text><line marker-end="url(#ah-cc4422)" stroke="#cc4422" stroke-dasharray="0.256 0.192" stroke-width="0.096" x1="6" x2="5" y1="-2" y2="0"></line><text dominant-baseline="central" fill="#cc4422" font-family="sans-serif" font-size="0.768" font-weight="bold" text-anchor="middle" x="5.780844057881555" y="-0.35957797105922273">-v</text><line marker-end="url(#ah-228833)" stroke="#228833" stroke-width="0.096" x1="0" x2="5" y1="0" y2="0"></line><text dominant-baseline="central" fill="#228833" font-family="sans-serif" font-size="0.768" font-weight="bold" text-anchor="middle" x="3.5" y="-0.5376">2u-v</text></svg>
+</section>
+<section id="span" class="level3">
+<h3 class="anchored" data-anchor-id="span">Span</h3>
+<p>The <strong><a href="https://en.wikipedia.org/wiki/Linear_span">span</a></strong> of a set of vectors is the collection of all their linear combinations — every point you can reach by adding and scaling them.</p>
+<p>Our vectors <span class="math inline">\(\mathbf{u} = [3,1]^T\)</span> and <span class="math inline">\(\mathbf{v} = [1,2]^T\)</span> point in different directions. Their span should be the entire plane — let us check by plotting many combinations <span class="math inline">\(\alpha \mathbf{u} + \beta \mathbf{v}\)</span>:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">let</span> [coeffs (<span class="kw">for</span> [a (<span class="kw">range</span> -<span class="fl">2.0</span> <span class="fl">2.1</span> <span class="fl">0.5</span>)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>                   b (<span class="kw">range</span> -<span class="fl">2.0</span> <span class="fl">2.1</span> <span class="fl">0.5</span>)]</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>               [a b])</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>      n (<span class="kw">count</span> coeffs)</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>      points (t/materialize</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>              (t/compute-tensor [n <span class="dv">2</span>]</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>                                (<span class="kw">fn</span> [i j]</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>                                  (<span class="kw">let</span> [[a b] (<span class="kw">nth</span> coeffs i)]</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>                                    (<span class="kw">+</span> (<span class="kw">*</span> a (u j <span class="dv">0</span>))</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>                                       (<span class="kw">*</span> b (v j <span class="dv">0</span>)))))</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>                                <span class="at">:float64</span>))</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>      xs (t/select points <span class="at">:all</span> <span class="dv">0</span>)</span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>      ys (t/select points <span class="at">:all</span> <span class="dv">1</span>)]</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">-&gt;</span> (tc/dataset {<span class="at">:x</span> xs <span class="at">:y</span> ys})</span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>      (plotly/base {:=x <span class="at">:x</span> :=y <span class="at">:y</span>})</span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>      (plotly/layer-point {:=mark-size <span class="dv">6</span>})</span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>      plotly/plot))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div style="height:auto;width:100%;"><script>Plotly.newPlot(document.currentScript.parentElement, [{"y":[-6.0,-5.0,-4.0,-3.0,-2.0,-1.0,0.0,1.0,2.0,-5.5,-4.5,-3.5,-2.5,-1.5,-0.5,0.5,1.5,2.5,-5.0,-4.0,-3.0,-2.0,-1.0,0.0,1.0,2.0,3.0,-4.5,-3.5,-2.5,-1.5,-0.5,0.5,1.5,2.5,3.5,-4.0,-3.0,-2.0,-1.0,0.0,1.0,2.0,3.0,4.0,-3.5,-2.5,-1.5,-0.5,0.5,1.5,2.5,3.5,4.5,-3.0,-2.0,-1.0,0.0,1.0,2.0,3.0,4.0,5.0,-2.5,-1.5,-0.5,0.5,1.5,2.5,3.5,4.5,5.5,-2.0,-1.0,0.0,1.0,2.0,3.0,4.0,5.0,6.0],"name":"","marker":{"size":6},"mode":"markers","type":"scatter","x":[-8.0,-7.5,-7.0,-6.5,-6.0,-5.5,-5.0,-4.5,-4.0,-6.5,-6.0,-5.5,-5.0,-4.5,-4.0,-3.5,-3.0,-2.5,-5.0,-4.5,-4.0,-3.5,-3.0,-2.5,-2.0,-1.5,-1.0,-3.5,-3.0,-2.5,-2.0,-1.5,-1.0,-0.5,0.0,0.5,-2.0,-1.5,-1.0,-0.5,0.0,0.5,1.0,1.5,2.0,-0.5,0.0,0.5,1.0,1.5,2.0,2.5,3.0,3.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0]}], {"width":500,"height":400,"margin":{"t":25},"automargin":false,"plot_bgcolor":"rgb(235,235,235)","xaxis":{"gridcolor":"rgb(255,255,255)","title":"x","showgrid":true},"yaxis":{"gridcolor":"rgb(255,255,255)","title":"y","showgrid":true}}, {});</script></div>
+<p>The points fill a grid that covers the whole plane. Every point in <span class="math inline">\(\mathbb{R}^2\)</span> can be expressed as <span class="math inline">\(\alpha \mathbf{u} + \beta \mathbf{v}\)</span> for some <span class="math inline">\(\alpha, \beta\)</span>.</p>
+<p>What if the vectors point in the <strong>same</strong> direction? Take <span class="math inline">\([1,2]^T\)</span> and <span class="math inline">\([2,4]^T\)</span> — one is just <span class="math inline">\(2\times\)</span> the other:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">let</span> [s1 (t/column [<span class="dv">1</span> <span class="dv">2</span>])</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>      s2 (t/column [<span class="dv">2</span> <span class="dv">4</span>])</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>      coeffs (<span class="kw">for</span> [a (<span class="kw">range</span> -<span class="fl">2.0</span> <span class="fl">2.1</span> <span class="fl">0.5</span>)</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>                   b (<span class="kw">range</span> -<span class="fl">2.0</span> <span class="fl">2.1</span> <span class="fl">0.5</span>)]</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>               [a b])</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>      n (<span class="kw">count</span> coeffs)</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>      points (t/materialize</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>              (t/compute-tensor [n <span class="dv">2</span>]</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>                                (<span class="kw">fn</span> [i j]</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>                                  (<span class="kw">let</span> [[a b] (<span class="kw">nth</span> coeffs i)]</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>                                    (<span class="kw">+</span> (<span class="kw">*</span> a (s1 j <span class="dv">0</span>))</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>                                       (<span class="kw">*</span> b (s2 j <span class="dv">0</span>)))))</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>                                <span class="at">:float64</span>))</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>      xs (t/select points <span class="at">:all</span> <span class="dv">0</span>)</span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>      ys (t/select points <span class="at">:all</span> <span class="dv">1</span>)]</span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">-&gt;</span> (tc/dataset {<span class="at">:x</span> xs <span class="at">:y</span> ys})</span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>      (plotly/base {:=x <span class="at">:x</span> :=y <span class="at">:y</span>})</span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>      (plotly/layer-point {:=mark-size <span class="dv">6</span>})</span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>      plotly/plot))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div style="height:auto;width:100%;"><script>Plotly.newPlot(document.currentScript.parentElement, [{"y":[-12.0,-10.0,-8.0,-6.0,-4.0,-2.0,0.0,2.0,4.0,-11.0,-9.0,-7.0,-5.0,-3.0,-1.0,1.0,3.0,5.0,-10.0,-8.0,-6.0,-4.0,-2.0,0.0,2.0,4.0,6.0,-9.0,-7.0,-5.0,-3.0,-1.0,1.0,3.0,5.0,7.0,-8.0,-6.0,-4.0,-2.0,0.0,2.0,4.0,6.0,8.0,-7.0,-5.0,-3.0,-1.0,1.0,3.0,5.0,7.0,9.0,-6.0,-4.0,-2.0,0.0,2.0,4.0,6.0,8.0,10.0,-5.0,-3.0,-1.0,1.0,3.0,5.0,7.0,9.0,11.0,-4.0,-2.0,0.0,2.0,4.0,6.0,8.0,10.0,12.0],"name":"","marker":{"size":6},"mode":"markers","type":"scatter","x":[-6.0,-5.0,-4.0,-3.0,-2.0,-1.0,0.0,1.0,2.0,-5.5,-4.5,-3.5,-2.5,-1.5,-0.5,0.5,1.5,2.5,-5.0,-4.0,-3.0,-2.0,-1.0,0.0,1.0,2.0,3.0,-4.5,-3.5,-2.5,-1.5,-0.5,0.5,1.5,2.5,3.5,-4.0,-3.0,-2.0,-1.0,0.0,1.0,2.0,3.0,4.0,-3.5,-2.5,-1.5,-0.5,0.5,1.5,2.5,3.5,4.5,-3.0,-2.0,-1.0,0.0,1.0,2.0,3.0,4.0,5.0,-2.5,-1.5,-0.5,0.5,1.5,2.5,3.5,4.5,5.5,-2.0,-1.0,0.0,1.0,2.0,3.0,4.0,5.0,6.0]}], {"width":500,"height":400,"margin":{"t":25},"automargin":false,"plot_bgcolor":"rgb(235,235,235)","xaxis":{"gridcolor":"rgb(255,255,255)","title":"x","showgrid":true},"yaxis":{"gridcolor":"rgb(255,255,255)","title":"y","showgrid":true}}, {});</script></div>
+<p>Now the points all lie on a single line through the origin. Two parallel vectors can only reach points along that line — their span is one-dimensional.</p>
+<hr>
+</section>
+</section>
+<section id="linear-independence" class="level2">
+<h2 class="anchored" data-anchor-id="linear-independence">Linear independence</h2>
+<section id="the-key-question" class="level3">
+<h3 class="anchored" data-anchor-id="the-key-question">The key question</h3>
+<p>Given a set of vectors, do they each contribute something genuinely new? Or could some be built from the others?</p>
+<p>Vectors <span class="math inline">\(\mathbf{v}_1, \ldots, \mathbf{v}_k\)</span> are <strong>linearly independent</strong> if none of them is a linear combination of the rest. The formal definition: the only way to get zero is with all coefficients zero:</p>
+<p><span class="math display">\[\alpha_1 \mathbf{v}_1 + \cdots + \alpha_k \mathbf{v}_k = \mathbf{0}
+\quad \Longrightarrow \quad \alpha_1 = \cdots = \alpha_k = 0\]</span></p>
+<p>For two vectors in <span class="math inline">\(\mathbb{R}^2\)</span>, this is the same as “not parallel.” The <strong>determinant</strong> of the matrix with these vectors as columns is non-zero precisely when they are independent.</p>
+<p>The difference is visible geometrically — independent vectors point in genuinely different directions, while dependent vectors are parallel:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>(vis/arrow-plot [{<span class="at">:label</span> <span class="st">"[3,1]"</span> <span class="at">:xy</span> [<span class="dv">3</span> <span class="dv">1</span>] <span class="at">:color</span> <span class="st">"#2266cc"</span>}</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>                 {<span class="at">:label</span> <span class="st">"[1,2]"</span> <span class="at">:xy</span> [<span class="dv">1</span> <span class="dv">2</span>] <span class="at">:color</span> <span class="st">"#cc4422"</span>}]</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>                {<span class="at">:width</span> <span class="dv">250</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<svg height="197.91666666666666" viewbox="-0.8999999999999999 -2.9 4.8 3.8" width="250"><defs><marker id="ah-2266cc" markerheight="0.2688" markerunits="userSpaceOnUse" markerwidth="0.38399999999999995" orient="auto" refx="0.38399999999999995" refy="0.1344"><polygon fill="#2266cc" points="0 0, 0.38399999999999995 0.1344, 0 0.2688"></polygon></marker><marker id="ah-cc4422" markerheight="0.2688" markerunits="userSpaceOnUse" markerwidth="0.38399999999999995" orient="auto" refx="0.38399999999999995" refy="0.1344"><polygon fill="#cc4422" points="0 0, 0.38399999999999995 0.1344, 0 0.2688"></polygon></marker></defs><line stroke="#ddd" stroke-width="0.0192" x1="-1" x2="-1" y1="1" y2="-3"></line><line stroke="#999" stroke-width="0.0384" x1="0" x2="0" y1="1" y2="-3"></line><line stroke="#ddd" stroke-width="0.0192" x1="1" x2="1" y1="1" y2="-3"></line><line stroke="#ddd" stroke-width="0.0192" x1="2" x2="2" y1="1" y2="-3"></line><line stroke="#ddd" stroke-width="0.0192" x1="3" x2="3" y1="1" y2="-3"></line><line stroke="#ddd" stroke-width="0.0192" x1="4" x2="4" y1="1" y2="-3"></line><line stroke="#ddd" stroke-width="0.0192" x1="-1" x2="4" y1="1" y2="1"></line><line stroke="#999" stroke-width="0.0384" x1="-1" x2="4" y1="0" y2="0"></line><line stroke="#ddd" stroke-width="0.0192" x1="-1" x2="4" y1="-1" y2="-1"></line><line stroke="#ddd" stroke-width="0.0192" x1="-1" x2="4" y1="-2" y2="-2"></line><line stroke="#ddd" stroke-width="0.0192" x1="-1" x2="4" y1="-3" y2="-3"></line><line marker-end="url(#ah-2266cc)" stroke="#2266cc" stroke-width="0.0576" x1="0" x2="3" y1="0" y2="-1"></line><text dominant-baseline="central" fill="#2266cc" font-family="sans-serif" font-size="0.4608" font-weight="bold" text-anchor="middle" x="1.9979975717936085" y="-1.0060072846191737">[3,1]</text><line marker-end="url(#ah-cc4422)" stroke="#cc4422" stroke-width="0.0576" x1="0" x2="1" y1="0" y2="-2"></line><text dominant-baseline="central" fill="#cc4422" font-family="sans-serif" font-size="0.4608" font-weight="bold" text-anchor="middle" x="0.4114935652710671" y="-1.5442532173644663">[1,2]</text></svg>
+<p>These point in different directions — they are independent (<span class="math inline">\(\det \neq 0\)</span>):</p>
+<p>Independent — two non-parallel directions:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>(la/det (t/matrix [[<span class="dv">3</span> <span class="dv">1</span>]</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>                   [<span class="dv">1</span> <span class="dv">2</span>]]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fl">5.0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Now two parallel vectors — one is <span class="math inline">\(2\times\)</span> the other:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>(vis/arrow-plot [{<span class="at">:label</span> <span class="st">"[3,1]"</span> <span class="at">:xy</span> [<span class="dv">3</span> <span class="dv">1</span>] <span class="at">:color</span> <span class="st">"#2266cc"</span>}</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>                 {<span class="at">:label</span> <span class="st">"[6,2]"</span> <span class="at">:xy</span> [<span class="dv">6</span> <span class="dv">2</span>] <span class="at">:color</span> <span class="st">"#cc4422"</span>}]</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>                {<span class="at">:width</span> <span class="dv">250</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<svg height="145.83333333333334" viewbox="-1.7999999999999998 -3.8 9.6 5.6" width="250"><defs><marker id="ah-2266cc" markerheight="0.5376" markerunits="userSpaceOnUse" markerwidth="0.7679999999999999" orient="auto" refx="0.7679999999999999" refy="0.2688"><polygon fill="#2266cc" points="0 0, 0.7679999999999999 0.2688, 0 0.5376"></polygon></marker><marker id="ah-cc4422" markerheight="0.5376" markerunits="userSpaceOnUse" markerwidth="0.7679999999999999" orient="auto" refx="0.7679999999999999" refy="0.2688"><polygon fill="#cc4422" points="0 0, 0.7679999999999999 0.2688, 0 0.5376"></polygon></marker></defs><line stroke="#ddd" stroke-width="0.0384" x1="-2" x2="-2" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.0384" x1="-1" x2="-1" y1="2" y2="-4"></line><line stroke="#999" stroke-width="0.0768" x1="0" x2="0" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.0384" x1="1" x2="1" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.0384" x1="2" x2="2" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.0384" x1="3" x2="3" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.0384" x1="4" x2="4" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.0384" x1="5" x2="5" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.0384" x1="6" x2="6" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.0384" x1="7" x2="7" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.0384" x1="8" x2="8" y1="2" y2="-4"></line><line stroke="#ddd" stroke-width="0.0384" x1="-2" x2="8" y1="2" y2="2"></line><line stroke="#ddd" stroke-width="0.0384" x1="-2" x2="8" y1="1" y2="1"></line><line stroke="#999" stroke-width="0.0768" x1="-2" x2="8" y1="0" y2="0"></line><line stroke="#ddd" stroke-width="0.0384" x1="-2" x2="8" y1="-1" y2="-1"></line><line stroke="#ddd" stroke-width="0.0384" x1="-2" x2="8" y1="-2" y2="-2"></line><line stroke="#ddd" stroke-width="0.0384" x1="-2" x2="8" y1="-3" y2="-3"></line><line stroke="#ddd" stroke-width="0.0384" x1="-2" x2="8" y1="-4" y2="-4"></line><line marker-end="url(#ah-2266cc)" stroke="#2266cc" stroke-width="0.1152" x1="0" x2="3" y1="0" y2="-1"></line><text dominant-baseline="central" fill="#2266cc" font-family="sans-serif" font-size="0.9216" font-weight="bold" text-anchor="middle" x="1.895995143587217" y="-1.3120145692383474">[3,1]</text><line marker-end="url(#ah-cc4422)" stroke="#cc4422" stroke-width="0.1152" x1="0" x2="6" y1="0" y2="-2"></line><text dominant-baseline="central" fill="#cc4422" font-family="sans-serif" font-size="0.9216" font-weight="bold" text-anchor="middle" x="3.995995143587217" y="-2.0120145692383473">[6,2]</text></svg>
+<p>They lie on the same line — the second adds no new direction.</p>
+<p>Dependent — second column is <span class="math inline">\(2 \times\)</span> the first:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>(la/det (t/matrix [[<span class="dv">3</span> <span class="dv">6</span>]</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>                   [<span class="dv">1</span> <span class="dv">2</span>]]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fl">0.0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>In <span class="math inline">\(\mathbb{R}^3\)</span>, three vectors are independent when they do not all lie in the same plane:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>(la/det (t/matrix [[<span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>]</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>                   [<span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span>]</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>                   [<span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span>]]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fl">1.0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>But if the third is the sum of the first two, they lie in a plane — the determinant is zero:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>(la/det (t/matrix [[<span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span>]</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>                   [<span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span>]</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>                   [<span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span>]]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fl">0.0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<hr>
+</section>
+</section>
+<section id="basis-and-dimension" class="level2">
+<h2 class="anchored" data-anchor-id="basis-and-dimension">Basis and dimension</h2>
+<section id="basis" class="level3">
+<h3 class="anchored" data-anchor-id="basis">Basis</h3>
+<p>A <strong>basis</strong> is a set of vectors that is both:</p>
+<ul>
+<li><strong>Spanning</strong>: their linear combinations reach every point in the space</li>
+<li><strong>Linearly independent</strong>: none of them is redundant</li>
+</ul>
+<p>A basis is a “minimal coordinate system” — it has exactly the right number of vectors. Not too many (which would mean redundancy), not too few (which would leave gaps).</p>
+<p>The <strong>standard basis</strong> for <span class="math inline">\(\mathbb{R}^3\)</span> has three vectors:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> e1 </span>(t/column [<span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> e2 </span>(t/column [<span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span>]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> e3 </span>(t/column [<span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span>]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="coordinates" class="level3">
+<h3 class="anchored" data-anchor-id="coordinates">Coordinates</h3>
+<p>Once you fix a basis, every vector has a unique representation as a linear combination of basis vectors. The coefficients are the <strong>coordinates</strong>.</p>
+<p>For the standard basis, coordinates are just the entries:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> w </span>(t/column [<span class="dv">5</span> -<span class="dv">3</span> <span class="dv">7</span>]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><span class="math inline">\(\mathbf{w} = 5\mathbf{e}_1 + (-3)\mathbf{e}_2 + 7\mathbf{e}_3\)</span>:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb51"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>(la/close? w</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>           (el/+ (el/scale e1 <span class="fl">5.0</span>)</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>                 (el/+ (el/scale e2 -<span class="fl">3.0</span>)</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>                       (el/scale e3 <span class="fl">7.0</span>))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="va">true</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>But <span class="math inline">\(\{\mathbf{e}_1, \mathbf{e}_2, \mathbf{e}_3\}\)</span> is not the only basis. Any three linearly independent vectors in <span class="math inline">\(\mathbb{R}^3\)</span> form a basis — and the coordinates change.</p>
+</section>
+<section id="dimension" class="level3">
+<h3 class="anchored" data-anchor-id="dimension">Dimension</h3>
+<p><strong>Every basis for a given vector space has the same number of vectors.</strong> This number is the <strong><a href="https://en.wikipedia.org/wiki/Dimension_(vector_space)">dimension</a></strong>.</p>
+<ul>
+<li><span class="math inline">\(\mathbb{R}^2\)</span> has dimension 2 (every basis has 2 vectors)</li>
+<li><span class="math inline">\(\mathbb{R}^3\)</span> has dimension 3</li>
+<li>The set of <span class="math inline">\(2 \times 3\)</span> matrices has dimension 6 (it takes 6 numbers to specify one)</li>
+</ul>
+<p>If you try to fit 4 vectors into <span class="math inline">\(\mathbb{R}^3\)</span>, at least one must be a linear combination of the others — you cannot have more independent vectors than the dimension.</p>
+<p>Here are three independent vectors in <span class="math inline">\(\mathbb{R}^3\)</span> (they form a basis because the determinant is non-zero):</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb53"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> v1 </span>(t/column [<span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb54"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> v2 </span>(t/column [<span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span>]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb55"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> v3 </span>(t/column [<span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span>]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb56"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>(la/det (t/matrix [[<span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>]</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>                   [<span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span>]</span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>                   [<span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span>]]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb57"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="fl">1.0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Now introduce a fourth vector. It must be expressible as a linear combination of the first three — because three independent vectors already fill all of <span class="math inline">\(\mathbb{R}^3\)</span>:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb58"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> v4 </span>(t/column [<span class="dv">2</span> <span class="dv">3</span> <span class="dv">1</span>]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb59"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>(la/close? v4</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>           (el/+ (el/scale v1 <span class="fl">2.0</span>)</span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>                 (el/+ (el/scale v2 <span class="fl">3.0</span>)</span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>                       (el/scale v3 <span class="fl">1.0</span>))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb60"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="va">true</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>No matter what fourth vector you choose, it will always be a combination of any basis for the space. This is the essence of dimension — it is an intrinsic property of the space, not of any particular set of vectors.</p>
+<hr>
+<p>These foundational ideas — vectors, linear combinations, independence, basis, dimension — are the vocabulary for everything that follows. In the next chapters we build on them to study linear maps and their matrix representations, inner products and projections, and the eigenvalue decompositions that reveal the structure of linear transformations.</p>
+<div style="background-color:grey;height:2px;width:100%;"></div>
+<div><pre><small><small>source: <a href="https://github.com/scicloj/lalinea/blob/main/notebooks/lalinea_book/vectors_and_spaces.clj">notebooks/lalinea_book/vectors_and_spaces.clj</a></small></small></pre></div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./lalinea_book.autodiff.html" class="pagination-link" aria-label="Automatic Differentiation">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Automatic Differentiation</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./lalinea_book.maps_and_structure.html" class="pagination-link" aria-label="Maps and Structure">
+        <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Maps and Structure</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

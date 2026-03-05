@@ -1,0 +1,22 @@
+{"Getting Started" ["quickstart"]
+ "Core Concepts" ["dtype_next_background"
+                  "tensors"
+                  "complex_tensors"
+                  "ecosystem"
+                  "fourier_transform"
+                  "sharing_and_mutation"
+                  "computation_tape"
+                  "autodiff"]
+ "Abstract Linear Algebra" ["vectors_and_spaces"
+                            "maps_and_structure"
+                            "inner_products_and_orthogonality"
+                            "eigenvalues_and_decompositions"]
+ "Applications" ["linear_systems"
+                 "markov_chains"
+                 "image_processing"
+                 "fractals"
+                 "decompositions_in_action"
+                 "least_squares"
+                 "spectral_graph_theory"]
+ "Validation" ["algebraic_identities"]
+ "Reference" ["api_reference"]}

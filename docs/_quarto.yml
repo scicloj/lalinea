@@ -1,0 +1,25 @@
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    theme: [cosmo, notebooks/custom.scss]
+    toc-expand: 3
+    number-depth: 1
+  revealjs: {theme: solarized, navigation-mode: vertical, transition: slide, background-transition: fade, incremental: true}
+project: {type: book}
+book:
+  chapters:
+  - index.qmd
+  - part: Getting Started
+    chapters: [lalinea_book.quickstart.qmd]
+  - part: Core Concepts
+    chapters: [lalinea_book.dtype_next_background.qmd, lalinea_book.tensors.qmd, lalinea_book.complex_tensors.qmd, lalinea_book.ecosystem.qmd, lalinea_book.fourier_transform.qmd, lalinea_book.sharing_and_mutation.qmd, lalinea_book.computation_tape.qmd, lalinea_book.autodiff.qmd]
+  - part: Abstract Linear Algebra
+    chapters: [lalinea_book.vectors_and_spaces.qmd, lalinea_book.maps_and_structure.qmd, lalinea_book.inner_products_and_orthogonality.qmd, lalinea_book.eigenvalues_and_decompositions.qmd]
+  - part: Applications
+    chapters: [lalinea_book.linear_systems.qmd, lalinea_book.markov_chains.qmd, lalinea_book.image_processing.qmd, lalinea_book.fractals.qmd, lalinea_book.decompositions_in_action.qmd, lalinea_book.least_squares.qmd, lalinea_book.spectral_graph_theory.qmd]
+  - part: Validation
+    chapters: [lalinea_book.algebraic_identities.qmd]
+  - part: Reference
+    chapters: [lalinea_book.api_reference.qmd]
+  title: La Linea
