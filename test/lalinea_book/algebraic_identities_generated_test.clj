@@ -549,15 +549,15 @@
  v174_l560
  (let
   [d-ab
-   (la/dot ca cb)
+   (la/dot-conj ca cb)
    re-ab
    (double (el/re d-ab))
    im-ab
    (double (el/im d-ab))
    re-aa
-   (double (el/re (la/dot ca ca)))
+   (double (el/re (la/dot-conj ca ca)))
    re-bb
-   (double (el/re (la/dot cb cb)))]
+   (double (el/re (la/dot-conj cb cb)))]
   (<= (- (+ (* re-ab re-ab) (* im-ab im-ab)) 1.0E-10) (* re-aa re-bb))))
 
 

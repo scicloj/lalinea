@@ -159,8 +159,8 @@
 ;;
 ;; [PCA](https://en.wikipedia.org/wiki/Principal_component_analysis)
 ;; finds the directions of maximum variance in data.
-;; Given a data matrix $X$ (centered), the principal components
-;; are the eigenvectors of $X^T X$.
+;; Given a centered data matrix $X$, the principal components
+;; are the eigenvectors of the [covariance matrix](https://en.wikipedia.org/wiki/Covariance_matrix) $\frac{1}{n-1} X^T X$.
 
 ;; ### Generate 2D data with known covariance
 ;;

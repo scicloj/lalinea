@@ -148,7 +148,7 @@
 ;;
 ;; Different values of $c$ produce different shapes.
 
-;; $c = -0.7 + 0.27i$ — a "dendrite" Julia set:
+;; $c = -0.7 + 0.27i$ — a [dendrite](https://en.wikipedia.org/wiki/Julia_set#Properties_of_the_Julia_set) (connected, empty interior):
 
 (def julia-dendrite
   (let [h 300 w 300 max-iter 80
@@ -160,7 +160,7 @@
 (kind/test-last
  [(fn [img] (= java.awt.image.BufferedImage (type img)))])
 
-;; $c = 0.355 + 0.355i$ — a connected Julia set:
+;; $c = 0.355 + 0.355i$ — a [connected Julia set](https://en.wikipedia.org/wiki/Julia_set#Equivalent_descriptions_of_the_Julia_set):
 
 (def julia-connected
   (let [h 300 w 300 max-iter 80
@@ -172,7 +172,7 @@
 (kind/test-last
  [(fn [img] (= java.awt.image.BufferedImage (type img)))])
 
-;; $c = -0.4 + 0.6i$ — a "rabbit" Julia set:
+;; $c = -0.4 + 0.6i$ — a [rabbit-like](https://en.wikipedia.org/wiki/Douady_rabbit) Julia set:
 
 (def julia-rabbit
   (let [h 300 w 300 max-iter 80

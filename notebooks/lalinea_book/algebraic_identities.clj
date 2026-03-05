@@ -557,11 +557,11 @@
 
 ;; ### [Cauchy-Schwarz](https://en.wikipedia.org/wiki/Cauchy%E2%80%93Schwarz_inequality): $|\langle a, b \rangle_H|^2 \leq \langle a, a \rangle_H \cdot \langle b, b \rangle_H$
 
-(let [d-ab (la/dot ca cb)
+(let [d-ab (la/dot-conj ca cb)
       re-ab (double (el/re d-ab))
       im-ab (double (el/im d-ab))
-      re-aa (double (el/re (la/dot ca ca)))
-      re-bb (double (el/re (la/dot cb cb)))]
+      re-aa (double (el/re (la/dot-conj ca ca)))
+      re-bb (double (el/re (la/dot-conj cb cb)))]
   (<= (- (+ (* re-ab re-ab) (* im-ab im-ab)) 1e-10)
       (* re-aa re-bb)))
 
