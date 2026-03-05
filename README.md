@@ -17,16 +17,17 @@ row-major `double[]` memory layout, enabling **zero-copy** interop.
 
 ## Design
 
-Two namespaces cover most usage:
+Three namespaces cover most usage:
 
 - **`t/`** (`scicloj.lalinea.tensor`) — construct tensors in either field (real or complex)
-- **`la/`** (`scicloj.lalinea.linalg`) — compute with them (polymorphic over the field)
+- **`el/`** (`scicloj.lalinea.elementwise`) — element-wise math, polymorphic over the field
+- **`la/`** (`scicloj.lalinea.linalg`) — linear algebra: products, decompositions, solve
 
-`la/mmul`, `la/transpose`, `la/dot`, and most other functions work
-uniformly on both real tensors and ComplexTensors. Field-aware operations like
-`el/re`, `el/im`, `el/conj` are identity on reals and meaningful on complex.
+All three are polymorphic — they work uniformly on both real tensors and
+ComplexTensors. Field-aware operations like `el/re`, `el/im`, `el/conj`
+are identity on reals and meaningful on complex.
 
-Supporting namespaces: `el/` (element-wise math), `tape/` (computation recording),
+Supporting namespaces: `tape/` (computation recording),
 `grad/` (autodiff), `ft/` (FFT bridge), `vis/` (visualization helpers).
 
 ## Features
