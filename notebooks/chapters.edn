@@ -2,6 +2,7 @@
  "Core Concepts" ["dtype_next_background"
                   "tensors"
                   "complex_tensors"
+                  "ecosystem"
                   "fourier_transform"
                   "sharing_and_mutation"
                   "computation_tape"
