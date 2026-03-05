@@ -1,7 +1,6 @@
 (ns
  lalinea-book.fractals-generated-test
  (:require
-  [scicloj.lalinea.linalg :as la]
   [scicloj.lalinea.tensor :as t]
   [scicloj.lalinea.elementwise :as el]
   [tech.v3.libs.buffered-image :as bufimg]
@@ -11,7 +10,7 @@
 
 
 (def
- v3_l34
+ v3_l33
  (def
   complex-grid
   (fn
@@ -29,7 +28,7 @@
 
 
 (def
- v5_l46
+ v5_l45
  (let
   [g (complex-grid -2.0 1.0 -1.5 1.5 3 3) raw (t/->tensor g)]
   {:shape (t/complex-shape g),
@@ -38,7 +37,7 @@
 
 
 (deftest
- t6_l52
+ t6_l51
  (is
   ((fn
     [v]
@@ -46,11 +45,11 @@
      (= (:shape v) [3 3])
      (= (:top-left-re v) -2.0)
      (= (:bottom-right-im v) 1.5)))
-   v5_l46)))
+   v5_l45)))
 
 
 (def
- v8_l68
+ v8_l67
  (def
   mandelbrot-counts
   (fn
@@ -75,7 +74,7 @@
 
 
 (def
- v10_l87
+ v10_l86
  (def
   counts->image
   (fn
@@ -110,7 +109,7 @@
 
 
 (def
- v12_l102
+ v12_l101
  (def
   mandelbrot-img
   (let
@@ -125,16 +124,16 @@
    (counts->image counts h w max-iter))))
 
 
-(def v13_l107 (bufimg/tensor->image mandelbrot-img))
+(def v13_l106 (bufimg/tensor->image mandelbrot-img))
 
 
 (deftest
- t14_l109
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v13_l107)))
+ t14_l108
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v13_l106)))
 
 
 (def
- v16_l117
+ v16_l116
  (def
   mandelbrot-zoom
   (let
@@ -149,16 +148,16 @@
    (counts->image counts h w max-iter))))
 
 
-(def v17_l122 (bufimg/tensor->image mandelbrot-zoom))
+(def v17_l121 (bufimg/tensor->image mandelbrot-zoom))
 
 
 (deftest
- t18_l124
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v17_l122)))
+ t18_l123
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v17_l121)))
 
 
 (def
- v20_l133
+ v20_l132
  (def
   julia-counts
   (fn
@@ -186,7 +185,7 @@
 
 
 (def
- v22_l153
+ v22_l152
  (def
   julia-dendrite
   (let
@@ -201,16 +200,16 @@
    (counts->image counts h w max-iter))))
 
 
-(def v23_l158 (bufimg/tensor->image julia-dendrite))
+(def v23_l157 (bufimg/tensor->image julia-dendrite))
 
 
 (deftest
- t24_l160
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v23_l158)))
+ t24_l159
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v23_l157)))
 
 
 (def
- v26_l165
+ v26_l164
  (def
   julia-connected
   (let
@@ -225,16 +224,16 @@
    (counts->image counts h w max-iter))))
 
 
-(def v27_l170 (bufimg/tensor->image julia-connected))
+(def v27_l169 (bufimg/tensor->image julia-connected))
 
 
 (deftest
- t28_l172
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v27_l170)))
+ t28_l171
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v27_l169)))
 
 
 (def
- v30_l177
+ v30_l176
  (def
   julia-rabbit
   (let
@@ -249,16 +248,16 @@
    (counts->image counts h w max-iter))))
 
 
-(def v31_l182 (bufimg/tensor->image julia-rabbit))
+(def v31_l181 (bufimg/tensor->image julia-rabbit))
 
 
 (deftest
- t32_l184
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v31_l182)))
+ t32_l183
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v31_l181)))
 
 
 (def
- v34_l208
+ v34_l207
  (def
   newton-roots
   (fn
@@ -331,11 +330,11 @@
          2.0)))))))))
 
 
-(def v36_l259 (def root-colors [[230 50 50] [50 180 50] [50 80 220]]))
+(def v36_l258 (def root-colors [[230 50 50] [50 180 50] [50 80 220]]))
 
 
 (def
- v37_l264
+ v37_l263
  (def
   roots->image
   (fn
@@ -351,7 +350,7 @@
 
 
 (def
- v39_l275
+ v39_l274
  (def
   newton-img
   (let
@@ -366,16 +365,16 @@
    (roots->image root-idx h w))))
 
 
-(def v40_l280 (bufimg/tensor->image newton-img))
+(def v40_l279 (bufimg/tensor->image newton-img))
 
 
 (deftest
- t41_l282
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v40_l280)))
+ t41_l281
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v40_l279)))
 
 
 (def
- v43_l289
+ v43_l288
  (def
   newton-zoom
   (let
@@ -390,9 +389,9 @@
    (roots->image root-idx h w))))
 
 
-(def v44_l294 (bufimg/tensor->image newton-zoom))
+(def v44_l293 (bufimg/tensor->image newton-zoom))
 
 
 (deftest
- t45_l296
- (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v44_l294)))
+ t45_l295
+ (is ((fn [img] (= java.awt.image.BufferedImage (type img))) v44_l293)))

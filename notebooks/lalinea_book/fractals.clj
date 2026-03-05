@@ -15,7 +15,6 @@
 (ns lalinea-book.fractals
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
-   [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.tensor :as t]
    [scicloj.lalinea.elementwise :as el]
    ;; Tensor <-> BufferedImage conversion:

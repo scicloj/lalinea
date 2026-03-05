@@ -1,7 +1,6 @@
 (ns
  lalinea-book.fourier-transform-generated-test
  (:require
-  [scicloj.lalinea.linalg :as la]
   [scicloj.lalinea.tensor :as t]
   [scicloj.lalinea.elementwise :as el]
   [scicloj.lalinea.transform :as ft]
@@ -12,16 +11,16 @@
   [clojure.test :refer [deftest is]]))
 
 
-(def v3_l34 (ft/forward [1.0 0.0 -1.0 0.0]))
+(def v3_l33 (ft/forward [1.0 0.0 -1.0 0.0]))
 
 
 (deftest
- t5_l38
- (is ((fn [ct] (< (abs (double (el/re (ct 0)))) 1.0E-10)) v3_l34)))
+ t5_l37
+ (is ((fn [ct] (< (abs (double (el/re (ct 0)))) 1.0E-10)) v3_l33)))
 
 
 (def
- v7_l44
+ v7_l43
  (let
   [signal
    [1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0]
@@ -32,11 +31,11 @@
   (el/reduce-max (el/abs (el/- recovered signal)))))
 
 
-(deftest t8_l49 (is ((fn [v] (< v 1.0E-10)) v7_l44)))
+(deftest t8_l48 (is ((fn [v] (< v 1.0E-10)) v7_l43)))
 
 
 (def
- v10_l58
+ v10_l57
  (let
   [signal
    [1.0 2.0 3.0 4.0]
@@ -53,11 +52,11 @@
   (< (abs (- time-energy freq-energy)) 1.0E-10)))
 
 
-(deftest t11_l66 (is (true? v10_l58)))
+(deftest t11_l65 (is (true? v10_l57)))
 
 
 (def
- v13_l72
+ v13_l71
  (let
   [x
    [1.0 2.0 3.0 4.0]
@@ -82,11 +81,11 @@
     1.0E-10))))
 
 
-(deftest t14_l83 (is (true? v13_l72)))
+(deftest t14_l82 (is (true? v13_l71)))
 
 
 (def
- v16_l92
+ v16_l91
  (let
   [x
    [1.0 2.0 0.0 0.0]
@@ -122,14 +121,14 @@
   (< (el/reduce-max (el/abs (el/- conv-result manual-conv))) 1.0E-10)))
 
 
-(deftest t17_l110 (is (true? v16_l92)))
+(deftest t17_l109 (is (true? v16_l91)))
 
 
-(def v19_l116 (def N-vis 64))
+(def v19_l115 (def N-vis 64))
 
 
 (def
- v20_l118
+ v20_l117
  (def
   signal-composed
   (t/->real-tensor
@@ -145,7 +144,7 @@
 
 
 (def
- v22_l128
+ v22_l127
  (->
   (tc/dataset
    {:t (t/make-reader :float64 N-vis (/ (double idx) N-vis)),
@@ -156,7 +155,7 @@
 
 
 (def
- v24_l137
+ v24_l136
  (let
   [spectrum (ft/forward signal-composed) mags (el/abs spectrum)]
   (->
@@ -169,7 +168,7 @@
 
 
 (def
- v26_l147
+ v26_l146
  (let
   [spectrum
    (ft/forward signal-composed)
@@ -182,11 +181,11 @@
   (= [3 7] (sort (take 2 peak-idx)))))
 
 
-(deftest t27_l153 (is (true? v26_l147)))
+(deftest t27_l152 (is (true? v26_l146)))
 
 
 (def
- v29_l160
+ v29_l159
  (let
   [spectrum (ft/forward [3.0 3.0 3.0 3.0])]
   {:dc (el/re (spectrum 0)),
@@ -197,18 +196,18 @@
 
 
 (deftest
- t30_l164
+ t30_l163
  (is
   ((fn
     [v]
     (and
      (< (abs (- (double (:dc v)) 12.0)) 1.0E-10)
-     (every? (fn* [p1__81239#] (< p1__81239# 1.0E-10)) (:others v))))
-   v29_l160)))
+     (every? (fn* [p1__100575#] (< p1__100575# 1.0E-10)) (:others v))))
+   v29_l159)))
 
 
 (def
- v32_l169
+ v32_l168
  (let
   [spectrum (ft/forward [1.0 -1.0 1.0 -1.0])]
   {:dc (double (el/abs (spectrum 0))),
@@ -216,16 +215,16 @@
 
 
 (deftest
- t33_l173
+ t33_l172
  (is
   ((fn
     [v]
     (and (< (:dc v) 1.0E-10) (< (abs (- (:nyquist v) 4.0)) 1.0E-10)))
-   v32_l169)))
+   v32_l168)))
 
 
 (def
- v35_l180
+ v35_l179
  (let
   [signal
    (t/complex-tensor [1.0 0.0] [0.0 1.0])
@@ -242,11 +241,11 @@
     1.0E-10))))
 
 
-(deftest t36_l186 (is (true? v35_l180)))
+(deftest t36_l185 (is (true? v35_l179)))
 
 
 (def
- v38_l192
+ v38_l191
  (let
   [signal
    [1.0 2.0 3.0 4.0]
@@ -257,4 +256,4 @@
   (< (el/reduce-max (el/abs (el/- recovered signal))) 1.0E-10)))
 
 
-(deftest t39_l197 (is (true? v38_l192)))
+(deftest t39_l196 (is (true? v38_l191)))
