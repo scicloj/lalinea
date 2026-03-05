@@ -66,9 +66,23 @@
 
 ;; ## Why La Linea builds on dtype-next
 ;;
-;; dtype-next tensors and EJML's `DMatrixRMaj` share the same
-;; memory layout — a flat `double[]` in row-major order.
-;; This lets La Linea pass tensors to EJML with **zero copying**:
+;; dtype-next provides high-performance typed buffers and tensors
+;; for Clojure.
+;; [Tablecloth](https://scicloj.github.io/tablecloth/)/[tech.ml.dataset](https://github.com/techascent/tech.ml.dataset)
+;; and other libraries in the Clojure data science ecosystem build on it.
+;; La Linea uses dtype-next as its tensor layer so that matrices
+;; interoperate with that ecosystem.
+;;
+;; A La Linea matrix is backed by a dtype-next tensor. It implements
+;; dtype-next's protocols, so `dtype/clone`, `dtype/shape`, and `dfn/`
+;; reductions work on it directly. The
+;; [Ecosystem Composability](ecosystem.html) chapter explores this
+;; interop in detail.
+;;
+;; For the computational backend, La Linea uses EJML. This pairing works
+;; naturally: dtype-next tensors and EJML's `DMatrixRMaj` share the same
+;; memory layout (a flat `double[]` in row-major order), enabling
+;; **zero-copy** interop:
 ;;
 ;; | Type | Backing | Layout |
 ;; |:-----|:--------|:-------|

@@ -2,8 +2,8 @@
 
 *What if dtype-next had linear algebra and complex numbers?*
 
-La Linea extends [dtype-next](https://github.com/cnuernber/dtype-next) — Clojure's
-high-performance tensor foundation — with linear algebra and complex numbers,
+La Linea extends [dtype-next](https://github.com/cnuernber/dtype-next) with
+linear algebra and complex numbers,
 powered by [EJML](https://ejml.org/) as the computational backend.
 The two share the same row-major `double[]` memory layout, enabling **zero-copy** interop.
 
