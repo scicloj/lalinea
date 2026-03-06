@@ -31,7 +31,7 @@
 ;;
 ;; A real signal produces a complex spectrum.
 
-(ft/forward [1.0 0.0 -1.0 0.0])
+(ft/dft-fwd [1.0 0.0 -1.0 0.0])
 
 ;; The DC component ($k=0$) is $\sum x_n = 0$.
 
@@ -42,8 +42,8 @@
 ;; FFT followed by inverse FFT recovers the original signal.
 
 (let [signal [1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0]
-      spectrum (ft/forward signal)
-      recovered (ft/inverse-real spectrum)]
+      spectrum (ft/dft-fwd signal)
+      recovered (ft/dft-inv-real spectrum)]
   (el/reduce-max (el/abs (el/- recovered signal))))
 
 (kind/test-last [(fn [v] (< v 1e-10))])
@@ -57,7 +57,7 @@
 
 (let [signal [1.0 2.0 3.0 4.0]
       n (count signal)
-      spectrum (ft/forward signal)
+      spectrum (ft/dft-fwd signal)
       time-energy (el/sum (el/* signal signal))
       magnitudes (el/abs spectrum)
       freq-energy (/ (el/sum (el/* magnitudes magnitudes)) n)]
@@ -74,9 +74,9 @@
       alpha 2.0
       beta -1.5
       combined (el/+ (el/* alpha x) (el/* beta y))
-      lhs (ft/forward combined)
-      rhs (el/+ (el/scale (ft/forward x) alpha)
-                (el/scale (ft/forward y) beta))]
+      lhs (ft/dft-fwd combined)
+      rhs (el/+ (el/scale (ft/dft-fwd x) alpha)
+                (el/scale (ft/dft-fwd y) beta))]
   (and (< (el/reduce-max (el/abs (el/- (el/re lhs) (el/re rhs)))) 1e-10)
        (< (el/reduce-max (el/abs (el/- (el/im lhs) (el/im rhs)))) 1e-10)))
 
@@ -91,10 +91,10 @@
 
 (let [x [1.0 2.0 0.0 0.0]
       y [1.0 0.0 1.0 0.0]
-      Fx (ft/forward x)
-      Fy (ft/forward y)
+      Fx (ft/dft-fwd x)
+      Fy (ft/dft-fwd y)
       product-spectrum (el/* Fx Fy)
-      conv-result (ft/inverse-real product-spectrum)
+      conv-result (ft/dft-inv-real product-spectrum)
       n (count x)
       manual-conv (let [out (t/make-container :float64 n)]
                     (dotimes [k n]
@@ -134,7 +134,7 @@
 ;; The magnitude spectrum reveals two peaks at frequencies
 ;; 3 and 7:
 
-(let [spectrum (ft/forward signal-composed)
+(let [spectrum (ft/dft-fwd signal-composed)
       mags (el/abs spectrum)]
   (-> (tc/dataset {:frequency (range (/ N-vis 2))
                    :magnitude (take (/ N-vis 2) mags)})
@@ -144,7 +144,7 @@
 
 ;; The two largest magnitude bins are at frequencies 3 and 7:
 
-(let [spectrum (ft/forward signal-composed)
+(let [spectrum (ft/dft-fwd signal-composed)
       mags (el/abs spectrum)
       half-n (/ N-vis 2)
       peak-idx (el/argsort > (t/select mags (range half-n)))]
@@ -157,7 +157,7 @@
 ;; The DFT of a constant signal $x_n = c$ is $\hat{x}_0 = Nc$
 ;; with all other bins zero.
 
-(let [spectrum (ft/forward [3.0 3.0 3.0 3.0])]
+(let [spectrum (ft/dft-fwd [3.0 3.0 3.0 3.0])]
   {:dc (el/re (spectrum 0))
    :others [(el/abs (spectrum 1)) (el/abs (spectrum 2)) (el/abs (spectrum 3))]})
 
@@ -166,7 +166,7 @@
 
 ;; The DFT of $x = [1, -1, 1, -1]$ has energy only at Nyquist ($k = N/2$).
 
-(let [spectrum (ft/forward [1.0 -1.0 1.0 -1.0])]
+(let [spectrum (ft/dft-fwd [1.0 -1.0 1.0 -1.0])]
   {:dc (double (el/abs (spectrum 0)))
    :nyquist (double (el/re (spectrum 2)))})
 
@@ -178,8 +178,8 @@
 ;; When the input is already complex, use `forward-complex`.
 
 (let [signal (t/complex-tensor [1.0 0.0] [0.0 1.0])
-      spectrum (ft/forward-complex signal)
-      recovered (ft/inverse spectrum)]
+      spectrum (ft/dft-fwd-complex signal)
+      recovered (ft/dft-inv spectrum)]
   (and (< (el/reduce-max (el/abs (el/- (el/re recovered) (el/re signal)))) 1e-10)
        (< (el/reduce-max (el/abs (el/- (el/im recovered) (el/im signal)))) 1e-10)))
 
@@ -190,8 +190,8 @@
 ;; [DCT](https://en.wikipedia.org/wiki/Discrete_cosine_transform), [DST](https://en.wikipedia.org/wiki/Discrete_sine_transform), and [DHT](https://en.wikipedia.org/wiki/Discrete_Hartley_transform) are also available, returning real tensors.
 
 (let [signal [1.0 2.0 3.0 4.0]
-      dct (ft/dct-forward signal)
-      recovered (ft/dct-inverse dct)]
+      dct (ft/dct-fwd signal)
+      recovered (ft/dct-inv dct)]
   (< (el/reduce-max (el/abs (el/- recovered signal))) 1e-10))
 
 (kind/test-last [true?])
@@ -205,12 +205,12 @@
 
 ;; ### Forward and inverse
 
-(ft/forward-2d (t/matrix [[1 2] [3 4]]))
+(ft/dft-fwd-2d (t/matrix [[1 2] [3 4]]))
 
 ;; Round-trip recovers the original matrix:
 
 (let [A (t/matrix [[1 2 3] [4 5 6] [7 8 9]])
-      recovered (ft/inverse-real-2d (ft/forward-2d A))]
+      recovered (ft/dft-inv-real-2d (ft/dft-fwd-2d A))]
   (la/close? recovered A))
 
 (kind/test-last [true?])
@@ -224,7 +224,7 @@
                     [9 10 11 12]
                     [13 14 15 16]])
       mn (* 4 4)
-      spectrum (ft/forward-2d A)
+      spectrum (ft/dft-fwd-2d A)
       space-energy (el/sum (el/* A A))
       mags (el/abs spectrum)
       freq-energy (/ (el/sum (el/* mags mags)) mn)]
@@ -242,7 +242,7 @@
                     [ 1 -1  1 -1]
                     [ 1 -1  1 -1]
                     [ 1 -1  1 -1]])
-      spectrum (ft/forward-2d A)
+      spectrum (ft/dft-fwd-2d A)
       mags (el/abs spectrum)]
   {:dc (double (mags 0 0))
    :h-nyquist (double (mags 0 2))})
@@ -257,7 +257,7 @@
                     [-1 -1 -1 -1]
                     [ 1  1  1  1]
                     [-1 -1 -1 -1]])
-      spectrum (ft/forward-2d A)
+      spectrum (ft/dft-fwd-2d A)
       mags (el/abs spectrum)]
   {:dc (double (mags 0 0))
    :v-nyquist (double (mags 2 0))})

@@ -12,7 +12,7 @@
   [clojure.test :refer [deftest is]]))
 
 
-(def v3_l34 (ft/forward [1.0 0.0 -1.0 0.0]))
+(def v3_l34 (ft/dft-fwd [1.0 0.0 -1.0 0.0]))
 
 
 (deftest
@@ -26,9 +26,9 @@
   [signal
    [1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0]
    spectrum
-   (ft/forward signal)
+   (ft/dft-fwd signal)
    recovered
-   (ft/inverse-real spectrum)]
+   (ft/dft-inv-real spectrum)]
   (el/reduce-max (el/abs (el/- recovered signal)))))
 
 
@@ -43,7 +43,7 @@
    n
    (count signal)
    spectrum
-   (ft/forward signal)
+   (ft/dft-fwd signal)
    time-energy
    (el/sum (el/* signal signal))
    magnitudes
@@ -70,11 +70,11 @@
    combined
    (el/+ (el/* alpha x) (el/* beta y))
    lhs
-   (ft/forward combined)
+   (ft/dft-fwd combined)
    rhs
    (el/+
-    (el/scale (ft/forward x) alpha)
-    (el/scale (ft/forward y) beta))]
+    (el/scale (ft/dft-fwd x) alpha)
+    (el/scale (ft/dft-fwd y) beta))]
   (and
    (< (el/reduce-max (el/abs (el/- (el/re lhs) (el/re rhs)))) 1.0E-10)
    (<
@@ -93,13 +93,13 @@
    y
    [1.0 0.0 1.0 0.0]
    Fx
-   (ft/forward x)
+   (ft/dft-fwd x)
    Fy
-   (ft/forward y)
+   (ft/dft-fwd y)
    product-spectrum
    (el/* Fx Fy)
    conv-result
-   (ft/inverse-real product-spectrum)
+   (ft/dft-inv-real product-spectrum)
    n
    (count x)
    manual-conv
@@ -158,7 +158,7 @@
 (def
  v24_l137
  (let
-  [spectrum (ft/forward signal-composed) mags (el/abs spectrum)]
+  [spectrum (ft/dft-fwd signal-composed) mags (el/abs spectrum)]
   (->
    (tc/dataset
     {:frequency (range (/ N-vis 2)),
@@ -172,7 +172,7 @@
  v26_l147
  (let
   [spectrum
-   (ft/forward signal-composed)
+   (ft/dft-fwd signal-composed)
    mags
    (el/abs spectrum)
    half-n
@@ -188,7 +188,7 @@
 (def
  v29_l160
  (let
-  [spectrum (ft/forward [3.0 3.0 3.0 3.0])]
+  [spectrum (ft/dft-fwd [3.0 3.0 3.0 3.0])]
   {:dc (el/re (spectrum 0)),
    :others
    [(el/abs (spectrum 1))
@@ -203,14 +203,14 @@
     [v]
     (and
      (< (abs (- (double (:dc v)) 12.0)) 1.0E-10)
-     (every? (fn* [p1__72868#] (< p1__72868# 1.0E-10)) (:others v))))
+     (every? (fn* [p1__67656#] (< p1__67656# 1.0E-10)) (:others v))))
    v29_l160)))
 
 
 (def
  v32_l169
  (let
-  [spectrum (ft/forward [1.0 -1.0 1.0 -1.0])]
+  [spectrum (ft/dft-fwd [1.0 -1.0 1.0 -1.0])]
   {:dc (double (el/abs (spectrum 0))),
    :nyquist (double (el/re (spectrum 2)))}))
 
@@ -230,9 +230,9 @@
   [signal
    (t/complex-tensor [1.0 0.0] [0.0 1.0])
    spectrum
-   (ft/forward-complex signal)
+   (ft/dft-fwd-complex signal)
    recovered
-   (ft/inverse spectrum)]
+   (ft/dft-inv spectrum)]
   (and
    (<
     (el/reduce-max (el/abs (el/- (el/re recovered) (el/re signal))))
@@ -251,16 +251,16 @@
   [signal
    [1.0 2.0 3.0 4.0]
    dct
-   (ft/dct-forward signal)
+   (ft/dct-fwd signal)
    recovered
-   (ft/dct-inverse dct)]
+   (ft/dct-inv dct)]
   (< (el/reduce-max (el/abs (el/- recovered signal))) 1.0E-10)))
 
 
 (deftest t39_l197 (is (true? v38_l192)))
 
 
-(def v41_l208 (ft/forward-2d (t/matrix [[1 2] [3 4]])))
+(def v41_l208 (ft/dft-fwd-2d (t/matrix [[1 2] [3 4]])))
 
 
 (def
@@ -269,7 +269,7 @@
   [A
    (t/matrix [[1 2 3] [4 5 6] [7 8 9]])
    recovered
-   (ft/inverse-real-2d (ft/forward-2d A))]
+   (ft/dft-inv-real-2d (ft/dft-fwd-2d A))]
   (la/close? recovered A)))
 
 
@@ -284,7 +284,7 @@
    mn
    (* 4 4)
    spectrum
-   (ft/forward-2d A)
+   (ft/dft-fwd-2d A)
    space-energy
    (el/sum (el/* A A))
    mags
@@ -303,7 +303,7 @@
   [A
    (t/matrix [[1 -1 1 -1] [1 -1 1 -1] [1 -1 1 -1] [1 -1 1 -1]])
    spectrum
-   (ft/forward-2d A)
+   (ft/dft-fwd-2d A)
    mags
    (el/abs spectrum)]
   {:dc (double (mags 0 0)), :h-nyquist (double (mags 0 2))}))
@@ -326,7 +326,7 @@
   [A
    (t/matrix [[1 1 1 1] [-1 -1 -1 -1] [1 1 1 1] [-1 -1 -1 -1]])
    spectrum
-   (ft/forward-2d A)
+   (ft/dft-fwd-2d A)
    mags
    (el/abs spectrum)]
   {:dc (double (mags 0 0)), :v-nyquist (double (mags 2 0))}))

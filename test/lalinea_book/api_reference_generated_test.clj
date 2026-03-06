@@ -1399,36 +1399,36 @@
  (is ((fn [v] (= [9.0 7.0 3.0 2.0 1.0] (t/flatten v))) v404_l904)))
 
 
-(def v407_l916 (kind/doc #'ft/forward))
+(def v407_l916 (kind/doc #'ft/dft-fwd))
 
 
 (def
  v408_l918
  (let
-  [signal [1.0 0.0 0.0 0.0] spectrum (ft/forward signal)]
+  [signal [1.0 0.0 0.0 0.0] spectrum (ft/dft-fwd signal)]
   (t/complex-shape spectrum)))
 
 
 (deftest t409_l922 (is (= v408_l918 [4])))
 
 
-(def v410_l924 (kind/doc #'ft/inverse))
+(def v410_l924 (kind/doc #'ft/dft-inv))
 
 
 (def
  v411_l926
  (let
   [spectrum
-   (ft/forward [1.0 2.0 3.0 4.0])
+   (ft/dft-fwd [1.0 2.0 3.0 4.0])
    roundtrip
-   (ft/inverse spectrum)]
+   (ft/dft-inv spectrum)]
   (la/close-scalar? (el/re (roundtrip 0)) 1.0)))
 
 
 (deftest t412_l930 (is (true? v411_l926)))
 
 
-(def v413_l932 (kind/doc #'ft/inverse-real))
+(def v413_l932 (kind/doc #'ft/dft-inv-real))
 
 
 (def
@@ -1437,14 +1437,14 @@
   [signal
    [1.0 2.0 3.0 4.0]
    roundtrip
-   (ft/inverse-real (ft/forward signal))]
+   (ft/dft-inv-real (ft/dft-fwd signal))]
   (la/close-scalar? (roundtrip 0) 1.0)))
 
 
 (deftest t415_l938 (is (true? v414_l934)))
 
 
-(def v416_l940 (kind/doc #'ft/forward-complex))
+(def v416_l940 (kind/doc #'ft/dft-fwd-complex))
 
 
 (def
@@ -1453,27 +1453,27 @@
   [ct
    (t/complex-tensor-real [1.0 0.0 0.0 0.0])
    spectrum
-   (ft/forward-complex ct)]
+   (ft/dft-fwd-complex ct)]
   (t/complex-shape spectrum)))
 
 
 (deftest t418_l946 (is (= v417_l942 [4])))
 
 
-(def v419_l948 (kind/doc #'ft/forward-2d))
+(def v419_l948 (kind/doc #'ft/dft-fwd-2d))
 
 
 (def
  v420_l950
  (let
-  [A (t/matrix [[1 2] [3 4]]) spectrum (ft/forward-2d A)]
+  [A (t/matrix [[1 2] [3 4]]) spectrum (ft/dft-fwd-2d A)]
   (t/complex-shape spectrum)))
 
 
 (deftest t421_l954 (is (= v420_l950 [2 2])))
 
 
-(def v422_l956 (kind/doc #'ft/inverse-2d))
+(def v422_l956 (kind/doc #'ft/dft-inv-2d))
 
 
 (def
@@ -1482,14 +1482,14 @@
   [A
    (t/matrix [[1 2] [3 4]])
    roundtrip
-   (ft/inverse-2d (ft/forward-2d A))]
+   (ft/dft-inv-2d (ft/dft-fwd-2d A))]
   (la/close-scalar? (el/re ((roundtrip 0) 0)) 1.0)))
 
 
 (deftest t424_l962 (is (true? v423_l958)))
 
 
-(def v425_l964 (kind/doc #'ft/inverse-real-2d))
+(def v425_l964 (kind/doc #'ft/dft-inv-real-2d))
 
 
 (def
@@ -1498,14 +1498,14 @@
   [A
    (t/matrix [[1 2] [3 4]])
    roundtrip
-   (ft/inverse-real-2d (ft/forward-2d A))]
+   (ft/dft-inv-real-2d (ft/dft-fwd-2d A))]
   (la/close? roundtrip A)))
 
 
 (deftest t427_l970 (is (true? v426_l966)))
 
 
-(def v428_l972 (kind/doc #'ft/forward-complex-2d))
+(def v428_l972 (kind/doc #'ft/dft-fwd-complex-2d))
 
 
 (def
@@ -1514,82 +1514,73 @@
   [ct
    (t/complex-tensor-real [[1 2] [3 4]])
    spectrum
-   (ft/forward-complex-2d ct)]
+   (ft/dft-fwd-complex-2d ct)]
   (t/complex-shape spectrum)))
 
 
 (deftest t430_l978 (is (= v429_l974 [2 2])))
 
 
-(def v431_l980 (kind/doc #'ft/dct-forward))
+(def v431_l980 (kind/doc #'ft/dct-fwd))
 
 
-(def v432_l982 (ft/dct-forward [1.0 2.0 3.0 4.0]))
+(def v432_l982 (ft/dct-fwd [1.0 2.0 3.0 4.0]))
 
 
 (deftest t433_l984 (is ((fn [v] (= 4 (count v))) v432_l982)))
 
 
-(def v434_l986 (kind/doc #'ft/dct-inverse))
+(def v434_l986 (kind/doc #'ft/dct-inv))
 
 
 (def
  v435_l988
  (let
-  [signal
-   [1.0 2.0 3.0 4.0]
-   roundtrip
-   (ft/dct-inverse (ft/dct-forward signal))]
+  [signal [1.0 2.0 3.0 4.0] roundtrip (ft/dct-inv (ft/dct-fwd signal))]
   (la/close-scalar? (roundtrip 0) 1.0)))
 
 
 (deftest t436_l992 (is (true? v435_l988)))
 
 
-(def v437_l994 (kind/doc #'ft/dst-forward))
+(def v437_l994 (kind/doc #'ft/dst-fwd))
 
 
-(def v438_l996 (ft/dst-forward [1.0 2.0 3.0 4.0]))
+(def v438_l996 (ft/dst-fwd [1.0 2.0 3.0 4.0]))
 
 
 (deftest t439_l998 (is ((fn [v] (= 4 (count v))) v438_l996)))
 
 
-(def v440_l1000 (kind/doc #'ft/dst-inverse))
+(def v440_l1000 (kind/doc #'ft/dst-inv))
 
 
 (def
  v441_l1002
  (let
-  [signal
-   [1.0 2.0 3.0 4.0]
-   roundtrip
-   (ft/dst-inverse (ft/dst-forward signal))]
+  [signal [1.0 2.0 3.0 4.0] roundtrip (ft/dst-inv (ft/dst-fwd signal))]
   (la/close-scalar? (roundtrip 0) 1.0)))
 
 
 (deftest t442_l1006 (is (true? v441_l1002)))
 
 
-(def v443_l1008 (kind/doc #'ft/dht-forward))
+(def v443_l1008 (kind/doc #'ft/dht-fwd))
 
 
-(def v444_l1010 (ft/dht-forward [1.0 2.0 3.0 4.0]))
+(def v444_l1010 (ft/dht-fwd [1.0 2.0 3.0 4.0]))
 
 
 (deftest t445_l1012 (is ((fn [v] (= 4 (count v))) v444_l1010)))
 
 
-(def v446_l1014 (kind/doc #'ft/dht-inverse))
+(def v446_l1014 (kind/doc #'ft/dht-inv))
 
 
 (def
  v447_l1016
  (let
-  [signal
-   [1.0 2.0 3.0 4.0]
-   roundtrip
-   (ft/dht-inverse (ft/dht-forward signal))]
+  [signal [1.0 2.0 3.0 4.0] roundtrip (ft/dht-inv (ft/dht-fwd signal))]
   (la/close-scalar? (roundtrip 0) 1.0)))
 
 

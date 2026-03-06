@@ -24,11 +24,11 @@
   (dtype/->double-array (rt/ensure-tensor signal)))
 
 ;; ---------------------------------------------------------------------------
-;; 1-D FFT
+;; 1-D DFT
 ;; ---------------------------------------------------------------------------
 
-(defn forward
-  "Forward FFT of a real signal. Returns a ComplexTensor spectrum.
+(defn dft-fwd
+  "Forward DFT of a real signal. Returns a ComplexTensor spectrum.
 
    The input can be a Clojure seq, double[], RealTensor, or dtype-next buffer.
    The output is a ComplexTensor of shape `[n]` where n = length of input."
@@ -39,8 +39,8 @@
     (.complexForward fft buf)
     (ct/->complex-tensor (dtt/reshape (dtt/ensure-tensor buf) [n 2]))))
 
-(defn inverse
-  "Inverse FFT from a ComplexTensor spectrum back to a ComplexTensor signal."
+(defn dft-inv
+  "Inverse DFT from a ComplexTensor spectrum back to a ComplexTensor signal."
   [spectrum]
   (let [[n]  (ct/complex-shape spectrum)
         buf  (aclone (ct/->double-array spectrum))
@@ -48,14 +48,14 @@
     (.complexInverse fft buf true)
     (ct/->complex-tensor (dtt/reshape (dtt/ensure-tensor buf) [n 2]))))
 
-(defn inverse-real
-  "Inverse FFT from a ComplexTensor spectrum, returning only the real part.
+(defn dft-inv-real
+  "Inverse DFT from a ComplexTensor spectrum, returning only the real part.
    Useful when you know the result should be purely real."
   [spectrum]
-  (rt/->real-tensor (ct/re (inverse spectrum))))
+  (rt/->real-tensor (ct/re (dft-inv spectrum))))
 
-(defn forward-complex
-  "Forward FFT of a ComplexTensor signal. Returns a ComplexTensor spectrum."
+(defn dft-fwd-complex
+  "Forward DFT of a ComplexTensor signal. Returns a ComplexTensor spectrum."
   [signal]
   (let [[n]  (ct/complex-shape signal)
         buf  (aclone (ct/->double-array signal))
@@ -64,11 +64,11 @@
     (ct/->complex-tensor (dtt/reshape (dtt/ensure-tensor buf) [n 2]))))
 
 ;; ---------------------------------------------------------------------------
-;; 2-D FFT
+;; 2-D DFT
 ;; ---------------------------------------------------------------------------
 
-(defn forward-2d
-  "Forward 2-D FFT of a real `[r c]` matrix.
+(defn dft-fwd-2d
+  "Forward 2-D DFT of a real `[r c]` matrix.
    Returns a ComplexTensor spectrum of shape `[r c]`."
   [matrix]
   (let [[rows cols] (dtype/shape (rt/ensure-tensor matrix))
@@ -77,8 +77,8 @@
     (.complexForward fft buf)
     (ct/->complex-tensor (dtt/reshape (dtt/ensure-tensor buf) [rows cols 2]))))
 
-(defn inverse-2d
-  "Inverse 2-D FFT from a ComplexTensor spectrum back to a ComplexTensor."
+(defn dft-inv-2d
+  "Inverse 2-D DFT from a ComplexTensor spectrum back to a ComplexTensor."
   [spectrum]
   (let [[rows cols] (ct/complex-shape spectrum)
         buf  (aclone (ct/->double-array spectrum))
@@ -86,14 +86,14 @@
     (.complexInverse fft buf true)
     (ct/->complex-tensor (dtt/reshape (dtt/ensure-tensor buf) [rows cols 2]))))
 
-(defn inverse-real-2d
-  "Inverse 2-D FFT from a ComplexTensor spectrum, returning only the real part.
+(defn dft-inv-real-2d
+  "Inverse 2-D DFT from a ComplexTensor spectrum, returning only the real part.
    Useful when you know the result should be purely real."
   [spectrum]
-  (rt/->real-tensor (ct/re (inverse-2d spectrum))))
+  (rt/->real-tensor (ct/re (dft-inv-2d spectrum))))
 
-(defn forward-complex-2d
-  "Forward 2-D FFT of a ComplexTensor signal. Returns a ComplexTensor spectrum."
+(defn dft-fwd-complex-2d
+  "Forward 2-D DFT of a ComplexTensor signal. Returns a ComplexTensor spectrum."
   [signal]
   (let [[rows cols] (ct/complex-shape signal)
         buf  (aclone (ct/->double-array signal))
@@ -105,7 +105,7 @@
 ;; DCT / DST / DHT (1-D, real → real)
 ;; ---------------------------------------------------------------------------
 
-(defn dct-forward
+(defn dct-fwd
   "Forward Discrete Cosine Transform. Real → real."
   [signal]
   (let [buf (aclone (->double-array-input signal))
@@ -113,7 +113,7 @@
     (.forward dct buf true)
     (rt/->real-tensor (dtt/ensure-tensor buf))))
 
-(defn dct-inverse
+(defn dct-inv
   "Inverse Discrete Cosine Transform. Real → real."
   [spectrum]
   (let [buf (aclone (->double-array-input spectrum))
@@ -121,7 +121,7 @@
     (.inverse dct buf true)
     (rt/->real-tensor (dtt/ensure-tensor buf))))
 
-(defn dst-forward
+(defn dst-fwd
   "Forward Discrete Sine Transform. Real → real."
   [signal]
   (let [buf (aclone (->double-array-input signal))
@@ -129,7 +129,7 @@
     (.forward dst buf true)
     (rt/->real-tensor (dtt/ensure-tensor buf))))
 
-(defn dst-inverse
+(defn dst-inv
   "Inverse Discrete Sine Transform. Real → real."
   [spectrum]
   (let [buf (aclone (->double-array-input spectrum))
@@ -137,7 +137,7 @@
     (.inverse dst buf true)
     (rt/->real-tensor (dtt/ensure-tensor buf))))
 
-(defn dht-forward
+(defn dht-fwd
   "Forward Discrete Hartley Transform. Real → real."
   [signal]
   (let [buf (aclone (->double-array-input signal))
@@ -145,7 +145,7 @@
     (.forward dht buf)
     (rt/->real-tensor (dtt/ensure-tensor buf))))
 
-(defn dht-inverse
+(defn dht-inv
   "Inverse Discrete Hartley Transform. Real → real."
   [spectrum]
   (let [buf (aclone (->double-array-input spectrum))

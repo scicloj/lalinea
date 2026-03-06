@@ -129,7 +129,7 @@
 ;; The forward FFT takes a real signal and returns a ComplexTensor
 ;; spectrum — zero-copy from Fastmath's interleaved output.
 
-(ft/forward [1.0 0.0 1.0 0.0])
+(ft/dft-fwd [1.0 0.0 1.0 0.0])
 
 ;; $\hat{f} = [2, 0, 2, 0]$ — a signal with energy at DC and Nyquist.
 
@@ -139,7 +139,7 @@
 ;; Round-trip:
 
 (let [signal [1.0 2.0 3.0 4.0]
-      recovered (ft/inverse-real (ft/forward signal))]
+      recovered (ft/dft-inv-real (ft/dft-fwd signal))]
   recovered)
 
 (kind/test-last [(fn [v] (la/close? v (t/matrix [1.0 2.0 3.0 4.0])))])

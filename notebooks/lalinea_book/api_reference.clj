@@ -913,108 +913,108 @@
 ;; 1-D and 2-D FFT return ComplexTensor spectra; DCT, DST, and
 ;; DHT return real tensors.
 
-(kind/doc #'ft/forward)
+(kind/doc #'ft/dft-fwd)
 
 (let [signal [1.0 0.0 0.0 0.0]
-      spectrum (ft/forward signal)]
+      spectrum (ft/dft-fwd signal)]
   (t/complex-shape spectrum))
 
 (kind/test-last [= [4]])
 
-(kind/doc #'ft/inverse)
+(kind/doc #'ft/dft-inv)
 
-(let [spectrum (ft/forward [1.0 2.0 3.0 4.0])
-      roundtrip (ft/inverse spectrum)]
+(let [spectrum (ft/dft-fwd [1.0 2.0 3.0 4.0])
+      roundtrip (ft/dft-inv spectrum)]
   (la/close-scalar? (el/re (roundtrip 0)) 1.0))
 
 (kind/test-last [true?])
 
-(kind/doc #'ft/inverse-real)
+(kind/doc #'ft/dft-inv-real)
 
 (let [signal [1.0 2.0 3.0 4.0]
-      roundtrip (ft/inverse-real (ft/forward signal))]
+      roundtrip (ft/dft-inv-real (ft/dft-fwd signal))]
   (la/close-scalar? (roundtrip 0) 1.0))
 
 (kind/test-last [true?])
 
-(kind/doc #'ft/forward-complex)
+(kind/doc #'ft/dft-fwd-complex)
 
 (let [ct (t/complex-tensor-real [1.0 0.0 0.0 0.0])
-      spectrum (ft/forward-complex ct)]
+      spectrum (ft/dft-fwd-complex ct)]
   (t/complex-shape spectrum))
 
 (kind/test-last [= [4]])
 
-(kind/doc #'ft/forward-2d)
+(kind/doc #'ft/dft-fwd-2d)
 
 (let [A (t/matrix [[1 2] [3 4]])
-      spectrum (ft/forward-2d A)]
+      spectrum (ft/dft-fwd-2d A)]
   (t/complex-shape spectrum))
 
 (kind/test-last [= [2 2]])
 
-(kind/doc #'ft/inverse-2d)
+(kind/doc #'ft/dft-inv-2d)
 
 (let [A (t/matrix [[1 2] [3 4]])
-      roundtrip (ft/inverse-2d (ft/forward-2d A))]
+      roundtrip (ft/dft-inv-2d (ft/dft-fwd-2d A))]
   (la/close-scalar? (el/re ((roundtrip 0) 0)) 1.0))
 
 (kind/test-last [true?])
 
-(kind/doc #'ft/inverse-real-2d)
+(kind/doc #'ft/dft-inv-real-2d)
 
 (let [A (t/matrix [[1 2] [3 4]])
-      roundtrip (ft/inverse-real-2d (ft/forward-2d A))]
+      roundtrip (ft/dft-inv-real-2d (ft/dft-fwd-2d A))]
   (la/close? roundtrip A))
 
 (kind/test-last [true?])
 
-(kind/doc #'ft/forward-complex-2d)
+(kind/doc #'ft/dft-fwd-complex-2d)
 
 (let [ct (t/complex-tensor-real [[1 2] [3 4]])
-      spectrum (ft/forward-complex-2d ct)]
+      spectrum (ft/dft-fwd-complex-2d ct)]
   (t/complex-shape spectrum))
 
 (kind/test-last [= [2 2]])
 
-(kind/doc #'ft/dct-forward)
+(kind/doc #'ft/dct-fwd)
 
-(ft/dct-forward [1.0 2.0 3.0 4.0])
+(ft/dct-fwd [1.0 2.0 3.0 4.0])
 
 (kind/test-last [(fn [v] (= 4 (count v)))])
 
-(kind/doc #'ft/dct-inverse)
+(kind/doc #'ft/dct-inv)
 
 (let [signal [1.0 2.0 3.0 4.0]
-      roundtrip (ft/dct-inverse (ft/dct-forward signal))]
+      roundtrip (ft/dct-inv (ft/dct-fwd signal))]
   (la/close-scalar? (roundtrip 0) 1.0))
 
 (kind/test-last [true?])
 
-(kind/doc #'ft/dst-forward)
+(kind/doc #'ft/dst-fwd)
 
-(ft/dst-forward [1.0 2.0 3.0 4.0])
+(ft/dst-fwd [1.0 2.0 3.0 4.0])
 
 (kind/test-last [(fn [v] (= 4 (count v)))])
 
-(kind/doc #'ft/dst-inverse)
+(kind/doc #'ft/dst-inv)
 
 (let [signal [1.0 2.0 3.0 4.0]
-      roundtrip (ft/dst-inverse (ft/dst-forward signal))]
+      roundtrip (ft/dst-inv (ft/dst-fwd signal))]
   (la/close-scalar? (roundtrip 0) 1.0))
 
 (kind/test-last [true?])
 
-(kind/doc #'ft/dht-forward)
+(kind/doc #'ft/dht-fwd)
 
-(ft/dht-forward [1.0 2.0 3.0 4.0])
+(ft/dht-fwd [1.0 2.0 3.0 4.0])
 
 (kind/test-last [(fn [v] (= 4 (count v)))])
 
-(kind/doc #'ft/dht-inverse)
+(kind/doc #'ft/dht-inv)
 
 (let [signal [1.0 2.0 3.0 4.0]
-      roundtrip (ft/dht-inverse (ft/dht-forward signal))]
+      roundtrip (ft/dht-inv (ft/dht-fwd signal))]
   (la/close-scalar? (roundtrip 0) 1.0))
 
 (kind/test-last [true?])

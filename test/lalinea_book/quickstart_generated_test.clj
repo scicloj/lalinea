@@ -126,7 +126,7 @@
  (is ((fn [ct] (= [2 2] (t/complex-shape ct))) v41_l121)))
 
 
-(def v44_l132 (ft/forward [1.0 0.0 1.0 0.0]))
+(def v44_l132 (ft/dft-fwd [1.0 0.0 1.0 0.0]))
 
 
 (deftest
@@ -146,7 +146,7 @@
   [signal
    [1.0 2.0 3.0 4.0]
    recovered
-   (ft/inverse-real (ft/forward signal))]
+   (ft/dft-inv-real (ft/dft-fwd signal))]
   recovered))
 
 
