@@ -1399,24 +1399,24 @@
  (is ((fn [v] (= [9.0 7.0 3.0 2.0 1.0] (t/flatten v))) v404_l904)))
 
 
-(def v407_l913 (kind/doc #'ft/forward))
+(def v407_l916 (kind/doc #'ft/forward))
 
 
 (def
- v408_l915
+ v408_l918
  (let
   [signal [1.0 0.0 0.0 0.0] spectrum (ft/forward signal)]
   (t/complex-shape spectrum)))
 
 
-(deftest t409_l919 (is (= v408_l915 [4])))
+(deftest t409_l922 (is (= v408_l918 [4])))
 
 
-(def v410_l921 (kind/doc #'ft/inverse))
+(def v410_l924 (kind/doc #'ft/inverse))
 
 
 (def
- v411_l923
+ v411_l926
  (let
   [spectrum
    (ft/forward [1.0 2.0 3.0 4.0])
@@ -1425,14 +1425,14 @@
   (la/close-scalar? (el/re (roundtrip 0)) 1.0)))
 
 
-(deftest t412_l927 (is (true? v411_l923)))
+(deftest t412_l930 (is (true? v411_l926)))
 
 
-(def v413_l929 (kind/doc #'ft/inverse-real))
+(def v413_l932 (kind/doc #'ft/inverse-real))
 
 
 (def
- v414_l931
+ v414_l934
  (let
   [signal
    [1.0 2.0 3.0 4.0]
@@ -1441,14 +1441,14 @@
   (la/close-scalar? (roundtrip 0) 1.0)))
 
 
-(deftest t415_l935 (is (true? v414_l931)))
+(deftest t415_l938 (is (true? v414_l934)))
 
 
-(def v416_l937 (kind/doc #'ft/forward-complex))
+(def v416_l940 (kind/doc #'ft/forward-complex))
 
 
 (def
- v417_l939
+ v417_l942
  (let
   [ct
    (t/complex-tensor-real [1.0 0.0 0.0 0.0])
@@ -1457,23 +1457,84 @@
   (t/complex-shape spectrum)))
 
 
-(deftest t418_l943 (is (= v417_l939 [4])))
+(deftest t418_l946 (is (= v417_l942 [4])))
 
 
-(def v419_l945 (kind/doc #'ft/dct-forward))
-
-
-(def v420_l947 (ft/dct-forward [1.0 2.0 3.0 4.0]))
-
-
-(deftest t421_l949 (is ((fn [v] (= 4 (count v))) v420_l947)))
-
-
-(def v422_l951 (kind/doc #'ft/dct-inverse))
+(def v419_l948 (kind/doc #'ft/forward-2d))
 
 
 (def
- v423_l953
+ v420_l950
+ (let
+  [A (t/matrix [[1 2] [3 4]]) spectrum (ft/forward-2d A)]
+  (t/complex-shape spectrum)))
+
+
+(deftest t421_l954 (is (= v420_l950 [2 2])))
+
+
+(def v422_l956 (kind/doc #'ft/inverse-2d))
+
+
+(def
+ v423_l958
+ (let
+  [A
+   (t/matrix [[1 2] [3 4]])
+   roundtrip
+   (ft/inverse-2d (ft/forward-2d A))]
+  (la/close-scalar? (el/re ((roundtrip 0) 0)) 1.0)))
+
+
+(deftest t424_l962 (is (true? v423_l958)))
+
+
+(def v425_l964 (kind/doc #'ft/inverse-real-2d))
+
+
+(def
+ v426_l966
+ (let
+  [A
+   (t/matrix [[1 2] [3 4]])
+   roundtrip
+   (ft/inverse-real-2d (ft/forward-2d A))]
+  (la/close? roundtrip A)))
+
+
+(deftest t427_l970 (is (true? v426_l966)))
+
+
+(def v428_l972 (kind/doc #'ft/forward-complex-2d))
+
+
+(def
+ v429_l974
+ (let
+  [ct
+   (t/complex-tensor-real [[1 2] [3 4]])
+   spectrum
+   (ft/forward-complex-2d ct)]
+  (t/complex-shape spectrum)))
+
+
+(deftest t430_l978 (is (= v429_l974 [2 2])))
+
+
+(def v431_l980 (kind/doc #'ft/dct-forward))
+
+
+(def v432_l982 (ft/dct-forward [1.0 2.0 3.0 4.0]))
+
+
+(deftest t433_l984 (is ((fn [v] (= 4 (count v))) v432_l982)))
+
+
+(def v434_l986 (kind/doc #'ft/dct-inverse))
+
+
+(def
+ v435_l988
  (let
   [signal
    [1.0 2.0 3.0 4.0]
@@ -1482,23 +1543,23 @@
   (la/close-scalar? (roundtrip 0) 1.0)))
 
 
-(deftest t424_l957 (is (true? v423_l953)))
+(deftest t436_l992 (is (true? v435_l988)))
 
 
-(def v425_l959 (kind/doc #'ft/dst-forward))
+(def v437_l994 (kind/doc #'ft/dst-forward))
 
 
-(def v426_l961 (ft/dst-forward [1.0 2.0 3.0 4.0]))
+(def v438_l996 (ft/dst-forward [1.0 2.0 3.0 4.0]))
 
 
-(deftest t427_l963 (is ((fn [v] (= 4 (count v))) v426_l961)))
+(deftest t439_l998 (is ((fn [v] (= 4 (count v))) v438_l996)))
 
 
-(def v428_l965 (kind/doc #'ft/dst-inverse))
+(def v440_l1000 (kind/doc #'ft/dst-inverse))
 
 
 (def
- v429_l967
+ v441_l1002
  (let
   [signal
    [1.0 2.0 3.0 4.0]
@@ -1507,23 +1568,23 @@
   (la/close-scalar? (roundtrip 0) 1.0)))
 
 
-(deftest t430_l971 (is (true? v429_l967)))
+(deftest t442_l1006 (is (true? v441_l1002)))
 
 
-(def v431_l973 (kind/doc #'ft/dht-forward))
+(def v443_l1008 (kind/doc #'ft/dht-forward))
 
 
-(def v432_l975 (ft/dht-forward [1.0 2.0 3.0 4.0]))
+(def v444_l1010 (ft/dht-forward [1.0 2.0 3.0 4.0]))
 
 
-(deftest t433_l977 (is ((fn [v] (= 4 (count v))) v432_l975)))
+(deftest t445_l1012 (is ((fn [v] (= 4 (count v))) v444_l1010)))
 
 
-(def v434_l979 (kind/doc #'ft/dht-inverse))
+(def v446_l1014 (kind/doc #'ft/dht-inverse))
 
 
 (def
- v435_l981
+ v447_l1016
  (let
   [signal
    [1.0 2.0 3.0 4.0]
@@ -1532,70 +1593,70 @@
   (la/close-scalar? (roundtrip 0) 1.0)))
 
 
-(deftest t436_l985 (is (true? v435_l981)))
+(deftest t448_l1020 (is (true? v447_l1016)))
 
 
-(def v438_l991 (kind/doc #'tape/memory-status))
+(def v450_l1026 (kind/doc #'tape/memory-status))
 
 
-(def v439_l993 (tape/memory-status (t/matrix [[1 2] [3 4]])))
+(def v451_l1028 (tape/memory-status (t/matrix [[1 2] [3 4]])))
 
 
-(deftest t440_l995 (is ((fn [s] (= :contiguous s)) v439_l993)))
+(deftest t452_l1030 (is ((fn [s] (= :contiguous s)) v451_l1028)))
 
 
 (def
- v441_l997
+ v453_l1032
  (tape/memory-status (la/transpose (t/matrix [[1 2] [3 4]]))))
 
 
-(deftest t442_l999 (is ((fn [s] (= :strided s)) v441_l997)))
+(deftest t454_l1034 (is ((fn [s] (= :strided s)) v453_l1032)))
 
 
-(def v443_l1001 (tape/memory-status (el/+ (t/eye 2) (t/eye 2))))
+(def v455_l1036 (tape/memory-status (el/+ (t/eye 2) (t/eye 2))))
 
 
-(deftest t444_l1003 (is ((fn [s] (= :lazy s)) v443_l1001)))
+(deftest t456_l1038 (is ((fn [s] (= :lazy s)) v455_l1036)))
 
 
-(def v445_l1005 (kind/doc #'tape/memory-relation))
+(def v457_l1040 (kind/doc #'tape/memory-relation))
 
 
 (def
- v446_l1007
+ v458_l1042
  (let
   [A (t/matrix [[1 2] [3 4]])]
   (tape/memory-relation A (la/transpose A))))
 
 
-(deftest t447_l1010 (is ((fn [r] (= :shared r)) v446_l1007)))
+(deftest t459_l1045 (is ((fn [r] (= :shared r)) v458_l1042)))
 
 
 (def
- v448_l1012
+ v460_l1047
  (tape/memory-relation
   (t/matrix [[1 0] [0 1]])
   (t/matrix [[5 6] [7 8]])))
 
 
-(deftest t449_l1014 (is ((fn [r] (= :independent r)) v448_l1012)))
+(deftest t461_l1049 (is ((fn [r] (= :independent r)) v460_l1047)))
 
 
 (def
- v450_l1016
+ v462_l1051
  (tape/memory-relation
   (t/matrix [[1 2] [3 4]])
   (el/+ (t/eye 2) (t/eye 2))))
 
 
-(deftest t451_l1018 (is ((fn [r] (= :unknown-lazy r)) v450_l1016)))
+(deftest t463_l1053 (is ((fn [r] (= :unknown-lazy r)) v462_l1051)))
 
 
-(def v452_l1020 (kind/doc #'tape/with-tape))
+(def v464_l1055 (kind/doc #'tape/with-tape))
 
 
 (def
- v453_l1022
+ v465_l1057
  (def
   tape-example
   (tape/with-tape
@@ -1604,60 +1665,60 @@
     (la/mmul B (la/transpose A))))))
 
 
-(def v454_l1028 (select-keys tape-example [:result :entries]))
+(def v466_l1063 (select-keys tape-example [:result :entries]))
 
 
 (deftest
- t455_l1030
+ t467_l1065
  (is
   ((fn [m] (and (contains? m :result) (contains? m :entries)))
-   v454_l1028)))
+   v466_l1063)))
 
 
-(def v456_l1033 (kind/doc #'tape/summary))
+(def v468_l1068 (kind/doc #'tape/summary))
 
 
-(def v457_l1035 (tape/summary tape-example))
+(def v469_l1070 (tape/summary tape-example))
 
 
-(deftest t458_l1037 (is ((fn [s] (= 4 (:total s))) v457_l1035)))
+(deftest t470_l1072 (is ((fn [s] (= 4 (:total s))) v469_l1070)))
 
 
-(def v459_l1039 (kind/doc #'tape/origin))
+(def v471_l1074 (kind/doc #'tape/origin))
 
 
-(def v460_l1041 (tape/origin tape-example (:result tape-example)))
+(def v472_l1076 (tape/origin tape-example (:result tape-example)))
 
 
-(deftest t461_l1043 (is ((fn [dag] (= :la/mmul (:op dag))) v460_l1041)))
+(deftest t473_l1078 (is ((fn [dag] (= :la/mmul (:op dag))) v472_l1076)))
 
 
-(def v462_l1045 (kind/doc #'tape/mermaid))
+(def v474_l1080 (kind/doc #'tape/mermaid))
 
 
-(def v464_l1049 (tape/mermaid tape-example (:result tape-example)))
+(def v476_l1084 (tape/mermaid tape-example (:result tape-example)))
 
 
-(def v465_l1051 (kind/doc #'tape/detect-memory-status))
+(def v477_l1086 (kind/doc #'tape/detect-memory-status))
 
 
 (def
- v467_l1056
+ v479_l1091
  (mapv tape/detect-memory-status (:entries tape-example)))
 
 
 (deftest
- t468_l1058
+ t480_l1093
  (is
   ((fn [v] (every? #{:independent :reads-through :shared} v))
-   v467_l1056)))
+   v479_l1091)))
 
 
-(def v470_l1064 (kind/doc #'grad/grad))
+(def v482_l1099 (kind/doc #'grad/grad))
 
 
 (def
- v471_l1066
+ v483_l1101
  (let
   [A
    (t/matrix [[1 2] [3 4]])
@@ -1668,36 +1729,36 @@
    (el/scale A 2))))
 
 
-(deftest t472_l1073 (is (true? v471_l1066)))
+(deftest t484_l1108 (is (true? v483_l1101)))
 
 
-(def v474_l1079 (kind/doc #'vis/arrow-plot))
+(def v486_l1114 (kind/doc #'vis/arrow-plot))
 
 
 (def
- v475_l1081
+ v487_l1116
  (vis/arrow-plot
   [{:xy [2 1], :color "#2266cc", :label "u"}
    {:xy [-1 1.5], :color "#cc4422", :label "v"}]
   {:width 600}))
 
 
-(def v476_l1085 (kind/doc #'vis/graph-plot))
+(def v488_l1120 (kind/doc #'vis/graph-plot))
 
 
 (def
- v477_l1087
+ v489_l1122
  (vis/graph-plot
   [[0 0] [1 0] [0.5 0.87]]
   [[0 1] [1 2] [2 0]]
   {:width 600, :labels ["A" "B" "C"]}))
 
 
-(def v478_l1091 (kind/doc #'vis/matrix->gray-image))
+(def v490_l1126 (kind/doc #'vis/matrix->gray-image))
 
 
 (def
- v479_l1093
+ v491_l1128
  (let
   [m
    (t/compute-tensor
@@ -1708,16 +1769,16 @@
 
 
 (deftest
- t480_l1098
+ t492_l1133
  (is
-  ((fn [img] (= java.awt.image.BufferedImage (type img))) v479_l1093)))
+  ((fn [img] (= java.awt.image.BufferedImage (type img))) v491_l1128)))
 
 
-(def v481_l1100 (kind/doc #'vis/extract-channel))
+(def v493_l1135 (kind/doc #'vis/extract-channel))
 
 
 (def
- v482_l1102
+ v494_l1137
  (let
   [img
    (t/compute-tensor
@@ -1730,6 +1791,6 @@
 
 
 (deftest
- t483_l1108
+ t495_l1143
  (is
-  ((fn [img] (= java.awt.image.BufferedImage (type img))) v482_l1102)))
+  ((fn [img] (= java.awt.image.BufferedImage (type img))) v494_l1137)))

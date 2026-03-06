@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **2-D FFT** (`ft/`) — `forward-2d`, `inverse-2d`, `inverse-real-2d`, `forward-complex-2d`
+
 ### Changed
+- `ft/` backend switched from Fastmath to JTransforms directly (zero-copy interleaved layout)
 - Default SVG width in `vis/arrow-plot` and `vis/graph-plot` changed from 300 to 600
 
 ## [0.1.0] — 2026-03-05

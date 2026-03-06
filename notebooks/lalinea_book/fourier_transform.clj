@@ -5,9 +5,9 @@
 ;; The chapter uses standard concepts (spectrum, frequency bins,
 ;; convolution theorem) without introduction.*
 ;;
-;; **La Linea** bridges [Fastmath](https://generateme.github.io/fastmath/clay)'s
-;; transform API to ComplexTensors. Fastmath's
-;; `(:complex :fftr)` transformer outputs interleaved `double[]`
+;; **La Linea** wraps [JTransforms](https://github.com/wendykierp/JTransforms)
+;; for both 1-D and 2-D FFT. JTransforms' `complexForward` /
+;; `complexInverse` operate on interleaved `double[]`
 ;; with `[re₀ im₀ re₁ im₁ ...]` — **exactly** the memory layout
 ;; of ComplexTensor. So the bridge is zero-copy.
 
@@ -15,8 +15,9 @@
   (:require
    ;; La Linea (https://github.com/scicloj/lalinea):
    [scicloj.lalinea.tensor :as t]
+   [scicloj.lalinea.linalg :as la]
    [scicloj.lalinea.elementwise :as el]
-   ;; FFT bridge — Fastmath transforms <-> ComplexTensor:
+   ;; FFT bridge — JTransforms <-> ComplexTensor:
    [scicloj.lalinea.transform :as ft]
    ;; Dataset manipulation (https://scicloj.github.io/tablecloth/):
    [tablecloth.api :as tc]
@@ -194,3 +195,72 @@
   (< (el/reduce-max (el/abs (el/- recovered signal))) 1e-10))
 
 (kind/test-last [true?])
+
+;; ## 2-D FFT
+;;
+;; The [2-D DFT](https://en.wikipedia.org/wiki/Discrete_Fourier_transform#Multidimensional_DFT)
+;; extends the Fourier transform to matrices.
+;; `forward-2d` takes a real `[r c]` matrix and returns a
+;; ComplexTensor spectrum of shape `[r c]`.
+
+;; ### Forward and inverse
+
+(ft/forward-2d (t/matrix [[1 2] [3 4]]))
+
+;; Round-trip recovers the original matrix:
+
+(let [A (t/matrix [[1 2 3] [4 5 6] [7 8 9]])
+      recovered (ft/inverse-real-2d (ft/forward-2d A))]
+  (la/close? recovered A))
+
+(kind/test-last [true?])
+
+;; ### 2-D [Parseval's theorem](https://en.wikipedia.org/wiki/Parseval%27s_theorem)
+;;
+;; $$\sum_{m,n} |x_{m,n}|^2 = \frac{1}{MN} \sum_{k,l} |\hat{x}_{k,l}|^2$$
+
+(let [A (t/matrix [[1 2 3 4]
+                    [5 6 7 8]
+                    [9 10 11 12]
+                    [13 14 15 16]])
+      mn (* 4 4)
+      spectrum (ft/forward-2d A)
+      space-energy (el/sum (el/* A A))
+      mags (el/abs spectrum)
+      freq-energy (/ (el/sum (el/* mags mags)) mn)]
+  (< (abs (- space-energy freq-energy)) 1e-10))
+
+(kind/test-last [true?])
+
+;; ### Spatial frequencies
+;;
+;; A matrix with a known horizontal pattern — columns alternate
+;; between 1 and −1 — has energy at the horizontal Nyquist
+;; frequency.
+
+(let [A (t/matrix [[ 1 -1  1 -1]
+                    [ 1 -1  1 -1]
+                    [ 1 -1  1 -1]
+                    [ 1 -1  1 -1]])
+      spectrum (ft/forward-2d A)
+      mags (el/abs spectrum)]
+  {:dc (double (mags 0 0))
+   :h-nyquist (double (mags 0 2))})
+
+(kind/test-last [(fn [v] (and (< (:dc v) 1e-10)
+                              (< (abs (- (:h-nyquist v) 16.0)) 1e-10)))])
+
+;; A vertical pattern — rows alternate — puts energy at
+;; the vertical Nyquist:
+
+(let [A (t/matrix [[ 1  1  1  1]
+                    [-1 -1 -1 -1]
+                    [ 1  1  1  1]
+                    [-1 -1 -1 -1]])
+      spectrum (ft/forward-2d A)
+      mags (el/abs spectrum)]
+  {:dc (double (mags 0 0))
+   :v-nyquist (double (mags 2 0))})
+
+(kind/test-last [(fn [v] (and (< (:dc v) 1e-10)
+                              (< (abs (- (:v-nyquist v) 16.0)) 1e-10)))])

@@ -5,7 +5,7 @@
 ;; - `scicloj.lalinea.tensor` — tensor construction, structural operations, EJML interop
 ;; - `scicloj.lalinea.linalg` — products, decompositions, solve
 ;; - `scicloj.lalinea.elementwise` — tape-aware element-wise functions
-;; - `scicloj.lalinea.transform` — FFT and real-valued transforms
+;; - `scicloj.lalinea.transform` — 1-D and 2-D FFT, DCT, DST, DHT
 ;; - `scicloj.lalinea.tape` — computation tape and memory inspection
 ;; - `scicloj.lalinea.grad` — reverse-mode automatic differentiation
 ;; - `scicloj.lalinea.vis` — visualization helpers
@@ -905,10 +905,13 @@
 
 (kind/test-last [(fn [v] (= [9.0 7.0 3.0 2.0 1.0] (t/flatten v)))])
 
+
 ;; ## `scicloj.lalinea.transform`
 ;;
-;; Bridge between Fastmath transforms and La Linea tensors.
-;; The FFT takes a real signal and returns a ComplexTensor spectrum.
+;; FFT and real-valued transforms backed by
+;; [JTransforms](https://github.com/wendykierp/JTransforms).
+;; 1-D and 2-D FFT return ComplexTensor spectra; DCT, DST, and
+;; DHT return real tensors.
 
 (kind/doc #'ft/forward)
 
@@ -941,6 +944,38 @@
   (t/complex-shape spectrum))
 
 (kind/test-last [= [4]])
+
+(kind/doc #'ft/forward-2d)
+
+(let [A (t/matrix [[1 2] [3 4]])
+      spectrum (ft/forward-2d A)]
+  (t/complex-shape spectrum))
+
+(kind/test-last [= [2 2]])
+
+(kind/doc #'ft/inverse-2d)
+
+(let [A (t/matrix [[1 2] [3 4]])
+      roundtrip (ft/inverse-2d (ft/forward-2d A))]
+  (la/close-scalar? (el/re ((roundtrip 0) 0)) 1.0))
+
+(kind/test-last [true?])
+
+(kind/doc #'ft/inverse-real-2d)
+
+(let [A (t/matrix [[1 2] [3 4]])
+      roundtrip (ft/inverse-real-2d (ft/forward-2d A))]
+  (la/close? roundtrip A))
+
+(kind/test-last [true?])
+
+(kind/doc #'ft/forward-complex-2d)
+
+(let [ct (t/complex-tensor-real [[1 2] [3 4]])
+      spectrum (ft/forward-complex-2d ct)]
+  (t/complex-shape spectrum))
+
+(kind/test-last [= [2 2]])
 
 (kind/doc #'ft/dct-forward)
 

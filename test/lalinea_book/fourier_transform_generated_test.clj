@@ -2,6 +2,7 @@
  lalinea-book.fourier-transform-generated-test
  (:require
   [scicloj.lalinea.tensor :as t]
+  [scicloj.lalinea.linalg :as la]
   [scicloj.lalinea.elementwise :as el]
   [scicloj.lalinea.transform :as ft]
   [tablecloth.api :as tc]
@@ -11,16 +12,16 @@
   [clojure.test :refer [deftest is]]))
 
 
-(def v3_l33 (ft/forward [1.0 0.0 -1.0 0.0]))
+(def v3_l34 (ft/forward [1.0 0.0 -1.0 0.0]))
 
 
 (deftest
- t5_l37
- (is ((fn [ct] (< (abs (double (el/re (ct 0)))) 1.0E-10)) v3_l33)))
+ t5_l38
+ (is ((fn [ct] (< (abs (double (el/re (ct 0)))) 1.0E-10)) v3_l34)))
 
 
 (def
- v7_l43
+ v7_l44
  (let
   [signal
    [1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0]
@@ -31,11 +32,11 @@
   (el/reduce-max (el/abs (el/- recovered signal)))))
 
 
-(deftest t8_l48 (is ((fn [v] (< v 1.0E-10)) v7_l43)))
+(deftest t8_l49 (is ((fn [v] (< v 1.0E-10)) v7_l44)))
 
 
 (def
- v10_l57
+ v10_l58
  (let
   [signal
    [1.0 2.0 3.0 4.0]
@@ -52,11 +53,11 @@
   (< (abs (- time-energy freq-energy)) 1.0E-10)))
 
 
-(deftest t11_l65 (is (true? v10_l57)))
+(deftest t11_l66 (is (true? v10_l58)))
 
 
 (def
- v13_l71
+ v13_l72
  (let
   [x
    [1.0 2.0 3.0 4.0]
@@ -81,11 +82,11 @@
     1.0E-10))))
 
 
-(deftest t14_l82 (is (true? v13_l71)))
+(deftest t14_l83 (is (true? v13_l72)))
 
 
 (def
- v16_l91
+ v16_l92
  (let
   [x
    [1.0 2.0 0.0 0.0]
@@ -121,14 +122,14 @@
   (< (el/reduce-max (el/abs (el/- conv-result manual-conv))) 1.0E-10)))
 
 
-(deftest t17_l109 (is (true? v16_l91)))
+(deftest t17_l110 (is (true? v16_l92)))
 
 
-(def v19_l115 (def N-vis 64))
+(def v19_l116 (def N-vis 64))
 
 
 (def
- v20_l117
+ v20_l118
  (def
   signal-composed
   (t/->real-tensor
@@ -144,7 +145,7 @@
 
 
 (def
- v22_l127
+ v22_l128
  (->
   (tc/dataset
    {:t (t/make-reader :float64 N-vis (/ (double idx) N-vis)),
@@ -155,7 +156,7 @@
 
 
 (def
- v24_l136
+ v24_l137
  (let
   [spectrum (ft/forward signal-composed) mags (el/abs spectrum)]
   (->
@@ -168,7 +169,7 @@
 
 
 (def
- v26_l146
+ v26_l147
  (let
   [spectrum
    (ft/forward signal-composed)
@@ -181,11 +182,11 @@
   (= [3 7] (sort (take 2 peak-idx)))))
 
 
-(deftest t27_l152 (is (true? v26_l146)))
+(deftest t27_l153 (is (true? v26_l147)))
 
 
 (def
- v29_l159
+ v29_l160
  (let
   [spectrum (ft/forward [3.0 3.0 3.0 3.0])]
   {:dc (el/re (spectrum 0)),
@@ -196,18 +197,18 @@
 
 
 (deftest
- t30_l163
+ t30_l164
  (is
   ((fn
     [v]
     (and
      (< (abs (- (double (:dc v)) 12.0)) 1.0E-10)
-     (every? (fn* [p1__74023#] (< p1__74023# 1.0E-10)) (:others v))))
-   v29_l159)))
+     (every? (fn* [p1__72868#] (< p1__72868# 1.0E-10)) (:others v))))
+   v29_l160)))
 
 
 (def
- v32_l168
+ v32_l169
  (let
   [spectrum (ft/forward [1.0 -1.0 1.0 -1.0])]
   {:dc (double (el/abs (spectrum 0))),
@@ -215,16 +216,16 @@
 
 
 (deftest
- t33_l172
+ t33_l173
  (is
   ((fn
     [v]
     (and (< (:dc v) 1.0E-10) (< (abs (- (:nyquist v) 4.0)) 1.0E-10)))
-   v32_l168)))
+   v32_l169)))
 
 
 (def
- v35_l179
+ v35_l180
  (let
   [signal
    (t/complex-tensor [1.0 0.0] [0.0 1.0])
@@ -241,11 +242,11 @@
     1.0E-10))))
 
 
-(deftest t36_l185 (is (true? v35_l179)))
+(deftest t36_l186 (is (true? v35_l180)))
 
 
 (def
- v38_l191
+ v38_l192
  (let
   [signal
    [1.0 2.0 3.0 4.0]
@@ -256,4 +257,87 @@
   (< (el/reduce-max (el/abs (el/- recovered signal))) 1.0E-10)))
 
 
-(deftest t39_l196 (is (true? v38_l191)))
+(deftest t39_l197 (is (true? v38_l192)))
+
+
+(def v41_l208 (ft/forward-2d (t/matrix [[1 2] [3 4]])))
+
+
+(def
+ v43_l212
+ (let
+  [A
+   (t/matrix [[1 2 3] [4 5 6] [7 8 9]])
+   recovered
+   (ft/inverse-real-2d (ft/forward-2d A))]
+  (la/close? recovered A)))
+
+
+(deftest t44_l216 (is (true? v43_l212)))
+
+
+(def
+ v46_l222
+ (let
+  [A
+   (t/matrix [[1 2 3 4] [5 6 7 8] [9 10 11 12] [13 14 15 16]])
+   mn
+   (* 4 4)
+   spectrum
+   (ft/forward-2d A)
+   space-energy
+   (el/sum (el/* A A))
+   mags
+   (el/abs spectrum)
+   freq-energy
+   (/ (el/sum (el/* mags mags)) mn)]
+  (< (abs (- space-energy freq-energy)) 1.0E-10)))
+
+
+(deftest t47_l233 (is (true? v46_l222)))
+
+
+(def
+ v49_l241
+ (let
+  [A
+   (t/matrix [[1 -1 1 -1] [1 -1 1 -1] [1 -1 1 -1] [1 -1 1 -1]])
+   spectrum
+   (ft/forward-2d A)
+   mags
+   (el/abs spectrum)]
+  {:dc (double (mags 0 0)), :h-nyquist (double (mags 0 2))}))
+
+
+(deftest
+ t50_l250
+ (is
+  ((fn
+    [v]
+    (and
+     (< (:dc v) 1.0E-10)
+     (< (abs (- (:h-nyquist v) 16.0)) 1.0E-10)))
+   v49_l241)))
+
+
+(def
+ v52_l256
+ (let
+  [A
+   (t/matrix [[1 1 1 1] [-1 -1 -1 -1] [1 1 1 1] [-1 -1 -1 -1]])
+   spectrum
+   (ft/forward-2d A)
+   mags
+   (el/abs spectrum)]
+  {:dc (double (mags 0 0)), :v-nyquist (double (mags 2 0))}))
+
+
+(deftest
+ t53_l265
+ (is
+  ((fn
+    [v]
+    (and
+     (< (:dc v) 1.0E-10)
+     (< (abs (- (:v-nyquist v) 16.0)) 1.0E-10)))
+   v52_l256)))
